@@ -26,7 +26,8 @@ import { NgStyle, NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { delay, filter, map, tap } from 'rxjs/operators';
+import { delay, filter, map, tap} from 'rxjs/operators';
+import {cilAccountLogout } from '@coreui/icons';
 
 @Component({
   selector: 'app-default-header',
@@ -35,6 +36,8 @@ import { delay, filter, map, tap } from 'rxjs/operators';
   imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle]
 })
 export class DefaultHeaderComponent extends HeaderComponent {
+
+  icons = { cilAccountLogout};
 
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   readonly #colorModeService = inject(ColorModeService);
@@ -57,6 +60,11 @@ export class DefaultHeaderComponent extends HeaderComponent {
         takeUntilDestroyed(this.#destroyRef)
       )
       .subscribe();
+  }
+
+  Logout(): void {
+    localStorage.clear();
+    window.location.reload();
   }
 
   @Input() sidebarId: string = 'sidebar1';

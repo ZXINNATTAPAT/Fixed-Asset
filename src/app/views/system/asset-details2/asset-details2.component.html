@@ -1,0 +1,179 @@
+<c-card class="mb-4" style="border: none;">
+    <!-- <c-card-header>
+      <strong>เพิ่มรายละเอียดครุภัณท์</strong>
+    </c-card-header> -->
+    <c-card-body>
+        <form  cForm (submit)="onSubmit()">
+            <div class="row mb-3">
+                <!-- <div class="col">
+                    <label cLabel for="AssetDetailId">รหัสสินทรัพย์</label>
+                    <input cFormControl
+                           id="AssetDetailId"
+                           placeholder="ระบุรหัสสินทรัพย์"
+                           type="text"
+                           (keyup)="autoInput($event)"
+                           (keypress)="handleKeyPress($event, 'Brand')"
+                    />
+                </div> -->
+                <div class="col">
+                    <label cLabel for="Brand">Brand</label>
+                    <input cFormControl
+                           id="Brand"
+                           placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์"
+                           type="text"
+                           name="Brand"
+                           [(ngModel)]="asset.Brand"
+                           (keypress)="handleKeyPress($event, 'Model')"
+                    />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label cLabel for="Model">Model</label>
+                    <input cFormControl
+                           id="Model"
+                           placeholder="ระบุจำนวน"
+                           type="number"
+                           name="Model"
+                           [(ngModel)]="asset.Model"
+                           (keypress)="handleKeyPress($event, 'SerialNumber')"
+                    />
+                </div>
+                <div class="col">
+                    <label cLabel for="SerialNumber">SerialNumber</label>
+                    <input cFormControl
+                           id="SerialNumber"
+                           placeholder="ระบุสถานที่ที่ซื้อ"
+                           type="text"
+                           name="SerialNumber"
+                           [(ngModel)]="asset.SerialNumber"
+                           (keypress)="handleKeyPress($event, 'InvoiceNumber')"
+                    />
+                </div>
+            
+                <div class="col">
+                    <label cLabel for="InvoiceNumber">InvoiceNumber</label>
+                    <input cFormControl
+                           id="InvoiceNumber"
+                           placeholder="ระบุประเภทสินทรัพย์"
+                           type="text"
+                           name="InvoiceNumber"
+                           [(ngModel)]="asset.InvoiceNumber"
+                           (keypress)="handleKeyPress($event, 'PaymentVoucherNumber')"
+                    />
+                </div>
+                <div class="col">
+                    <label cLabel for="PaymentVoucherNumber">PaymentVoucherNumber</label>
+                    <input cFormControl
+                           id="PaymentVoucherNumber"
+                           placeholder="ระบุหมวดหมู่สินทรัพย์"
+                           type="text"
+                           name="PaymentVoucherNumber"
+                           [(ngModel)]="asset.PaymentVoucherNumber"
+                           (keypress)="handleKeyPress($event, 'InsurancePolicyNumber')"
+                    />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label cLabel for="InsurancePolicyNumber">InsurancePolicyNumber</label>
+                    <input cFormControl
+                           id="InsurancePolicyNumber"
+                           placeholder="ระบุแผนก"
+                           name="InsurancePremium"
+                           type="text"
+                           [(ngModel)]="asset.InsurancePolicyNumber"
+                           (keypress)="handleKeyPress($event, 'InsuranceNumber')"
+                    />
+                </div>
+                <div class="col">
+                    <label cLabel for="InsuranceNumber">InsuranceNumber</label>
+                    <input cFormControl
+                           id="InsuranceNumber"
+                           placeholder="ระบุสถานที่ตั้งสินทรัพย์"
+                           name="InsuranceNumber"
+                           type="text"
+                           [(ngModel)]="asset.InsuranceNumber"
+                           (keypress)="handleKeyPress($event, 'InsuranceCompany')"
+                    />
+                </div>
+            
+                <div class="col">
+                    <label cLabel for="InsuranceCompany">InsuranceCompany</label>
+                    <input cFormControl
+                           id="InsuranceCompany"
+                           placeholder="ระบุชื่อพนักงานที่รับผิดชอบ"
+                           name="InsuranceCompany"
+                           type="text"
+                           [(ngModel)]="asset.InsuranceCompany"
+                           (keypress)="handleKeyPress($event, 'InsurancePremium')"
+                    />
+                </div>
+                <div class="col">
+                    <label cLabel for="InsurancePremium">InsurancePremium</label>
+                    <input cFormControl
+                           id="InsurancePremium"
+                           name="InsurancePremium"
+                           placeholder="ระบุเลขที่เอกสาร"
+                           [(ngModel)]="asset.InsurancePremium"
+                           type="text"
+                    />
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                
+                
+                <div class="col">
+                    <label cLabel for="InsuranceStartDate">InsuranceStartDate</label>
+                    <input cFormControl
+                           id="InsuranceStartDate"
+                           name="InsuranceStartDate"
+                           placeholder="ระบุราคาซื้อ"
+                           [(ngModel)]="asset.InsuranceStartDate"
+                           type="date"
+                    />
+                </div>
+                <div class="col">
+                    <label cLabel for="InsuranceEndDate">InsuranceEndDate</label>
+                    <input cFormControl
+                           id="InsuranceEndDate"
+                           placeholder="ระบุราคาซื้อ"
+                           name="InsuranceEndDate"
+                           [(ngModel)]="asset.InsuranceEndDate"
+                           type="date"
+                    />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label cLabel for="MaintenanceRecommendation">หมายเหตุ</label>
+                    <input cFormControl
+                           id="MaintenanceRecommendation"
+                           placeholder="ระบุหมายเหตุ"
+                           name="MaintenanceRecommendation"
+                           [(ngModel)]="asset.MaintenanceRecommendation"
+                           type="text"
+                    />
+                </div>
+
+                <div class="col">
+                    <label cLabel for="AssetId">AssetId</label>
+                    <input cFormControl
+                           id="AssetId"
+                           name="AssetId"
+                           placeholder="ระบุหมายเหตุ"
+                           [(ngModel)]="asset.AssetId"
+                           type="text"
+                    />
+                </div>
+                
+            </div>
+            
+            <button cButton type="submit" color="success" style="color: white;">Submit</button>
+            
+
+        </form>
+    </c-card-body>
+  </c-card>

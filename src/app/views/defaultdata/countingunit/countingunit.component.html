@@ -1,0 +1,75 @@
+<!-- defaultdata.component.html -->
+
+<c-card class="mb-4 shadow-sm" >
+  <c-card-header>
+      <strong>กำหนดหน่วยนับ</strong>
+  </c-card-header>
+    <c-card-body>
+      <form  cForm >
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
+          <div class="col-5">
+              <label cLabel for="assetCodeInput">รหัสประเภทสินทรัพย์</label>
+              <input cFormControl
+                  id="assetCodeInput"
+                  placeholder="ระบุรหัสสินทรัพย์"
+                  class="form-control"
+                  type="text"
+              />
+          </div>
+          <div class="col-6">
+              <label cLabel for="assetNameInput">ชื่อประเภทสินทรัพย์</label>
+              <input cFormControl
+                  id="assetNameInput"
+                  placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์"
+                  class="form-control"
+                  type="text"
+              />
+          </div>
+          <div class="col align-self-end">
+              <button class="btn btn-primary">เพิ่ม</button>
+          </div>
+      </div>
+      
+        </form> <br/>
+
+        <div class="table-responsive">
+          <table  mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover ">
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef style="font-weight: bold;">#</th>
+              <td mat-cell *matCellDef="let asset">
+
+                <button class="btn btn-sm btn-warning m-1" 
+                            (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
+                            <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
+                </button>
+
+                <button class="btn btn-sm btn-danger m-1" 
+                            (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
+                            <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
+                </button>
+              </td>
+            </ng-container>
+          
+            <!-- Dynamic Columns -->
+            <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">{{ column }}</th>
+              <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
+            </ng-container>
+          
+            <!-- Header Row -->
+            <!-- Header Row -->
+            <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสหน่วยนับ', 'ชื่อหน่วยนับ']"></tr>
+        
+            <!-- Data Rows -->
+            <tr mat-row *matRowDef="let row; columns: ['actions', 'รหัสหน่วยนับ', 'ชื่อหน่วยนับ'];"></tr>
+          </table>
+          
+          <!-- Paginator -->
+          <mat-paginator [pageSizeOptions]="[ 30, 50, 70, 100 ]" [pageSize]="15" showFirstLastButtons></mat-paginator>
+          </div>
+        
+        
+    </c-card-body>
+  </c-card>
+  

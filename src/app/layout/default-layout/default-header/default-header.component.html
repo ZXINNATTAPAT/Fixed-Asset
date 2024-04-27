@@ -1,40 +1,49 @@
 <!--<c-header class="mb-4 d-print-none" position="sticky">-->
 <ng-container>
-  <c-container [fluid]="true" class="border-bottom px-4">
-    <button
+  <c-container [fluid]="true" class="border-bottom px-4" style="background-color: #30916b;">
+    <button 
       [cSidebarToggle]="sidebarId"
       cHeaderToggler
-      class="btn"
+      class="btn btn-sm border shadow"
       toggle="visible"
       style="margin-inline-start: -14px;"
+      
     >
-      <svg cIcon name="cilMenu" size="lg"></svg>
+      <svg cIcon name="cilMenu" size="lg" style="color: white;"></svg>
     </button>
+
     <c-header-nav class="d-none d-md-flex">
       <c-nav-item>
-        <a cNavLink routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+        <a cNavLink 
+          style="font-size:large;font-weight: 500;color: white;">
+          &nbsp; สำนักงานคณะกรรมการการเลือกตั้งประจำกรุงเทพมหานคร
+        </a>
       </c-nav-item>
-      <c-nav-item>
+      <!-- <c-nav-item>
         <a cNavLink routerLink="/users" routerLinkActive="active">Users</a>
-      </c-nav-item>
-      <c-nav-item>
+      </c-nav-item> -->
+      <!-- <c-nav-item>
         <a cNavLink routerLink="/settings" routerLinkActive="active">Settings</a>
-      </c-nav-item>
+      </c-nav-item> -->
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto ">
-      <a cNavLink>
+      <!-- <a cNavLink>
         <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
       </a>
       <a cNavLink>
         <svg cIcon class="my-1" name="cilList" size="lg"></svg>
-      </a>
-      <a cNavLink>
-        <svg cIcon class="my-1" name="cilEnvelopeOpen" size="lg"></svg>
-      </a>
+      </a> -->
+      <button class="btn btn-danger btn-sm shadow" (click)="Logout()">
+        <!-- <a   cNavLink > -->
+        <!-- <svg cIcon class="my-1" name="cilEnvelopeOpen" size="lg"></svg> -->
+          <svg [cIcon]="icons.cilAccountLogout"  style="color:white" ></svg>
+        <!-- </a> -->
+      </button>
+      
     </c-header-nav>
 
-    <c-header-nav class="ms-auto ms-md-0">
+    <!-- <c-header-nav class="ms-auto ms-md-0">
       <div class="nav-item py-1">
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
       </div>
@@ -42,22 +51,24 @@
       <div class="nav-item py-1">
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
       </div>
-    </c-header-nav>
+    </c-header-nav> -->
 
     <c-header-nav class="mx-0">
       <ng-container *ngTemplateOutlet="userDropdown" />
     </c-header-nav>
 
   </c-container>
-  <c-container [fluid]="true" class="px-4">
-    <c-breadcrumb-router />
+
+  <c-container [fluid]="true" class="px-4 shadow-sm">
+    <c-breadcrumb-router  />
   </c-container>
+
 </ng-container>
 <!--</c-header>-->
 
 <ng-template #userDropdown>
   <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
-    <button [caret]="false" cDropdownToggle class="py-0 pe-0">
+    <!-- <button [caret]="false" cDropdownToggle class="py-0 pe-0">
       <c-avatar
         shape="rounded-1"
         [size]="'md'"
@@ -65,8 +76,8 @@
         status="success"
         textColor="primary"
       />
-    </button>
-    <ul cDropdownMenu class="pt-0 w-auto">
+    </button> -->
+    <!-- <ul cDropdownMenu class="pt-0 w-auto">
       <li>
         <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2 rounded-top">
           Account
@@ -153,11 +164,11 @@
           Logout
         </a>
       </li>
-    </ul>
+    </ul> -->
   </c-dropdown>
 </ng-template>
 
-<ng-template #themeDropdown>
+<!-- <ng-template #themeDropdown>
   <c-dropdown alignment="end" variant="nav-item">
     <button [caret]="false" cDropdownToggle>
       @switch (colorMode()) {
@@ -205,4 +216,4 @@
       </button>
     </div>
   </c-dropdown>
-</ng-template>
+</ng-template> -->

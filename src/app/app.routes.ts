@@ -1,5 +1,7 @@
-import { Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
+import { AuthGuard } from './auth.guard';
+import { NgModule } from '@angular/core';
 
 export const routes: Routes = [
   {
@@ -8,8 +10,16 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'login',
+    loadComponent: () => import('./views/pages/login/login.component').then(m => m.LoginComponent),
+    data: {
+      title: 'Login Page'
+    }
+  },
+  {
     path: '',
     component: DefaultLayoutComponent,
+    canActivate: [AuthGuard], // ใช้ AuthGuard ที่สร้างขึ้นเพื่อตรวจสอบ Token
     data: {
       title: 'Home'
     },
@@ -19,17 +29,25 @@ export const routes: Routes = [
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
       {
+        path: 'defaultdata',
+        loadChildren: () => import('./views/defaultdata/routes').then(m => m.routes)
+      },
+      {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
+      },
+      {
+        path: 'system',
+        loadChildren: () => import('./views/system/routes').then((m) => m.routes)
       },
       {
         path: 'base',
         loadChildren: () => import('./views/base/routes').then((m) => m.routes)
       },
-      {
-        path: 'buttons',
-        loadChildren: () => import('./views/buttons/routes').then((m) => m.routes)
-      },
+      // {
+      //   path: 'buttons',
+      //   loadChildren: () => import('./views/buttons/routes').then((m) => m.routes)
+      // },
       {
         path: 'forms',
         loadChildren: () => import('./views/forms/routes').then((m) => m.routes)
@@ -70,19 +88,12 @@ export const routes: Routes = [
       title: 'Page 500'
     }
   },
-  {
-    path: 'login',
-    loadComponent: () => import('./views/pages/login/login.component').then(m => m.LoginComponent),
-    data: {
-      title: 'Login Page'
-    }
-  },
-  {
-    path: 'register',
-    loadComponent: () => import('./views/pages/register/register.component').then(m => m.RegisterComponent),
-    data: {
-      title: 'Register Page'
-    }
-  },
-  { path: '**', redirectTo: 'dashboard' }
+  
+
 ];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
