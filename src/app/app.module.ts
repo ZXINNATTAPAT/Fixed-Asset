@@ -1,33 +1,58 @@
 import { CUSTOM_ELEMENTS_SCHEMA, LOCALE_ID, NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // Import ReactiveFormsModule
+import { FormControlDirective, FormsModule, ReactiveFormsModule } from '@angular/forms'; // Import ReactiveFormsModule
 import { HttpClientModule } from '@angular/common/http';
-import { RouterModule } from '@angular/router'; 
+import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { AuthGuard } from './auth.guard'; 
-import { DatePipe } from '@angular/common';
+import { AuthGuard } from './auth.guard';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import {AssetDetails2Component} from './views/system/asset-details2/asset-details2.component'
+import { AssetDetails2Component } from './views/system/asset-details2/asset-details2.component'
+import { SystemComponent } from './views/system/asset-detail1/system.component';
 
-import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerModule } from '@angular/material/datepicker';
-import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/select';
+// import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+// import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+// import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
+import { MatOptionModule } from '@angular/material/core';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { SingleSelectionComponent } from './views/system/single-selection/single-selection.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    AssetDetails2Component
+    AssetDetails2Component,
+    SystemComponent,
+    SingleSelectionComponent
   ],
   imports: [
-    MatDatepickerModule,MatMomentDateModule,MatFormFieldModule,MatInputModule,MatDatepicker,
-
-    MatInputModule,MatTableModule,MatTabsModule,
-   
+    MatDatepickerModule, 
+    MatMomentDateModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatDatepicker,
+    MatInputModule,
+    MatTableModule, 
+    MatTabsModule, 
+    MatSelectModule, 
+    MatSelect, 
+    MatOption, 
+    MatOptionModule,
+    MatFormFieldModule, 
+    FormControlDirective,
+    NgxMatSelectSearchModule, 
+    MatToolbarModule,
+    CommonModule,
     BrowserModule,
     FormsModule,
     HttpClientModule,
@@ -35,13 +60,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     RouterModule.forRoot([])
   ],
   providers: [
-    AuthGuard,DatePipe,
-    MatDatepickerModule, 
-    
-    // { provide: LOCALE_ID, useValue: "th-TH" }
-  // กำหนด locale เป็น 'th-TH' (ภาษาไทย)
-    // { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } } // กำหนดให้ Moment.js ใช้งานในโหมด UTC
+    AuthGuard, DatePipe,
+    MatDatepickerModule,
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

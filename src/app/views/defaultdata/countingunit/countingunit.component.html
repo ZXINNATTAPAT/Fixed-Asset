@@ -5,23 +5,30 @@
       <strong>กำหนดหน่วยนับ</strong>
   </c-card-header>
     <c-card-body>
-      <form  cForm >
+      <form  cForm  (submit)="onSubmit()">
+
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
-          <div class="col-5">
-              <label cLabel for="assetCodeInput">รหัสประเภทสินทรัพย์</label>
+
+          <div class="col">
+              <label cLabel for="assetCodeInput">รหัสหน่วยนับ</label>
               <input cFormControl
                   id="assetCodeInput"
-                  placeholder="ระบุรหัสสินทรัพย์"
+                  placeholder="ระบุหน่วยนับ"
+                  name="unitCode"
+                  [(ngModel)]="asset.unitCode" 
                   class="form-control"
                   type="text"
               />
           </div>
-          <div class="col-6">
-              <label cLabel for="assetNameInput">ชื่อประเภทสินทรัพย์</label>
+
+          <div class="col">
+              <label cLabel for="assetNameInput">ชื่อหน่วยนับ</label>
               <input cFormControl
                   id="assetNameInput"
-                  placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์"
+                  placeholder="ระบุชื่อหน่วยนับ"
                   class="form-control"
+                  name="unitName"
+                  [(ngModel)]="asset.unitName" 
                   type="text"
               />
           </div>
@@ -40,13 +47,13 @@
               <td mat-cell *matCellDef="let asset">
 
                 <button class="btn btn-sm btn-warning m-1" 
-                            (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
+                    (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
+                    <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
                 </button>
 
                 <button class="btn btn-sm btn-danger m-1" 
-                            (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
+                    (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
+                    <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
                 </button>
               </td>
             </ng-container>
@@ -58,7 +65,7 @@
             </ng-container>
           
             <!-- Header Row -->
-            <!-- Header Row -->
+            
             <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสหน่วยนับ', 'ชื่อหน่วยนับ']"></tr>
         
             <!-- Data Rows -->

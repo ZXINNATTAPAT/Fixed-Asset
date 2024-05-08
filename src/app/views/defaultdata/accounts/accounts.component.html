@@ -7,19 +7,23 @@
       <form  cForm >
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
           <div class="col">
-              <label cLabel for="assetCodeInput">รหัสประเภทสินทรัพย์</label>
+              <label cLabel for="assetCodeInput">รหัสบัญชี</label>
               <input cFormControl
                   id="assetCodeInput"
                   placeholder="ระบุรหัสสินทรัพย์"
+                  name="accounts_Code"
+                  [(ngModel)]="asset.accounts_Code"
                   class="form-control"
                   type="text"
               />
           </div>
           <div class="col">
-              <label cLabel for="assetNameInput">ชื่อประเภทสินทรัพย์</label>
+              <label cLabel for="assetNameInput">ชื่อบัญชี</label>
               <input cFormControl
                   id="assetNameInput"
                   placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์"
+                  name="accounts_Name"
+                  [(ngModel)]="asset.accounts_Name"
                   class="form-control"
                   type="text"
               />

@@ -15,8 +15,8 @@ import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 
 interface AssetDetails {
-  assetCode: string,
-  assetName: string
+  sectioncode: string,
+  sectionName: string
 }
 
 

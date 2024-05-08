@@ -41,6 +41,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 
 export class EditassetDetailComponent {
+
   isEditMode: any;
   autoInput(event: KeyboardEvent) {
     const assetCodeInput = document.getElementById('assetCodeInput') as HTMLInputElement;
@@ -63,10 +64,8 @@ export class EditassetDetailComponent {
         }
     }
   }
-
   // asset: any = {  }; // สร้าง object เพื่อเก็บข้อมูลสินทรัพย์ที่ผู้ใช้ป้อน
  
-
   constructor(private http: HttpClient , private route: ActivatedRoute) { }
 
   ngOnInit() {
@@ -92,9 +91,6 @@ export class EditassetDetailComponent {
     });
   }
 
-  
-
-  
   oldasset:any ={};
 
   onSubmit(): void {
@@ -108,7 +104,7 @@ export class EditassetDetailComponent {
             icon: "success"
           }).then((result) => {
             if (result.isConfirmed) {
-              window.location.href="/#/system/Asset-table";
+              window.history.back();
             }
           });
         },

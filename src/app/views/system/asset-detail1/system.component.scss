@@ -1,0 +1,37 @@
+// YourComponent.component.scss
+
+.mat-form-field {
+  // Adjust the appearance to make it look like Bootstrap's select input
+  border: 1px solid #ced4da; // Border color
+  border-radius: 4px; // Border radius
+  padding: 0.375rem 0.75rem; // Padding
+  background-color: #fff; // Background color
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; // Transition effect
+
+  // Adjust the focus style
+  &:focus-within {
+    border-color: #80bdff; // Border color when focused
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); // Box shadow when focused
+  }
+
+  // Override the floating label style
+  .mat-form-field-label {
+    color: #495057; // Label color
+  }
+
+  // Override the placeholder style
+  .mat-form-field-placeholder {
+    color: #6c757d; // Placeholder color
+  }
+
+  // Override the underline style
+  .mat-form-field-underline {
+    display: none; // Hide the underline
+  }
+
+  // Override the outline style (optional)
+  &.mat-focused .mat-form-field-outline-start,
+  &.mat-focused .mat-form-field-outline-end {
+    color: #80bdff; // Outline color when focused
+  }
+}

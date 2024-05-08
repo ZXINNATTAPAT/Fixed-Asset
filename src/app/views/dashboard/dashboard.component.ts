@@ -25,6 +25,13 @@ import { IconDirective } from '@coreui/icons-angular';
 import { WidgetsBrandComponent } from '../widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '../widgets/widgets-dropdown/widgets-dropdown.component';
 import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
+import { HttpClient } from '@angular/common/http';
+import { ApiService } from 'src/app/api-service.service';
+import { AssetTableComponent } from "../system/asset-table/asset-table.component";
+import { TablewigetComponent } from "../dashboard/tablewiget/tablewiget.component"
+import { Tablewiget2Component} from "../dashboard/tablewiget2/tablewiget2.component"
+import { Tablewiget3Component} from "../dashboard/tablewiget3/tablewiget3.component"
+import { ChartsComponent } from "../charts/charts.component";
 
 interface IUser {
   name: string;
@@ -41,17 +48,45 @@ interface IUser {
 }
 
 @Component({
-  templateUrl: 'dashboard.component.html',
-  styleUrls: ['dashboard.component.scss'],
-  standalone: true,
-  imports: [WidgetsDropdownComponent, TextColorDirective, CardComponent, CardBodyComponent, RowComponent, ColComponent, ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressBarDirective, ProgressComponent, WidgetsBrandComponent, CardHeaderComponent, TableDirective, AvatarComponent]
+    templateUrl: 'dashboard.component.html',
+    styleUrls: ['dashboard.component.scss'],
+    standalone: true,
+    imports: [WidgetsDropdownComponent, TextColorDirective, 
+      CardComponent, CardBodyComponent, RowComponent, ColComponent, 
+      ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, 
+      ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressBarDirective, 
+      ProgressComponent, WidgetsBrandComponent, CardHeaderComponent, TableDirective, AvatarComponent, AssetTableComponent, 
+      TablewigetComponent,Tablewiget2Component,Tablewiget3Component ,ChartsComponent]
 })
 export class DashboardComponent implements OnInit {
 
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
+  
   readonly #document: Document = inject(DOCUMENT);
+  
   readonly #renderer: Renderer2 = inject(Renderer2);
+  
   readonly #chartsData: DashboardChartsData = inject(DashboardChartsData);
+
+  assetDetails: any = [];
+
+  assetcom:string='';
+
+
+  numberOfAssets:string ='';
+
+  constructor(private http: HttpClient ,private apiService: ApiService) {
+    this.getAssetDetails();
+  }
+
+  getAssetDetails(): void {
+    this.apiService.fetchData('assetDetails').subscribe(data => {
+      this.numberOfAssets = data.length;
+      // this.assetcom = data.assetCode.startsWith('004');
+      console.log("Number of assets: ", this.numberOfAssets);
+    });
+  }
+  
 
   public users: IUser[] = [
     {

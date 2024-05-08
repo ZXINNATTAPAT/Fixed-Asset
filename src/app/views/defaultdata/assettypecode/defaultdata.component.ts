@@ -13,7 +13,7 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
 import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
-
+import Swal from 'sweetalert2';
 
 interface AssetDetails {
   assetCode: string,
@@ -51,8 +51,33 @@ export class DefaultdataComponent implements OnInit {
   
 yourFormName: FormGroup<any> | undefined;
 
+asset: any = {}; 
+
 onSubmit() {
-  throw new Error('Method not implemented.');
+  this.http.post<any>('https://localhost:7204/api/Assettypecodes/', this.asset)
+      .subscribe(
+        response => {
+          console.log(response);
+          const newAsset = response;
+          console.log(newAsset);
+          this.assetDetails.push(this.translateToThai(newAsset));
+          this.dataSource.data = this.assetDetails;
+
+          Swal.fire({
+            title: "บันทึกเสร็จสิ้น",
+            icon: "success"
+          });
+        },
+        error => {
+          console.error(error);
+          if (error) {
+            Swal.fire({
+              title: "มีข้อมูลในระบบอยู่แล้ว",
+              icon: "error"
+            });
+          }
+        }
+      );
 }
 
   icons = { cilPencil, cilTrash };
@@ -105,8 +130,50 @@ onSubmit() {
     return translatedAsset;
   }
 
-  deleteAsset(_t35: any) {
-    throw new Error('Method not implemented.');
+  deleteAsset(asset: any): void {
+    Swal.fire({
+      title: 'คุณแน่ใจหรือไม่?',
+      text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่',
+      cancelButtonText: 'ไม่'
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+        // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
+        this.http.delete(`https://localhost:7204/api/Assettypecodes/${asset.id}`).subscribe(
+          () => {
+            const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
+              if (index !== -1) {
+                this.assetDetails.splice(index, 1);
+                this.dataSource.data = this.assetDetails;
+              }
+            Swal.fire(
+              'ลบแล้ว!',
+              'สินทรัพย์ของคุณถูกลบแล้ว',
+              'success'
+            );
+          },
+          (error) => {
+            console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+            Swal.fire(
+              'ข้อผิดพลาด!',
+              'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
+              'error'
+            );
+          }
+        );
+        
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
+        Swal.fire(
+          'ยกเลิกแล้ว',
+          'สินทรัพย์ของคุณปลอดภัย :)',
+          'info'
+        );
+      }
+    });
   }
   editAsset(_t35: any) {
     throw new Error('Method not implemented.');

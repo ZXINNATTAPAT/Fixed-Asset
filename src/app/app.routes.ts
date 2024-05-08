@@ -29,6 +29,10 @@ export const routes: Routes = [
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
       {
+        path: 'assettable',
+        loadChildren: () => import('./views/system/routes').then((m) => m.routes)
+      },
+      {
         path: 'defaultdata',
         loadChildren: () => import('./views/defaultdata/routes').then(m => m.routes)
       },
@@ -39,6 +43,10 @@ export const routes: Routes = [
       {
         path: 'system',
         loadChildren: () => import('./views/system/routes').then((m) => m.routes)
+      },
+      {
+        path: 'system',
+        loadChildren: () => import('./views/system2/routes').then((m) => m.routes)
       },
       {
         path: 'base',
@@ -93,7 +101,7 @@ export const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

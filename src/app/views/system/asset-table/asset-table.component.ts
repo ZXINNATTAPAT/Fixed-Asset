@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {  AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent } from '@coreui/angular';
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -10,9 +10,10 @@ import { HttpClient } from '@angular/common/http';
 import { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
+import { ApiService } from '../../../api-service.service';
+
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
-
 
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -22,6 +23,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import 'moment/locale/th.js';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 interface AssetDetails {
   assetId: any;
@@ -32,8 +34,10 @@ interface AssetDetails {
   purchasedFrom: string;
   documentNumber: string;
   department: string;
+  assetLocation: string;
   responsibleEmployee: string;
   Note: string;
+  [key: string]: string | number ; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
 }
 
 @Component({
@@ -51,26 +55,35 @@ interface AssetDetails {
   styleUrl: './asset-table.component.scss'
 })
 
-export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
-  
-  displayedColumns2: string[] = ["การดำเนินการ","วันเดือนปี","รหัสครุภัณฑ์","รายการ","ราคาต่อหน่วย","วิธีการได้มา","เลขที่เอกสาร","ฝ่าย","ผู้ใช้งาน","หมายเหตุ"];
+export class AssetTableComponent implements OnInit, OnDestroy , AfterViewInit{
 
-  displayedColumns: string[] = [
-    "purchaseDate",
-    "assetCode",
-    "assetName",
-    "purchasePrice",
-    "purchasedFrom",
-    "documentNumber",
-    "department",
-    "responsibleEmployee",
-    "note"
-  ];
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  @ViewChild(MatSort) sort!: MatSort;
+
+  displayedColumns2: string[] = ["การดำเนินการ","วันเดือนปี","รหัสครุภัณฑ์","รายการ","ราคาต่อหน่วย","วิธีการได้มา","เลขที่เอกสาร","แผนก","ที่อยู่","ผู้ใช้งาน","หมายเหตุ"];
+
+  displayedColumns: string[] = ["purchaseDate","assetCode","assetName","purchasePrice","purchasedFrom","documentNumber","department","assetLocation","responsibleEmployee","note"];
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
+  userinfo:any = []
+  token: any;
+
+  readinfo(){
+
+    this.token = localStorage.getItem('token');
+
+    const decodedToken = jwtDecode(this.token);
+
+    this.userinfo = decodedToken ;
+    // console.log(this.userinfo);
+  }
+
   assetDetails: AssetDetails[] = [];
+
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
+
   private dataSubscription!: Subscription;
 
   ngOnInit(): void {
@@ -79,30 +92,48 @@ export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.dataSubscription) {
-
       this.dataSubscription.unsubscribe();
-
     }
   }
 
-  constructor(private http: HttpClient) {
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+
+  constructor(private http: HttpClient ,private apiService: ApiService) {
+    this.readinfo();
     this.getAssetDetails();
   }
   
-  ngAfterViewInit(): void {
-      throw new Error('Method not implemented.');
-  }
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-
+  // getAssetDetails(): void {
+  //   this.dataSubscription = this.apiService.fetchData('assetDetails').subscribe(data => {
+  //     this.assetDetails = data.map((asset: { purchaseDate: string; }) => {
+  //       asset.purchaseDate = this.convertDate(asset.purchaseDate);
+  //       asset = this.translateToThai(asset);
+  //       return asset;
+  //     });
+  //     this.dataSource.data = this.assetDetails;
+  //   });
+  // }
   getAssetDetails(): void {
-    this.dataSubscription = this.http.get<any[]>('https://localhost:7204/api/AssetDetails').subscribe(data => {
-      this.assetDetails = data.map(asset => {
-        asset.purchaseDate = this.convertDate(asset.purchaseDate);
-        asset = this.translateToThai(asset);
-        return asset;
-      });
+    this.dataSubscription = this.apiService.fetchData('assetDetails').subscribe(data => {
+      console.log(this.userinfo.affiliation);
+      this.assetDetails = data
+        .filter((asset: any) => asset.assetCode.startsWith(this.userinfo.affiliation))
+        .sort((a: any, b: any) => {
+          // Convert dates to timestamp for comparison
+          const dateA = new Date(a.purchaseDate).getTime();
+          const dateB = new Date(b.purchaseDate).getTime();
+          // Sort in descending order (latest date first)
+          return dateB - dateA;
+        })
+        .map((asset: any) => {
+          asset.purchaseDate = this.convertDate(asset.purchaseDate);
+          asset = this.translateToThai(asset);
+          return asset;
+        })
+        
       // Update the data source with the new asset details
       this.dataSource.data = this.assetDetails;
     });
@@ -118,7 +149,8 @@ export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
       "purchasePrice": "ราคาต่อหน่วย",
       "purchasedFrom": "วิธีการได้มา",
       "documentNumber": "เลขที่เอกสาร",
-      "department": "ฝ่าย",
+      "assetLocation" : "ที่อยู่",
+      "department": "แผนก",
       "responsibleEmployee": "ผู้ใช้งาน",
       "note": "หมายเหตุ"
     };
@@ -147,14 +179,61 @@ export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
     return formattedDate ?? '';
   }
 
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource!.filter = filterValue.trim().toLowerCase();
+  // applyFilter(event: Event): void {
+  //   const filterValue = (event.target as HTMLInputElement).value;
 
-    if (this.dataSource?.paginator) {
-      this.dataSource.paginator.firstPage();
+  //   this.dataSource.filter = filterValue
+
+  //   if (this.dataSource?.paginator) {
+  //     this.dataSource.paginator.firstPage();
+  //   }
+  // }
+
+//   applyFilter(column: string, event: Event): void {
+//     const filterValue = (event.target as HTMLInputElement).value;
+//     this.filterByColumn(column, filterValue);
+//   }
+ 
+
+// filterByColumn(column: string, filterValue: string): void {
+//     // Implement your filtering logic here using the column name and filter value
+//     console.log(column, filterValue);
+
+//     // For example, if you have a dataSource array, you can filter it like this:
+//     this.dataSource.data = this.dataSource.data.filter((item: any) => {
+//         // Convert the item's value for the specified column to lowercase for case-insensitive comparison
+//         const columnValue = (item[column] || '').toString().toLowerCase();
+//         // Convert the filterValue to lowercase for case-insensitive comparison
+//         const filterText = filterValue.trim().toLowerCase();
+//         // Check if the columnValue includes the filterText
+//         return columnValue.includes(filterText);
+//     });
+
+//     // Optionally, you can reapply pagination if using a paginator
+//     if (this.dataSource?.paginator) {
+//         this.dataSource.paginator.firstPage();
+//     }
+// }
+
+setupFilter(column: string) {
+  const isPriceColumn = column === 'ราคาต่อหน่วย';
+
+  this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
+    const textToSearch = d[column];
+    if (typeof textToSearch === 'string') {
+      return isPriceColumn? textToSearch.includes(filter) : textToSearch.toLowerCase().includes(filter);
+    } else if (typeof textToSearch === 'number') {
+      return textToSearch.toString().includes(filter);
+    } else {
+      return false; // or some other default behavior
     }
-  }
+  };
+}
+
+applyFilter(event: Event) {
+  const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+  this.dataSource.filter = filterValue;
+}
 
   editAsset(asset: any): void {
     window.location.href = `#/system/Editasset/${asset.assetId}`;
@@ -220,7 +299,7 @@ export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const worksheet = workbook.addWorksheet('Assets');
 
     // Add headers
-    const headers = ['วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร', 'ฝ่าย', 'ผู้ใช้งาน', 'หมายเหตุ'];
+    const headers = ['วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร', 'แผนก', 'ผู้ใช้งาน', 'หมายเหตุ'];
     worksheet.addRow(headers);
 
     // Add data
@@ -232,7 +311,7 @@ export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
       row.push(this.formatCurrency(asset.ราคาต่อหน่วย));
       row.push(asset.วิธีการได้มา);
       row.push(asset.เลขที่เอกสาร);
-      row.push(asset.ฝ่าย);
+      row.push(asset.แผนก);
       row.push(asset.ผู้ใช้งาน);
       row.push(asset.หมายเหตุ);
       worksheet.addRow(row);
@@ -249,10 +328,7 @@ export class AssetTableComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
- 
-
 }
-
 
 //   async searchAsset(): Promise<void> {
   //     const assetCode = this.assetCodeInput;

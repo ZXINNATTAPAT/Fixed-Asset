@@ -12,6 +12,10 @@ import { ChartjsComponent } from '@coreui/angular-chartjs';
 import { RouterLink } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { RowComponent, ColComponent, WidgetStatAComponent, TemplateIdDirective, ThemeDirective, DropdownComponent, ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, DropdownItemDirective, DropdownDividerDirective } from '@coreui/angular';
+import { HttpClient } from '@angular/common/http';
+import { ApiService } from 'src/app/api-service.service';
+import { cibAddthis, cilArrowCircleRight, cilBuilding, cilBullhorn, cilDataTransferDown, cilDevices, cilInfo, cilPencil, cilSave, cilTrash, cilUser } from '@coreui/icons';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
     selector: 'app-widgets-dropdown',
@@ -23,9 +27,73 @@ import { RowComponent, ColComponent, WidgetStatAComponent, TemplateIdDirective, 
 })
 export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
 
+  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, 
+    cilInfo ,cilSave,cilDevices,cilBuilding,cilUser,cilBullhorn,cilArrowCircleRight};
+
   constructor(
-    private changeDetectorRef: ChangeDetectorRef
-  ) {}
+    private changeDetectorRef: ChangeDetectorRef,
+    private apiService: ApiService
+  ) {
+    this.getAssetDetails();
+    this.getUsers();
+  }
+  
+  userinfo:any = []
+  token: any;
+
+  numberOfAssets:string ='';
+  numberOfUsers:string ='';
+
+  assetcom:string='';
+
+  assetoffice:string='';
+
+  assetinter:string='';
+
+  assetcar:string='';
+
+  getAssetDetails(): void {
+    this.apiService.fetchData('assetDetails').subscribe(data => {
+      
+      this.token = localStorage.getItem('token');
+      const decodedToken = jwtDecode(this.token);
+
+      this.userinfo = decodedToken;
+
+      // if(this.userinfo.affiliation === 'กกต.กรุงเทพ'){
+      //     this.userinfo.affiliation = 'กกต'
+      // }
+      
+      const filteredAssets = data.filter((asset: { assetCode: string; }) => 
+        asset.assetCode.indexOf(`${this.userinfo.affiliation} 004`) !== -1);
+
+      const filteredAssets2 = data.filter((asset: { assetCode: string; }) => 
+        asset.assetCode.indexOf(`${this.userinfo.affiliation} 001`) !== -1);
+
+      const filteredAssets3 = data.filter((asset: { assetCode: string; }) => 
+        asset.assetCode.indexOf(`${this.userinfo.affiliation} 003`) !== -1);
+
+      const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
+        asset.assetCode.indexOf(`${this.userinfo.affiliation} 006`) !== -1);
+      
+      this.numberOfAssets = data.length;// นับจำนวน asset ทั้งหมด
+
+      this.assetinter = filteredAssets2.length
+
+      this.assetoffice = filteredAssets3.length
+
+      this.assetcar =filteredAssets4.length
+      
+      this.assetcom = filteredAssets.length;
+      
+    });
+  }
+  getUsers(): void {
+    this.apiService.fetchData('Users').subscribe(data => {
+      this.numberOfUsers = data.length;
+    });
+  }
+  
 
   data: any[] = [];
   options: any[] = [];
@@ -179,87 +247,87 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   }
 }
 
-@Component({
-    selector: 'app-chart-sample',
-    template: '<c-chart type="line" [data]="data" [options]="options" width="300" #chart></c-chart>',
-    standalone: true,
-    imports: [ChartjsComponent]
-})
-export class ChartSample implements AfterViewInit {
+// @Component({
+//     selector: 'app-chart-sample',
+//     template: '<c-chart type="line" [data]="data" [options]="options" width="300" #chart></c-chart>',
+//     standalone: true,
+//     imports: [ChartjsComponent]
+// })
+// export class ChartSample implements AfterViewInit {
 
-  constructor() {}
+//   constructor() {}
 
-  @ViewChild('chart') chartComponent!: ChartjsComponent;
+//   @ViewChild('chart') chartComponent!: ChartjsComponent;
 
-  colors = {
-    label: 'My dataset',
-    backgroundColor: 'rgba(77,189,116,.2)',
-    borderColor: '#4dbd74',
-    pointHoverBackgroundColor: '#fff'
-  };
+//   colors = {
+//     label: 'My dataset',
+//     backgroundColor: 'rgba(77,189,116,.2)',
+//     borderColor: '#4dbd74',
+//     pointHoverBackgroundColor: '#fff'
+//   };
 
-  labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+//   labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-  data = {
-    labels: this.labels,
-    datasets: [{
-      data: [65, 59, 84, 84, 51, 55, 40],
-      ...this.colors,
-      fill: { value: 65 }
-    }]
-  };
+//   data = {
+//     labels: this.labels,
+//     datasets: [{
+//       data: [65, 59, 84, 84, 51, 55, 40],
+//       ...this.colors,
+//       fill: { value: 65 }
+//     }]
+//   };
 
-  options = {
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false
-      }
-    },
-    elements: {
-      line: {
-        tension: 0.4
-      }
-    }
-  };
+//   options = {
+//     maintainAspectRatio: false,
+//     plugins: {
+//       legend: {
+//         display: false
+//       }
+//     },
+//     elements: {
+//       line: {
+//         tension: 0.4
+//       }
+//     }
+//   };
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      const data = () => {
-        return {
-          ...this.data,
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-          datasets: [{
-            ...this.data.datasets[0],
-            data: [42, 88, 42, 66, 77],
-            fill: { value: 55 }
-          }, { ...this.data.datasets[0], borderColor: '#ffbd47', data: [88, 42, 66, 77, 42] }]
-        };
-      };
-      const newLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
-      const newData = [42, 88, 42, 66, 77];
-      let { datasets, labels } = { ...this.data };
-      // @ts-ignore
-      const before = this.chartComponent?.chart?.data.datasets.length;
-      console.log('before', before);
-      // console.log('datasets, labels', datasets, labels)
-      // @ts-ignore
-      // this.data = data()
-      this.data = {
-        ...this.data,
-        datasets: [{ ...this.data.datasets[0], data: newData }, {
-          ...this.data.datasets[0],
-          borderColor: '#ffbd47',
-          data: [88, 42, 66, 77, 42]
-        }],
-        labels: newLabels
-      };
-      // console.log('datasets, labels', { datasets, labels } = {...this.data})
-      // @ts-ignore
-      setTimeout(() => {
-        const after = this.chartComponent?.chart?.data.datasets.length;
-        console.log('after', after);
-      });
-    }, 5000);
-  }
-}
+//   ngAfterViewInit(): void {
+//     setTimeout(() => {
+//       const data = () => {
+//         return {
+//           ...this.data,
+//           labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+//           datasets: [{
+//             ...this.data.datasets[0],
+//             data: [42, 88, 42, 66, 77],
+//             fill: { value: 55 }
+//           }, { ...this.data.datasets[0], borderColor: '#ffbd47', data: [88, 42, 66, 77, 42] }]
+//         };
+//       };
+//       const newLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+//       const newData = [42, 88, 42, 66, 77];
+//       let { datasets, labels } = { ...this.data };
+//       // @ts-ignore
+//       const before = this.chartComponent?.chart?.data.datasets.length;
+//       console.log('before', before);
+//       // console.log('datasets, labels', datasets, labels)
+//       // @ts-ignore
+//       // this.data = data()
+//       this.data = {
+//         ...this.data,
+//         datasets: [{ ...this.data.datasets[0], data: newData }, {
+//           ...this.data.datasets[0],
+//           borderColor: '#ffbd47',
+//           data: [88, 42, 66, 77, 42]
+//         }],
+//         labels: newLabels
+//       };
+//       // console.log('datasets, labels', { datasets, labels } = {...this.data})
+//       // @ts-ignore
+//       setTimeout(() => {
+//         const after = this.chartComponent?.chart?.data.datasets.length;
+//         console.log('after', after);
+//       });
+//     }, 5000);
+//   }
+// }

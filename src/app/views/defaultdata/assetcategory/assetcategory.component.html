@@ -1,28 +1,45 @@
 <!-- defaultdata.component.html -->
-
 <c-card class="mb-4 shadow-sm" >
   <c-card-header>
       <strong>กำหนดหมวดสินทรัพย์</strong>
   </c-card-header>
     <c-card-body>
-      <form  cForm >
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
+      <form  cForm (ngSubmit)="onSubmit()">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 mb-3 ">
           <div class="col">
-              <label cLabel for="assetCodeInput">รหัสประเภทสินทรัพย์</label>
+              <label cLabel for="assetCodeInput">รหัสหมวดสินทรัพย์</label>
               <input cFormControl
                   id="assetCodeInput"
-                  placeholder="ระบุรหัสสินทรัพย์"
+                  placeholder="ระบุรหัสหมวดสินทรัพย์"
                   class="form-control"
                   type="text"
+                  name="asc_name"
+                  [(ngModel)]="asset.asc_Code" 
+                  required
               />
           </div>
           <div class="col">
-              <label cLabel for="assetNameInput">ชื่อประเภทสินทรัพย์</label>
+              <label cLabel for="assetNameInput">ชื่อหมวดสินทรัพย์</label>
               <input cFormControl
                   id="assetNameInput"
-                  placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์"
+                  placeholder="ระบุชื่อหมวดสินทรัพย์"
                   class="form-control"
                   type="text"
+                  name="asc_name"
+                  [(ngModel)]="asset.asc_name "
+                  required
+              />
+          </div>
+          <div class="col">
+              <label cLabel for="assetNameInput">รหัสประเภทสินทรัพย์</label>
+              <input cFormControl
+                  id="assetNameInput"
+                  placeholder="ระบุรหัสประเภทสินทรัพย์"
+                  class="form-control"
+                  type="text"
+                  name="AssetCode"
+                  [(ngModel)]="asset.AssetCode" 
+                  required
               />
           </div>
           <div class="col align-self-end">
@@ -58,11 +75,10 @@
             </ng-container>
           
             <!-- Header Row -->
-            <!-- Header Row -->
-            <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสหมวดสินทรัพย์', 'ชื่อหมวดสินทรัพย์']"></tr>
+            <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสหมวดสินทรัพย์', 'ชื่อหมวดสินทรัพย์' ,'รหัสประเภทสินทรัพย์']"></tr>
         
             <!-- Data Rows -->
-            <tr mat-row *matRowDef="let row; columns: ['actions', 'รหัสหมวดสินทรัพย์', 'ชื่อหมวดสินทรัพย์'];"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['actions', 'รหัสหมวดสินทรัพย์', 'ชื่อหมวดสินทรัพย์' ,'รหัสประเภทสินทรัพย์'];"></tr>
           </table>
           
           <!-- Paginator -->

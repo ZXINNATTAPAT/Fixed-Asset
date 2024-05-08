@@ -1,16 +1,18 @@
 <!--sidebar-->
-<c-sidebar #sidebar1="cSidebar" class="d-print-none sidebar sidebar-fixed border-end" colorScheme="light" id="sidebar1"
-  visible>
-  <c-sidebar-header class="border-bottom" style="text-align: center; background-color: white;">
+<c-sidebar #sidebar1="cSidebar" class="d-print-none sidebar sidebar-fixed border-end " 
+  id="sidebar1" colorScheme="light" visible>
+
+  <c-sidebar-header class="border-bottom" style="text-align: center; background:transparent;">
     <c-sidebar-brand [routerLink]="[]">
       <br>
-      <img src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png" height="120"  alt="ss"
-        style="padding: 2px;margin-left: 55px;" />
+      <img src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png" height="110" alt="ss"
+        style="padding: 2px; margin-left: 55px;" />
       <br />
       <br />
     </c-sidebar-brand>
-  </c-sidebar-header>
 
+  </c-sidebar-header>
+ 
 
   <ng-scrollbar #scrollbar="ngScrollbar" (updated)="onScrollbarUpdate(scrollbar.state)" class="overflow"
     pointerEventsMethod="scrollbar" visibility="hover">
@@ -27,11 +29,12 @@
 <!--main-->
 <div class="wrapper d-flex flex-column min-vh-100">
   <!--app-header-->
-  <app-default-header [cShadowOnScroll]="'sm'" class="mb-4 d-print-none header header-sticky p-0 shadow-sm"
+  <app-default-header [cShadowOnScroll]="'lg'" 
+    class="mb-3 d-print-none header header-sticky p-0 shadow-sm"
     position="sticky" sidebarId="sidebar1" />
   <!--app-body-->
   <div class="body flex-grow-1">
-    <c-container fluid >
+    <c-container fluid>
       <router-outlet />
     </c-container>
   </div>

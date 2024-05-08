@@ -5,6 +5,15 @@ import { SystemComponent } from './asset-detail1/system.component';
 
 export const routes: Routes = [
   {
+    
+        path: '',
+        loadComponent: () => import('./asset-table/asset-table.component').then(m => m.AssetTableComponent),
+        data: {
+          title: 'Asset-table'
+        }
+    
+  },
+  {
     path: '',
     data: {
       title: ''
@@ -14,7 +23,7 @@ export const routes: Routes = [
         path: 'AssetDetails',
         loadComponent: () => import('./asset-detail1/system.component').then(m => m.SystemComponent),
         data: {
-          title: 'AssetDetails'
+          title: 'เพิ่มรายการครุภัณท์'
         }
       },
       {
@@ -31,13 +40,7 @@ export const routes: Routes = [
           title: 'AssetDetails3'
         }
       },
-      {
-        path: 'Asset-table',
-        loadComponent: () => import('./asset-table/asset-table.component').then(m => m.AssetTableComponent),
-        data: {
-          title: 'Asset-table'
-        }
-      },
+      
       {
         path: 'Editasset/:assetId',
         loadComponent: () => import('./editasset-detail/editasset-detail.component').then(m => m.EditassetDetailComponent),

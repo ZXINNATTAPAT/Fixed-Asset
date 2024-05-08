@@ -13,6 +13,7 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
 import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
+import Swal from 'sweetalert2';
 
 interface AssetDetails {
   sellerCode: "string",
@@ -54,10 +55,34 @@ interface AssetDetails {
 export class PropertySellerComponent implements OnInit {
 
   yourFormName: FormGroup<any> | undefined;
+  asset: any ={};
 
-onSubmit() {
-  throw new Error('Method not implemented.');
-}
+  onSubmit() {
+    this.http.post<any>('https://localhost:7204/api/PropertySellers', this.asset)
+        .subscribe(
+          response => {
+            // console.log(response);
+            const newAsset = response;
+            // console.log(newAsset);
+            this.assetDetails.push(this.translateToThai(newAsset));
+            this.dataSource.data = this.assetDetails;
+  
+            Swal.fire({
+              title: "บันทึกเสร็จสิ้น",
+              icon: "success"
+            });
+          },
+          error => {
+            console.error(error);
+            if (error) {
+              Swal.fire({
+                title: "มีข้อมูลในระบบอยู่แล้ว",
+                icon: "error"
+              });
+            }
+          }
+        );
+  }
 
   icons = { cilPencil, cilTrash };
   assetDetails: AssetDetails[] = [];

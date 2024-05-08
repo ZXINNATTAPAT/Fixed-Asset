@@ -5,6 +5,10 @@ import { Title } from '@angular/platform-browser';
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
 
+import { VERSION } from '@angular/material/core';
+
+import { MatSelectSearchVersion } from 'ngx-mat-select-search';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -31,4 +35,17 @@ export class AppComponent implements OnInit {
       }
     });
   }
+
+
+  version = VERSION;
+
+  matSelectSearchVersion = MatSelectSearchVersion;
+
+  private rightToLeft = false;
+
+  toggleRightToLeft() {
+    this.rightToLeft = !this.rightToLeft;
+    document.body.dir = this.rightToLeft ? 'rtl' : '';
+  }
+
 }

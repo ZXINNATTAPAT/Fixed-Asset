@@ -1,104 +1,116 @@
-<c-card class="mb-4 shadow-sm" >
+<c-card class="mb-4 shadow-sm">
   <c-card-header>
-      <strong>กำหนดรหัสประเภทสินทรัพย์</strong>
+    <strong>กำหนดรหัสประเภทสินทรัพย์</strong>
   </c-card-header>
-    <c-card-body>
+  <c-card-body>
+
+    <form cForm (submit)="onSubmit()">
+
       <div class="row mb-3">
-        <div class="">
-          <br/>
-          <form  (ngSubmit)="onSubmit()">
-            <div class="row mb-3">
-              <div class="col">
-                <label cLabel  for="assetCodeInput">รหัสผู้ขาย</label >
-                <input cFormControl name="assetCode" id="assetCodeInput" 
-                placeholder="ระบุรหัสสินทรัพย์" class="form-control" type="text">
-              </div>
-            
-              <div class="col">
-                <label cLabel  for="assetNameInput">ชื่อผู้ขาย</label >
-                <input cFormControl name="assetName" id="assetNameInput" 
-                placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์" class="form-control" type="text">
-              </div>
-              
-              <div class="col">
-                <label cLabel  for="assetNameInput">เบอร์โทรศัพท์</label >
-                <input cFormControl name="assetName" id="assetNameInput" 
-                placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์" class="form-control" type="text">
-              </div>
-            </div>
+        <div class="col">
+          <label cLabel for="assetCodeInput">รหัสผู้ขาย</label>
+          <input cFormControl name="sellerCode" id="assetCodeInput" placeholder="ระบุรหัสสินทรัพย์" class="form-control"
+            type="text" [(ngModel)]="asset.sellerCode" required>
 
-            <div class="row mb-3">
-              
-              <div class="col">
-                <label cLabel  for="assetNameInput">เบอร์แฟ็กซ์</label >
-                <input cFormControl name="assetName" id="assetNameInput" 
-                placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์" class="form-control" 
-                type="text">
-              </div>
-
-              <div class="col">
-                <label cLabel  for="assetNameInput">อีเมล</label >
-                <input cFormControl name="assetName" id="assetNameInput" 
-                placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์" class="form-control" type="email">
-              </div>
-        
-            </div>
-
-            <div class=" row mb-3">
-              <div class="col-11">
-                <label cLabel  for="assetNameInput">ที่อยู่</label >
-                <input cFormControl name="assetName" id="assetNameInput" 
-                placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์" class="form-control" type="text">
-              </div>
-              
-              <div class="col-1 align-self-end">
-                <button type="submit" class="btn btn-primary">เพิ่ม</button>
-              </div>
-           </div>
-          </form><br/>
         </div>
-        
-        <div class="">
-          <div class="table-responsive">
-          <table  mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover ">
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef style="font-weight: bold;">#</th>
-              <td mat-cell *matCellDef="let asset">
 
-                <button class="btn btn-sm btn-warning m-1" 
-                    (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                    <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
-                </button>
+        <div class="col">
+          <label cLabel for="assetCodeInput">ชื่อผู้ขาย</label>
+          <input cFormControl name="sellerName" id="assetCodeInput" placeholder="ชื่อผู้ขาย" class="form-control"
+            type="text" [(ngModel)]="asset.sellerName" required>
 
-                <button class="btn btn-sm btn-danger m-1" 
-                    (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                    <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
-                </button>
-              </td>
-            </ng-container>
-          
-            <!-- Dynamic Columns -->
-            <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">{{ column }}</th>
-              <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
-            </ng-container>
-          
-            <!-- Header Row -->
-            <!-- Header Row -->
-            <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสผู้ขาย', 'ชื่อผู้ขาย','ที่อยู่','เบอร์โทรศัพท์','เบอร์แฟ็กซ์','อีเมล','เว็บไซต์','หมายเลขประจำตัวผู้เสียภาษี']"></tr>
-        
-            <!-- Data Rows -->
-            <tr mat-row *matRowDef="let row; columns: ['actions', 'รหัสผู้ขาย', 'ชื่อผู้ขาย','ที่อยู่','เบอร์โทรศัพท์','เบอร์แฟ็กซ์','อีเมล','เว็บไซต์','หมายเลขประจำตัวผู้เสียภาษี'];"></tr>
-          </table>
-          
-          <!-- Paginator -->
-          <mat-paginator [pageSizeOptions]="[ 30, 50, 70, 100 ]" [pageSize]="15" showFirstLastButtons></mat-paginator>
-          </div>
+        </div>
+
+        <div class="col">
+          <label cLabel for="assetCodeInput">ที่อยู่</label>
+          <input cFormControl name="Address" id="assetCodeInput" placeholder="ระบุรหัสสินทรัพย์" class="form-control"
+            type="text" [(ngModel)]="asset.Address" required>
         </div>
 
       </div>
-      
 
-    </c-card-body>
-  </c-card>
+      <div class="row mb-3">
+        <div class="col">
+          <label cLabel for="assetCodeInput">เบอร์โทรศัพท์</label>
+          <input cFormControl name="Tel" id="assetCodeInput" placeholder="ระบุเบอร์โทรศัพท์" class="form-control"
+            type="text" [(ngModel)]="asset.Tel" required>
+        </div>
+
+        <div class="col">
+          <label cLabel for="assetCodeInput">เบอร์โทรศัพท์แฟก</label>
+          <input cFormControl name="TelFax" id="assetCodeInput" placeholder="ระบุเบอร์แฟลก์" class="form-control"
+            type="text" [(ngModel)]="asset.TelFax" required>
+        </div>
+
+        <div class="col">
+          <label cLabel for="assetCodeInput">อีเมล</label>
+          <input cFormControl name="Email" id="assetCodeInput" placeholder="ชื่อผู้ขาย" class="form-control" type="text"
+            [(ngModel)]="asset.Email" required>
+
+        </div>
+
+      </div>
+
+      <div class="row mb-3">
+        <div class="col">
+          <label cLabel for="assetCodeInput">เว็บไซต์</label>
+          <input cFormControl name="Homepage" id="assetCodeInput" placeholder="ระบุเว็บไซต์" class="form-control"
+            type="text" [(ngModel)]="asset.Homepage" required>
+        </div>
+
+        <div class="col">
+          <label cLabel for="assetCodeInput">หมายเลขประจำตัวผู้เสียภาษี</label>
+          <input cFormControl name="TelFax" id="assetCodeInput" placeholder="ระบุหมายเลขประจำตัวผู้เสียภาษี"
+            class="form-control" type="text" [(ngModel)]="asset.TinNumber" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">เพิ่ม</button>
+    
+    </form><br />
+
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover ">
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef style="font-weight: bold;">#</th>
+            <td mat-cell *matCellDef="let asset">
+
+              <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)"
+                style="width: 28px;height: 28px; padding: 4px;">
+                <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
+              </button>
+
+              <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)"
+                style="width: 28px;height: 28px; padding: 4px;">
+                <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
+              </button>
+            </td>
+          </ng-container>
+
+          <!-- Dynamic Columns -->
+          <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">{{ column }}</th>
+            <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
+          </ng-container>
+
+          <!-- Header Row -->
+          <tr mat-header-row
+            *matHeaderRowDef="['actions', 'รหัสผู้ขาย', 'ชื่อผู้ขาย','ที่อยู่','เบอร์โทรศัพท์','เบอร์แฟ็กซ์','อีเมล','เว็บไซต์','หมายเลขประจำตัวผู้เสียภาษี']">
+          </tr>
+
+          <!-- Data Rows -->
+          <tr mat-row
+            *matRowDef="let row; columns: ['actions', 'รหัสผู้ขาย', 'ชื่อผู้ขาย','ที่อยู่','เบอร์โทรศัพท์','เบอร์แฟ็กซ์','อีเมล','เว็บไซต์','หมายเลขประจำตัวผู้เสียภาษี'];">
+          </tr>
+        </table>
+
+        <!-- Paginator -->
+        <mat-paginator [pageSizeOptions]="[ 30, 50, 70, 100 ]" [pageSize]="15" showFirstLastButtons></mat-paginator>
+      </div>
+   
+
+
+  </c-card-body>
+</c-card>

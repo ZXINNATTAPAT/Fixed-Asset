@@ -78,12 +78,12 @@ export class ChartsComponent {
   // };
 
   chartPieData: ChartData = {
-    labels: ['Red', 'Green', 'Yellow'],
+    labels: ['usable assets' ,'Obsolete assets', 'Assets sold'],
     datasets: [
       {
         data: [300, 50, 100],
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+        backgroundColor: ['#36A2EB','#FF6384' , '#FFCE56'],
+        hoverBackgroundColor: ['#36A2EB','#FF6384',  '#FFCE56']
       }
     ]
   };

@@ -122,8 +122,6 @@
             </div>
             
             <div class="row mb-3">
-                
-                
                 <div class="col">
                     <label cLabel for="InsuranceStartDate">InsuranceStartDate</label>
                     <input cFormControl
@@ -134,6 +132,7 @@
                            type="date"
                     />
                 </div>
+
                 <div class="col">
                     <label cLabel for="InsuranceEndDate">InsuranceEndDate</label>
                     <input cFormControl
@@ -156,18 +155,20 @@
                            [(ngModel)]="asset.MaintenanceRecommendation"
                            type="text"
                     />
-                </div>
+                </div> 
 
                 <div class="col">
-                    <label cLabel for="AssetId">AssetId</label>
-                    <input cFormControl
-                           id="AssetId"
-                           name="AssetId"
-                           placeholder="ระบุหมายเหตุ"
-                           [(ngModel)]="asset.AssetId"
-                           type="text"
-                    />
+                    <div class="row">
+                        <div class="col">
+                            <label cLabel for="assetCode">Asset Code</label>
+                            <input cFormControl [(ngModel)]="assetCode" type="text" id="assetCode" name="assetCode" required>
+                        </div>
+                        <div class="col align-self-end">
+                            <button type="button" cButton color="success" (click)="onSearch()">Search</button>
+                        </div>
+                    </div>
                 </div>
+                
                 
             </div>
             
