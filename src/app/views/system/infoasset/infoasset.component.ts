@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent } from '@coreui/angular';
-import { ApiService } from 'src/app/api-service.service';
+// import { ApiService } from 'src/app/api-service.service';
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import QRCode from 'qrcode';
 
 interface AssetDetails {
   assetId: any;
@@ -13,7 +16,8 @@ interface AssetDetails {
   department: string;
   responsibleEmployee: string;
   Note: string;
-  [key: string]: string | number ; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
+  [key: string]: string | number ; 
+  // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
 }
 
 @Component({
@@ -23,24 +27,37 @@ interface AssetDetails {
   templateUrl: './infoasset.component.html',
   styleUrl: './infoasset.component.scss'
 })
-export class InfoassetComponent {
 
-  constructor(private apiService: ApiService) {
-    this.getAssetDetails();
-  }
+export class InfoassetComponent {
 
   assetDetails: AssetDetails[] = [];
 
+  assets:any = {};
 
-  getAssetDetails(): void {
-    this.apiService.fetchData('assetDetails').subscribe(data => {
-      this.assetDetails = data.map((asset: { purchaseDate: string; }) => {
-        asset.purchaseDate = this.convertDate(asset.purchaseDate);
-        asset = this.translateToThai(asset);
-        return asset;
-      });
-      // Update the data source with the new asset details
-      // this.dataSource.data = this.assetDetails;
+  qrCodeUrl: string ='';
+
+  constructor(private http: HttpClient , private route: ActivatedRoute) { }
+
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      const assetId = params['assetId'];
+      if (assetId) {
+        // เรียกข้อมูล AssetDetails จาก API
+        this.http.get<any>('https://localhost:7204/api/AssetDetails/' + assetId)
+          .subscribe((data: any) => {
+            this.assets = data ;
+            console.log(this.assets);
+            // สร้าง QR code จาก path ที่เป็น URL ของ asset details
+            const path = 'http://localhost:4200/#/system/infoasset/' + assetId;
+            QRCode.toDataURL(path, (err, url) => {
+              if (err) throw err;
+              // นำ URL ของ QR code ไปใช้งานต่อ
+              console.log('QR code URL:', url);
+              this.qrCodeUrl= url;
+              // ในที่นี้คุณสามารถส่ง URL ไปยัง HTML template เพื่อแสดงผลได้
+            });
+          });
+      }
     });
   }
 

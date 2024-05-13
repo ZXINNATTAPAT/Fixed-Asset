@@ -65,8 +65,7 @@ interface AssetDetails {
 }
 
 @Component({
-  selector: 'app-asset-table',
-  providers: [DatePipe],
+  selector: 'app-recordascount',
   standalone: true,
   imports: [
     CardComponent,
@@ -87,10 +86,11 @@ interface AssetDetails {
     ButtonDirective,
     NgStyle,
   ],
-  templateUrl: './asset-table.component.html',
-  styleUrl: './asset-table.component.scss',
+  templateUrl: './recordascount.component.html',
+  styleUrl: './recordascount.component.scss'
 })
-export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
+export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit {
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -162,16 +162,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getAssetDetails();
   }
 
-  // getAssetDetails(): void {
-  //   this.dataSubscription = this.apiService.fetchData('assetDetails').subscribe(data => {
-  //     this.assetDetails = data.map((asset: { purchaseDate: string; }) => {
-  //       asset.purchaseDate = this.convertDate(asset.purchaseDate);
-  //       asset = this.translateToThai(asset);
-  //       return asset;
-  //     });
-  //     this.dataSource.data = this.assetDetails;
-  //   });
-  // }
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
       .fetchData('assetDetails')
@@ -234,11 +224,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     return translatedAsset;
   }
 
-  // convertDate(dateString: string): string {
-  //   const formattedDate = moment(dateString).locale('th').format('ll');
-  //   return formattedDate ?? '';
-  // }
-
   convertDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleDateString('th', {
@@ -248,41 +233,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     return formattedDate ?? '';
   }
-
-  // applyFilter(event: Event): void {
-  //   const filterValue = (event.target as HTMLInputElement).value;
-
-  //   this.dataSource.filter = filterValue
-
-  //   if (this.dataSource?.paginator) {
-  //     this.dataSource.paginator.firstPage();
-  //   }
-  // }
-
-  //   applyFilter(column: string, event: Event): void {
-  //     const filterValue = (event.target as HTMLInputElement).value;
-  //     this.filterByColumn(column, filterValue);
-  //   }
-
-  // filterByColumn(column: string, filterValue: string): void {
-  //     // Implement your filtering logic here using the column name and filter value
-  //     console.log(column, filterValue);
-
-  //     // For example, if you have a dataSource array, you can filter it like this:
-  //     this.dataSource.data = this.dataSource.data.filter((item: any) => {
-  //         // Convert the item's value for the specified column to lowercase for case-insensitive comparison
-  //         const columnValue = (item[column] || '').toString().toLowerCase();
-  //         // Convert the filterValue to lowercase for case-insensitive comparison
-  //         const filterText = filterValue.trim().toLowerCase();
-  //         // Check if the columnValue includes the filterText
-  //         return columnValue.includes(filterText);
-  //     });
-
-  //     // Optionally, you can reapply pagination if using a paginator
-  //     if (this.dataSource?.paginator) {
-  //         this.dataSource.paginator.firstPage();
-  //     }
-  // }
 
   setupFilter(column: string) {
     const isPriceColumn = column === 'ราคาต่อหน่วย';
@@ -405,24 +355,3 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 }
 
-//   async searchAsset(): Promise<void> {
-//     const assetCode = this.assetCodeInput;
-
-//     // ใช้เงื่อนไขการเปรียบเทียบค่าที่ต้องการ (เช่น >=, <=, === เป็นต้น) กับค่าที่มีอยู่ในรายการ
-//     const foundAsset = this.assetDetailsset.find(asset => {
-//         // เช็คว่ารหัสครุภัณฑ์ในรายการเป็นค่าที่คล้ายค่าที่ผู้ใช้ป้อนเข้ามาหรือไม่
-//         return asset.รหัสครุภัณฑ์.startsWith(assetCode) || asset.รหัสครุภัณฑ์.startsWith(assetCode + "-");
-//     });
-
-//     if (foundAsset) {
-//         // พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Found asset:', foundAsset);
-//         this.dataSource = new MatTableDataSource<any>([foundAsset]); // แปลงเป็นอาร์เรย์เดี่ยวแล้วสร้าง MatTableDataSource
-
-//         // ทำอย่างไรก็ได้ตามที่ต้องการกับข้อมูลที่พบ
-//     } else {
-//         // ไม่พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Asset with code', assetCode, 'not found.');
-//         // จัดการกรณีที่ไม่พบรหัสครุภัณฑ์ที่ต้องการ
-//     }
-// }

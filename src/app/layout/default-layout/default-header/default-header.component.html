@@ -1,16 +1,44 @@
 <!--<c-header class="mb-4 d-print-none" position="sticky">-->
-<ng-container >
-  <c-container [fluid]="true" class="border-bottom " style="background-color: #08a045;">
-    <c-header-nav class="d-none d-md-flex px-1">
-        <button 
-        [cSidebarToggle]="sidebarId" cHeaderToggler toggle="visible" style="margin-inline-start: -14px;">
-        <svg cIcon name="cilMenu" size="lg" style="color: rgb(255,255,255)"></svg>
+<ng-container>
+  <c-container
+    [fluid]="true"
+    class="border-bottom shadow-sm"
+    style="background-color: #30906a"
+  >
+    <c-header-nav class="d-none d-md-flex" style="width: fit-content">
+      <button
+        [cSidebarToggle]="sidebarId"
+        cHeaderToggler
+        toggle="visible"
+        style="margin-inline-start: -14px"
+      >
+        <svg
+          cIcon
+          name="cilMenu"
+          size="lg"
+          style="color: rgb(255, 255, 255)"
+        ></svg>
       </button>
 
-      <c-nav-item>
-        <a cNavLink 
-          style="font-size:22.5px; font-weight: 400;color: rgb(255,255,255)">
-          สำนักงาน{{userinfo.affiliation}}
+      <c-nav-item *ngIf="userinfo.affiliation === 'กกต.สกล'">
+        <a
+          cNavLink
+          class="anuphan-700"
+          style="font-size: large; color: rgb(255, 255, 255)"
+        >
+          สำนักงานคณะกรรมการการเลือกตั้ง{{ this.showCounty }} ({{ userinfo.workgroup }})
+        </a>
+      </c-nav-item>
+
+      <c-nav-item *ngIf="userinfo.affiliation !== 'กกต.สกล'">
+        <a
+          cNavLink
+          class="anuphan-700"
+          style="font-size: large; color: rgb(255, 255, 255)"
+        >
+          สำนักงานคณะกรรมการการเลือกตั้งส่วนภูมิภาค {{ this.showCounty }} ({{
+            this.userinfo.affiliation
+          }})
         </a>
       </c-nav-item>
 
@@ -21,24 +49,22 @@
       <c-nav-item>
         <a cNavLink routerLink="/settings" routerLinkActive="active">Settings</a>
       </c-nav-item> -->
-
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto d-flex align-items-center">
-      <a cNavLink class="m-1 text-white" style="text-decoration: none;">
+      <!-- <a cNavLink class="m-1 text-white" style="text-decoration: none;">
         <svg [cIcon]="icons.cilUser"></svg>
         <span style="font-size: 14px;">
             คุณ {{userinfo.Sname}} {{userinfo.Lname}}  
             {{ userinfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] }}
         </span>
-      </a>
-  
-      <button class="btn btn-danger btn-sm shadow-sm m-0" (click)="Logout()">
-          <svg [cIcon]="icons.cilAccountLogout" style="color: white;"></svg>
-      </button> 
+      </a> -->
 
+      <button class="btn btn-danger btn-sm shadow-sm m-0" (click)="Logout()">
+        <svg [cIcon]="icons.cilAccountLogout" style="color: white"></svg>
+      </button>
     </c-header-nav>
-  
+
     <!-- <c-header-nav class="ms-auto ms-md-0">
       <div class="nav-item py-1">
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
@@ -52,18 +78,22 @@
     <c-header-nav class="mx-0">
       <!-- <ng-container *ngTemplateOutlet="userDropdown" /> -->
     </c-header-nav>
-
   </c-container>
 
-
-  <c-container  [fluid]="true" class="m-0 shadow-sm " style="border: none; background-color: transparent;">
+  <!-- <c-container  [fluid]="true" class="m-0 shadow-sm " style="border: none; background-color: transparent;">
     <c-breadcrumb-router  />
-  </c-container>
-
+    <div >
+      <button class="btn btn btn-secondary m-1">เพิ่ม</button>
+      <button class="btn btn btn-secondary m-1">รายการ</button>
+      <button class="btn btn-secondary m-1">ตรวจนับ</button>
+      <button class="btn btn-secondary m-1">ซ่อมแซม</button>
+      <button class="btn btn-secondary m-1">โอนย้าย</button>
+      <button class="btn btn-secondary m-1">ขาย</button>
+    </div>
+    
+  </c-container> -->
 </ng-container>
 <!--</c-header>-->
-
-
 
 <!-- <ng-template #themeDropdown>
   <c-dropdown alignment="end" variant="nav-item">

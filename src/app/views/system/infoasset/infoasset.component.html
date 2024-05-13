@@ -1,11 +1,55 @@
-<c-card class="mb-4 shadow" >
-    <c-card-header>
+<c-card class="mb-4 shadow" style="border: none">
+  <!-- <c-card-header>
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="margin-right: auto;">เพิ่มรายละเอียดครุภัฑณ์</strong>
+            <span style="margin-right: auto;">เพิ่มรายละเอียดครุภัฑณ์</span>
         </div>
-    </c-card-header>
-    <c-card-body>
-        
+    </c-card-header> -->
+  <!-- purchasePrice: number;
+  purchasedFrom: string;
+  documentNumber: string;
+  department: string;
+  responsibleEmployee: string;
+  Note: string; -->
+  <c-card-body>
+    <h1><span class="anuphan-700">รายละเอียดครุภัฑณ์</span></h1>
+    <hr />
 
-    </c-card-body>
+    <div class="row">
+      <div class="col-2 m-1">
+        <img src="{{ qrCodeUrl }}" />
+      </div>
+
+      <div class="col">
+        <h3>
+          <span class="anuphan-600"
+            ><strong>รหัสครุภัณฑ์</strong> : {{ assets.assetCode }}
+          </span>
+        </h3>
+
+        <h3>
+          <span class="anuphan-600"
+            ><strong>ชื่อครุภัณฑ์</strong> : {{ assets.assetName }}</span
+          >
+        </h3>
+
+        <h3>
+          <span class="anuphan-600"
+            ><strong>ราคาต่อหน่วย</strong>: {{ assets.purchasePrice }}</span
+          >
+        </h3>
+
+        <h3>
+          <span class="anuphan-600"
+            ><strong>วันที่ได้มา</strong> : {{ assets.purchaseDate }}
+          </span>
+        </h3>
+
+        <h3>
+          <span class="anuphan-600"
+            ><strong>เลขที่เอกสาร</strong> : {{ assets.documentNumber }}</span
+          >
+        </h3>
+      </div>
+    </div>
+  </c-card-body>
 </c-card>

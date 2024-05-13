@@ -71,7 +71,7 @@ export class RepairComponent implements OnInit {
 
   icons = { cilPencil, cilTrash ,cilMagnifyingGlass};
 
-  displayedColumns2: string[] = ["รหัสครุภัณฑ์","SerialNumber","รายละเอียด","จำนวนเงิน",];
+  displayedColumns2: string[] = ["รหัสครุภัณฑ์","เลขที่เอกสาร","รายละเอียด","จำนวนเงิน",];
   
   ngOnInit(): void {
     this.getAssetdata();
@@ -149,7 +149,7 @@ export class RepairComponent implements OnInit {
     const translationMap: { [key: string]: string } = {
       "assetId": "assetId",
       "assetCode":"รหัสครุภัณฑ์",
-      "serialNumber": "SerialNumber",
+      "serialNumber": "เลขที่เอกสาร",
       "description": "รายละเอียด",
       "amount": "จำนวนเงิน",
     };

@@ -1,24 +1,27 @@
-<c-card class="shadow-sm" >
-    <c-card-header>
+<c-card class="shadow" style="border: none;">
+    <!-- <c-card-header>
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <strong style="margin-right: auto;">สถานที่ครอบครองทรัพย์สินกี่จำนวน</strong>
           </div>
-        </c-card-header>
+        </c-card-header> -->
     <c-card-body>
+        <h3 class="border-bottom"><span class="anuphan-700"style="color: green;">สถานที่ครอบครองทรัพย์สินกี่จำนวน</span></h3>
             <div class="table-responsive">
-                <table class="table table-striped table-hover " style="font-size: 14px; width: max-content;"
+                <table class="table table-striped table-hover " style="font-size: 12px; width: max-content;"
                      mat-table [dataSource]="dataSource2" matSort>
 
                      <ng-container matColumnDef="location">
-                        <th mat-header-cell *matHeaderCellDef> สถานที่ </th>
-                        <td mat-cell *matCellDef="let element"> 
+                        <th mat-header-cell *matHeaderCellDef class="anuphan-600" 
+                            style="font-weight: bold;font-size: 13px;"> สถานที่ </th>
+                        <td class="anuphan-400" mat-cell *matCellDef="let element" style="font-size: 12.5px;"> 
                             {{ element.location }} 
                         </td>
                       </ng-container>
                       
                       <ng-container matColumnDef="assetCount">
-                        <th mat-header-cell *matHeaderCellDef> จำนวนสินทรัพย์ </th>
-                        <td mat-cell *matCellDef="let element"> 
+                        <th class="anuphan-600" mat-header-cell *matHeaderCellDef 
+                            style="font-weight: bold;font-size: 13px;">จำนวนสินทรัพย์</th>
+                        <td class="anuphan-400" mat-cell *matCellDef="let element" style="font-size: 12.5px;"> 
                             {{ element.assetCount }} 
                         </td>
                       </ng-container>

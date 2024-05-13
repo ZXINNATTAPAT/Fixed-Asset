@@ -15,6 +15,13 @@ export const routes: Routes = [
         }
       },
       {
+        path: 'recordAssetcount',
+        loadComponent: () => import('./recordascount/recordascount.component').then(m => m.RecordascountComponent),
+        data: {
+          title: 'Assetcount'
+        }
+      },
+      {
         path: 'Repair',
         loadComponent: () => import('./repair/repair.component').then(m => m.RepairComponent),
         data: {

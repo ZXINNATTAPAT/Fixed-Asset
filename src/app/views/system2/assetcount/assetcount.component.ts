@@ -1,20 +1,54 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent, InputGroupComponent, BorderDirective } from '@coreui/angular';
+import {
+  CUSTOM_ELEMENTS_SCHEMA,
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import {
+  TextColorDirective,
+  CardComponent,
+  CardHeaderComponent,
+  CardBodyComponent,
+  InputGroupComponent,
+  BorderDirective,
+} from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormsModule,
+  FormControl,
+  Validators,
+  FormGroup,
+  FormBuilder,
+} from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 
-import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  FormDirective,
+  FormLabelDirective,
+  FormControlDirective,
+  ButtonDirective,
+} from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 
 import { ApiService } from '../../../api-service.service';
 
+import Swal from 'sweetalert2';
 
-import Swal from 'sweetalert2'
-
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput } from '@angular/material/datepicker';
-import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatNativeDateModule, MatOption } from '@angular/material/core';
+import {
+  MatDatepicker,
+  MatDatepickerToggle,
+  MatDatepickerInput,
+} from '@angular/material/datepicker';
+import {
+  MatFormField,
+  MatFormFieldModule,
+  MatLabel,
+} from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import * as XLSX from 'xlsx';
 
@@ -23,14 +57,23 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
+import { FormArray } from '@angular/forms';
 // import 'moment/locale/th';
 // import 'date-fns/locale/th';
 import 'moment/locale/th.js';
 
 import { IconDirective } from '@coreui/icons-angular';
-import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
-import { Subscription } from 'rxjs';
-
+import {
+  cibAddthis,
+  cilDataTransferDown,
+  cilInfo,
+  cilPencil,
+  cilTrash,
+} from '@coreui/icons';
+import { ReplaySubject, Subject, Subscription, take, takeUntil } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
+import { MatSelect } from '@angular/material/select';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 interface AssetDetails1 {
   Date: string;
@@ -39,11 +82,11 @@ interface AssetDetails1 {
   LocationCode: string;
   Inspector: string;
   Verifier: string;
-  Note:string;
-  AssetId:string;
-  AssetName:string;
-  BookValue:string;
-  InventoryValue:string;
+  Note: string;
+  AssetId: string;
+  AssetName: string;
+  BookValue: string;
+  InventoryValue: string;
 }
 
 interface AssetDetails {
@@ -57,74 +100,127 @@ interface AssetDetails {
   department: string;
   responsibleEmployee: string;
   Note: string;
-  [key: string]: string | number ; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
+  [key: string]: string | number; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
 }
 
 @Component({
   selector: 'app-assetcount',
   standalone: true,
-  imports:[
+  imports: [
     TextColorDirective,
 
-    MatNativeDateModule, MatTabsModule, MatDatepicker, MatDatepickerToggle, MatFormField,
-    MatLabel, MatDatepickerInput, MatFormFieldModule, MatInputModule,
+    NgxMatSelectSearchModule,
+    MatSelect,
 
-    CommonModule,BorderDirective,
+    MatNativeDateModule,
+    MatTabsModule,
+    MatDatepicker,
+    MatDatepickerToggle,
+    MatFormField,
+    MatLabel,
+    MatDatepickerInput,
+    MatFormFieldModule,
+    MatInputModule,
+    MatOption,
 
-    CardComponent, CardHeaderComponent, CardBodyComponent, CardComponent,
-    CardHeaderComponent, CardBodyComponent, InputGroupComponent,
+    CommonModule,
+    BorderDirective,
 
-    RowComponent, ColComponent,
+    CardComponent,
+    CardHeaderComponent,
+    CardBodyComponent,
+    CardComponent,
+    CardHeaderComponent,
+    CardBodyComponent,
+    InputGroupComponent,
+
+    RowComponent,
+    ColComponent,
     TextColorDirective,
 
-    MatTableModule,MatPaginator,MatSort,MatPaginatorModule,
+    MatTableModule,
+    MatPaginator,
+    MatSort,
+    MatPaginatorModule,
 
     ReactiveFormsModule,
-    FormsModule, FormDirective, FormLabelDirective, FormControlDirective,
-  
-    ButtonDirective, NgStyle, IconDirective],
+    FormsModule,
+    FormDirective,
+    FormLabelDirective,
+    FormControlDirective,
+
+    ButtonDirective,
+    NgStyle,
+    IconDirective,
+  ],
   templateUrl: './assetcount.component.html',
-  styleUrl: './assetcount.component.scss'
+  styleUrl: './assetcount.component.scss',
 })
+export class AssetcountComponent implements OnInit {
 
-export class AssetcountComponent implements OnInit{
-
+  scanQr() {
+  throw new Error('Method not implemented.');
+  }
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
+  isFormControl(control: any): boolean {
+    return control instanceof FormControl;
+  }
+
   displayedColumns2: string[] = [
-    "การดำเนินการ",
-    "วันเดือนปี",
-    "รหัสครุภัณฑ์",
-    "รายการ",
-    "ราคาต่อหน่วย",
-    "วิธีการได้มา",
-    "เลขที่เอกสาร",
-    "แผนก",
-    "ผู้ใช้งาน",
-    "หมายเหตุ"];
+    'การดำเนินการ',
+    'วันเดือนปี',
+    'รหัสครุภัณฑ์',
+    'รายการ',
+    'ราคาต่อหน่วย',
+    'วิธีการได้มา',
+    'เลขที่เอกสาร',
+    'แผนก',
+    'ผู้ใช้งาน',
+    'หมายเหตุ',
+  ];
 
   displayedColumns: string[] = [
-    "purchaseDate",
-    "assetCode",
-    "assetName",
-    "purchasePrice",
-    "purchasedFrom",
-    "documentNumber",
-    "department",
-    "responsibleEmployee",
-    "note"];
-  
-  displayedColumns3: string[] = ["รหัสครุภัณฑ์","รายการ","ยอดตามบัญชี","ยอดตรวจนับ","ผลต่าง","หมายเหตุ"];
+    'purchaseDate',
+    'assetCode',
+    'assetName',
+    'purchasePrice',
+    'purchasedFrom',
+    'documentNumber',
+    'department',
+    'responsibleEmployee',
+    'note',
+  ];
+
+  // displayedColumns3: string[] = ["รหัสครุภัณฑ์","รายการ","ยอดตามบัญชี","ยอดตรวจนับ","ผลต่าง","หมายเหตุ"];
+  displayedColumns3: string[] = ['รหัสครุภัณฑ์', 'รายการ'];
+
+  userinfo: any = [];
+
+  token: any;
+
+  public readinfo() {
+    this.token = localStorage.getItem('token');
+
+    const decodedToken = jwtDecode(this.token);
+
+    this.userinfo = decodedToken;
+  }
 
   private dataSubscription!: Subscription;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   @ViewChild(MatSort) sort!: MatSort;
+
+  @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
   ngOnDestroy(): void {
     if (this.dataSubscription) {
       this.dataSubscription.unsubscribe();
     }
+    this._onDestroy.next();
+    this._onDestroy.complete();
   }
 
   editAsset(_t115: any) {
@@ -135,19 +231,17 @@ export class AssetcountComponent implements OnInit{
     throw new Error('Method not implemented.');
   }
 
-  
-
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "purchaseDate": "วันเดือนปี",
-      "assetCode": "รหัสครุภัณฑ์",
-      "assetName": "รายการ",
-      "purchasePrice": "ราคาต่อหน่วย",
-      "purchasedFrom": "วิธีการได้มา",
-      "documentNumber": "เลขที่เอกสาร",
-      "department": "แผนก",
-      "responsibleEmployee": "ผู้ใช้งาน",
-      "note": "หมายเหตุ"
+      purchaseDate: 'วันเดือนปี',
+      assetCode: 'รหัสครุภัณฑ์',
+      assetName: 'รายการ',
+      purchasePrice: 'ราคาต่อหน่วย',
+      purchasedFrom: 'วิธีการได้มา',
+      documentNumber: 'เลขที่เอกสาร',
+      department: 'แผนก',
+      responsibleEmployee: 'ผู้ใช้งาน',
+      note: 'หมายเหตุ',
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {
@@ -167,42 +261,92 @@ export class AssetcountComponent implements OnInit{
     });
     return formattedDate ?? '';
   }
+
+  assetData: any[] = []; // Initialize assetData as an empty array
+
+  dataSource!: MatTableDataSource<AssetDetails>; // Removed the initialization here
+
+  dataSource2: any[] = []; // No changes
   
-  assetData:any =[]
+  assetDataCtrl: FormControl = new FormControl();
 
-  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetData);
+  assetdataFilterCtrl: FormControl = new FormControl('');
 
-  dataSource2: any[] = [];
+  filteredAssetData: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
+
+  _onDestroy = new Subject<void>();
 
   constructor(
     private http: HttpClient,
     private apiService: ApiService,
-    private formBuilder: FormBuilder) 
-    {
-      this.getAssetDetails();
-
+    private formBuilder: FormBuilder
+  ) {
+    this.getAssetDetails();
   }
-  // assetDetails: AssetDetails[] = [];
-  assetForm: FormGroup = new FormGroup({});
-  form: FormGroup = new FormGroup({});
+
+  assetForm!: FormGroup; 
+  
+  form!: FormGroup; 
 
   getAssetDetails(): void {
-    this.dataSubscription = this.apiService.fetchData('assetDetails').subscribe(data => {
-      this.assetData = data.map((asset: { purchaseDate: string; }) => {
-        asset.purchaseDate = this.convertDate(asset.purchaseDate);
-        asset = this.translateToThai(asset);
-        return asset;
+    this.dataSubscription = this.apiService
+      .fetchData('assetDetails')
+      .subscribe((data) => {
+        this.assetData = data.map((asset: any) => {
+          asset.purchaseDate = this.convertDate(asset.purchaseDate);
+          // asset = this.translateToThai(asset);
+          return asset;
+        });
+
+        console.log(this.assetData);
+
+        // this.dataSource = new MatTableDataSource<AssetDetails>(this.assetData); 
+        // Initialize dataSource here
       });
-      // Update the data source with the new asset details
-      this.dataSource.data = this.assetData;
-    });
+  }
+
+  inputform: any[] = [];
+
+  formArray!: FormArray; // No changes
+
+  filterAsset(): void {
+    let search = this.assetdataFilterCtrl.value;
+    if (!search) {
+      this.filteredAssetData.next(this.assetData.slice());
+      return;
+    } else {
+      search = search.toLowerCase();
+    }
+    this.filteredAssetData.next(
+      this.assetData.filter(
+        (asset) => asset.assetCode.toLowerCase().indexOf(search) > -1
+      )
+    );
+  }
+
+  setInitialValue(): void {
+    this.filteredAssetData
+      .pipe(take(1), takeUntil(this._onDestroy))
+      .subscribe(() => {
+        console.log(this.singleSelect);
+        this.singleSelect.compareWith = (a: any, b: any) =>
+          a && b && a.assetCode === b.assetCode;
+      });
   }
 
   ngOnInit(): void {
-    this.getAssetDetails();
+
+    this.readinfo() ;
+
+    this.assetdataFilterCtrl.valueChanges
+    .pipe(takeUntil(this._onDestroy))
+    .subscribe(() => {
+      this.filterAsset();
+    });
+
     this.assetForm = this.formBuilder.group({
-      date: [''],
-      serialNumber: [''],//เลขที่เอกสาร
+      date: [new Date().toISOString()],
+      serialNumber: [`${this.userinfo.affiliation}-ตน-0001`],
       departmentCode: [''],
       locationCode: [''],
       inspector: [''],
@@ -210,61 +354,101 @@ export class AssetcountComponent implements OnInit{
       note: [''],
       assetId: [''],
       assetName: [''],
-      bookValue: [''],
-      inventoryValue: [''],
+      // bookValue: [''],
+      // inventoryValue: [''],
+      formArray: this.formBuilder.array([]),
     });
+
     this.form = this.formBuilder.group({
-      'รหัสครุภัณฑ์': ['', Validators.required],
-      'รายการ': ['', Validators.required],
-      'ยอดตามบัญชี': ['', Validators.required],
-      'ยอดตรวจนับ': ['', Validators.required],
-      'ผลต่าง': ['', Validators.required],
-      'หมายเหตุ': ['']
+      รหัสครุภัณฑ์: [''],
+      รายการ: [''],
+      // 'ยอดตามบัญชี': [''],
+      // 'ยอดตรวจนับ': [''],
+      // 'ผลต่าง': [''],
+      // หมายเหตุ: [''],
     });
-   
+
+    this.formArray = this.assetForm.get('formArray') as FormArray;
+    this.addform(); // Add initial form control
+  }
+
+  createItem(): FormGroup {
+    return this.formBuilder.group({
+      รหัสครุภัณฑ์: [''],
+      รายการ: [''],
+      // 'ยอดตามบัญชี': [''],
+      // 'ยอดตรวจนับ': [''],
+      // 'ผลต่าง': [''],
+      // หมายเหตุ: [''],
+    });
+  }
+
+  getAssetName(assetId: number): string {
+    // หาชื่อของครุภัณฑ์จาก ID ของครุภัณฑ์
+    const asset = this.assetData.find(data => data.assetId === assetId);
+    return asset ? asset.assetName : '';
   }
   
+  addform() {
+
+    const newFormItem = this.createItem(); // Create a new form control
+
+    this.formArray.push(newFormItem); // Add the new form control to the formArray
+
+    this.inputform.push(newFormItem); // Add the new form control to the inputform array
+  }
+
   onSubmit() {
     if (this.form.valid) {
-      this.dataSource2.push(this.form.value); // เพิ่มข้อมูลลงในตาราง
+      const requestBody = {
+        data: [] as any[],
+      };
+  
+      this.formArray.controls.forEach((control) => {
+        if (control instanceof FormGroup) {
+          let formData: any = {};
+          Object.keys(control.value).forEach((key) => {
+            formData[key] = control.value[key];
+          });
+          requestBody.data.push(formData);
+        }
+      });
+  
+      requestBody.data.forEach((item, index) => {
+        const assetset = {
+          date: this.assetForm.get('date')?.value,
+          serialNumber: `${this.userinfo.affiliation}-ตน-0001`,
+          departmentCode: this.assetForm.get('departmentCode')?.value,
+          locationCode: this.assetForm.get('locationCode')?.value,
+          inspector: this.assetForm.get('inspector')?.value,
+          verifier: this.assetForm.get('verifier')?.value,
+          note: this.assetForm.get('note')?.value,
+          assetId: item.รหัสครุภัณฑ์,
+          // assetName: item.assetName,
+        };
+        console.log(assetset);
+      
+      
+        // ส่งข้อมูลไปยังเซิร์ฟเวอร์ที่อยู่ที่ https://localhost:7204/api/AssetInventory
+        // this.http.post('https://localhost:7204/api/AssetInventory', data)
+        //   .subscribe(
+        //     (response) => {
+        //       console.log('POST request successful: ', response);
+        //       // ทำอะไรต่อไปหลังจากได้รับการตอบกลับจากเซิร์ฟเวอร์
+        //     },
+        //     (error) => {
+        //       console.error('Error in POST request: ', error);
+        //       // ประมวลผลข้อผิดพลาดหากมี
+        //     }
+        //   );
+      });
+    } else {
+      console.error('Form is invalid. Please fill in all required fields or add more forms.');
     }
-    console.log(this.form.value);
-      // const formData = this.form.value;
-      // const formData2 = this.assetForm.value;
-      // const requestBody = {
-      //   inventoryId: 0,
-      //   date: new Date().toISOString(), // กำหนดวันที่เป็น ISO string
-      //   serialNumber: formData2['serialNumber'],
-      //   departmentCode: formData2['departmentCode'],
-      //   locationCode: formData2['locationCode'],
-      //   inspector: formData2['inspector'],
-      //   verifier: formData2['verifier'],
-      //   note: formData['หมายเหตุ'],
-      //   assetId: formData['assetId'],
-      //   assetName: formData['assetName'],
-      //   bookValue: formData['bookValue'],
-      //   inventoryValue: formData['inventoryValue']
-      // };
-  
-      // // เรียกใช้งาน API โดยใช้ HttpClient
-      // this.http.post('https://localhost:7204/api/AssetInventory', requestBody).subscribe(
-      //   (response) => {
-      //     console.log('ส่งข้อมูลเรียบร้อยแล้ว:', response);
-      //     // เพิ่มข้อมูลลงในตารางหรือทำอย่างอื่นตามต้องการ
-      //     // this.dataSource2.push(formData);
-      //     this.form.reset(); // รีเซ็ตฟอร์มหลังจาก submit
-      //   },
-      //   (error) => {
-      //     console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error);
-      //   }
-      // );
-    
-  
-    
   }
+  
 
   getSequence(index: number): number {
     return index + 1;
   }
-
 }

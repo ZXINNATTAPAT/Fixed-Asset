@@ -1,193 +1,196 @@
-<c-card>
-<c-card-header>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="margin-right: auto;">บันทึกครุภัณท์</strong> 
-        
-    </div>
-</c-card-header>
-<c-card-body>
-    
-                <form cForm [formGroup]="assetForm" (ngSubmit)="onSubmit()">
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label cLabel>วันทีเอกสาร:</label>
-                            <input cFormControl type="text" formControlName="date">
-                        </div>
-                        <div class="col">
-                            <label cLabel>เลขที่เอกสาร</label>
-                            <input cFormControl type="text" formControlName="serialNumber">
-                        </div>
-                        <div class="col">
-                            <label cLabel>รหัสแผนก</label>
-                            <input cFormControl type="text" formControlName="departmentCode">
-                        </div>
-                        <div class="col">
-                            <label cLabel>รหัสที่ตั้ง</label>
-                            <input cFormControl type="text" formControlName="locationCode">
-                        </div>
-                    </div>
-                    <div class="row mb-3"> 
-                        <div class="col">
-                            <label cLabel>ผู้ตรวจนับ</label>
-                            <input cFormControl type="text" formControlName="inspector">
-                        </div>
-                        <div class="col">
-                            <label cLabel>ผู้ตรวจสอบ</label>
-                            <input cFormControl type="text" formControlName="verifier">
-                        </div>
-                    
-                    </div>
-                        
-                    <!-- <div class="row">
-                        <div class="col">
-                            <label cLabel>รหัสครุภัณฑ์</label>
-                            <input cFormControl type="text" formControlName="assetId">
-                        </div>
-                        <div class="col">
-                            <label cLabel>ยอดตรวจนับ</label>
-                            <input cFormControl type="text" formControlName="inventoryValue">
-                          </div>
-                    </div> -->
-                    
-                    <!-- <div>
-                      <label cLabel>Asset Name:</label>
-                      <input cFormControl type="text" formControlName="assetName">
-                    </div> -->
-                    <!-- <div>
-                      <label cLabel>Book Value:</label>
-                      <input cFormControl type="text" formControlName="bookValue">
-                    </div> -->
-                    <div class="row">
-                        <div class="col">
-                          <label>หมายเหตุ</label>
-                          <input type="text" formControlName="note" class="form-control">
-                        </div>
-                        <div class="col"><br/>
-                          <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                      </div>
-                  </form><br/>
+<c-card class="shadow" style="border: none">
+  <c-card-body>
+    <h1><span class="anuphan-700">ตรวจนับครุภัณท์</span></h1>
+    <hr />
+    <form cForm [formGroup]="assetForm" (ngSubmit)="onSubmit()">
+      <div class="row mb-3">
+        <!-- <div class="col"> -->
+        <!-- <label cLabel>วันทีเอกสาร:</label> -->
+        <input
+          cFormControl
+          placeholder="กรอกข้อมูล"
+          type="text"
+          formControlName="date"
+          hidden
+        />
+        <!-- </div> -->
+        <!-- <div class="col"> -->
+        <!-- <label cLabel>เลขที่เอกสาร</label> -->
+        <input
+          cFormControl
+          placeholder="กรอกข้อมูล"
+          type="text"
+          formControlName="serialNumber"
+          hidden
+        />
+        <!-- </div> -->
+      </div>
+      <div class="row mb-3">
+        <div class="col">
+          <label cLabel><span style="color: red;">*</span>รหัสแผนก</label>
+          <input
+            cFormControl
+            placeholder="กรอกข้อมูล"
+            type="text"
+            formControlName="departmentCode"
+          />
+        </div>
 
-                <div class="table-responsive ">
-                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                        <table class="table table-striped table-hover">
-                          <!-- Displayed Columns -->
-                          <thead>
-                            <tr>
-                              <th>ลำดับ</th>
-                              <ng-container *ngFor="let column of displayedColumns3">
-                                  <th>{{ column }}</th>
-                              </ng-container>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr *ngFor="let i of [0, 1, 2, 3, 4, 5,6,7]"> 
-                                <!-- เพิ่มแถวโดยใช้วิธีการวนลูป index -->
-                              <td class="text-center">{{ i + 1 }}</td> 
-                              <!-- เพิ่มลำดับ 1, 2, 3, ... -->
-                              <ng-container *ngFor="let column of displayedColumns3; let j = index">
-                                <ng-container *ngIf="column !== 'ลำดับ'"> 
-                                  <td>
-                                    <input cFormControl [formControlName]="column" placeholder="กรอก{{ column }}">
-                                  </td>
-                                </ng-container>
-                              </ng-container>
-                            </tr>
-                          </tbody>
-                        </table><br/>
-                        <button mat-raised-button class="btn btn-success" color="primary" type="submit">Submit</button>
-                      </form>
-                    
-                    <!-- <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                        <table class="table table-striped table-hover " mat-table 
-                        [dataSource]="dataSource2" >
-                      
-                          <ng-container matColumnDef="ลำดับ">
-                            <th class="text-center" mat-header-cell *matHeaderCellDef> ลำดับ </th>
-                            <td class="text-center" mat-cell *matCellDef="let element; let i = index"> 
-                                {{ getSequence(i) }} 
-                            </td>
-                          </ng-container>
-                      
-                          <ng-container *ngFor="let column of displayedColumns3; let i = index" [matColumnDef]="column">
-                            <th mat-header-cell *matHeaderCellDef> {{ column }} </th>
-                            <td mat-cell *matCellDef="let element">
-                              <ng-container *ngIf="column !== 'หมายเหตุ'; else noteField">
-                                <input cFormControl matInput [formControlName]="column" placeholder="กรอก{{ column }}">
-                              </ng-container>
-                              <ng-template #noteField>
-                                <input matInput cFormControl [formControlName]="column" placeholder="กรอก{{ column }}">
-                              </ng-template>
-                            </td>
-                          </ng-container>
-                      
-                          <tr mat-header-row *matHeaderRowDef="['ลำดับ','รหัสครุภัณฑ์','รายการ','ยอดตามบัญชี','ยอดตรวจนับ','ผลต่าง','หมายเหตุ']"></tr>
-                          <tr mat-row *matRowDef="let row; columns:['ลำดับ','รหัสครุภัณฑ์','รายการ','ยอดตามบัญชี','ยอดตรวจนับ','ผลต่าง','หมายเหตุ']"></tr>
-                        </table><br/>
-                        <button mat-raised-button class="btn btn-success" color="primary" type="submit">Submit</button>
-                    </form> -->
-                </div>  
-     
-        <!-- <div class="table-responsive">
-            <table class="table table-striped table-hover " style="font-size: 15px; width: fit-content;" 
-                mat-table [dataSource]="dataSource" matSort>
+        <div class="col">
+          <label cLabel><span style="color: red;">*</span> รหัสที่ตั้ง</label>
+          <input
+            cFormControl
+            placeholder="กรอกข้อมูล"
+            type="text"
+            formControlName="locationCode"
+          />
+        </div>
+      </div>
 
-                <ng-container matColumnDef="Aactions">
-                    
-                    <th class="" mat-header-cell *matHeaderCellDef style="color: black;font-weight: bold;"> 
-                        # 
-                    </th>
-                    
-                    <td mat-cell *matCellDef="let asset">
-                        <button class="btn btn-sm btn-primary m-1" 
-                            (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilInfo" style="color: white; width: 100%; height: 100%;"></svg>
-                        </button>
+      <div class="row">
+        <div class="col">
+          <label cLabel><span style="color: red;">*</span> ผู้ตรวจนับ</label>
+          <input
+            cFormControl
+            placeholder="กรอกข้อมูล"
+            type="text"
+            formControlName="inspector"
+          />
+        </div>
 
-                        <button class="btn btn-sm btn-warning m-1" 
-                            (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
-                        </button>
+        <div class="col">
+          <label cLabel><span style="color: red;">*</span> ผู้ตรวจสอบ</label>
+          <input
+            cFormControl
+            placeholder="กรอกข้อมูล"
+            type="text"
+            formControlName="verifier"
+          />
+        </div>
 
-                        <button class="btn btn-sm btn-danger m-1" 
-                            (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
-                        </button>
-                        
-                    </td>
+        <div class="col">
+          <label cLabel><span style="color: red;">*</span> หมายเหตุ</label>
+          <input
+            cFormControl
+            type="text"
+            formControlName="note"
+            placeholder="ระบุหมายเหตุ"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <br />
+
+      <div style="text-align: center">
+        <button
+          type="button"
+          class="btn btn-success anuphan-600 m-1"
+          style="color: white"
+          (click)="addform()"
+        >
+        <svg [cIcon]="icons.cibAddthis" ></svg> เพิ่มฟอร์ม
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-success anuphan-600"
+          style="color: white"
+          (click)="scanQr()"
+        >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width: 20px;">
+          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com 
+            License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+            <path fill="#ffffff" d="M0 224h192V32H0v192zM64 
+            96h64v64H64V96zm192-64v192h192V32H256zm128 
+            128h-64V96h64v64zM0 
+            480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v128h-96v-32h-32v96h-64V288h96v32h64v-32zm0 
+            160h32v32h-32v-32zm-64 0h32v32h-32v-32z"/></svg> Qr-code
+        </button>
+      </div>
+      <!-- </form> -->
+      <br /><br />
+
+      <div class="table-responsive">
+        <!-- <form [formGroup]="form" (ngSubmit)="onSubmit()"> -->
+        <table class="table table-striped table-hover">
+          <!-- Displayed Columns -->
+          <thead>
+            <tr>
+              <th class="border" style="width: 75px">ลำดับ</th>
+              <ng-container *ngFor="let column of displayedColumns3">
+                <th class="border">{{ column }}</th>
+              </ng-container>
+            </tr>
+          </thead>
+          <tbody class="border">
+            <tr
+              *ngFor="let formGroup of formArray.controls; let rowIndex = index"
+            >
+              <!-- Add rows using index loop -->
+              <td class="text-center border">{{ rowIndex + 1 }}</td>
+              <!-- Add 1, 2, 3, ... index -->
+              <ng-container
+                *ngFor="let column of displayedColumns3; let colIndex = index"
+              >
+                <!-- Iterate through each column -->
+                <ng-container *ngIf="column !== 'ลำดับ'">
+                  <!-- <td class="border" *ngIf="column !== 'รหัสครุภัณฑ์'">
+                    Display the value of the form control
+                    <input cFormControl placeholder="กรอกข้อมูล" [formControl]="$any(formGroup.get(column)!)" />
+                  </td> -->
+                  <td
+                    class="border"
+                    *ngIf="column === 'รหัสครุภัณฑ์'"
+                    style="width: 550px"
+                  >
+                    <mat-select
+                      class="form-control"
+                      [formControl]="$any(formGroup.get(column)!)"
+                      placeholder="เลือกครุภัณฑ์"
+                      #singleSelect
+                    >
+                      <mat-option>
+                        <ngx-mat-select-search
+                          [formControl]="assetdataFilterCtrl"
+                        >
+                        </ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option
+                        *ngFor="let assetData of filteredAssetData | async"
+                        [value]="assetData.assetId"
+                      >
+                        {{ assetData.assetCode }}
+                      </mat-option>
+                    </mat-select>
+                  </td>
+                  <td
+                    class="border"
+                    *ngIf="
+                      column === 'รายการ' &&
+                      formGroup.get('รหัสครุภัณฑ์')!.value"
+                  >
+                    {{ getAssetName(formGroup.get("รหัสครุภัณฑ์")!.value) }}
+                  </td>
                 </ng-container>
-        
-             
-                <ng-container *ngFor="let column of displayedColumns2; let i = index" [matColumnDef]="column">
-                    <th class="mat-header-cell" mat-header-cell *matHeaderCellDef mat-sort-header>
-                        <div style="color: black; font-weight: bold;">
-                            <label cLabel>{{ column }}</label>
-                           
-                        </div>
-                    </th>
-                    <td mat-cell *matCellDef="let asset">
-                        <div *ngIf="column!== 'ราคาต่อหน่วย'; else currencyFormat">
-                            {{ asset[column] }}
-                        </div>
-                        <ng-template #currencyFormat>
-                            {{ asset[column] | currency:'':'':'1.2-2' }}
-                        </ng-template>
-                    </td>
-                </ng-container>
-                
-                
-                <tr mat-header-row 
-                *matHeaderRowDef="['Aactions', 'วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร', 'แผนก', 'ผู้ใช้งาน', 'หมายเหตุ']"></tr>
-        
-                <tr mat-row 
-                *matRowDef="let row; columns: ['Aactions','วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร', 'แผนก', 'ผู้ใช้งาน', 'หมายเหตุ'];"></tr>
-            </table>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
 
-            <mat-paginator [pageSizeOptions]="[ 30, 50, 70, 100]" [pageSize]="15" 
-            showFirstLastButtons class="paginator-style"></mat-paginator>
-        </div> -->
-    </c-card-body>
-</c-card> 
-            
-            
-     
+        <br />
+
+        <button
+          mat-raised-button
+          class="btn btn-success anuphan-600"
+          color="primary"
+          type="submit"
+          style="color: white"
+        >
+          ดำเนินการ
+        </button>
+        
+      </div>
+    </form>
+  </c-card-body>
+</c-card>

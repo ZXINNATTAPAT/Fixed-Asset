@@ -1,9 +1,8 @@
 import { INavData } from '@coreui/angular';
 
 export const navItems: INavData[] = [
- 
   {
-    name: 'Dashboard',
+    name: 'แดชบอร์ดสรุปภาพรวม',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
     // badge: {
@@ -17,10 +16,10 @@ export const navItems: INavData[] = [
   //   url: '/defaultdata',
   //   iconComponent: { name: 'cil-pencil' }
   
-  {
-    title: true,
-    name: 'จัดการข้อมูลในระบบ'
-  },
+  // {
+  //   title: true,
+  //   name: 'จัดการข้อมูลในระบบ'
+  // },
   
   {
     name: 'บันทึกรายการรายวัน',
@@ -66,10 +65,10 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-pencil' }
   
   },
-  {
-    title: true,
-    name: 'แก้ไขข้อมูลในระบบ'
-  },
+  // {
+  //   title: true,
+  //   name: 'แก้ไขข้อมูลในระบบ'
+  // },
   {
     name: 'เพิ่มข้อมูลตั้งต้น',
     url: '/defaultdata',

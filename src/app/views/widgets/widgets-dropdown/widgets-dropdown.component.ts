@@ -16,6 +16,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApiService } from 'src/app/api-service.service';
 import { cibAddthis, cilArrowCircleRight, cilBuilding, cilBullhorn, cilDataTransferDown, cilDevices, cilInfo, cilPencil, cilSave, cilTrash, cilUser } from '@coreui/icons';
 import { jwtDecode } from 'jwt-decode';
+import { NgIf } from '@angular/common';
 
 @Component({
     selector: 'app-widgets-dropdown',
@@ -23,7 +24,10 @@ import { jwtDecode } from 'jwt-decode';
     styleUrls: ['./widgets-dropdown.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
     standalone: true,
-    imports: [RowComponent, ColComponent, WidgetStatAComponent, TemplateIdDirective, IconDirective, ThemeDirective, DropdownComponent, ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, DropdownItemDirective, RouterLink, DropdownDividerDirective, ChartjsComponent]
+    imports: [RowComponent, ColComponent, WidgetStatAComponent, 
+      TemplateIdDirective, IconDirective, ThemeDirective, DropdownComponent, 
+      ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, 
+      DropdownItemDirective, RouterLink, DropdownDividerDirective, ChartjsComponent,NgIf]
 })
 export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
 
@@ -76,7 +80,10 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
       const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
         asset.assetCode.indexOf(`${this.userinfo.affiliation} 006`) !== -1);
       
-      this.numberOfAssets = data.length;// นับจำนวน asset ทั้งหมด
+      this.numberOfAssets = data.filter((asset: { assetCode: string; }) => 
+        asset.assetCode.startsWith(this.userinfo.affiliation) &&
+        !asset.assetCode.includes(`${this.userinfo.affiliation}.`)).length;
+    // นับจำนวน asset ทั้งหมด
 
       this.assetinter = filteredAssets2.length
 

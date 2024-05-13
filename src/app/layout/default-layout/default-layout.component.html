@@ -1,29 +1,50 @@
 <!--sidebar-->
-<c-sidebar #sidebar1="cSidebar" class="d-print-none sidebar sidebar-fixed border-end " 
+<c-sidebar #sidebar1="cSidebar" 
+  class="d-print-none sidebar sidebar-fixed border-end anuphan-700" 
   id="sidebar1" colorScheme="light" visible>
 
   <c-sidebar-header class="border-bottom" style="text-align: center; background:transparent;">
     <c-sidebar-brand [routerLink]="[]">
       <br>
-      <img src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png" height="110" alt="ss"
-        style="padding: 2px; margin-left: 55px;" />
-      <br />
-      <br />
+      <img class="p-1" src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png" height="100" alt="ss"
+        style="padding: 2px; margin-left: 60px;" />
+      <br><br>
     </c-sidebar-brand>
+    
+  </c-sidebar-header>   
 
-  </c-sidebar-header>
+  
  
+  <div class="m-1 p-3" style="background-color: rgba(48,144,106);border-radius: 4px ;color: white;">
+    <div class="row ">
+      <div class="col-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+        </svg>
+      </div>
+      <div class="col-10">
+        <span style="font-size: 15.5px;"> เจ้าหน้าที่ {{userinfo.workgroup}} ({{ userinfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] }})</span><br/>
+        <span style="font-size: 11.5px;">คุณ {{userinfo.Sname}} {{userinfo.Lname}} </span> <br/>
+        <!-- <span style="font-size: 10px;">{{userinfo.position}}/{{userinfo.positiontype}}</span> -->
+      </div>
+    </div>
+  </div>
 
-  <ng-scrollbar #scrollbar="ngScrollbar" (updated)="onScrollbarUpdate(scrollbar.state)" class="overflow"
+  <ng-scrollbar #scrollbar="ngScrollbar" 
+    (updated)="onScrollbarUpdate(scrollbar.state)" class="overflow"
     pointerEventsMethod="scrollbar" visibility="hover">
-    <c-sidebar-nav #overflow [navItems]="navItems" dropdownMode="close" compact />
+      
+      <c-sidebar-nav #overflow [navItems]="navItems" dropdownMode="close" compact />
+    
   </ng-scrollbar>
+
   @if (!sidebar1.narrow) {
   <c-sidebar-footer cSidebarToggle="sidebar1" class="border-top d-none d-lg-flex" toggle="unfoldable"
     style="cursor: pointer;">
     <button cSidebarToggler></button>
   </c-sidebar-footer>
   }
+
 </c-sidebar>
 
 <!--main-->
@@ -34,7 +55,7 @@
     position="sticky" sidebarId="sidebar1" />
   <!--app-body-->
   <div class="body flex-grow-1">
-    <c-container fluid>
+    <c-container fluid class="anuphan-700">
       <router-outlet />
     </c-container>
   </div>

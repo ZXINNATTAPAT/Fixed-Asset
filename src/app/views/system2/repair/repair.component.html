@@ -1,17 +1,10 @@
-<c-card class="mb-4 shadow-sm">
-    <c-card-header>
-      <strong>บันทึก</strong>
-    </c-card-header>
+<c-card class="mb-4 shadow" style="border: none;">
+    
     <c-card-body>
+      <h1><span class="anuphan-700">บันทึกการซ่อมแซมและบำรุงรักษา</span></h1><hr/>
   
       <form cForm (submit)="onSubmit()">
             <div class="row mb-3">
-            <!-- <div class="col">
-                <label cLabel for="assetCodeInput">รหัสครุภัณฑ์</label>
-                <input cFormControl name=" assetId " id="assetCodeInput" 
-                placeholder="ระบุรหัสครุภัณฑ์" class="form-control"
-                type="text" [(ngModel)]="asset.assetId " required>
-            </div> -->
 
             <div class="col">
                 <label cLabel for="assetCode">รหัสครุภัณฑ์</label>
@@ -24,9 +17,9 @@
             </div>
     
             <div class="col">
-                <label cLabel for="assetCodeInput">SerialNumber</label>
+                <label cLabel for="assetCodeInput">เลขที่เอกสาร</label>
                 <input cFormControl name="SerialNumber" id="assetCodeInput" 
-                placeholder="SerialNumber" class="form-control"
+                placeholder="เลขที่เอกสาร" class="form-control"
                 type="text" [(ngModel)]="asset.SerialNumber" required>
     
             </div>
@@ -34,22 +27,28 @@
     
             <div class="row mb-3">
                 
-            <div class="col">
-                <label cLabel for="assetCodeInput">รายละเอียด</label>
-                <input cFormControl name="Description" id="assetCodeInput" 
-                placeholder="ระบุรายละเอียด" class="form-control"
-                type="text" [(ngModel)]="asset.Description" required>
-            </div>
+              <div class="col">
+                  <label cLabel for="assetCodeInput">รายละเอียด</label>
+                  <input cFormControl name="Description" id="assetCodeInput" 
+                  placeholder="ระบุรายละเอียด" class="form-control"
+                  type="text" [(ngModel)]="asset.Description" required>
+              </div>
 
-            <div class="col">
-                <label cLabel for="assetCodeInput">จำนวนเงิน</label>
-                <input cFormControl name="Amount" id="assetCodeInput" 
-                placeholder="ระบุจำนวนเงิน" class="form-control"
-                type="text" [(ngModel)]="asset.Amount" required>
-            </div>
+              <div class="col">
+                  <label cLabel for="assetCodeInput">จำนวนเงิน</label>
+                  <input cFormControl name="Amount" id="assetCodeInput" 
+                  placeholder="ระบุจำนวนเงิน" class="form-control"
+                  type="text" [(ngModel)]="asset.Amount" required>
+              </div>
+
+              <div class="col align-self-end">
+                <button cButton class="anuphan-600" 
+                type="submit" color="success"  
+                style="color: white;">ดำเนินการ</button>
+              </div>
             </div>
     
-            <button type="submit" class="btn btn-primary">เพิ่ม</button>
+            
         
       </form><br />
   
@@ -81,12 +80,12 @@
   
             <!-- Header Row -->
             <tr mat-header-row
-              *matHeaderRowDef="['actions', 'รหัสครุภัณฑ์' , 'SerialNumber' ,'รายละเอียด' ,'จำนวนเงิน']">
+              *matHeaderRowDef="['actions', 'รหัสครุภัณฑ์' , 'เลขที่เอกสาร' ,'รายละเอียด' ,'จำนวนเงิน']">
             </tr>
   
             <!-- Data Rows -->
             <tr mat-row
-              *matRowDef="let row; columns: ['actions',  'รหัสครุภัณฑ์' , 'SerialNumber' ,'รายละเอียด' ,'จำนวนเงิน'];">
+              *matRowDef="let row; columns: ['actions',  'รหัสครุภัณฑ์' , 'เลขที่เอกสาร' ,'รายละเอียด' ,'จำนวนเงิน'];">
             </tr>
           </table>
   

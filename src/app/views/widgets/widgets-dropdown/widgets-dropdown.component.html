@@ -1,142 +1,251 @@
-<c-row class="g-3" >
+<c-row class="g-3">
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none;background-color: green;color: white;">
-      <div class="card-body"> 
-         <c-dropdown alignment="end" variant="btn-group" style="float: right;">
-              <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
-                <svg cIcon name="cilOptions"></svg>
-              </button>
-              <ul cDropdownMenu>
-                <li><p cDropdownItem>สินทรัพย์ทั้งหมด</p></li>
-              </ul>
-          </c-dropdown>
-        
-            <h2 style="font-weight: bold;">{{ numberOfAssets }} <br/>สินทรัพย์ <svg [cIcon]="icons.cilSave"  height="32" style="float: right;"></svg></h2>
-              
-            <div class="d-grid">
-              <button class="btn btn-sm btn btn-outline-light" >ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg></button>
-            </div>
-      </div>
-    </div>
-    
-  </c-col>
-  
-  <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none;background-color:  #000080;color: white;">
-      <div class="card-body"> 
-        <c-dropdown alignment="end" variant="btn-group" style="float: right;">
-          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
+    <div
+      class="card shadow"
+      style="border: none; background-color: white; color: green"
+    >
+      <div class="card-body">
+        <c-dropdown alignment="end" variant="btn-group" style="float: right">
+          <button
+            [caret]="false"
+            cButton
+            cDropdownToggle
+            class="p-0 text-white"
+            color="transparent"
+          >
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><p cDropdownItem>สินทรัพย์คอมพิวเตอร์</p></li>
+            <li>
+              <p cDropdownItem>สินทรัพย์ทั้งหมด</p>
+            </li>
           </ul>
-      </c-dropdown>
-       
-            <h2 style="font-weight: bold;">{{assetcom  }} <br/>คอมพิวเตอร์ <svg [cIcon]="icons.cilDevices" height="32" style="float: right;"></svg></h2>
-            
-            <div class="d-grid">
-              <button class="btn btn-sm btn btn-outline-light" >ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg></button>
-            </div>
-      </div>
-    </div>
-    
-  </c-col>
-  
-  <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none;background-color: orangered;color: white;">
-      <div class="card-body"> 
-        <c-dropdown alignment="end" variant="btn-group" style="float: right;">
-          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
-            <svg cIcon name="cilOptions"></svg>
+        </c-dropdown>
+
+        <!-- <div *ngIf="!numberOfAssets">
+          <iframe src="https://lottie.host/embed/29329dbc-a2ea-4ae6-a82a-24ad670f7fdd/FdsbK2G4Tq.lottie"></iframe>
+        </div> -->
+
+        <h2 *ngIf="numberOfAssets">
+          <span class="anuphan-700" style="color: green"
+            >{{ numberOfAssets }} <br />สินทรัพย์
+            <svg [cIcon]="icons.cilSave" height="32" style="float: right"></svg
+          ></span>
+        </h2>
+        <div class="d-grid">
+          <button
+            class="btn btn-sm btn btn-outline-light"
+            style="border-color: green; color: green"
+          >
+            ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
-          <ul cDropdownMenu>
-            <li><p cDropdownItem>สินทรัพย์สำนักงาน</p></li>
-          </ul>
-      </c-dropdown>
-       
-            <h2 style="font-weight: bold;">{{ assetoffice }} <br/>สำนักงาน 
-              <svg [cIcon]="icons.cilBuilding" height="32" style="float: right;"></svg></h2>
-            
-            <div class="d-grid">
-              <button class="btn btn-sm btn btn-outline-light" >ดูทั้งหมด 
-                <svg [cIcon]="icons.cilArrowCircleRight"></svg></button>
-            </div>
+        </div>
       </div>
     </div>
-    
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none;background-color: slateblue;color: white;">
-      <div class="card-body"> 
-        <c-dropdown alignment="end" variant="btn-group" style="float: right;">
-          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
+    <div class="card shadow" style="border: none; background-color: #ffffff">
+      <div class="card-body">
+        <c-dropdown
+          alignment="end"
+          variant="btn-group"
+          style="float: right; color: #000080"
+        >
+          <button
+            [caret]="false"
+            cButton
+            cDropdownToggle
+            class="p-0"
+            color="transparent"
+          >
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><p cDropdownItem>สินทรัพย์โฆษณา</p></li>
+            <li>
+              <p cDropdownItem>สินทรัพย์คอมพิวเตอร์</p>
+            </li>
           </ul>
-      </c-dropdown>
-        
-      <h2 style="font-weight: bold;">{{ assetinter }} <br/>โฆษณา 
-        <svg [cIcon]="icons.cilBullhorn" height="32" style="float: right;"></svg></h2>            
-        
-          <div class="d-grid">
-            <button class="btn btn-sm btn btn-outline-light" >ดูทั้งหมด 
-              <svg [cIcon]="icons.cilArrowCircleRight"></svg></button>
-          </div>
-        
+        </c-dropdown>
+
+        <h2 style="color: #000080">
+          {{ assetcom }} <br /><span class="anuphan-700" style="color: #000080"
+            >คอมพิวเตอร์
+            <svg
+              [cIcon]="icons.cilDevices"
+              height="32"
+              style="float: right"
+            ></svg
+          ></span>
+        </h2>
+
+        <div class="d-grid">
+          <button
+            class="btn btn-sm btn btn-outline-light"
+            style="border-color: #000080; color: #000080"
+          >
+            ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
+          </button>
+        </div>
       </div>
     </div>
-    
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none;background-color: orange;color: white;">
-      <div class="card-body"> 
-        <c-dropdown alignment="end" variant="btn-group" style="float: right;">
-          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
+    <div class="card shadow" style="border: none; background-color: white">
+      <div class="card-body">
+        <c-dropdown
+          alignment="end"
+          variant="btn-group"
+          style="float: right; color: orangered"
+        >
+          <button
+            [caret]="false"
+            cButton
+            cDropdownToggle
+            class="p-0 text-white"
+            color="transparent"
+          >
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><p cDropdownItem>จำนวนผู้ใช้ระบบ</p></li>
+            <li>
+              <p cDropdownItem>สินทรัพย์สำนักงาน</p>
+            </li>
           </ul>
-      </c-dropdown>
-        
-      <h2 style="font-weight: bold;">{{ numberOfUsers }} <br/>ผู้ใช้ในระบบ 
-        <svg [cIcon]="icons.cilUser" height="32" style="float: right;"></svg></h2>
-      
-      <div class="d-grid">
-        <button class="btn btn-sm btn btn-outline-light" >ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg></button>
-      </div>
+        </c-dropdown>
+
+        <h2>
+          <span class="anuphan-700" style="color: orangered"
+            >{{ assetoffice }} <br />สำนักงาน
+            <svg
+              [cIcon]="icons.cilBuilding"
+              height="32"
+              style="float: right"
+            ></svg
+          ></span>
+        </h2>
+
+        <div class="d-grid">
+          <button
+            class="btn btn-sm btn btn-outline-light"
+            style="color: orangered; border-color: orangered"
+          >
+            ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
+          </button>
+        </div>
       </div>
     </div>
-    
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none;background-color: orange;color: white;">
-      <div class="card-body"> 
+    <div class="card shadow" style="border: none; background-color: white">
+      <div class="card-body">
+        <c-dropdown alignment="end" variant="btn-group" style="float: right">
+          <button
+            [caret]="false"
+            cButton
+            cDropdownToggle
+            class="p-0 text-white"
+            color="transparent"
+          >
+            <svg cIcon name="cilOptions"></svg>
+          </button>
+          <ul cDropdownMenu>
+            <li>
+              <p cDropdownItem>สินทรัพย์โฆษณา</p>
+            </li>
+          </ul>
+        </c-dropdown>
+
+        <h2>
+          <span class="anuphan-700" style="color: slateblue"
+            >{{ assetinter }} <br />โฆษณา
+            <svg
+              [cIcon]="icons.cilBullhorn"
+              height="32"
+              style="float: right"
+            ></svg
+          ></span>
+        </h2>
+
+        <div class="d-grid">
+          <button
+            class="btn btn-sm btn btn-outline-light"
+            style="color: slateblue; border-color: slateblue"
+          >
+            ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </c-col>
+
+  <c-col sm="6" md="4" xl="2">
+    <div class="card shadow" style="border: none; background-color: white">
+      <div class="card-body">
+        <c-dropdown alignment="end" variant="btn-group" style="float: right">
+          <button
+            [caret]="false"
+            cButton
+            cDropdownToggle
+            class="p-0 text-white"
+            color="transparent"
+          >
+            <svg cIcon name="cilOptions"></svg>
+          </button>
+          <ul cDropdownMenu>
+            <li>
+              <p cDropdownItem>จำนวนผู้ใช้ระบบ</p>
+            </li>
+          </ul>
+        </c-dropdown>
+
+        <h2>
+          <span class="anuphan-700" style="color: orange"
+            >{{ numberOfUsers }} <br />ผู้ใช้ในระบบ
+            <svg [cIcon]="icons.cilUser" height="32" style="float: right"></svg
+          ></span>
+        </h2>
+
+        <div class="d-grid">
+          <button
+            class="btn btn-sm btn btn-outline-light"
+            style="color: orange; border-color: orange"
+          >
+            ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </c-col>
+
+  <!-- <c-col sm="6" md="4" xl="2">
+    <div class="card shadow" style="border: none;background-color: orange;color: white;">
+      <div class="card-body">
         <c-dropdown alignment="end" variant="btn-group" style="float: right;">
           <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><p cDropdownItem>จำนวนผู้ใช้ระบบ</p></li>
+            <li>
+              <p cDropdownItem>จำนวนผู้ใช้ระบบ</p>
+            </li>
           </ul>
-      </c-dropdown>
-        
-      <h2 style="font-weight: bold;">{{ numberOfUsers }} <br/>ผู้ใช้ในระบบ 
-        <svg [cIcon]="icons.cilUser" height="32" style="float: right;"></svg></h2>
-      
-      <div class="d-grid">
-        <button class="btn btn-sm btn btn-outline-light" >ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg></button>
-      </div>
+        </c-dropdown>
+
+        <h2 style="font-weight: bold;">{{ numberOfUsers }} <br />ผู้ใช้ในระบบ
+          <svg [cIcon]="icons.cilUser" height="32" style="float: right;"></svg>
+        </h2>
+
+        <div class="d-grid">
+          <button class="btn btn-sm btn btn-outline-light">ดูทั้งหมด <svg
+              [cIcon]="icons.cilArrowCircleRight"></svg></button>
+        </div>
       </div>
     </div>
-    
-  </c-col>
+
+  </c-col> -->
   <!-- <c-col sm="6" md="4" xl="3">
     <c-widget-stat-a
       [title]="'Conversion Rate'"
