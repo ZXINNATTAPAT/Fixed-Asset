@@ -90,7 +90,9 @@ interface AssetDetails {
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
 })
+
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -103,7 +105,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     'ราคาต่อหน่วย',
     'วิธีการได้มา',
     'เลขที่เอกสาร',
-    'แผนก',
+    'หน่วยงาน',
+    'ฝ่าย',
     'ที่อยู่',
     'ผู้ใช้งาน',
     'หมายเหตุ',
@@ -116,6 +119,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     'purchasePrice',
     'purchasedFrom',
     'documentNumber',
+    'agency',
     'department',
     'assetLocation',
     'responsibleEmployee',
@@ -125,9 +129,11 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
   userinfo: any = [];
+
   token: any;
 
   readinfo() {
+
     this.token = localStorage.getItem('token');
 
     const decodedToken = jwtDecode(this.token);
@@ -139,7 +145,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   assetDetails: AssetDetails[] = [];
 
   dataSource: MatTableDataSource<AssetDetails> =
-    new MatTableDataSource<AssetDetails>(this.assetDetails);
+  new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   private dataSubscription!: Subscription;
 
@@ -178,9 +184,26 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((data) => {
         // console.log(this.userinfo.affiliation);
         this.assetDetails = data
-          .filter((asset: any) =>
-            asset.assetCode.startsWith(this.userinfo.affiliation)
-          )
+        .filter((asset: any) => {
+          // จัดการกรณีค่า null
+          const agency = asset.agency || '';
+          const assetCode = asset.assetCode || '';
+        
+          if (this.userinfo.affiliation === "กกต.สกล") {
+            
+            return assetCode.startsWith(this.userinfo.affiliation) || 
+                   !asset.assetCode.startsWith("กกต") || 
+                   agency === this.userinfo.workgroup;
+            
+          } 
+          else if(this.userinfo.affiliation === "กกต"){
+            return assetCode.startsWith("กกต") && !asset.assetCode.startsWith("กกต.");
+          }
+          else {
+            // Return true if assetCode starts with affiliation (handling null)
+            return assetCode.startsWith(this.userinfo.affiliation);
+          }
+        })
           .sort((a: any, b: any) => {
             // Convert dates to timestamp for comparison
             const dateA = new Date(a.purchaseDate).getTime();
@@ -189,10 +212,23 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
             return dateB - dateA;
           })
           .map((asset: any) => {
+            // Convert purchaseDate
             asset.purchaseDate = this.convertDate(asset.purchaseDate);
+            
+            // Remove prefix from assetCode if it exists
+            if (asset.assetCode && this.userinfo.affiliation === "กกต.สกล") {
+                const parts = asset.assetCode.split(' ');
+                if (parts.length > 1) {
+                    asset.assetCode = parts.slice(1).join(' ');
+                }
+            }
+
+             // Translate to Thai
             asset = this.translateToThai(asset);
+            
             return asset;
-          });
+        });
+        
 
         // Update the data source with the new asset details
         this.dataSource.data = this.assetDetails;
@@ -220,7 +256,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       purchasedFrom: 'วิธีการได้มา',
       documentNumber: 'เลขที่เอกสาร',
       assetLocation: 'ที่อยู่',
-      department: 'แผนก',
+      agency: 'หน่วยงาน',
+      department: 'ฝ่าย',
       responsibleEmployee: 'ผู้ใช้งาน',
       note: 'หมายเหตุ',
     };
@@ -369,7 +406,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       'ราคาต่อหน่วย',
       'วิธีการได้มา',
       'เลขที่เอกสาร',
-      'แผนก',
+      'หน่วยงาน',
+      'ฝ่าย',
       'ผู้ใช้งาน',
       'หมายเหตุ',
     ];
@@ -385,7 +423,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       row.push(this.formatCurrency(asset.ราคาต่อหน่วย));
       row.push(asset.วิธีการได้มา);
       row.push(asset.เลขที่เอกสาร);
-      row.push(asset.แผนก);
+      row.push(asset.หน่วยงาน);
+      row.push(asset.ฝ่าย);
       row.push(asset.ผู้ใช้งาน);
       row.push(asset.หมายเหตุ);
       worksheet.addRow(row);

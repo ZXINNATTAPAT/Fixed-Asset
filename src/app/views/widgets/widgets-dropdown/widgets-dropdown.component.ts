@@ -80,10 +80,19 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
       const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
         asset.assetCode.indexOf(`${this.userinfo.affiliation} 006`) !== -1);
       
-      this.numberOfAssets = data.filter((asset: { assetCode: string; }) => 
-        asset.assetCode.startsWith(this.userinfo.affiliation) &&
-        !asset.assetCode.includes(`${this.userinfo.affiliation}.`)).length;
-    // นับจำนวน asset ทั้งหมด
+      if(this.userinfo.affiliation !== "กกต.สกล"){
+        this.numberOfAssets = data.filter((asset: { assetCode: string; }) => 
+          asset.assetCode.startsWith(this.userinfo.affiliation) &&
+          !asset.assetCode.includes(`${this.userinfo.affiliation}.`)).length;
+      }
+      else{
+        this.numberOfAssets = data.filter((asset: { assetCode: string; agency:string }) => 
+          !asset.assetCode.startsWith("กกต." && "กกต")&& //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
+          asset.agency.startsWith(`${this.userinfo.workgroup}`)).length;
+          
+      }
+
+      // นับจำนวน asset ทั้งหมด
 
       this.assetinter = filteredAssets2.length
 

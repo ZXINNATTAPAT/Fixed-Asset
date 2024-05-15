@@ -16,7 +16,7 @@
           </div>
         </c-card-header> -->
     <c-card-body>
-        <h1 ><span class="anuphan-700" style="color: green;">รายละเอียดครุภัณฑ์</span></h1><hr/>
+        <h1 ><span class="anuphan-700" style="color: green;">บันทึกการตรวจนับ</span></h1><hr/>
         <div  style="display: flex; justify-content: space-between; align-items: center;">
             <div style="margin-right: auto;"></div>
                 <p>ส่งออกข้อมูล : 
@@ -88,10 +88,10 @@
                 
                 
                 <!-- Header Row -->
-                <tr mat-header-row *matHeaderRowDef="['Aactions', 'วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร', 'แผนก', 'ที่อยู่', 'ผู้ใช้งาน', 'หมายเหตุ']"></tr>
+                <tr mat-header-row *matHeaderRowDef="['Aactions', 'วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร','หน่วยงาน', 'ฝ่าย', 'ที่อยู่', 'ผู้ใช้งาน', 'หมายเหตุ']"></tr>
         
                 <!-- Data Rows -->
-                <tr mat-row *matRowDef="let row; columns: ['Aactions','วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร', 'แผนก', 'ที่อยู่', 'ผู้ใช้งาน', 'หมายเหตุ'];"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['Aactions','วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร','หน่วยงาน' ,'ฝ่าย', 'ที่อยู่', 'ผู้ใช้งาน', 'หมายเหตุ'];"></tr>
             </table>
 
             <!-- Paginator -->

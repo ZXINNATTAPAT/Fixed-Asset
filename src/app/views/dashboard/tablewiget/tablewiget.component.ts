@@ -197,10 +197,19 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((data) => {
         this.assetDetails = data
           .filter((asset) => {
-            return (
-              asset.assetCode.startsWith(this.userinfo.affiliation) &&
-              !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-            );
+            if(this.userinfo.affiliation !== "กกต.สกล"){
+              return (
+                asset.assetCode.startsWith(this.userinfo.affiliation) &&
+                !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+              );
+            }
+            else{
+              return (
+                !asset.assetCode.startsWith("กกต." && "กกต") && //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
+                asset.agency.startsWith(`${this.userinfo.workgroup}`)
+              );
+            }
+            
           })
           .map((asset) => {
             asset.purchaseDate = this.convertDate(asset.purchaseDate);

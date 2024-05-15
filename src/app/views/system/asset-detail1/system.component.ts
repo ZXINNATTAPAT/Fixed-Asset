@@ -71,7 +71,7 @@ import { IconDirective } from '@coreui/icons-angular';
 
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject, firstValueFrom } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
 
 import {
@@ -266,15 +266,16 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // เพิ่ม form control สำหรับ input เพิ่มเติม
   ngOnInit(): void {
-    this.assetCategoryCtrl = this.formBuilder.control(null);
-
-    this.asset = this.formBuilder.group({
-      assetCode: ['', Validators.required],
+    
+    this.assetCategoryCtrl = this.formBuilder.control(null);// Initialize assetCategoryCtrl with a null value
+   
+    this.asset = this.formBuilder.group({ // Initialize the form group
+      assetType: [''],
+      assetCategory: [''],
+      assetCode: [''], // Set this initially as empty
       assetName: ['', Validators.required],
       quantity: ['1'],
       purchasedFrom: [''],
-      assetType: [''],
-      assetCategory: [''],
       department: [''],
       agency: [''],
       assetLocation: [''],
@@ -285,16 +286,58 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       Note: [''],
       additionalInput: [''],
     });
-    // Initialize the form group
+  
+    // Function to update assetCode
+    const updateAssetCode = () => {
 
-    // console.log(this.assetCategory);
+      const assetType = this.asset.get('assetType')?.value || '';
 
+      const assetCategory = this.asset.get('assetCategory')?.value || '';
+
+      const purchaseDate = this.asset.get('purchaseDate')?.value || '';
+  
+      let year = '';
+  
+      if (purchaseDate) {
+        const date = new Date(purchaseDate);
+        
+        const isBuddhistEra = date.getFullYear() > 2500; // Example check for Buddhist Era (BE)
+        
+        year = isBuddhistEra ? date.getFullYear().toString() : (date.getFullYear() + 543).toString();
+      }
+         this.asset.patchValue({
+          assetCode: `${this.userinfo.affiliation} ${assetType}-${assetCategory}-${year}`
+        });
+      
+    };
+  
+    // Subscribe to value changes on assetType, assetCategory, and purchaseDate
+    this.asset.get('assetType')?.valueChanges.subscribe(updateAssetCode);
+
+    this.asset.get('assetCategory')?.valueChanges.subscribe(updateAssetCode);
+
+    this.asset.get('purchaseDate')?.valueChanges.subscribe(updateAssetCode);
+  
+    // Subscribe to value changes on assetCategoryFilterCtrl
     this.assetCategoryFilterCtrl.valueChanges
       .pipe(takeUntil(this._onDestroy))
       .subscribe(() => {
         this.filterAssetCategories();
       });
   }
+  
+  
+  
+    // Initialize the form group
+
+    // console.log(this.assetCategory);
+
+  //   this.assetCategoryFilterCtrl.valueChanges
+  //     .pipe(takeUntil(this._onDestroy))
+  //     .subscribe(() => {
+  //       this.filterAssetCategories();
+  //     });
+  // }
 
   ngAfterViewInit() {
     // this.setInitialValue();
@@ -434,7 +477,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
             columnName.includes('วัน') ||
             columnName.includes('ว.ด.ป.ที่ซื้อ')
           ) {
-            cellValue = this.convertToDate(cellValue);
+            if (cellValue) {
+              cellValue = this.convertToDate(cellValue);
+            }
           }
 
           jsonObject[columnName] = cellValue;
@@ -449,92 +494,142 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       this.asset2 = jsonArray;
 
       // Process the imported JSON data
-      // console.log(jsonArray);
-      // console.log(this.asset2);
+      console.log(jsonArray);
+      console.log(this.asset2);
     };
 
     reader.readAsBinaryString(file);
   }
 
-  convertToDate(dateString: string): string {
-    // Map ชื่อเดือนภาษาไทยเป็นเลขเดือน
-    const monthMap: { [key: string]: number } = {
-      'ม.ค.': 0,
-      'ก.พ.': 1,
-      'มี.ค.': 2,
-      'เม.ย.': 3,
-      'พ.ค.': 4,
-      'มิ.ย.': 5,
-      'ก.ค.': 6,
-      'ส.ค.': 7,
-      'ก.ย.': 8,
-      'ต.ค.': 9,
-      'พ.ย.': 10,
-      'ธ.ค.': 11,
-    };
+  convertToDate(dateString: string): Date {
+    const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const parts = dateString.split(' ');
 
-    // Split ข้อมูลวันที่เป็นส่วนๆ
-    const dateParts = dateString.split(' ');
+    if (parts.length !== 3) {
+        throw new Error("Invalid date format");
+    }
 
-    // แยกวันที่ออกเป็นส่วนๆ
-    const day = parseInt(dateParts[0], 10);
+    const day = parseInt(parts[0], 10);
+    const month = thaiMonths.indexOf(parts[1]);
+    let year = parseInt(parts[2], 10);
 
-    const month = monthMap[dateParts[1]];
+    if (isNaN(day) || month === -1 || isNaN(year)) {
+        throw new Error("Invalid date components");
+    }
 
-    const year = parseInt(dateParts[2], 10);
+    if (this.isThaiYear(year)) {
+        year = this.convertThaiToGregorian(year);
+    }
 
-    // สร้างสตริงที่แสดงวันที่ในรูปแบบที่ต้องการ
-    const formattedDate = `${year}-${(month + 1)
-      .toString()
-      .padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    return formattedDate;
+    return new Date(year, month, day);
   }
 
-  onSubmit2(): void {
+  isThaiYear(year: number): boolean {
+    return year > 2400; // Assuming any year greater than 2400 is a Thai year
+  }
+
+  convertThaiToGregorian(year: number): number {
+    return year - 543; // Convert Buddhist year to Gregorian year
+  }
+  // convertToDate(dateString: string): string {
+  //   // Map ชื่อเดือนภาษาไทยเป็นเลขเดือน
+  //   const monthMap: { [key: string]: number } = {
+  //     'ม.ค.': 0,
+  //     'ก.พ.': 1,
+  //     'มี.ค.': 2,
+  //     'เม.ย.': 3,
+  //     'พ.ค.': 4,
+  //     'มิ.ย.': 5,
+  //     'ก.ค.': 6,
+  //     'ส.ค.': 7,
+  //     'ก.ย.': 8,
+  //     'ต.ค.': 9,
+  //     'พ.ย.': 10,
+  //     'ธ.ค.': 11,
+  //   };
+
+  //   // Split ข้อมูลวันที่เป็นส่วนๆ
+  //   const dateParts = dateString.split(' ');
+
+  //   // แยกวันที่ออกเป็นส่วนๆ
+  //   const day = parseInt(dateParts[0], 10);
+
+  //   const month = monthMap[dateParts[1]];
+
+  //   const year = parseInt(dateParts[2], 10);
+
+  //   // สร้างสตริงที่แสดงวันที่ในรูปแบบที่ต้องการ
+  //   const formattedDate = `${year}-${(month + 1)
+  //     .toString()
+  //     .padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+  //   return formattedDate;
+  // }
+
+  async onSubmit2(): Promise<void> {
+    // ตรวจสอบข้อมูลทั้งหมดก่อน
     for (let i = 0; i < this.asset2.length; i++) {
-      const currentAsset = this.asset2[i];
-      this.http
-        .post<any>('https://localhost:7204/api/AssetDetails', currentAsset)
-        .subscribe(
-          (response) => {
-            console.log(response);
-            Swal.fire({
-              title: 'บันทึกเสร็จสิ้น',
-              icon: 'success',
-            });
-          },
-          (error) => {
-            console.error(error);
-            if (error) {
-              Swal.fire({
-                title: 'มีข้อมูลในระบบอยู่แล้ว',
-                icon: 'error',
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  // window.location.reload();
-                  console.log(currentAsset.purchaseDate);
-                }
-              });
-            }
-          }
-        );
+      const asset = this.asset2[i];
+      if (!this.validateAsset(asset)) {
+        return; // หยุดการทำงานถ้าพบข้อมูลไม่ถูกต้อง
+      }
+    }
+    // ถ้าข้อมูลทั้งหมดถูกต้อง ให้ส่งคำขอ HTTP เป็น batch
+    const batchSize = 25; // Adjust the batch size as needed
+    for (let i = 0; i < this.asset2.length; i += batchSize) {
+      const batch = this.asset2.slice(i, i + batchSize);
+      await Promise.all(batch.map((asset: any) => this.sendRequest(asset)));
     }
   }
-
+  
+  private async sendRequest(asset: any): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<any>('https://localhost:7204/api/AssetDetails', asset)
+      );
+      console.log(response);
+      Swal.fire({
+        title: 'บันทึกเสร็จสิ้น',
+        icon: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: 'มีข้อมูลในระบบอยู่แล้วหรือข้อมูลไม่ถูกต้อง',
+        text: `Error: ${error || 'Unknown error'}`,
+        icon: 'error',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log(asset.purchaseDate);
+        }
+      });
+    }
+  }
+  
   // ตรวจสอบข้อมูลว่าถูกต้องตามเงื่อนไขหรือไม่
   validateAsset(asset: any): boolean {
+
+    if (typeof asset.note === 'number') {
+      // แปลงค่าเฉพาะเมื่อมันเป็น number
+      asset.note = asset.note.toString();
+    }
     // ในที่นี้คุณสามารถเขียนเงื่อนไขตามที่คุณต้องการได้
-    if (asset.purchaseDate && asset.assetCode) {
+    if (
+      asset.purchaseDate &&
+      asset.assetCode &&
+      asset.assetName &&
+      asset.purchasePrice > 0
+    ) {
       return true; // ถ้าข้อมูลถูกต้องคืนค่าเป็น true
     } else {
       Swal.fire({
         title: 'มีข้อมูลมีบางอย่างผิดพลาด',
+        text: `Asset Code: ${asset.assetCode} has missing or invalid data`,
         icon: 'error',
       });
       return false; // ถ้าข้อมูลไม่ถูกต้องคืนค่าเป็น false
     }
   }
-
+  
   toggleHidden(): void {
     this.hidden = !this.hidden; // เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
   }
