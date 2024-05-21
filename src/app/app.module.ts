@@ -27,6 +27,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { SingleSelectionComponent } from './views/system/single-selection/single-selection.component';
+// import { HighchartsChartModule } from 'highcharts-angular';
 
 @NgModule({
   declarations: [

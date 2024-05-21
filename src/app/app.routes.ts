@@ -17,6 +17,10 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'mainpage',
+    loadComponent:() => import('../app/views/pages/mainpage/mainpage.component').then(m=>m.MainpageComponent)
+  },
+  {
     path: '',
     component: DefaultLayoutComponent,
     canActivate: [AuthGuard], // ใช้ AuthGuard ที่สร้างขึ้นเพื่อตรวจสอบ Token

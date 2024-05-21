@@ -48,6 +48,8 @@ import 'moment/locale/th.js';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 
 interface AssetDetails {
   assetId: any;
@@ -84,21 +86,22 @@ interface AssetDetails {
     FormControlDirective,
     MatPaginatorModule,
     MatTableModule,
+    MatFormFieldModule,
+    MatSelectModule,
     ButtonDirective,
     NgStyle,
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
 })
-
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns2: string[] = [
-    'การดำเนินการ',
+  //ไว้จัด Header row & col
+  displayedColumns3: string[] = [
+    'Aactions',
     'วันเดือนปี',
     'รหัสครุภัณฑ์',
     'รายการ',
@@ -111,6 +114,51 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     'ผู้ใช้งาน',
     'หมายเหตุ',
   ];
+
+  //ไว้เรียงข้อมูลในตาราง
+  displayedColumns2: string[] = [
+    'วันเดือนปี',
+    'รหัสครุภัณฑ์',
+    'รายการ',
+    'ราคาต่อหน่วย',
+    'วิธีการได้มา',
+    'เลขที่เอกสาร',
+    'หน่วยงาน',
+    'ฝ่าย',
+    'ที่อยู่',
+    'ผู้ใช้งาน',
+    'หมายเหตุ',
+  ];
+
+  // toggleColumn(event: MatSelectChange) {
+  //   const column = event.value;
+  //   const index = this.displayedColumns3.indexOf(column);
+  //   if (index >= 0) {
+  //     this.displayedColumns3.splice(index, 1);  // Remove column
+  //   } else {
+  //     this.displayedColumns3.push(column);     // Add column
+  //   }
+  // }
+
+  // toggleColumn(event: MatSelectChange) {
+
+  //   const selectedColumns = event.value;
+    
+  //   this.displayedColumns3 = this.displayedColumns2.filter(column => selectedColumns.includes(column));
+  // }
+
+  toggleColumn(event: MatSelectChange) {
+    const selectedColumns = event.value;
+    if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
+        // เซตค่าคืนทุกคอลัมน์
+        this.displayedColumns3 = ['Aactions',...this.displayedColumns2];
+    } else {
+        // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
+        this.displayedColumns3 = ['Aactions', ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด')];
+    }
+}
+
+
 
   displayedColumns: string[] = [
     'purchaseDate',
@@ -133,7 +181,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   token: any;
 
   readinfo() {
-
     this.token = localStorage.getItem('token');
 
     const decodedToken = jwtDecode(this.token);
@@ -145,7 +192,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   assetDetails: AssetDetails[] = [];
 
   dataSource: MatTableDataSource<AssetDetails> =
-  new MatTableDataSource<AssetDetails>(this.assetDetails);
+    new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   private dataSubscription!: Subscription;
 
@@ -168,42 +215,42 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getAssetDetails();
   }
 
-  // getAssetDetails(): void {
-  //   this.dataSubscription = this.apiService.fetchData('assetDetails').subscribe(data => {
-  //     this.assetDetails = data.map((asset: { purchaseDate: string; }) => {
-  //       asset.purchaseDate = this.convertDate(asset.purchaseDate);
-  //       asset = this.translateToThai(asset);
-  //       return asset;
-  //     });
-  //     this.dataSource.data = this.assetDetails;
-  //   });
-  // }
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
       .fetchData('assetDetails')
       .subscribe((data) => {
         // console.log(this.userinfo.affiliation);
         this.assetDetails = data
-        .filter((asset: any) => {
-          // จัดการกรณีค่า null
-          const agency = asset.agency || '';
-          const assetCode = asset.assetCode || '';
-        
-          if (this.userinfo.affiliation === "กกต.สกล") {
-            
-            return assetCode.startsWith(this.userinfo.affiliation) || 
-                   !asset.assetCode.startsWith("กกต") || 
-                   agency === this.userinfo.workgroup;
-            
-          } 
-          else if(this.userinfo.affiliation === "กกต"){
-            return assetCode.startsWith("กกต") && !asset.assetCode.startsWith("กกต.");
-          }
-          else {
-            // Return true if assetCode starts with affiliation (handling null)
-            return assetCode.startsWith(this.userinfo.affiliation);
-          }
-        })
+          .filter((asset: any) => {
+            // จัดการกรณีค่า null
+            const agency = asset.agency || '';
+            const assetCode = asset.assetCode || '';
+
+            // if (this.userinfo.affiliation === "กกต.สกล") {
+
+            //   return assetCode.startsWith(this.userinfo.affiliation) ||
+            //          !asset.assetCode.startsWith("กกต") ||
+            //          agency === this.userinfo.workgroup;
+
+            // }
+            // if(this.userinfo.affiliation === "กกต")
+            // {
+            //   return assetCode.startsWith("กกต") && !asset.assetCode.startsWith("กกต.");
+            // }
+            // else {
+            // }
+
+            //เช็คว่าใช่ส่วนกลางไหม (กกต)
+            if (this.userinfo.affiliation === 'กกต') {
+              return (
+                assetCode.startsWith('กกต') &&
+                !asset.assetCode.startsWith('กกต.')
+              );
+              //กัน กกต. ส่วนจังหวัด
+            } else {
+              return assetCode.startsWith(`${this.userinfo.affiliation}`);
+            }
+          })
           .sort((a: any, b: any) => {
             // Convert dates to timestamp for comparison
             const dateA = new Date(a.purchaseDate).getTime();
@@ -214,21 +261,20 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
           .map((asset: any) => {
             // Convert purchaseDate
             asset.purchaseDate = this.convertDate(asset.purchaseDate);
-            
-            // Remove prefix from assetCode if it exists
-            if (asset.assetCode && this.userinfo.affiliation === "กกต.สกล") {
-                const parts = asset.assetCode.split(' ');
-                if (parts.length > 1) {
-                    asset.assetCode = parts.slice(1).join(' ');
-                }
-            }
 
-             // Translate to Thai
+            // Remove prefix from assetCode if it exists
+            // if (asset.assetCode && this.userinfo.affiliation === "กกต.สกล") {
+            //     const parts = asset.assetCode.split(' ');
+            //     if (parts.length > 1) {
+            //         asset.assetCode = parts.slice(1).join(' ');
+            //     }
+            // }
+
+            // Translate to Thai
             asset = this.translateToThai(asset);
-            
+
             return asset;
-        });
-        
+          });
 
         // Update the data source with the new asset details
         this.dataSource.data = this.assetDetails;

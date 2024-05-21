@@ -38,12 +38,18 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
     private changeDetectorRef: ChangeDetectorRef,
     private apiService: ApiService
   ) {
+    this.getassettype();
     this.getAssetDetails();
     this.getUsers();
   }
   
-  userinfo:any = []
+  userinfo:any = [];
+
   token: any;
+
+  assetTypes: any[] =[];
+
+  assetCategory: any[]=[];
 
   numberOfAssets:string ='';
   numberOfUsers:string ='';
@@ -60,54 +66,120 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
     this.apiService.fetchData('assetDetails').subscribe(data => {
       
       this.token = localStorage.getItem('token');
+
       const decodedToken = jwtDecode(this.token);
 
       this.userinfo = decodedToken;
 
-      // if(this.userinfo.affiliation === 'กกต.กรุงเทพ'){
-      //     this.userinfo.affiliation = 'กกต'
-      // }
+      // นับจำนวน asset ทั้งหมด
+      if(this.userinfo.affiliation === "กกต"){
+
+        const filteredAssetCategory004 = this.assetCategory.filter((category: { asc_Code: string; assetCode: string }) =>
+          category.assetCode.startsWith("004")
+        );
+
+        // กรองข้อมูลใน data โดยใช้ filteredAssetCategory004 เพื่อหาข้อมูลที่มี assetCode ตรงกับ asc_Code ของกลุ่ม "004"
+        const filteredAssets = data.filter((asset: { assetCode: string }) =>
+          filteredAssetCategory004.some((category: { asc_Code: string; assetCode: string }) =>
+            asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
+          )
+        );
+
+        const filteredAssets2 = data.filter((asset: { assetCode: string; }) => 
+          asset.assetCode.indexOf(`${this.userinfo.affiliation} 001`) !== -1);
+
+        const filteredAssets3 = data.filter((asset: { assetCode: string; }) => 
+          asset.assetCode.indexOf(`${this.userinfo.affiliation} 003`) !== -1);
+
+        const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
+          asset.assetCode.indexOf(`${this.userinfo.affiliation} 006`) !== -1);
+        
+          this.assetinter = filteredAssets2.length
+
+          this.assetoffice = filteredAssets3.length
+
+          this.assetcar =filteredAssets4.length
+        
+          this.assetcom = filteredAssets.length;
+
       
-      const filteredAssets = data.filter((asset: { assetCode: string; }) => 
-        asset.assetCode.indexOf(`${this.userinfo.affiliation} 004`) !== -1);
-
-      const filteredAssets2 = data.filter((asset: { assetCode: string; }) => 
-        asset.assetCode.indexOf(`${this.userinfo.affiliation} 001`) !== -1);
-
-      const filteredAssets3 = data.filter((asset: { assetCode: string; }) => 
-        asset.assetCode.indexOf(`${this.userinfo.affiliation} 003`) !== -1);
-
-      const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
-        asset.assetCode.indexOf(`${this.userinfo.affiliation} 006`) !== -1);
-      
-      if(this.userinfo.affiliation !== "กกต.สกล"){
         this.numberOfAssets = data.filter((asset: { assetCode: string; }) => 
           asset.assetCode.startsWith(this.userinfo.affiliation) &&
           !asset.assetCode.includes(`${this.userinfo.affiliation}.`)).length;
       }
       else{
+        //ข้อมูลจะไม่มี กกต.นำหน้า
+        // data ที่เข้ามาเป็น 0401 แต่ อยากให้้หา 0401 อยู่ใน type ของ assetCode ไหน
+        //ระบบจะรวบรวมข้อมูลตาม type ของ assetCode
+        // {id: 6, asc_Code: '0401', asc_Name: 'คอมพิวเตอร์', assetCode: '004'} assetcategory เทียบ กับ 
+        // {id: 3, assetCode: '004', assetName: 'ครุภัณฑ์คอมพิวเตอร์'} assetType 
+
+       // กรองข้อมูลใน assetCategory เพื่อหากลุ่มที่มี asc_Code เริ่มต้นด้วย "004"
+        const filteredAssetCategory004 = this.assetCategory.filter((category: { asc_Code: string; assetCode: string }) =>
+          category.assetCode.startsWith("004")
+        );
+
+        // กรองข้อมูลใน data โดยใช้ filteredAssetCategory004 เพื่อหาข้อมูลที่มี assetCode ตรงกับ asc_Code ของกลุ่ม "004"
+        const filteredAssets = data.filter((asset: { assetCode: string }) =>
+          filteredAssetCategory004.some((category: { asc_Code: string; assetCode: string }) =>
+            asset.assetCode.startsWith(category.asc_Code)
+          )
+        );
+
+        // กรองข้อมูลใน assetCategory เพื่อหากลุ่มที่มี asc_Code เริ่มต้นด้วย "001"
+        const filteredAssetCategory001 = this.assetCategory.filter((category: { asc_Code: string; assetCode: string }) =>
+          category.assetCode.startsWith("001")
+        );
+
+        // กรองข้อมูลใน data โดยใช้ filteredAssetCategory001 เพื่อหาข้อมูลที่มี assetCode ตรงกับ asc_Code ของกลุ่ม "001"
+        const filteredAssets2 = data.filter((asset: { assetCode: string }) =>
+          filteredAssetCategory001.some((category: { asc_Code: string; assetCode: string }) =>
+            asset.assetCode.startsWith(category.asc_Code)
+          )
+        );
+
+        const filteredAssets3 = data.filter((asset: { assetCode: string; }) => 
+          asset.assetCode.indexOf(`003`) !== -1);
+
+        const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
+          asset.assetCode.indexOf(`006`) !== -1);
+
+          this.assetinter = filteredAssets2.length
+
+          this.assetoffice = filteredAssets3.length
+
+          this.assetcar =filteredAssets4.length
+        
+          this.assetcom = filteredAssets.length;
+        
         this.numberOfAssets = data.filter((asset: { assetCode: string; agency:string }) => 
           !asset.assetCode.startsWith("กกต." && "กกต")&& //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
           asset.agency.startsWith(`${this.userinfo.workgroup}`)).length;
-          
       }
-
-      // นับจำนวน asset ทั้งหมด
-
-      this.assetinter = filteredAssets2.length
-
-      this.assetoffice = filteredAssets3.length
-
-      this.assetcar =filteredAssets4.length
-      
-      this.assetcom = filteredAssets.length;
       
     });
   }
+
   getUsers(): void {
     this.apiService.fetchData('Users').subscribe(data => {
       this.numberOfUsers = data.length;
     });
+  }
+
+  getassettype():void{
+    this.apiService.fetchData('Assettypecodes')
+      .subscribe((data) => {
+        this.assetTypes = data;
+        // console.log(this.assetTypes);
+      }); 
+
+      this.apiService.fetchData('Assetcategories')
+      .subscribe((data) => {
+        this.assetCategory = data;
+        // console.log(this.assetCategory);
+      });
+
+    
   }
   
 

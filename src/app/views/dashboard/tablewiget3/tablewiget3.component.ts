@@ -1,16 +1,50 @@
-import { AfterViewInit, Component, Injectable, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent ,RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
+import {
+  AfterViewInit,
+  Component,
+  Injectable,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { ApiService } from 'src/app/api-service.service';
+import {
+  TextColorDirective,
+  CardComponent,
+  CardHeaderComponent,
+  CardBodyComponent,
+  RowComponent,
+  ColComponent,
+  FormDirective,
+  FormLabelDirective,
+  FormControlDirective,
+  ButtonDirective,
+} from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { HttpClient } from '@angular/common/http';
 
-import { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo } from '@coreui/icons';
+import {
+  cilPencil,
+  cilTrash,
+  cibAddthis,
+  cilDataTransferDown,
+  cilInfo,
+} from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
-import { MatFooterRow, MatRowDef, MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import {
+  MatFooterRow,
+  MatRowDef,
+  MatTableDataSource,
+  MatTableModule,
+} from '@angular/material/table';
+import {
+  MatPaginator,
+  MatPaginatorIntl,
+  MatPaginatorModule,
+} from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 
 import 'moment/locale/th.js';
 // import moment from 'moment';
@@ -67,26 +101,51 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
 @Component({
   selector: 'app-tablewiget3',
   standalone: true,
-  imports: [CardComponent, CardHeaderComponent, CardBodyComponent,
-    RowComponent, ColComponent, TextColorDirective,
-    CommonModule, ReactiveFormsModule, FormsModule,
-    IconDirective, FormDirective, FormLabelDirective,
+  imports: [
+    CardComponent,
+    CardHeaderComponent,
+    CardBodyComponent,
+    RowComponent,
+    ColComponent,
+    TextColorDirective,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    IconDirective,
+    FormDirective,
+    FormLabelDirective,
     FormControlDirective,
-    MatPaginatorModule, MatTableModule, MatSort, MatPaginator, MatFooterRow, MatRowDef,
-    ButtonDirective, NgStyle],
+
+    MatSortModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatSort,
+    MatPaginator,
+    MatFooterRow,
+    MatRowDef,
+
+    ButtonDirective,
+    NgStyle,
+    
+  ],
   providers: [{ provide: MatPaginatorIntl, useClass: MyCustomPaginatorIntl }],
   templateUrl: './tablewiget3.component.html',
-  styleUrl: './tablewiget3.component.scss'
+  styleUrl: './tablewiget3.component.scss',
 })
 
 export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
 
-  displayedColumns: string[] = ['category','assetType', 'assetCount'];
-  
+  displayedColumns: string[] = ['category', 'assetType', 'assetCount'];
+
   totalAssetsByCategory: { [category: string]: number } = {};
+
   totalAssetsByType: { [type: string]: number } = {};
 
   assetDetails: any[] = [];
+
+  assetTypes:any[]=[];
+  
+  assetCategories:any[]=[];
 
   dataSource = new MatTableDataSource<any>(this.assetDetails);
 
@@ -110,50 +169,86 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient , private apiService :ApiService) {
     this.getAssetDetails();
+    this.getAssetType();
   }
 
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    this.http.get<AssetDetails[]>('https://localhost:7204/api/AssetDetails').subscribe(data => {
-      this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
-      this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
+    this.http
+      .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
+      .subscribe((data) => {
+        this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
+        this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
+      });
+  }
+
+  getAssetType(): void {
+    this.apiService.fetchData('Assettypecodes').subscribe((data) => {
+      this.assetTypes = data;
+      // console.log(this.assetTypes);
+    });
+  
+    this.apiService.fetchData('Assetcategories').subscribe((data) => {
+      this.assetCategories = data;
+      // console.log(this.assetCategories);
     });
   }
   
   countAssetsByCategory(): void {
-    let assetType:any = '';
-    const assetCountByCategory: { [category: string]: number } = {}; 
-    this.assetDetails.forEach(asset => {
-      const category = asset.assetCategory; 
-      assetType =  asset.assetType;
-      assetCountByCategory[category] = assetCountByCategory[category] ? assetCountByCategory[category] + 1 : 1;
+    const assetCountByCategory: { [category: string]: number } = {};
+  
+    this.assetDetails.forEach((asset) => {
+      let categoryCode = asset.assetCategory || 'Unknown'; // Set a default value if asset category is null
+      const assetTypeCode = asset.assetType;
+  
+      // Create a combined key with asset type and category
+      const combinedKey = `${assetTypeCode}-${categoryCode}`;
+      assetCountByCategory[combinedKey] = (assetCountByCategory[combinedKey] || 0) + 1;
     });
   
-    // console.log(assetCountByCategory);
+    // Prepare data to show in the table
+    const dataToShowInTable = Object.keys(assetCountByCategory).map((combinedKey) => {
+
+      const [assetTypeCode, categoryCode] = combinedKey.split('-');
+      
+      // console.log(assetTypeCode);
+      
+      // Find asset type name
+      const assetType = this.assetTypes.find(type => type.assetCode === assetTypeCode);
+      // console.log(assetType);
+
+      const assetTypeName = assetType ? assetType.assetName : 'Unknown';
   
-    const dataToShowInTable = Object.keys(assetCountByCategory).map(category => {
-      return { category: category, assetType:assetType,  assetCount: assetCountByCategory[category] };
+      // Find asset category name
+      const assetCategory = this.assetCategories.find(category => category.asc_Code === categoryCode);
+      const assetCategoryName = assetCategory ? assetCategory.asc_Name : 'Unknown';
+  
+      return {
+        category: assetCategoryName,
+        assetType: assetTypeName,
+        assetCount: assetCountByCategory[combinedKey],
+      };
     });
-  
+
     this.dataSource.data = dataToShowInTable;
-    // กำหนดข้อมูลให้กับ dataSource
-    // console.log(this.dataSource.data);
-  }
   
+    // console.table(dataToShowInTable);
+  }
+
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "purchaseDate": "วันเดือนปี",
-      "assetCode": "รหัสครุภัณฑ์",
-      "assetName": "รายการ",
-      "purchasePrice": "ราคาต่อหน่วย",
-      "purchasedFrom": "วิธีการได้มา",
-      "documentNumber": "เลขที่เอกสาร",
-      "department": "ฝ่าย",
-      "responsibleEmployee": "ผู้ใช้งาน",
-      "note": "หมายเหตุ"
+      purchaseDate: 'วันเดือนปี',
+      assetCode: 'รหัสครุภัณฑ์',
+      assetName: 'รายการ',
+      purchasePrice: 'ราคาต่อหน่วย',
+      purchasedFrom: 'วิธีการได้มา',
+      documentNumber: 'เลขที่เอกสาร',
+      department: 'ฝ่าย',
+      responsibleEmployee: 'ผู้ใช้งาน',
+      note: 'หมายเหตุ',
     };
 
     const translatedAsset: { [key: string]: any } = {};
@@ -176,6 +271,9 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
   }
 
   formatCurrency(price: number): string {
-    return price.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    return price.toLocaleString('en-US', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    });
   }
 }

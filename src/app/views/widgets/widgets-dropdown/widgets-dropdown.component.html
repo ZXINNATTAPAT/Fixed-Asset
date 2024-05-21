@@ -28,7 +28,7 @@
 
         <h2 *ngIf="numberOfAssets">
           <span class="anuphan-700" style="color: green"
-            >{{ numberOfAssets }} <br />สินทรัพย์
+            >{{ numberOfAssets }} <br />ครุภัฑณ์
             <svg [cIcon]="icons.cilSave" height="32" style="float: right"></svg
           ></span>
         </h2>
@@ -69,8 +69,9 @@
         </c-dropdown>
 
         <h2 style="color: #000080">
-          {{ assetcom }} <br /><span class="anuphan-700" style="color: #000080"
-            >คอมพิวเตอร์
+          <span class="anuphan-700" style="color: #000080">
+          {{ assetcom }} <br />
+            คอมพิวเตอร์
             <svg
               [cIcon]="icons.cilDevices"
               height="32"

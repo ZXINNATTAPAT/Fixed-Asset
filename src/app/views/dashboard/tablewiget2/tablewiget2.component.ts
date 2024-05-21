@@ -1,18 +1,52 @@
-import { AfterViewInit, Component, Injectable, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent } from '@coreui/angular';
+import {
+  AfterViewInit,
+  Component,
+  Injectable,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import {
+  TextColorDirective,
+  CardComponent,
+  CardHeaderComponent,
+  CardBodyComponent,
+} from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
-import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  FormDirective,
+  FormLabelDirective,
+  FormControlDirective,
+  ButtonDirective,
+} from '@coreui/angular';
 
 import { HttpClient } from '@angular/common/http';
 
-import { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo } from '@coreui/icons';
+import {
+  cilPencil,
+  cilTrash,
+  cibAddthis,
+  cilDataTransferDown,
+  cilInfo,
+} from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
-import { MatFooterRow, MatRowDef, MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import {
+  MatFooterRow,
+  MatRowDef,
+  MatTableDataSource,
+  MatTableModule,
+} from '@angular/material/table';
+import {
+  MatPaginator,
+  MatPaginatorIntl,
+  MatPaginatorModule,
+} from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 
 import 'moment/locale/th.js';
 // import moment from 'moment';
@@ -26,6 +60,7 @@ interface AssetDetails {
   purchasePrice: number;
   purchasedFrom: string;
   documentNumber: string;
+  agency: string;
   department: string;
   assetLocation: string;
   responsibleEmployee: string;
@@ -57,59 +92,79 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   selector: 'app-tablewiget2',
   standalone: true,
   imports: [
-    CardComponent, CardHeaderComponent, CardBodyComponent,
-    RowComponent, ColComponent, TextColorDirective,
-    CommonModule, ReactiveFormsModule, FormsModule,
-    IconDirective, FormDirective, FormLabelDirective,
+    CardComponent,
+    CardHeaderComponent,
+    CardBodyComponent,
+    RowComponent,
+    ColComponent,
+    TextColorDirective,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    IconDirective,
+    FormDirective,
+    FormLabelDirective,
     FormControlDirective,
-    MatPaginatorModule, MatTableModule, MatSort, MatPaginator, MatFooterRow, MatRowDef,
-    ButtonDirective, NgStyle],
+
+    MatPaginatorModule,
+    MatTableModule,
+    MatPaginator,
+    MatSortModule,
+    MatSort,
+    MatPaginator,
+    MatFooterRow,
+    MatRowDef,
+
+    ButtonDirective,
+    NgStyle,
+  ],
   templateUrl: './tablewiget2.component.html',
   styleUrl: './tablewiget2.component.scss',
-  providers: [{ provide: MatPaginatorIntl, useClass: MyCustomPaginatorIntl }]
+  providers: [{ provide: MatPaginatorIntl, useClass: MyCustomPaginatorIntl }],
 })
-
-export class Tablewiget2Component implements
-  OnInit, OnDestroy, AfterViewInit {
+export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
 
   assetDetails: AssetDetails[] = [];
+
   assetDetails2: AssetDetails[] = [];
 
   displayedColumns2: string[] = [
-    "การดำเนินการ",
-    "วันเดือนปี",
-    "รหัสครุภัณฑ์",
-    "รายการ",
-    "ราคาต่อหน่วย",
-    "วิธีการได้มา",
-    "เลขที่เอกสาร",
-    "ฝ่าย",
-    "ที่อยู่",
-    "ผู้ใช้งาน",
-    "หมายเหตุ"];
-  displayedColumns3: string[] = ['location' , 'assetCount'];
+    'การดำเนินการ',
+    'วันเดือนปี',
+    'รหัสครุภัณฑ์',
+    'รายการ',
+    'ราคาต่อหน่วย',
+    'วิธีการได้มา',
+    'เลขที่เอกสาร',
+    'ฝ่าย',
+    'ที่อยู่',
+    'ผู้ใช้งาน',
+    'หมายเหตุ',
+  ];
 
-  dataSource = new MatTableDataSource<AssetDetails>(this.assetDetails);
-  dataSource2 = new MatTableDataSource<any>(this.assetDetails);
+  displayedColumns3: string[] = ['location', 'assetCount'];
+
+  dataSource = new MatTableDataSource<any>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
+      this.dataSource.paginator = this.paginator;
   }
 
+  // dataSource2 = new MatTableDataSource<any>();
+
   displayedColumns: string[] = [
-    "purchaseDate",
-    "assetCode",
-    "assetName",
-    "purchasePrice",
-    "purchasedFrom",
-    "documentNumber",
-    "department",
-    "assetLocation",
-    "responsibleEmployee",
-    "note"
+    'purchaseDate',
+    'assetCode',
+    'assetName',
+    'purchasePrice',
+    'purchasedFrom',
+    'documentNumber',
+    'department',
+    'assetLocation',
+    'responsibleEmployee',
+    'note',
   ];
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
@@ -132,55 +187,60 @@ export class Tablewiget2Component implements
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    this.dataSubscription = this.http.get<AssetDetails[]>('https://localhost:7204/api/AssetDetails').subscribe(data => {
-      // this.assetDetails = data.map(asset => {
-      //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
-      //   asset = this.translateToThai(asset);
-      //   return asset;
-      // });
-      this.assetDetails2 = data.map(asset => {
-        return asset;
+    this.dataSubscription = this.http
+      .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
+      .subscribe((data) => {
+        this.assetDetails2 = data.map((asset) => {
+          return asset;
+        });
+        this.countAssetsByLocation();
       });
-      // this.dataSource.data = this.assetDetails2;// Update the data source with the new asset details
-      // console.log(this.assetDetails2);
-      this.countAssetsByLocation();
-      
-    });
   }
 
   countAssetsByLocation(): void {
-    const assetCountByLocation: { [location: string]: number } = {}; // Create an object to store the count of assets in each location
-    this.assetDetails2.forEach(asset => {
-      const location = asset.assetLocation;
+    const assetCountByLocation: { [location: string]: number } = {};
+    // Create an object to store the count of assets in each location
+    this.assetDetails2.forEach((asset) => {
+      const location = asset.responsibleEmployee;
       // console.log(location);
-      assetCountByLocation[location] = assetCountByLocation[location] ? assetCountByLocation[location] + 1 : 1;
+      assetCountByLocation[location] = assetCountByLocation[location]
+        ? assetCountByLocation[location] + 1
+        : 1;
     });
 
-    console.log(assetCountByLocation);
     // สร้างข้อมูลสำหรับแสดงในตาราง
-    const dataToShowInTable = Object.keys(assetCountByLocation).map(location => {
-      return { location: location, assetCount: assetCountByLocation[location] };
-    });
+    const dataToShowInTable = Object.keys(assetCountByLocation).map(
+      (location) => {
+        return {
+          location: location,
+          assetCount: assetCountByLocation[location],
+        };
+      }
+    );
 
-    // กำหนดข้อมูลให้กับ dataSource
-    this.dataSource2.data = dataToShowInTable;
+    // Sort the array by assetCount in descending order
+    dataToShowInTable.sort((a, b) => b.assetCount - a.assetCount);
 
+    // Assign the sorted data to the dataSource
+    this.dataSource.data = dataToShowInTable;
   }
 
-  addasset(): void { window.location.href = "#/system/AssetDetails"; }
+  addasset(): void {
+    window.location.href = '#/system/AssetDetails';
+  }
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "purchaseDate": "วันเดือนปี",
-      "assetCode": "รหัสครุภัณฑ์",
-      "assetName": "รายการ",
-      "purchasePrice": "ราคาต่อหน่วย",
-      "purchasedFrom": "วิธีการได้มา",
-      "documentNumber": "เลขที่เอกสาร",
-      "assetLocation": "ที่อยู่",
-      "department": "ฝ่าย",
-      "responsibleEmployee": "ผู้ใช้งาน",
-      "note": "หมายเหตุ"
+      purchaseDate: 'วันเดือนปี',
+      assetCode: 'รหัสครุภัณฑ์',
+      assetName: 'รายการ',
+      purchasePrice: 'ราคาต่อหน่วย',
+      purchasedFrom: 'วิธีการได้มา',
+      documentNumber: 'เลขที่เอกสาร',
+      assetLocation: 'ที่อยู่',
+      department: 'ฝ่าย',
+      responsibleEmployee: 'ผู้ใช้งาน',
+      note: 'หมายเหตุ',
     };
 
     const translatedAsset: { [key: string]: any } = {};
@@ -203,6 +263,9 @@ export class Tablewiget2Component implements
   }
 
   formatCurrency(price: number): string {
-    return price.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    return price.toLocaleString('en-US', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    });
   }
 }

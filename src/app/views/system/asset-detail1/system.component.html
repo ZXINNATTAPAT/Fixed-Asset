@@ -10,7 +10,9 @@
     <div
       style="display: flex; justify-content: space-between; align-items: center"
     >
-      <div style="margin-right: auto"></div>
+      <div style="margin-right: auto">
+        <p><span class="text-danger">*</span> จำเป็นต้องระบุ</p>
+      </div>
       <p>
         นำเข้าข้อมูล :
         <button
@@ -65,40 +67,13 @@
     </div>
     <c-card class="mb-4" style="border: none">
       <c-card-body>
-        <c-card class=" shadow-sm" [hidden]="hidden2" style="border-style: dotted ;border-width: 3.5px;">
+        <c-card
+          class="shadow-sm"
+          [hidden]="hidden2"
+          style="border-style: dotted; border-width: 3.5px"
+        >
           <!-- <c-card-header>นำเข้ามูลในรูปแบบ Excel</c-card-header> -->
           <c-card-body>
-            <!-- <p>ข้อมูลที่นำเข้าจะต้องมีลักษณะวันเดือนปีแบบนี้เท่านั้นครับ</p> -->
-
-            <!-- <table class="table border">
-              <thead>
-                <tr>
-                  <th>วันเดือนปี</th>
-                  <th>รหัสครุภัณฑ์</th>
-                  <th>รายการ</th>
-                  <th>ราคาต่อหน่วย</th>
-                  <th>วิธีการได้มา</th>
-                  <th>เลขที่เอกสาร</th>
-                  <th>ฝ่าย</th>
-                  <th>ผู้ใช้งาน</th>
-                  <th>หมายเหตุ</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>23 เม.ย. 2552</td>
-                  <td>กกต 004-0401-33-2552</td>
-                  <td>เครื่องคอมพิวเตอร์ (PC) ยี่ห้อ DELL รุ่น Optiplex 760</td>
-                  <td>1,000.00</td>
-                  <td>บริษัท ABC</td>
-                  <td>เอกสาร001</td>
-                  <td>ฝ่ายไอที</td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table> -->
-
             <form (submit)="onSubmit2()">
               <div class="row">
                 <div class="col">
@@ -117,31 +92,139 @@
             </form>
           </c-card-body>
         </c-card>
-        
-        <br/>
+
+        <br />
 
         <form cForm [formGroup]="asset" (ngSubmit)="autoInput(); onSubmit()">
-          <div class="row row-cols-1 row-cols-sm-3 row-cols-md-3 mb-3">
+          <div class="row mb-3">
             <div class="col">
-              <label cLabel style="font-weight: bold" for="assetCodeInput">
-                <span class="text-danger">*</span> รหัสครุภัณฑ์</label
+              <label cLabel style="font-weight: bold" for="assetTypeInput"
+                ><span class="text-danger">*</span> ประเภทครุภัณฑ์
+              </label>
+              <mat-select
+                class="form-control"
+                formControlName="assetType"
+                panelClass="mat-select-panel"
+                placeholder="เลือกหมวดหมู่ครุภัณฑ์"
+                style="font-family: 'Anuphan', sans-serif; font-weight: 400"
               >
-              <div class="input-group mb-3">
-                <span class="input-group-text">{{
-                  this.userinfo.affiliation
-                }}</span>
-                <input
+                <mat-option
+                  class="anuphan-700"
+                  *ngFor="let type of assetTypes"
+                  [value]="type.assetCode"
+                >
+                  <span class="anuphan-600">{{ type.assetName }}</span>
+                </mat-option>
+              </mat-select>
+            </div>
+
+            <div class="col">
+              <!-- หมวดหมู่ครุภัณฑ์ -->
+              <div class="col">
+                <label
+                  cLabel
+                  style="font-weight: bold"
+                  for="assetCategoryInput"
+                >
+                  <span class="text-danger">*</span>
+                  หมวดหมู่ครุภัณฑ์
+                </label>
+                <!-- <input
                   cFormControl
-                  id="assetCodeInput"
-                  placeholder="ระบุรหัสครุภัณฑ์"
-                  formControlName="assetCode"
-                  pattern="\d{3}-\d{4}-\d{2}-\d{4}\(\d\)"
+                  id="assetCategoryInput"
+                  placeholder="ระบุหมวดหมู่ครุภัณฑ์"
+                  formControlName="assetCategory"
                   type="text"
-                  (keypress)="handleKeyPress($event, 'assetNameInput')"
-                  readonly
-                />
+                  [hidden]="!showAssetCategoryInput"
+                /> -->
+                <mat-select
+                  *ngIf="asset.get('assetType')?.value"
+                  class="form-control"
+                  formControlName="assetCategory"
+                  placeholder="เลือกหมวดหมู่ครุภัณฑ์"
+                  panelClass="mat-select-panel"
+                  #singleSelect
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 400"
+                  required
+                >
+                  <mat-option>
+                    <ngx-mat-select-search
+                      placeholderLabel="ค้นหาหมวดหมู่"
+                      noEntriesFoundLabel="'ไม่พบข้อมูล'"
+                      [formControl]="assetCategoryFilterCtrl"
+                    ></ngx-mat-select-search>
+                  </mat-option>
+
+                  <mat-option
+                    *ngFor="let category of filteredAssetCategories | async"
+                    [value]="category.asc_Code"
+                  >
+                    <span class="anuphan-600">{{ category.asc_Name }}</span>
+                  </mat-option>
+                </mat-select>
+
+                <mat-select
+                  *ngIf="!asset.get('assetType')?.value"
+                  class="form-control"
+                  placeholder="เลือกหมวดหมู่ครุภัณฑ์"
+                  panelClass="mat-select-panel"
+                  #singleSelect
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 400"
+                  required
+                  disabled="true"
+                >
+                </mat-select>
               </div>
             </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="purchaseDateInput"
+                >วันเดือนปีที่ได้มา</label
+              >
+              <input
+                cFormControl
+                class="form-control"
+                id="purchaseDateInput"
+                formControlName="purchaseDate"
+                type="date"
+                placeholder="Choose a date"
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="assetCodeInput">
+                <span class="text-danger">*</span> รหัสครุภัณฑ์ (แก้ได้ -001-)
+              </label>
+              <input
+                cFormControl
+                id="assetCodeInput"
+                placeholder="ระบุรหัสครุภัณฑ์"
+                formControlName="assetCode"
+                pattern=" \d{4}-\d{2}-\d{4}"
+                type="text"
+                (input)="handleInput($event)"
+                (keydown)="handleKeyDown($event)"
+                (keypress)="handleKeyPress($event, 'assetNameInput')"
+              />
+            </div>
+          </div>
+
+          <!-- ######## line 1 ############ -->
+          <div class="row mb-3">
+            <!-- <div class="col">
+            <label cLabel style="font-weight: bold;" 
+              for="quantityInput">จำนวน(ระบบเซตค่า 1 )</label>
+            <input
+              cFormControl
+              id="quantityInput"
+              placeholder="ระบุจำนวน"
+              formControlName="quantity"
+              type="number"
+              [hidden]="true"
+              (keypress)="handleKeyPress($event, 'purchasedFromInput')"
+              readonly
+            />
+            </div> -->
 
             <div class="col">
               <label cLabel style="font-weight: bold" for="assetNameInput">
@@ -158,19 +241,64 @@
               />
             </div>
 
-            <!-- <div class="col"> -->
-            <!-- <label cLabel style="font-weight: bold;" for="quantityInput">จำนวน(ระบบเซตค่า 1 )</label> -->
-            <input
-              cFormControl
-              id="quantityInput"
-              placeholder="ระบุจำนวน"
-              formControlName="quantity"
-              type="number"
-              [hidden]="true"
-              (keypress)="handleKeyPress($event, 'purchasedFromInput')"
-              readonly
-            />
-            <!-- </div> -->
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="assetLocationInput">
+                <span class="text-danger">*</span>
+                สถานที่ตั้งครุภัณฑ์
+              </label>
+              <input
+                cFormControl
+                id="assetLocationInput"
+                placeholder="ระบุสถานที่ตั้งครุภัณฑ์"
+                formControlName="assetLocation"
+                type="text"
+                (keypress)="handleKeyPress($event, 'EmployeeInput')"
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="EmployeeInput">
+                <span class="text-danger">*</span> พนักงานที่รับผิดชอบ
+              </label>
+              <input
+                cFormControl
+                id="EmployeeInput"
+                placeholder="ระบุชื่อพนักงานที่รับผิดชอบ"
+                formControlName="responsibleEmployee"
+                type="text"
+                (keypress)="handleKeyPress($event, 'documentNumberInput')"
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="documentNumberInput"
+                >เลขที่เอกสาร <span style="opacity: 50%">(ถ้ามี)</span></label
+              >
+              <input
+                cFormControl
+                id="documentNumberInput"
+                placeholder="ระบุเลขที่เอกสาร"
+                formControlName="documentNumber"
+                type="text"
+              />
+            </div>
+          </div>
+
+          <!-- ######## line 2 ############ -->
+          <div class="row mb-3">
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="purchasePriceInput"
+                ><span class="text-danger">*</span>ราคาซื้อ</label
+              >
+              <input
+                cFormControl
+                id="purchasePriceInput"
+                placeholder=".00"
+                formControlName="purchasePrice"
+                type="number"
+                step="0.01"
+              />
+            </div>
 
             <div class="col">
               <label cLabel style="font-weight: bold" for="purchasedFromInput"
@@ -185,182 +313,37 @@
                 (keypress)="handleKeyPress($event, 'assetTypeInput')"
               />
             </div>
-          </div>
 
-          <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 mb-3">
             <div class="col">
-              <label cLabel style="font-weight: bold" for="assetTypeInput"
-                ><span class="text-danger">*</span> ประเภทครุภัณฑ์</label
+              <label cLabel style="font-weight: bold" for="unitInput"
+                >หน่วยนับ</label
               >
-
-              <mat-select
-                class="form-control"
-                formControlName="assetType"
-                placeholder="เลือกหมวดหมู่ครุภัณฑ์"
-              >
-                <mat-option
-                  *ngFor="let type of assetTypes"
-                  [value]="type.assetCode"
-                >
-                  {{ type.assetName }}
-                </mat-option>
-              </mat-select>
-            </div>
-
-            <div class="col">
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="assetCategoryInput"
-                >
-                  <span class="text-danger">*</span>
-                  หมวดหมู่ครุภัณฑ์
-                </label>
-                <input
-                  cFormControl
-                  id="assetCategoryInput"
-                  placeholder="ระบุหมวดหมู่ครุภัณฑ์"
-                  formControlName="assetCategory"
-                  type="text"
-                  [hidden]="!showAssetCategoryInput"
-                />
-              </div>
-
-              <div class="col">
-                
-                <mat-select
-                  class="form-control"
-                  formControlName="assetCategory"
-                  placeholder="เลือกหมวดหมู่ครุภัณฑ์"
-                  #singleSelect>
-                    <mat-option>
-                     <ngx-mat-select-search [formControl]="assetCategoryFilterCtrl"></ngx-mat-select-search> 
-                    </mat-option>
-                  
-                  <mat-option
-                    *ngFor="let category of filteredAssetCategories | async"
-                    [value]="category.asc_Code"
-                  >
-                    {{ category.asc_Name }}
-                  </mat-option>
-                </mat-select>
-                <!-- </mat-form-field> -->
-              </div>
-            </div>
-
-            <div class="col">
-              <label cLabel style="font-weight: bold" for="agencyInput">
-                <span class="text-danger">*</span> หน่วยงาน / สำนักงาน 
-              </label>
               <input
                 cFormControl
-                id="agencyInput"
-                placeholder="ระบุหน่วยหน่วยงาน"
-                formControlName="agency"
+                id="unitInput"
+                placeholder="ระบุหน่วยนับ"
+                formControlName="unit"
                 type="text"
-                (keypress)="handleKeyPress($event, 'assetLocationInput')"
-                required
+                readonly
               />
             </div>
 
             <div class="col">
-                
-                <label cLabel style="font-weight: bold" for="departmentInput">
-                    <span class="text-danger">*</span> 
-                    ฝ่าย
-                </label>
-
-                <input
-                    cFormControl
-                    id="departmentInput"
-                    placeholder="ระบุแผนก"
-                    formControlName="department"
-                    type="text"
-                    (keypress)="handleKeyPress($event, 'assetLocationInput')"
-                    required
-                />
-
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col">
-              <label cLabel style="font-weight: bold" for="assetLocationInput">
-                <span class="text-danger">*</span>
-                สถานที่ตั้งครุภัณฑ์
-              </label>
-
-              <input
-                cFormControl
-                id="assetLocationInput"
-                placeholder="ระบุสถานที่ตั้งครุภัณฑ์"
-                formControlName="assetLocation"
-                type="text"
-                (keypress)="handleKeyPress($event, 'EmployeeInput')"
-              />
-            </div>
-
-            <div class="col">
-              <label cLabel style="font-weight: bold" for="EmployeeInput">
-                พนักงานที่รับผิดชอบ
-              </label>
-
-              <input
-                cFormControl
-                id="EmployeeInput"
-                placeholder="ระบุชื่อพนักงานที่รับผิดชอบ"
-                formControlName="responsibleEmployee"
-                type="text"
-                (keypress)="handleKeyPress($event, 'documentNumberInput')"
-              />
-            </div>
-
-            <div class="col">
-              <label cLabel style="font-weight: bold" for="documentNumberInput"
-                >เลขที่เอกสาร</label
+              <label cLabel style="font-weight: bold" for="receiptDateInput"
+                ><span class="text-danger">*</span> วันที่ได้รับ
+                <span style="opacity: 50%">(ใช้คำนวณค่าเสื่อม)</span></label
               >
               <input
                 cFormControl
-                id="documentNumberInput"
-                placeholder="ระบุเลขที่เอกสาร"
-                formControlName="documentNumber"
-                type="text"
-              />
-            </div>
-
-            <div class="col">
-              <label cLabel style="font-weight: bold" for="purchasePriceInput"
-                ><span class="text-danger">*</span>ราคาซื้อ</label
-              >
-              <input
-                cFormControl
-                id="purchasePriceInput"
-                placeholder="ระบุราคาซื้อ"
-                formControlName="purchasePrice"
-                type="number"
-              />
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col">
-              <label cLabel style="font-weight: bold" for="purchaseDateInput"
-                >วันเดือนปีที่ได้มา</label
-              >
-              <input
-                cFormControl
-                class="form-control"
-                id="purchaseDateInput"
-                formControlName="purchaseDate"
+                id="receiptDateInput"
                 type="date"
-                placeholder="Choose a date"
+                formControlName="ReceiptDate"
               />
             </div>
 
             <div class="col">
               <label cLabel style="font-weight: bold" for="annotationInput"
-                >หมายเหตุ</label
+                >หมายเหตุ <span style="opacity: 50%">(ถ้ามี)</span></label
               >
               <input
                 cFormControl
@@ -368,6 +351,206 @@
                 placeholder="ระบุหมายเหตุ"
                 formControlName="Note"
                 type="text"
+              />
+            </div>
+
+            <div class="col">
+              <label
+                cLabel
+                style="font-weight: bold"
+                for="taxInvoiceNumberInput"
+                >เลขที่ใบกำกับภาษี
+                <span style="opacity: 50%">(ถ้ามี)</span></label
+              >
+              <input
+                cFormControl
+                id="taxInvoiceNumberInput"
+                placeholder="ระบุเลขที่ใบกำกับภาษี"
+                type="text"
+                formControlName="TaxInvoiceNumber"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3 p-1">
+            <div class="hr-with-text">
+              <hr />
+              <span>ระบบดำเนินการให้</span>
+              <hr />
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col">
+              <!-- agency -->
+              <label cLabel style="font-weight: bold" for="agencyInput">
+                <span class="text-danger">*</span> หน่วยงาน / สำนักงาน
+              </label>
+
+              <input
+                cFormControl
+                id="agencyInput"
+                placeholder="ระบุหน่วยหน่วยงาน"
+                formControlName="agency"
+                type="text"
+                (keypress)="handleKeyPress($event, 'assetLocationInput')"
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="departmentInput">
+                <span class="text-danger">*</span>
+                ฝ่าย
+              </label>
+
+              <input
+                cFormControl
+                id="departmentInput"
+                placeholder="ระบุแผนก"
+                formControlName="department"
+                type="text"
+                (keypress)="handleKeyPress($event, 'assetLocationInput')"
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="quantityInput"
+                >จำนวน</label
+              >
+              <input
+                cFormControl
+                id="quantityInput"
+                placeholder="ระบุจำนวน"
+                formControlName="quantity"
+                type="number"
+                readonly
+              />
+            </div>
+
+            <div class="col">
+              <label
+                cLabel
+                style="font-weight: bold"
+                for="depreciationStartDateInput"
+                >วันที่เริ่มคิดค่าเสื่อม</label
+              >
+              <input
+                cFormControl
+                id="depreciationStartDateInput"
+                type="date"
+                formControlName="DepreciationStartDate"
+                readonly
+              />
+            </div>
+
+            <div class="col">
+              <label
+                cLabel
+                style="font-weight: bold"
+                for="depreciationCalculationStartDateInput"
+              >
+                วันที่เริ่มคำนวณค่าเสื่อม</label
+              >
+              <input
+                cFormControl
+                id="depreciationCalculationStartDateInput"
+                formControlName="DepreciationCalculationStartDate"
+                type="date"
+                readonly
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="calculatedPriceInput"
+                >ราคาคำนวณ</label
+              >
+              <input
+                cFormControl
+                id="calculatedPriceInput"
+                formControlName="CalculatedPrice"
+                placeholder="ระบุราคาคำนวณ"
+                type="number"
+                readonly
+              />
+            </div>
+          </div>
+
+          <!-- <div class="row mb-3">
+          </div> -->
+
+          <div class="row mb-3">
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="scrapPriceInput"
+                >ราคาขีดความสามารถใช้</label
+              >
+              <input
+                cFormControl
+                id="scrapPriceInput"
+                placeholder="ระบุราคาขีดความสามารถใช้"
+                type="number"
+                disabled
+              />
+            </div>
+
+            <div class="col">
+              <label
+                cLabel
+                style="font-weight: bold"
+                for="depreciationRateInput"
+                >อัตราการคิดค่าเสื่อม</label
+              >
+              <div class="input-group">
+                <input
+                  cFormControl
+                  id="depreciationRateInput"
+                  placeholder="ระบุอัตราการคิดค่าเสื่อม"
+                  type="number"
+                  formControlName="DepreciationRate"
+                />
+              </div>
+            </div>
+
+            <div class="col">
+              <label cLabel style="font-weight: bold" for="assetAgeInput"
+                >อายุของครุภัณฑ์</label
+              >
+              <input
+                cFormControl
+                id="assetAgeInput"
+                placeholder="ระบุอายุของครุภัณฑ์"
+                type="number"
+                disabled
+              />
+            </div>
+            <div class="col">
+              <label
+                cLabel
+                style="font-weight: bold"
+                for="accumulatedDepreciationInput"
+                >ค่าเสื่อมสะสม</label
+              >
+              <input
+                cFormControl
+                id="accumulatedDepreciationInput"
+                placeholder="ระบุค่าเสื่อมสะสม"
+                type="number"
+                disabled
+              />
+            </div>
+
+            <div class="col">
+              <label
+                cLabel
+                style="font-weight: bold"
+                for="depreciationValueInput"
+                >มูลค่าค่าเสื่อม</label
+              >
+              <input
+                cFormControl
+                id="depreciationValueInput"
+                placeholder="ระบุมูลค่าค่าเสื่อม"
+                type="number"
+                disabled
               />
             </div>
 
@@ -384,166 +567,11 @@
             </div>
           </div>
 
-          <div class="m-1" [style.display]="hidden ? 'none' : 'block'">
-            <br />
+          <!-- <div class="row mb-3"></div> -->
 
-            <div class="row mb-3">
-              <div class="col">
-                <label cLabel style="font-weight: bold" for="receiptDateInput"
-                  >วันที่ได้รับ</label
-                >
-                <input
-                  cFormControl
-                  id="receiptDateInput"
-                  type="date"
-                  disabled
-                />
-              </div>
-
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="depreciationStartDateInput"
-                  >วันที่เริ่มคิดค่าเสื่อม</label
-                >
-                <input
-                  cFormControl
-                  id="depreciationStartDateInput"
-                  type="date"
-                  disabled
-                />
-              </div>
-
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="depreciationCalculationStartDateInput"
-                  >วันที่เริ่มคำนวณค่าเสื่อม</label
-                >
-                <input
-                  cFormControl
-                  id="depreciationCalculationStartDateInput"
-                  type="date"
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="calculatedPriceInput"
-                  >ราคาคำนวณ</label
-                >
-                <input
-                  cFormControl
-                  id="calculatedPriceInput"
-                  placeholder="ระบุราคาคำนวณ"
-                  type="number"
-                  disabled
-                />
-              </div>
-              <div class="col">
-                <label cLabel style="font-weight: bold" for="scrapPriceInput"
-                  >ราคาขีดความสามารถใช้</label
-                >
-                <input
-                  cFormControl
-                  id="scrapPriceInput"
-                  placeholder="ระบุราคาขีดความสามารถใช้"
-                  type="number"
-                  disabled
-                />
-              </div>
-
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="depreciationRateInput"
-                  >อัตราการคิดค่าเสื่อม</label
-                >
-                <div class="input-group">
-                  <input
-                    cFormControl
-                    id="depreciationRateInput"
-                    placeholder="ระบุอัตราการคิดค่าเสื่อม"
-                    type="number"
-                    disabled
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col">
-                <label cLabel style="font-weight: bold" for="assetAgeInput"
-                  >อายุของครุภัณฑ์</label
-                >
-                <input
-                  cFormControl
-                  id="assetAgeInput"
-                  placeholder="ระบุอายุของครุภัณฑ์"
-                  type="number"
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="accumulatedDepreciationInput"
-                  >ค่าเสื่อมสะสม</label
-                >
-                <input
-                  cFormControl
-                  id="accumulatedDepreciationInput"
-                  placeholder="ระบุค่าเสื่อมสะสม"
-                  type="number"
-                  disabled
-                />
-              </div>
-
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="depreciationValueInput"
-                  >มูลค่าค่าเสื่อม</label
-                >
-                <input
-                  cFormControl
-                  id="depreciationValueInput"
-                  placeholder="ระบุมูลค่าค่าเสื่อม"
-                  type="number"
-                  disabled
-                />
-              </div>
-
-              <div class="col">
-                <label
-                  cLabel
-                  style="font-weight: bold"
-                  for="taxInvoiceNumberInput"
-                  >เลขที่ใบกำกับภาษี</label
-                >
-                <input
-                  cFormControl
-                  id="taxInvoiceNumberInput"
-                  placeholder="ระบุเลขที่ใบกำกับภาษี"
-                  type="text"
-                  disabled
-                />
-              </div>
-            </div>
-          </div>
+          <!-- <div class="row mb-3">
+            
+          </div> -->
 
           <!-- <button cButton class="anuphan-600" type="submit" color="success"  style="color: white;">ดำเนินการ</button> -->
         </form>
@@ -561,5 +589,21 @@
             </mat-tab> -->
 
     <!-- </mat-tab-group> -->
+  </c-card-body>
+</c-card>
+
+<c-card
+  *ngIf="this.asset.get('assetType')?.value === '004'"
+  class="mb-3 shadow"
+  style="border: none"
+>
+  <c-card-body>
+    <h1>
+      <span class="anuphan-700"
+        >บันทึกรายการเพิ่มเติมสำหรับ ครุภัณฑ์คอมพิวเตอร์</span
+      >
+    </h1>
+    <hr />
+    <app-form-controls2></app-form-controls2>
   </c-card-body>
 </c-card>

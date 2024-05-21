@@ -1,4 +1,36 @@
 // YourComponent.component.scss
+/* Your custom CSS file */
+
+::ng-deep .mat-select-panel {
+  margin-right: 25px;
+}
+
+.mat-select::placeholder{
+  font-family: 'Anuphan', sans-serif;
+  font-weight: 600;
+}
+
+.swal2-popup  {
+  font-family: 'Anuphan', sans-serif;
+  font-weight: 700;
+  color: red;
+}
+
+
+.hr-with-text {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.hr-with-text hr {
+  flex: 1;
+  border: 0;
+  border-top: 1px solid #000;
+}
+.hr-with-text span {
+  padding: 0 10px;
+}
+
 
 .mat-form-field {
   // Adjust the appearance to make it look like Bootstrap's select input

@@ -7,17 +7,31 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
-import { Router } from '@angular/router';
-import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent, TableModule, UtilitiesModule } from '@coreui/angular';
-import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
+// import { Router } from '@angular/router';
+import {
+  TextColorDirective,
+  CardComponent,
+  CardHeaderComponent,
+  CardBodyComponent,
+  TableModule,
+  UtilitiesModule,
+} from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  FormDirective,
+  FormLabelDirective,
+  FormControlDirective,
+  ButtonDirective,
+} from '@coreui/angular';
 import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
 
 interface AssetDetails {
-  assetCode: string,
-  assetName: string
+  assetCode: string;
+  assetName: string;
 }
 
 @Component({
@@ -40,76 +54,79 @@ interface AssetDetails {
     UtilitiesModule,
     ButtonDirective,
     NgStyle,
-    IconDirective,FormDirective, FormLabelDirective, FormControlDirective,
+    IconDirective,
+    FormDirective,
+    FormLabelDirective,
+    FormControlDirective,
   ],
-  
+
   templateUrl: './defaultdata.component.html',
-  styleUrl: './defaultdata.component.scss'
+  styleUrl: './defaultdata.component.scss',
 })
-
 export class DefaultdataComponent implements OnInit {
-  
-yourFormName: FormGroup<any> | undefined;
+  yourFormName: FormGroup<any> | undefined;
 
-asset: any = {}; 
+  asset: any = {};
 
-onSubmit() {
-  this.http.post<any>('https://localhost:7204/api/Assettypecodes/', this.asset)
+  onSubmit() {
+    this.http
+      .post<any>('https://localhost:7204/api/Assettypecodes/', this.asset)
       .subscribe(
-        response => {
-          console.log(response);
+        (response) => {
+          // console.log(response);
           const newAsset = response;
-          console.log(newAsset);
+          // console.log(newAsset);
           this.assetDetails.push(this.translateToThai(newAsset));
           this.dataSource.data = this.assetDetails;
 
           Swal.fire({
-            title: "บันทึกเสร็จสิ้น",
-            icon: "success"
+            title: 'บันทึกเสร็จสิ้น',
+            icon: 'success',
           });
         },
-        error => {
+        (error) => {
           console.error(error);
           if (error) {
             Swal.fire({
-              title: "มีข้อมูลในระบบอยู่แล้ว",
-              icon: "error"
+              title: 'มีข้อมูลในระบบอยู่แล้ว',
+              icon: 'error',
             });
           }
         }
       );
-}
+  }
 
   icons = { cilPencil, cilTrash };
+
   assetDetails: AssetDetails[] = [];
 
-  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
+  dataSource: MatTableDataSource<AssetDetails> =
+    new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient) {}
 
-  displayedColumns2: string[] = [
-    "รหัสประเภทสินทรัพย์",
-    "ชื่อประเภทสินทรัพย์"
-  ];
+  displayedColumns2: string[] = ['รหัสประเภทสินทรัพย์', 'ชื่อประเภทสินทรัพย์'];
 
-  assetDetailsset: any[] = []
+  assetDetailsset: any[] = [];
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Assettypecodes').subscribe(data => {
-      this.assetDetails = data.map(asset => {
-        asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
-        return asset;
+    this.http
+      .get<any[]>('https://localhost:7204/api/Assettypecodes')
+      .subscribe((data) => {
+        this.assetDetails = data.map((asset) => {
+          asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
+          return asset;
+        });
+        // console.log(this.assetDetails);
+        this.assetDetailsset = this.assetDetails;
+        this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
+        // console.log(this.dataSource)
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
       });
-      // console.log(this.assetDetails);
-      this.assetDetailsset = this.assetDetails;
-      this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-      // console.log(this.dataSource)
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    });
   }
 
   ngOnInit(): void {
@@ -118,8 +135,8 @@ onSubmit() {
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "assetCode": "รหัสประเภทสินทรัพย์",
-      "assetName": "ชื่อประเภทสินทรัพย์"
+      assetCode: 'รหัสประเภทสินทรัพย์',
+      assetName: 'ชื่อประเภทสินทรัพย์',
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {
@@ -137,46 +154,39 @@ onSubmit() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'ใช่',
-      cancelButtonText: 'ไม่'
+      cancelButtonText: 'ไม่',
     }).then((result) => {
-
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/Assettypecodes/${asset.id}`).subscribe(
-          () => {
-            const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
+        this.http
+          .delete(`https://localhost:7204/api/Assettypecodes/${asset.id}`)
+          .subscribe(
+            () => {
+              const index = this.assetDetailsset.findIndex(
+                (a) => a.id === asset.id
+              );
               if (index !== -1) {
                 this.assetDetails.splice(index, 1);
                 this.dataSource.data = this.assetDetails;
               }
-            Swal.fire(
-              'ลบแล้ว!',
-              'สินทรัพย์ของคุณถูกลบแล้ว',
-              'success'
-            );
-          },
-          (error) => {
-            console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-            Swal.fire(
-              'ข้อผิดพลาด!',
-              'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
-              'error'
-            );
-          }
-        );
-        
+              Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
+            },
+            (error) => {
+              console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+              Swal.fire(
+                'ข้อผิดพลาด!',
+                'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
+                'error'
+              );
+            }
+          );
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
-        Swal.fire(
-          'ยกเลิกแล้ว',
-          'สินทรัพย์ของคุณปลอดภัย :)',
-          'info'
-        );
+        Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
       }
     });
   }
   editAsset(_t35: any) {
     throw new Error('Method not implemented.');
   }
-
 }

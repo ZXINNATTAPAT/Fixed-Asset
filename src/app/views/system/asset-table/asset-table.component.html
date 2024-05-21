@@ -1,107 +1,198 @@
-<c-card class="mb-4 shadow" style="border: none;">
-    <!-- <c-card-header>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="margin-right: auto;">เพิ่มรายละเอียดครุภัฑณ์</strong>
+<c-card class="mb-4 shadow" style="border: none">
+  <c-card-body>
+    <h1>
+      <span class="anuphan-700" style="color: green">รายละเอียดครุภัณฑ์</span>
+    </h1>
+    <hr />
+    <div
+      style="display: flex; justify-content: space-between; align-items: center"
+    >
+      <div style="margin-right: auto"></div>
+      <p>
+        ส่งออกข้อมูล :
+        <button
+          class="btn btn-success"
+          type="button"
+          (click)="exportExcel()"
+          style="color: white"
+        >
+          <!-- <svg [cIcon]="icons.cilDataTransferUp"></svg> -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0,0,256,256"
+            style="height: 22px"
+          >
+            <g
+              fill="#ffffff"
+              fill-rule="nonzero"
+              stroke="none"
+              stroke-width="1"
+              stroke-linecap="butt"
+              stroke-linejoin="miter"
+              stroke-miterlimit="10"
+              stroke-dasharray=""
+              stroke-dashoffset="0"
+              font-family="none"
+              font-weight="none"
+              font-size="none"
+              text-anchor="none"
+              style="mix-blend-mode: normal"
+            >
+              <g transform="scale(5.12,5.12)">
+                <path
+                  d="M28.875,0c-0.01953,0.00781 -0.04297,0.01953 -0.0625,0.03125l-28,5.3125c-0.47656,0.08984 -0.82031,0.51172 -0.8125,1v37.3125c-0.00781,0.48828 0.33594,0.91016 0.8125,1l28,5.3125c0.28906,0.05469 0.58984,-0.01953 0.82031,-0.20703c0.22656,-0.1875 0.36328,-0.46484 0.36719,-0.76172v-5h17c1.09375,0 2,-0.90625 2,-2v-34c0,-1.09375 -0.90625,-2 -2,-2h-17v-5c0.00391,-0.28906 -0.12109,-0.5625 -0.33594,-0.75391c-0.21484,-0.19141 -0.50391,-0.28125 -0.78906,-0.24609zM28,2.1875v4.34375c-0.13281,0.27734 -0.13281,0.59766 0,0.875v35.40625c-0.02734,0.13281 -0.02734,0.27344 0,0.40625v4.59375l-26,-4.96875v-35.6875zM30,8h17v34h-17v-5h4v-2h-4v-6h4v-2h-4v-5h4v-2h-4v-5h4v-2h-4zM36,13v2h8v-2zM6.6875,15.6875l5.46875,9.34375l-5.96875,9.34375h5l3.25,-6.03125c0.22656,-0.58203 0.375,-1.02734 0.4375,-1.3125h0.03125c0.12891,0.60938 0.25391,1.02344 0.375,1.25l3.25,6.09375h4.96875l-5.75,-9.4375l5.59375,-9.25h-4.6875l-2.96875,5.53125c-0.28516,0.72266 -0.48828,1.29297 -0.59375,1.65625h-0.03125c-0.16406,-0.60937 -0.35156,-1.15234 -0.5625,-1.59375l-2.6875,-5.59375zM36,20v2h8v-2zM36,27v2h8v-2zM36,35v2h8v-2z"
+                ></path>
+              </g>
+            </g>
+          </svg>
+          Excel
+        </button>
+      </p>
+    </div>
 
-            <button class="btn btn-sm btn-success"
-                style="color: white;" (click)="addasset()">
-              <svg [cIcon]="icons.cibAddthis" ></svg> เพิ่มครุภัฑณ์
+    <div class="col-2">
+      
+      <mat-select
+      class="form-control mb-3"
+      multiple
+      (selectionChange)="toggleColumn($event)"
+      placeholder="กรองข้อมูล"
+      style="font-family: 'Anuphan', sans-serif; font-weight: 400"
+      #t
+    >
+      <mat-select-trigger>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 20px; height: 20px;">
+        <path d="M3.9 54.9C10.5 40.9 24.5 32 40 32H472c15.5 0 29.5 8.9 36.1 22.9s4.6 
+        30.5-5.2 42.5L320 320.9V448c0 12.1-6.8 23.2-17.7 28.6s-23.8 
+        4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6V320.9L9 97.3C-.7 
+        85.4-2.8 68.8 3.9 54.9z"/></svg>
+        {{t.value?.length}} คอลัมน์เลือก (+{{(t.value?.length || 0) - 1}} {{t.value?.length === 2 ? 'อื่นๆ' : 'อื่นๆ'}})
+      </mat-select-trigger>
+      <mat-option value="เซตค่าคืนทั้งหมด">เซตค่าคืนทั้งหมด</mat-option><hr/>
+      <mat-option *ngFor="let column of displayedColumns2" [value]="column">
+        {{ column }}
+      </mat-option>
+    </mat-select>
+  </div>
+  
+    
+    
+    <div class="table-responsive">
+      <table
+        class="table table-striped table-hover"
+        style="font-size: 13.5px; width: fit-content"
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+      >
+        <!-- Actions Column -->
+        <ng-container matColumnDef="Aactions">
+          <th
+            class="text-center border"
+            mat-header-cell
+            *matHeaderCellDef
+            style="color: black; font-weight: bold"
+          >
+            # <input cFormControl sizing="sm" disabled />
+          </th>
+
+          <td class="border" mat-cell *matCellDef="let asset">
+            <button
+              class="btn btn-sm btn-primary m-1"
+              (click)="infoasset(asset)"
+              style="width: 28px; height: 28px; padding: 4px"
+            >
+              <!-- <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg> -->
+              <svg
+                [cIcon]="icons.cilInfo"
+                style="color: white; width: 100%; height: 100%"
+              ></svg>
             </button>
 
-            <button class="btn btn-sm btn-primary m-1"
-                style="color: white;" (click)="exportExcel()">
-                <svg [cIcon]="icons.cilDataTransferDown"></svg>
+            <button
+              class="btn btn-sm btn-warning m-1"
+              (click)="editAsset(asset)"
+              style="width: 28px; height: 28px; padding: 4px"
+            >
+              <svg
+                [cIcon]="icons.cilPencil"
+                style="color: white; width: 100%; height: 100%"
+              ></svg>
             </button>
-          </div>
-        </c-card-header> -->
-    <c-card-body>
-        <h1 ><span class="anuphan-700" style="color: green;">รายละเอียดครุภัณฑ์</span></h1><hr/>
-        <div  style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="margin-right: auto;"></div>
-                <p>ส่งออกข้อมูล : 
-                    <button class="btn btn-success " type="button" (click)="exportExcel()" style="color: white;">
-                        <!-- <svg [cIcon]="icons.cilDataTransferUp"></svg> -->
-                        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0,0,256,256" style="height: 22px;">
-                            <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M28.875,0c-0.01953,0.00781 -0.04297,0.01953 -0.0625,0.03125l-28,5.3125c-0.47656,0.08984 -0.82031,0.51172 -0.8125,1v37.3125c-0.00781,0.48828 0.33594,0.91016 0.8125,1l28,5.3125c0.28906,0.05469 0.58984,-0.01953 0.82031,-0.20703c0.22656,-0.1875 0.36328,-0.46484 0.36719,-0.76172v-5h17c1.09375,0 2,-0.90625 2,-2v-34c0,-1.09375 -0.90625,-2 -2,-2h-17v-5c0.00391,-0.28906 -0.12109,-0.5625 -0.33594,-0.75391c-0.21484,-0.19141 -0.50391,-0.28125 -0.78906,-0.24609zM28,2.1875v4.34375c-0.13281,0.27734 -0.13281,0.59766 0,0.875v35.40625c-0.02734,0.13281 -0.02734,0.27344 0,0.40625v4.59375l-26,-4.96875v-35.6875zM30,8h17v34h-17v-5h4v-2h-4v-6h4v-2h-4v-5h4v-2h-4v-5h4v-2h-4zM36,13v2h8v-2zM6.6875,15.6875l5.46875,9.34375l-5.96875,9.34375h5l3.25,-6.03125c0.22656,-0.58203 0.375,-1.02734 0.4375,-1.3125h0.03125c0.12891,0.60938 0.25391,1.02344 0.375,1.25l3.25,6.09375h4.96875l-5.75,-9.4375l5.59375,-9.25h-4.6875l-2.96875,5.53125c-0.28516,0.72266 -0.48828,1.29297 -0.59375,1.65625h-0.03125c-0.16406,-0.60937 -0.35156,-1.15234 -0.5625,-1.59375l-2.6875,-5.59375zM36,20v2h8v-2zM36,27v2h8v-2zM36,35v2h8v-2z"></path></g></g>
-                        </svg>
-                        Excel
-                    </button>
-                </p>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" style="font-size: 13.5px;width: fit-content; " 
-                mat-table [dataSource]="dataSource" matSort>
 
-                <!-- Actions Column -->
-                <ng-container matColumnDef="Aactions" >
-                    <th class="text-center border" mat-header-cell *matHeaderCellDef 
-                        style="color: black;font-weight: bold;"> 
-                        # <input cFormControl sizing="sm" disabled/>
-                    </th>
-                    
-                    <td class="border" mat-cell *matCellDef="let asset" >
-                        <button class="btn btn-sm btn-primary m-1" 
-                            (click)="infoasset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <!-- <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg> -->
-                            <svg [cIcon]="icons.cilInfo" style="color: white; width: 100%; height: 100%;"></svg>
-                        </button>
+            <button
+              class="btn btn-sm btn-danger m-1"
+              (click)="deleteAsset(asset)"
+              style="width: 28px; height: 28px; padding: 4px"
+            >
+              <svg
+                [cIcon]="icons.cilTrash"
+                style="color: white; width: 100%; height: 100%"
+              ></svg>
+            </button>
+          </td>
+        </ng-container>
 
-                        <button class="btn btn-sm btn-warning m-1" 
-                            (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
-                        </button>
+        <!-- Dynamic Columns -->
+        <ng-container
+          *ngFor="let column of displayedColumns2; let i = index"
+          [matColumnDef]="column"
+        >
+          <th
+            class="mat-header-cell anuphan-600 border"
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+          >
+            <div style="color: black; font-weight: bold">
+              <label cLabel>{{ column }}</label>
+              <input
+                cFormControl
+                sizing="sm"
+                placeholder="ค้นหาข้อมูล"
+                (keyup)="applyFilter($event)"
+                (focus)="setupFilter(column)"
+              />
+            </div>
+          </th>
 
-                        <button class="btn btn-sm btn-danger m-1" 
-                            (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
-                        </button>
-                        
-                    </td>
+          <td class="anuphan-500 border" mat-cell *matCellDef="let asset">
+            <div *ngIf="column !== 'ราคาต่อหน่วย'; else currencyFormat">
+              {{ asset[column] }}
+            </div>
 
-                </ng-container>
-        
-                <!-- Dynamic Columns -->
-                <ng-container *ngFor="let column of displayedColumns2; let i = index" [matColumnDef]="column">
-                    <th class="mat-header-cell anuphan-600 border" mat-header-cell *matHeaderCellDef mat-sort-header>
-                        <div style="color: black; font-weight: bold;">
-                            <label cLabel>{{ column }}</label>
-                            <input cFormControl sizing="sm"
-                                    placeholder="ค้นหาข้อมูล"
-                                   (keyup)="applyFilter($event)" 
-                                   (focus)="setupFilter(column)" />
-                        </div>
-                    </th>
+            <ng-template #currencyFormat>
+              {{ asset[column] | currency : "" : "" : "1.2-2" }}
+            </ng-template>
+          </td>
+        </ng-container>
 
-                    <td class="anuphan-500 border" mat-cell *matCellDef="let asset" >
+        <!-- Header Row -->
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns3"
+        ></tr>
 
-                        <div *ngIf="column!== 'ราคาต่อหน่วย'; else currencyFormat">
-                            {{ asset[column] }}
-                        </div>
+        <!-- Data Rows -->
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: displayedColumns3
+          "
+        ></tr>
+      </table>
 
-                        <ng-template #currencyFormat >
-                            {{ asset[column] | currency:'':'':'1.2-2' }}
-                        </ng-template>
+      <!-- Paginator -->
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]"
+        [pageSize]="10"
+        showFirstLastButtons
+        class="paginator-style"
+      ></mat-paginator>
+    </div>
 
-                    </td>
-                </ng-container>
-                
-                
-                <!-- Header Row -->
-                <tr mat-header-row *matHeaderRowDef="['Aactions', 'วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร','หน่วยงาน', 'ฝ่าย', 'ที่อยู่', 'ผู้ใช้งาน', 'หมายเหตุ']"></tr>
-        
-                <!-- Data Rows -->
-                <tr mat-row *matRowDef="let row; columns: ['Aactions','วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย', 'วิธีการได้มา', 'เลขที่เอกสาร','หน่วยงาน', 'ฝ่าย', 'ที่อยู่', 'ผู้ใช้งาน', 'หมายเหตุ'];"></tr>
-            </table>
-
-            <!-- Paginator -->
-            <mat-paginator 
-                [pageSizeOptions]="[ 5,10,15,30, 50, 70, 100]" 
-                [pageSize]="10" 
-                showFirstLastButtons 
-                class="paginator-style"></mat-paginator>
-        </div>
-        
-          <!-- <table class="table table-striped" 
+    <!-- <table class="table table-striped" 
           style="font-size: 14px;width:max-content;"  
           cTable mat-table 
           [dataSource]="dataSource"  
@@ -119,12 +210,12 @@
                   <th class="border" scope="col">แผนก</th>
                   <th class="border" scope="col">ผู้ใช้งาน</th>
                   <th class="border" scope="col">หมายเหตุ</th> -->
-                  <!-- <th class="border" scope="col">ดำเนินการ</th> -->
-              <!-- </tr>
+    <!-- <th class="border" scope="col">ดำเนินการ</th> -->
+    <!-- </tr>
           </thead>
           <tbody> -->
-              <!-- <tr *ngFor="let asset of assetDetails; let i = index" (click)="toggleCheckbox($event)"> -->
-              <!-- <tr *ngFor="let asset of assetDetails; let i = index">
+    <!-- <tr *ngFor="let asset of assetDetails; let i = index" (click)="toggleCheckbox($event)"> -->
+    <!-- <tr *ngFor="let asset of assetDetails; let i = index">
                   <td class="col">
                       <div style="display: flex;">
                           <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)">
@@ -149,16 +240,10 @@
               </tr>
               
       </table> -->
-      <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator> -->
-      <!-- <button class="btn btn-sm btn-primary" (click)="editAsset(Asset)">แก้ไข</button>
+    <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator> -->
+    <!-- <button class="btn btn-sm btn-primary" (click)="editAsset(Asset)">แก้ไข</button>
       <button class="btn btn-sm btn-danger" (click)="deleteAsset(Asset)">ลบ</button> -->
 
-  
-          
-          
-        
-        
-        
-      <!-- </app-docs-example> -->
-    </c-card-body>
-  </c-card>
+    <!-- </app-docs-example> -->
+  </c-card-body>
+</c-card>

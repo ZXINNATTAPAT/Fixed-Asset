@@ -1,13 +1,9 @@
-<c-card class="shadow-sm" >
-    <c-card-header>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="margin-right: auto;" style="color: green;">รายละเอียดครุภัฑณ์ล่าสุด3</strong>
-        </div>
-    </c-card-header>
-
-    <c-card-body>
-            <div class="table-responsive">
-                <!-- <table class="table 
+<c-card class="border shadow">
+  <c-card-body>
+    <h3 class="border-bottom">
+      <span class="anuphan-700" style="color: green;">รายละเอียดครุภัณฑ์ที่ครอบครอง</span></h3>
+    <div class="table-responsive">
+      <!-- <table class="table 
                     table-striped table-hover" 
                     style="font-size: 14px; 
                     width: max-content;"
@@ -66,49 +62,45 @@
                     <tr mat-row *matRowDef="let row; columns: ['Aactions','วันเดือนปี', 'รหัสครุภัณฑ์', 'รายการ', 'ราคาต่อหน่วย',  'ฝ่าย', 'ผู้ใช้งาน', 'หมายเหตุ'];"></tr>
 
                 </table> -->
-                
-                <table mat-table [dataSource]="dataSource">
-                    <!-- Column definitions -->
 
-                    <!-- <ng-container matColumnDef="assetType">
-                      <th mat-header-cell *matHeaderCellDef> ประเภทครุภัณฑ์ </th>
-                      <td mat-cell *matCellDef="let element"> 
-                        {{ element.assetType }} </td>
-                    </ng-container> -->
+      <table mat-table [dataSource]="dataSource">
 
-                    <ng-container matColumnDef="category">
-                      <th mat-header-cell *matHeaderCellDef> หมวดหมู่ครุภัณฑ์ </th>
-                      <td mat-cell *matCellDef="let element"> 
-                        {{ element.category }} </td>
-                    </ng-container>
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>หมวดหมู่ครุภัณฑ์</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.category }}
+          </td>
+        </ng-container>
 
-                    <ng-container matColumnDef="assetType">
-                      <th mat-header-cell *matHeaderCellDef> ประเภทครุภัณฑ์</th>
-                      <td mat-cell *matCellDef="let element"> 
-                        {{ element.assetType }} </td>
-                    </ng-container>
+        <ng-container matColumnDef="assetType">
+          <th mat-header-cell *matHeaderCellDef>ประเภทครุภัณฑ์</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.assetType }}
+          </td>
+        </ng-container>
 
-                    <ng-container matColumnDef="assetCount">
-                      <th mat-header-cell *matHeaderCellDef>  </th>
-                      <td mat-cell *matCellDef="let element"> 
-                        {{ element.assetCount }} </td>
-                    </ng-container>
-                    
-                    <!-- Table rows -->
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                  </table>
-                  
+        <ng-container matColumnDef="assetCount">
+          <th mat-header-cell *matHeaderCellDef>จำนวน</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.assetCount }}
+          </td>
+        </ng-container>
 
-                <!-- Paginator -->
-                <mat-paginator 
-                    [length]="dataSource.data.length" 
-                    [pageSizeOptions]="[5,10, 50, 100]"
-                    showFirstLastButtons  
-                    aria-label="Select page"  
-                    class="paginator-style">
-                </mat-paginator>
-                
-            </div>
-    </c-card-body>
-  </c-card>
+        <!-- Table rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <!-- Paginator -->
+      <mat-paginator
+        [length]="dataSource.data.length"
+        [pageSizeOptions]="[5, 10, 50, 100]"
+        showFirstLastButtons
+        aria-label="Select page"
+        class="paginator-style"
+      >
+      </mat-paginator>
+      
+    </div>
+  </c-card-body>
+</c-card>

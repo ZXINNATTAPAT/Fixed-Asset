@@ -14,7 +14,7 @@ import {
   InputGroupComponent,
   BorderDirective,
 } from '@coreui/angular';
-import { CommonModule, NgStyle } from '@angular/common';
+import { CommonModule, NgIf, NgStyle } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormsModule,
@@ -22,6 +22,8 @@ import {
   Validators,
   FormGroup,
   FormBuilder,
+  ValidatorFn,
+  AbstractControl,
 } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 
@@ -186,7 +188,7 @@ export interface asc {
     FormLabelDirective,
     FormControlDirective,
     ButtonDirective,
-    NgStyle,
+    NgStyle,NgIf,
     IconDirective,
     MatSelect,
     MatOption,
@@ -207,6 +209,8 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   hidden: boolean = true;
 
   hidden2: boolean = true;
+
+  assetDetails: any[] = [];
 
   openImport(): void {
     this.hidden2 = false;
@@ -233,7 +237,13 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   showAssetCategoryInput?: boolean;
 
   userinfo: any = [];
+
   token: any;
+
+  fixedPrefix: string = 'กกต 0401-';
+  fixedSuffix: string = '-2567';
+  editablePartLength: number = 3;
+
 
   public readinfo() {
     this.token = localStorage.getItem('token');
@@ -244,14 +254,13 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder) {
-
     this.readinfo();
 
     this.http
       .get<any[]>('https://localhost:7204/api/Assettypecodes')
       .subscribe((data) => {
         this.assetTypes = data;
-        console.log(this.assetTypes);
+        // console.log(this.assetTypes);
       });
 
     this.http
@@ -259,65 +268,153 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((data) => {
         this.assetCategory = data;
         this.assetCategoryCtrl.setValue(this.assetCategory);
-        this.filteredAssetCategories.next(this.assetCategory.slice());
-        console.log(this.assetCategory);
+        // this.filteredAssetCategories.next(this.assetCategory.slice());
+        // console.log(this.assetCategory);
       });
   }
 
   // เพิ่ม form control สำหรับ input เพิ่มเติม
   ngOnInit(): void {
-    
-    this.assetCategoryCtrl = this.formBuilder.control(null);// Initialize assetCategoryCtrl with a null value
-   
-    this.asset = this.formBuilder.group({ // Initialize the form group
+    this.getAssetDetails();
+
+    this.assetCategoryCtrl = this.formBuilder.control(null);
+    // Initialize assetCategoryCtrl with a null value
+
+    // Initialize the form group
+    this.asset = this.formBuilder.group({
       assetType: [''],
       assetCategory: [''],
-      assetCode: [''], // Set this initially as empty
+      assetCode: ['', [Validators.required,Validators.pattern(/^[ก-๙]{3}\s\d{4}-\d{3}-\d{4}$/)]], // Set this initially as empty
       assetName: ['', Validators.required],
       quantity: ['1'],
-      purchasedFrom: [''],
-      department: [''],
-      agency: [''],
-      assetLocation: [''],
-      responsibleEmployee: [''],
+      unit:[''],
+      purchasedFrom: ['', Validators.required],
+      department: [`${this.userinfo.position}`],
+      agency: [`${this.userinfo.workgroup}`],
+      assetLocation: ['', Validators.required],
+      responsibleEmployee: ['', Validators.required],
       documentNumber: [''],
       purchasePrice: [''],
-      purchaseDate: [''],
+      CalculatedPrice:[''],
+      purchaseDate: [''], //วันที่ซื้อ
+      ReceiptDate: [''], //วันที่ได้รับ
+      TaxInvoiceNumber: [''], //เลขที่ใบกำกับภาษี
+      DepreciationRate: [''], //อัตราค่าเสื่อม
+      DepreciationStartDate: [''],
+      DepreciationCalculationStartDate: [''],
       Note: [''],
       additionalInput: [''],
     });
-  
+
+    // this.asset.get('agency')?.valueChanges.subscribe(this.userinfo.workgroup);
+
+    this.asset.get('assetCode')?.valueChanges.subscribe((value) => {
+      const check = this.assetDetails.some(
+        (asset) => asset.assetCode === value
+      );
+      if (check) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+          },
+        });
+        Toast.fire({
+          icon: 'error',
+          html: `<span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: red;">รหัสรหัสครุภัณฑ์ซ้ำ</span>`,
+        });
+      }
+      else{
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+          },
+        });
+        Toast.fire({
+          icon: 'success',
+          html: `<span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">รหัสรหัสครุภัณฑ์ใช้ได้</span>`,
+        });
+      }
+    });
+
+    this.asset.get('ReceiptDate')?.valueChanges.subscribe((value) => {
+      this.asset.patchValue({
+        DepreciationStartDate: value,
+        DepreciationCalculationStartDate: value,
+      });
+    });
+
+    this.asset.get('purchasePrice')?.valueChanges.subscribe((value) =>{
+      this.asset.patchValue({CalculatedPrice : value});
+    });
+
     // Function to update assetCode
     const updateAssetCode = () => {
-
-      const assetType = this.asset.get('assetType')?.value || '';
+      // const assetType = this.asset.get('assetType')?.value || '';
 
       const assetCategory = this.asset.get('assetCategory')?.value || '';
 
       const purchaseDate = this.asset.get('purchaseDate')?.value || '';
-  
+
       let year = '';
-  
+
       if (purchaseDate) {
         const date = new Date(purchaseDate);
-        
-        const isBuddhistEra = date.getFullYear() > 2500; // Example check for Buddhist Era (BE)
-        
-        year = isBuddhistEra ? date.getFullYear().toString() : (date.getFullYear() + 543).toString();
+        const isBuddhistEra = date.getFullYear() > 2500;
+        year = isBuddhistEra
+          ? date.getFullYear().toString()
+          : (date.getFullYear() + 543).toString();
       }
-         this.asset.patchValue({
-          assetCode: `${this.userinfo.affiliation} ${assetType}-${assetCategory}-${year}`
-        });
-      
+
+      const newAssetCode = `${this.userinfo.affiliation} ${assetCategory}-001-${year}`;
+
+      // Check if the new asset code already exists in assetDetails
+      const isAssetCodeExist = this.assetDetails.some(
+        (asset) => asset.assetCode === newAssetCode
+      );
+
+      if (isAssetCodeExist) {
+        let suffix = 1;
+        let newAssetCodeUnique = newAssetCode;
+
+        // Find a unique asset code by incrementing the suffix
+        while (
+          this.assetDetails.some(
+            (asset) => asset.assetCode === newAssetCodeUnique
+          )
+        ) {
+          suffix++;
+          newAssetCodeUnique = `${
+            this.userinfo.affiliation
+          } ${assetCategory}-${suffix.toString().padStart(3, '0')}-${year}`;
+        }
+
+        this.asset.patchValue({ assetCode: newAssetCodeUnique });
+      } else {
+        this.asset.patchValue({ assetCode: newAssetCode });
+      }
     };
-  
+
+    // Subscribe to changes in ReceiptDate and update DepreciationStartDate and DepreciationCalculationStartDate
+    
     // Subscribe to value changes on assetType, assetCategory, and purchaseDate
     this.asset.get('assetType')?.valueChanges.subscribe(updateAssetCode);
 
     this.asset.get('assetCategory')?.valueChanges.subscribe(updateAssetCode);
 
     this.asset.get('purchaseDate')?.valueChanges.subscribe(updateAssetCode);
-  
+
     // Subscribe to value changes on assetCategoryFilterCtrl
     this.assetCategoryFilterCtrl.valueChanges
       .pipe(takeUntil(this._onDestroy))
@@ -325,19 +422,64 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filterAssetCategories();
       });
   }
-  
-  
-  
-    // Initialize the form group
 
-    // console.log(this.assetCategory);
+  handleInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    const fixedPart = this.fixedPrefix;
+    const suffix = this.fixedSuffix;
+    const regex = /^กกต\s0401-\d{3}-2567$/;
 
-  //   this.assetCategoryFilterCtrl.valueChanges
-  //     .pipe(takeUntil(this._onDestroy))
-  //     .subscribe(() => {
-  //       this.filterAssetCategories();
-  //     });
-  // }
+    // Ensure the fixed parts are not modified
+    if (!regex.test(value)) {
+      input.value = this.asset.get('assetCode')!.value;
+    } else {
+      const editablePart = value.slice(fixedPart.length, fixedPart.length + this.editablePartLength);
+      const newValue = `${fixedPart}${editablePart}${suffix}`;
+      this.asset.get('assetCode')!.setValue(newValue);
+    }
+  }
+
+  handleKeyDown(event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    const cursorPosition = input.selectionStart;
+
+    // Prevent editing fixed parts of the input
+    if (cursorPosition! < 10 || cursorPosition! >= 13) {
+      event.preventDefault();
+    }
+  }
+
+
+
+
+  //เรียกข้อมูลรายการครุทั้งหมด
+  getAssetDetails(): void {
+    this.http
+      .get<any[]>('https://localhost:7204/api/AssetDetails')
+      .subscribe((data) => {
+        this.assetDetails = data.filter((asset) => {
+          if (this.userinfo.affiliation !== 'กกต') {
+            return (
+              asset.assetCode.startsWith(this.userinfo.affiliation) &&
+              !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+            );
+          } else {
+            return (
+              !asset.assetCode.startsWith('กกต.') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
+              asset.agency.startsWith(`${this.userinfo.workgroup}`)
+            );
+          }
+        });
+        // .map((asset) => {
+        //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
+        //   asset = this.translateToThai(asset);
+        //   return asset;
+        // });
+        // Update the data source with the new asset details
+        // this.dataSource.data = this.assetDetails;
+      });
+  }
 
   ngAfterViewInit() {
     // this.setInitialValue();
@@ -348,48 +490,62 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     this._onDestroy.complete();
   }
 
+  // filterAssetCategories(): void {
+  //   let search = this.assetCategoryFilterCtrl.value;
+  //   if (!search) {
+  //     // this.filteredAssetCategories.next(this.assetCategory.slice());
+  //     this.filteredAssetCategories.next(this.assetCategory.slice());//ใช้ระบุค่าใน
+  //     return;
+  //   } else {
+  //     search = search.toLowerCase();
+  //   }
+  //   this.filteredAssetCategories.next(
+  //     this.assetCategory.filter(
+  //       (category) => category.asc_Name.toLowerCase().indexOf(search) > -1
+  //     )
+  //   );
+  // }
+
   filterAssetCategories(): void {
-    let search = this.assetCategoryFilterCtrl.value;
-    if (!search) {
-      this.filteredAssetCategories.next(this.assetCategory.slice());
-      return;
-    } else {
-      search = search.toLowerCase();
-    }
-    this.filteredAssetCategories.next(
-      this.assetCategory.filter(
-        (category) => category.asc_Name.toLowerCase().indexOf(search) > -1
-      )
-    );
+    const searchValue = this.assetCategoryFilterCtrl.value?.toLowerCase();
+    const assetType = this.asset.get('assetType')?.value;
+  
+    const filteredAssetCategories = this.assetCategory.filter(category => {
+      return category.assetCode === assetType &&
+        (searchValue? category.asc_Name.toLowerCase().includes(searchValue) : true);
+    });
+  
+    this.filteredAssetCategories.next(filteredAssetCategories);
   }
 
-  setInitialValue(): void {
-    this.filteredAssetCategories
-      .pipe(take(1), takeUntil(this._onDestroy))
-      .subscribe(() => {
-        console.log(this.singleSelect);
-        this.singleSelect.compareWith = (a: any, b: any) =>
-          a && b && a.asc_Name === b.asc_Name;
-      });
-  }
 
-  selection(): void {
-    if (this.assetTypeSelect) {
-      const selectedValue = (
-        this.assetTypeSelect.nativeElement as HTMLSelectElement
-      ).value;
-      this.assetTypeInputVisible = selectedValue === '0';
-    }
-  }
+  // setInitialValue(): void {
+  //   this.filteredAssetCategories
+  //     .pipe(take(1), takeUntil(this._onDestroy))
+  //     .subscribe(() => {
+  //       console.log(this.singleSelect);
+  //       this.singleSelect.compareWith = (a: any, b: any) =>
+  //         a && b && a.asc_Name === b.asc_Name;
+  //     });
+  // }
 
-  toggleAssetCategoryInputVisibility(): void {
-    if (this.assetCategorySelect) {
-      const selectedValue = (
-        this.assetCategorySelect.nativeElement as HTMLSelectElement
-      ).value;
-      this.showAssetCategoryInput = selectedValue === '0';
-    }
-  }
+  // selection(): void {
+  //   if (this.assetTypeSelect) {
+  //     const selectedValue = (
+  //       this.assetTypeSelect.nativeElement as HTMLSelectElement
+  //     ).value;
+  //     this.assetTypeInputVisible = selectedValue === '0';
+  //   }
+  // }
+
+  // toggleAssetCategoryInputVisibility(): void {
+  //   if (this.assetCategorySelect) {
+  //     const selectedValue = (
+  //       this.assetCategorySelect.nativeElement as HTMLSelectElement
+  //     ).value;
+  //     this.showAssetCategoryInput = selectedValue === '0';
+  //   }
+  // }
 
   onSubmit(): void {
     this.http
@@ -398,21 +554,28 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         (response) => {
           console.log(response);
           Swal.fire({
-            title: 'บันทึกเสร็จสิ้น',
+            html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
             icon: 'success',
+            showCancelButton: false,
+            confirmButtonText: 'OK'
+          }).then((result) => {
+          // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
+            this.getAssetDetails();
+            this.asset.reset();
+            this.assetCategoryCtrl.reset();
           });
         },
         (error) => {
           console.error(error);
           if (error) {
             Swal.fire({
-              title: 'มีข้อมูลในระบบอยู่แล้ว',
+              html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
               icon: 'error',
             });
+            console.log(this.asset);
           }
         }
       );
-    this.asset.reset();
   }
 
   translateToEnglish(asset: any): any {
@@ -494,19 +657,32 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       this.asset2 = jsonArray;
 
       // Process the imported JSON data
-      console.log(jsonArray);
-      console.log(this.asset2);
+      // console.log(jsonArray);
+      // console.log(this.asset2);
     };
 
     reader.readAsBinaryString(file);
   }
 
   convertToDate(dateString: string): Date {
-    const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const thaiMonths = [
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.',
+    ];
     const parts = dateString.split(' ');
 
     if (parts.length !== 3) {
-        throw new Error("Invalid date format");
+      throw new Error('Invalid date format');
     }
 
     const day = parseInt(parts[0], 10);
@@ -514,11 +690,11 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     let year = parseInt(parts[2], 10);
 
     if (isNaN(day) || month === -1 || isNaN(year)) {
-        throw new Error("Invalid date components");
+      throw new Error('Invalid date components');
     }
 
     if (this.isThaiYear(year)) {
-        year = this.convertThaiToGregorian(year);
+      year = this.convertThaiToGregorian(year);
     }
 
     return new Date(year, month, day);
@@ -531,6 +707,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   convertThaiToGregorian(year: number): number {
     return year - 543; // Convert Buddhist year to Gregorian year
   }
+
   // convertToDate(dateString: string): string {
   //   // Map ชื่อเดือนภาษาไทยเป็นเลขเดือน
   //   const monthMap: { [key: string]: number } = {
@@ -565,22 +742,68 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   //   return formattedDate;
   // }
 
+  // ตรวจสอบข้อมูลว่าถูกต้องตามเงื่อนไขหรือไม่
+  validateAsset(asset: any): boolean {
+    // ตรวจสอบข้อมูล asset.note หากเป็นตัวเลข ให้แปลงเป็นสตริง
+    if (typeof asset.note === 'number') {
+      asset.note = asset.note.toString();
+    }
+
+    // ตรวจสอบข้อมูลตามเงื่อนไขที่กำหนด
+    if (
+      asset.purchaseDate &&
+      asset.assetCode &&
+      asset.assetName &&
+      asset.purchasePrice > 0
+    ) {
+      return true; // ถ้าข้อมูลถูกต้องคืนค่าเป็น true
+    } else {
+      Swal.fire({
+        title: 'มีข้อมูลมีบางอย่างผิดพลาด',
+        text: `Asset Code: ${asset.assetCode} มีข้อมูลไม่ครบถ้วนหรือไม่ถูกต้อง`,
+        icon: 'error',
+      });
+      return false; // ถ้าข้อมูลไม่ถูกต้องคืนค่าเป็น false
+    }
+  }
+
+  validateUniqueAssetCodes(assets: any[]): boolean {
+    const assetCodeSet = new Set();
+    for (const asset of assets) {
+      if (assetCodeSet.has(asset.assetCode)) {
+        Swal.fire({
+          title: 'มีข้อมูลซ้ำกัน',
+          text: `Asset Code: ${asset.assetCode} ซ้ำกันในไฟล์นำเข้า`,
+          icon: 'error',
+        });
+        return false;
+      }
+      assetCodeSet.add(asset.assetCode);
+    }
+    return true;
+  }
+
   async onSubmit2(): Promise<void> {
     // ตรวจสอบข้อมูลทั้งหมดก่อน
+    if (!this.validateUniqueAssetCodes(this.asset2)) {
+      return; // หยุดการทำงานถ้าพบข้อมูลซ้ำกัน
+    }
+
     for (let i = 0; i < this.asset2.length; i++) {
       const asset = this.asset2[i];
       if (!this.validateAsset(asset)) {
         return; // หยุดการทำงานถ้าพบข้อมูลไม่ถูกต้อง
       }
     }
+
     // ถ้าข้อมูลทั้งหมดถูกต้อง ให้ส่งคำขอ HTTP เป็น batch
-    const batchSize = 25; // Adjust the batch size as needed
+    const batchSize = 25; // ปรับขนาดของ batch ตามต้องการ
     for (let i = 0; i < this.asset2.length; i += batchSize) {
       const batch = this.asset2.slice(i, i + batchSize);
       await Promise.all(batch.map((asset: any) => this.sendRequest(asset)));
     }
   }
-  
+
   private async sendRequest(asset: any): Promise<void> {
     try {
       const response = await firstValueFrom(
@@ -604,42 +827,45 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }
   }
-  
-  // ตรวจสอบข้อมูลว่าถูกต้องตามเงื่อนไขหรือไม่
-  validateAsset(asset: any): boolean {
 
-    if (typeof asset.note === 'number') {
-      // แปลงค่าเฉพาะเมื่อมันเป็น number
-      asset.note = asset.note.toString();
-    }
-    // ในที่นี้คุณสามารถเขียนเงื่อนไขตามที่คุณต้องการได้
-    if (
-      asset.purchaseDate &&
-      asset.assetCode &&
-      asset.assetName &&
-      asset.purchasePrice > 0
-    ) {
-      return true; // ถ้าข้อมูลถูกต้องคืนค่าเป็น true
-    } else {
-      Swal.fire({
-        title: 'มีข้อมูลมีบางอย่างผิดพลาด',
-        text: `Asset Code: ${asset.assetCode} has missing or invalid data`,
-        icon: 'error',
-      });
-      return false; // ถ้าข้อมูลไม่ถูกต้องคืนค่าเป็น false
-    }
-  }
-  
   toggleHidden(): void {
     this.hidden = !this.hidden; // เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
   }
 
   autoInput() {
+    this.asset.get('quantity')?.setValue(1); //เซคจำนวน
+
+    this.asset.get('CalculatedPrice')?.setValue(this.asset.get('purchasePrice')?.value); //เซคราคาคำนวณ
+
+    this.asset
+      .get('DepreciationCalculationStartDate')
+      ?.setValue(this.asset.get('ReceiptDate')?.value);
+
+    this.asset
+      .get('DepreciationStartDate')
+      ?.setValue(this.asset.get('ReceiptDate')?.value);
+
+    if (this.userinfo.affiliation === 'กกต') {
+      this.asset.get('agency')?.setValue(`${this.userinfo.workgroup}`); //เซตสังกัด หรือ สำนัก
+
+      this.asset.get('department')?.setValue(`${this.userinfo.position}`); //เซตฝ่าย
+    } else {
+      // this.asset.get('agen')
+    }
+
     const assetCodeInput = this.asset.get('assetCode');
+
+    // const depreciationStartDateInput = this.asset.get('ReceiptDate');
+    // const depreciationStartDateInput = this.asset.get('DepreciationStartDate');
+    // depreciationStartDateInput?.value?.setValue(this.asset.get('DepreciationStartDate')?.value)
+
     if (assetCodeInput && assetCodeInput.value) {
       const currentValue = assetCodeInput.value;
+
       if (!currentValue.startsWith(`${this.userinfo.affiliation}`)) {
-        assetCodeInput.setValue(`${this.userinfo.affiliation}`+' '+ currentValue);
+        assetCodeInput.setValue(
+          `${this.userinfo.affiliation}` + ' ' + currentValue
+        );
       }
     }
   }

@@ -33,7 +33,10 @@ import Swal from 'sweetalert2'
         FormControlDirective, 
         ButtonDirective, NgStyle]
 })
+
 export class AssetDetails2Component implements OnInit {
+
+  
 
   autoInput(event: KeyboardEvent) {
     const assetCodeInput = document.getElementById('assetCodeInput') as HTMLInputElement;
@@ -71,7 +74,7 @@ export class AssetDetails2Component implements OnInit {
         });
         // สร้างอาเรย์ของ assetCode
         this.assetCodes = this.assetDetails.map((asset: { assetCode: any; }) => asset.assetCode);
-        console.log(this.assetDetails);
+        // console.log(this.assetDetails);
     });
 }
   

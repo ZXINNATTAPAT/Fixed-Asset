@@ -12,7 +12,7 @@ import {
   CardHeaderComponent,
   CardBodyComponent,
 } from '@coreui/angular';
-import { CommonModule, DatePipe, NgStyle } from '@angular/common';
+import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import {
@@ -36,7 +36,10 @@ import {
 import { IconDirective } from '@coreui/icons-angular';
 
 import {
+  MatFooterCell,
+  MatFooterCellDef,
   MatFooterRow,
+  MatFooterRowDef,
   MatRowDef,
   MatTableDataSource,
   MatTableModule,
@@ -49,7 +52,6 @@ import {
 import { MatSort } from '@angular/material/sort';
 
 import 'moment/locale/th.js';
-// import moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 
@@ -70,7 +72,6 @@ interface AssetDetails {
 @Injectable()
 export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   changes = new Subject<void>();
-
   // For internationalization, the `$localize` function from
   // the `@angular/localize` package can be used.
   firstPageLabel = $localize`First page`;
@@ -115,9 +116,12 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
     MatPaginator,
     MatFooterRow,
     MatRowDef,
+    MatFooterCell,
+    MatFooterCellDef,
+    MatFooterRowDef,
 
     ButtonDirective,
-    NgStyle,
+    NgStyle,NgIf
   ],
   templateUrl: './tablewiget.component.html',
   styleUrl: './tablewiget.component.scss',
@@ -179,7 +183,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     this.token = localStorage.getItem('token');
     const decodedToken = jwtDecode(this.token);
     this.userinfo = decodedToken;
-    console.log(this.userinfo);
+    // console.log(this.userinfo);
   }
 
   constructor(private http: HttpClient) {
@@ -225,6 +229,11 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     window.location.href = '#/system/AssetDetails';
   }
 
+  totalPricePerUnit(): number {
+    return this.dataSource.data.reduce((acc, curr) => acc +Number(curr['ราคาต่อหน่วย']) , 0);
+}
+
+
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
       purchaseDate: 'วันเดือนปี',
@@ -256,6 +265,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     return formattedDate ?? '';
   }
+
   formatCurrency(price: number): string {
     return price.toLocaleString('en-US', {
       maximumFractionDigits: 2,

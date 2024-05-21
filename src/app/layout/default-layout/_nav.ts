@@ -59,7 +59,7 @@ export const navItems: INavData[] = [
     ]
   },
   {
-    name: 'รายละเอียดครุภัฑณ์',
+    name: 'รายการครุภัณฑ์',
     url: '/assettable',
     // icon: 'nav-cil-folder',
     iconComponent: { name: 'cil-pencil' }

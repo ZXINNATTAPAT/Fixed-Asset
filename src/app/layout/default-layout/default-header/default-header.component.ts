@@ -130,7 +130,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     this.token = localStorage.getItem('token');
     const decodedToken = jwtDecode(this.token);
     this.userinfo = decodedToken;
-    console.log(this.userinfo);
+    // console.log(this.userinfo);
   }
   setshow() {
     this.http
@@ -144,11 +144,11 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
             id: item.id,
             name_th: item.name_th,
           }));
-          console.log(this.provinceset);
-          console.log(CountyData.codecounty);
+          // console.log(this.provinceset);
+          // console.log(CountyData.codecounty);
 
           for (const county of CountyData.codecounty) {
-            if (this.userinfo.affiliation.toString() !== 'กกต.สกล') {
+            if (this.userinfo.affiliation.toString() !== 'กกต') {
               // ตรวจสอบเงื่อนไขของการเปรียบเทียบชื่อ
               if (this.userinfo.affiliation.toString() === county.name_th) {
                 console.log('Found matching affiliation:', county);

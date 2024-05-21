@@ -1,5 +1,5 @@
 import { DOCUMENT, NgStyle } from '@angular/common';
-import { Component, DestroyRef, effect, inject, OnInit, Renderer2, signal, WritableSignal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, NgModule, OnInit, Renderer2, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ChartOptions } from 'chart.js';
 import {
@@ -24,6 +24,7 @@ import { IconDirective } from '@coreui/icons-angular';
 
 import { WidgetsBrandComponent } from '../widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '../widgets/widgets-dropdown/widgets-dropdown.component';
+import { HoneycombComponent } from '../dashboard/honeycomb/honeycomb.component';
 import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from 'src/app/api-service.service';
@@ -56,7 +57,7 @@ interface IUser {
       ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, 
       ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressBarDirective, 
       ProgressComponent, WidgetsBrandComponent, CardHeaderComponent, TableDirective, AvatarComponent, AssetTableComponent, 
-      TablewigetComponent,Tablewiget2Component,Tablewiget3Component ,ChartsComponent]
+      TablewigetComponent,Tablewiget2Component,Tablewiget3Component ,ChartsComponent ,HoneycombComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -83,7 +84,7 @@ export class DashboardComponent implements OnInit {
     this.apiService.fetchData('assetDetails').subscribe(data => {
       this.numberOfAssets = data.length;
       // this.assetcom = data.assetCode.startsWith('004');
-      console.log("Number of assets: ", this.numberOfAssets);
+      // console.log("Number of assets: ", this.numberOfAssets);
     });
   }
   

@@ -1,0 +1,67 @@
+<ng-container>
+  <c-header class="mb-2 border-bottom shadow-sm" style="background-color: #ffffff; color: black">
+    <c-container [fluid]="true">
+      <!-- <div class="container"> -->
+      <c-header-brand
+        [routerLink]
+        class="anuphan-700 p-2"
+        style="font-size: x-large; color:black;"
+        ><img
+          class="m-1"
+          src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png"
+          height="62.5"
+          alt="ss"
+        /> สำนักงานคณะกรรมการการเลือกตั้ง</c-header-brand
+      >
+      <c-header-nav class="ms-auto">
+        <c-nav-item>
+          <a [active]="true" [routerLink] cNavLink style="color: black">Home</a>
+        </c-nav-item>
+        <c-nav-item>
+          <a cNavLink routerLink="/components/alert" style="color: black"
+            >Link</a
+          >
+        </c-nav-item>
+        <c-nav-item>
+          <a
+            cNavLink
+            disabled
+            routerLink="/components/alert"
+            style="color: black"
+            >Disabled</a
+          >
+        </c-nav-item>
+      </c-header-nav>
+      <!-- </div> -->
+    </c-container>
+  </c-header>
+</ng-container>
+<br />
+
+<c-container fluid>
+  <div class="row">
+    <div class="col">
+      <div class="card shadow-sm "style="border: none; ">
+        <div class="card-body">
+             <h1><span class="anuphan-700">ภาพรวมของส่วนกลางทั้งหมด</span></h1>
+            <app-honeycomb></app-honeycomb>
+        </div>
+    </div>
+
+    </div>
+    <div class="col">
+       <div class="card shadow-sm "style="border: none; ">
+        <div class="card-body">
+             <h1><span class="anuphan-700">ภาพรวมของส่วนกลางทั้งหมด</span></h1>
+             <app-thailand-map></app-thailand-map>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+   
+    <br/>
+    
+
+</c-container>
+
