@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
 
 interface AssetDetails {
+  id:string,
   unitCode: string,
   unitName: string
 }
@@ -45,6 +46,7 @@ interface AssetDetails {
   templateUrl: './countingunit.component.html',
   styleUrl: './countingunit.component.scss'
 })
+
 export class CountingunitComponent implements OnInit {
 
   yourFormName: FormGroup<any> | undefined;
@@ -86,7 +88,7 @@ export class CountingunitComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient) { }
 
   displayedColumns2: string[] = [
     "รหัสหน่วยนับ",
@@ -140,7 +142,7 @@ export class CountingunitComponent implements OnInit {
   
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/Factiontypecodes/${asset.id}`).subscribe(
+        this.http.delete(`https://localhost:7204/api/Countingunits/${asset.id}`).subscribe(
           () => {
             const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
               if (index !== -1) {
@@ -173,6 +175,7 @@ export class CountingunitComponent implements OnInit {
       }
     });
   }
+
   editAsset(_t35: any) {
     throw new Error('Method not implemented.');
   }

@@ -51,6 +51,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import 'moment/locale/th.js';
 // import moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
+import { DataService } from 'src/app/data-service/data-service.component';
 
 interface AssetDetails {
   assetId: any;
@@ -180,14 +181,24 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
       this.dataSubscription.unsubscribe();
     }
   }
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient ,private dataService :DataService) {
     this.getAssetDetails();
   }
 
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    this.dataSubscription = this.http
+    if(this.dataService.getAssetDetails()){
+      this.dataSubscription = this.dataService.getAssetDetails()
+        .subscribe((data) => {
+          this.assetDetails2 = data.map((asset) => {
+            return asset;
+          });
+          this.countAssetsByLocation();
+        });
+    }
+    else{
+      this.dataSubscription = this.http
       .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
       .subscribe((data) => {
         this.assetDetails2 = data.map((asset) => {
@@ -195,6 +206,8 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
         });
         this.countAssetsByLocation();
       });
+    }
+    
   }
 
   countAssetsByLocation(): void {

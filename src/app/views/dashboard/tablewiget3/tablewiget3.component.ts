@@ -49,6 +49,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import 'moment/locale/th.js';
 // import moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
+import { DataService } from 'src/app/data-service/data-service.component';
 
 // interface AssetDetails {
 //   assetId: any;
@@ -160,7 +161,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
   private dataSubscription!: Subscription;
 
   ngOnInit(): void {
-    this.getAssetDetails();
+    // this.getAssetDetails();
   }
 
   ngOnDestroy(): void {
@@ -169,7 +170,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  constructor(private http: HttpClient , private apiService :ApiService) {
+  constructor( private apiService :ApiService ,private dataService :DataService) {
     this.getAssetDetails();
     this.getAssetType();
   }
@@ -177,28 +178,51 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    this.http
-      .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
-      .subscribe((data) => {
+
+    if(this.dataService){
+      this.dataService.getAssetDetails()
+        .subscribe((data) => {
+          this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
+          this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
+        });
+    }
+    else{
+      this.apiService.fetchData('assetDetails')
+      .catch((data) => {
         this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
         this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
       });
+    }
+    
   }
 
   getAssetType(): void {
-    this.apiService.fetchData('Assettypecodes').subscribe((data) => {
-      this.assetTypes = data;
-      // console.log(this.assetTypes);
-    });
-  
-    this.apiService.fetchData('Assetcategories').subscribe((data) => {
-      this.assetCategories = data;
-      // console.log(this.assetCategories);
-    });
+    if (this.dataService.getAssetTypes() && this.dataService.getAssetCategory()) {
+      this.dataService.getAssetTypes().subscribe(assetTypes => {
+        this.assetTypes = assetTypes;
+      });
+      
+      this.dataService.getAssetCategory().subscribe(assetCategories => {
+        this.assetCategories = assetCategories;
+      });
+    }
+    else{
+      this.apiService.fetchData('Assettypecodes').catch((data) => {
+        this.assetTypes = data;
+        // console.log(this.assetTypes);
+      });
+    
+      this.apiService.fetchData('Assetcategories').catch((data) => {
+        this.assetCategories = data;
+        // console.log(this.assetCategories);
+      });
+    }
   }
   
   countAssetsByCategory(): void {
     const assetCountByCategory: { [category: string]: number } = {};
+    
+    console.log(assetCountByCategory);
   
     this.assetDetails.forEach((asset) => {
       let categoryCode = asset.assetCategory || 'Unknown'; // Set a default value if asset category is null
@@ -210,32 +234,29 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
     });
   
     // Prepare data to show in the table
-    const dataToShowInTable = Object.keys(assetCountByCategory).map((combinedKey) => {
-
+    const dataToShowInTable = Object.entries(assetCountByCategory).map(([combinedKey, count]) => {
       const [assetTypeCode, categoryCode] = combinedKey.split('-');
-      
-      // console.log(assetTypeCode);
       
       // Find asset type name
       const assetType = this.assetTypes.find(type => type.assetCode === assetTypeCode);
-      // console.log(assetType);
-
       const assetTypeName = assetType ? assetType.assetName : 'Unknown';
   
       // Find asset category name
       const assetCategory = this.assetCategories.find(category => category.asc_Code === categoryCode);
       const assetCategoryName = assetCategory ? assetCategory.asc_Name : 'Unknown';
   
-      return {
-        category: assetCategoryName,
-        assetType: assetTypeName,
-        assetCount: assetCountByCategory[combinedKey],
-      };
-    });
-
-    this.dataSource.data = dataToShowInTable;
+      // Check if asset category code is null or undefined and assign a default value if so
+      const formattedCategoryCode = categoryCode || 'Unknown';
+      console.log(formattedCategoryCode);
   
-    // console.table(dataToShowInTable);
+      return {
+          category: assetCategoryName,
+          assetType: assetTypeName,
+          assetCount: count,
+      };
+  });
+  console.log(dataToShowInTable);
+  this.dataSource.data = dataToShowInTable;
   }
 
   translateToThai(asset: any): any {

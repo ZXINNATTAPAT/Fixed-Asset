@@ -5,186 +5,278 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { getStyle } from '@coreui/utils';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
 import { RouterLink } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
-import { RowComponent, ColComponent, WidgetStatAComponent, TemplateIdDirective, ThemeDirective, DropdownComponent, ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, DropdownItemDirective, DropdownDividerDirective } from '@coreui/angular';
+import {
+  RowComponent,
+  ColComponent,
+  WidgetStatAComponent,
+  TemplateIdDirective,
+  ThemeDirective,
+  DropdownComponent,
+  ButtonDirective,
+  DropdownToggleDirective,
+  DropdownMenuDirective,
+  DropdownItemDirective,
+  DropdownDividerDirective,
+} from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from 'src/app/api-service.service';
-import { cibAddthis, cilArrowCircleRight, cilBuilding, cilBullhorn, cilDataTransferDown, cilDevices, cilInfo, cilPencil, cilSave, cilTrash, cilUser } from '@coreui/icons';
+import {
+  cibAddthis,
+  cilArrowCircleRight,
+  cilBuilding,
+  cilBullhorn,
+  cilDataTransferDown,
+  cilDevices,
+  cilInfo,
+  cilPencil,
+  cilSave,
+  cilTrash,
+  cilUser,
+} from '@coreui/icons';
 import { jwtDecode } from 'jwt-decode';
 import { NgIf } from '@angular/common';
+import { DataService } from '../../../data-service/data-service.component';
+import { forkJoin, of, tap } from 'rxjs';
 
 @Component({
-    selector: 'app-widgets-dropdown',
-    templateUrl: './widgets-dropdown.component.html',
-    styleUrls: ['./widgets-dropdown.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Default,
-    standalone: true,
-    imports: [RowComponent, ColComponent, WidgetStatAComponent, 
-      TemplateIdDirective, IconDirective, ThemeDirective, DropdownComponent, 
-      ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, 
-      DropdownItemDirective, RouterLink, DropdownDividerDirective, ChartjsComponent,NgIf]
+  selector: 'app-widgets-dropdown',
+  templateUrl: './widgets-dropdown.component.html',
+  styleUrls: ['./widgets-dropdown.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Default,
+  standalone: true,
+  imports: [
+    RowComponent,
+    ColComponent,
+    WidgetStatAComponent,
+    TemplateIdDirective,
+    IconDirective,
+    ThemeDirective,
+    DropdownComponent,
+    ButtonDirective,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
+    DropdownItemDirective,
+    RouterLink,
+    DropdownDividerDirective,
+    ChartjsComponent,
+    NgIf,
+  ],
 })
 export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
-
-  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, 
-    cilInfo ,cilSave,cilDevices,cilBuilding,cilUser,cilBullhorn,cilArrowCircleRight};
+  icons = {
+    cilPencil,
+    cilTrash,
+    cibAddthis,
+    cilDataTransferDown,
+    cilInfo,
+    cilSave,
+    cilDevices,
+    cilBuilding,
+    cilUser,
+    cilBullhorn,
+    cilArrowCircleRight,
+  };
 
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private dataService: DataService
   ) {
-    this.getassettype();
-    this.getAssetDetails();
-    this.getUsers();
+    this.loadData();
   }
-  
-  userinfo:any = [];
+
+  userinfo: any = [];
 
   token: any;
 
-  assetTypes: any[] =[];
+  assetTypes: any[] = [];
 
-  assetCategory: any[]=[];
+  assetCategory: any[] = [];
 
-  numberOfAssets:string ='';
-  numberOfUsers:string ='';
+  numberOfUsers!: number;
+  numberOfAssets!: number;
 
-  assetcom:string='';
+  assetinter!: number;
+  assetoffice!: number;
+  assetcar!: number;
+  assetcom!: number;
 
-  assetoffice:string='';
+  // private assetDetailsCache: any[] | null = null;
 
-  assetinter:string='';
-
-  assetcar:string='';
-
-  getAssetDetails(): void {
-    this.apiService.fetchData('assetDetails').subscribe(data => {
-      
-      this.token = localStorage.getItem('token');
-
-      const decodedToken = jwtDecode(this.token);
-
-      this.userinfo = decodedToken;
-
-      // นับจำนวน asset ทั้งหมด
-      if(this.userinfo.affiliation === "กกต"){
-
-        const filteredAssetCategory004 = this.assetCategory.filter((category: { asc_Code: string; assetCode: string }) =>
-          category.assetCode.startsWith("004")
-        );
-
-        // กรองข้อมูลใน data โดยใช้ filteredAssetCategory004 เพื่อหาข้อมูลที่มี assetCode ตรงกับ asc_Code ของกลุ่ม "004"
-        const filteredAssets = data.filter((asset: { assetCode: string }) =>
-          filteredAssetCategory004.some((category: { asc_Code: string; assetCode: string }) =>
-            asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
-          )
-        );
-
-        const filteredAssets2 = data.filter((asset: { assetCode: string; }) => 
-          asset.assetCode.indexOf(`${this.userinfo.affiliation} 001`) !== -1);
-
-        const filteredAssets3 = data.filter((asset: { assetCode: string; }) => 
-          asset.assetCode.indexOf(`${this.userinfo.affiliation} 003`) !== -1);
-
-        const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
-          asset.assetCode.indexOf(`${this.userinfo.affiliation} 006`) !== -1);
-        
-          this.assetinter = filteredAssets2.length
-
-          this.assetoffice = filteredAssets3.length
-
-          this.assetcar =filteredAssets4.length
-        
-          this.assetcom = filteredAssets.length;
-
-      
-        this.numberOfAssets = data.filter((asset: { assetCode: string; }) => 
-          asset.assetCode.startsWith(this.userinfo.affiliation) &&
-          !asset.assetCode.includes(`${this.userinfo.affiliation}.`)).length;
-      }
-      else{
-        //ข้อมูลจะไม่มี กกต.นำหน้า
-        // data ที่เข้ามาเป็น 0401 แต่ อยากให้้หา 0401 อยู่ใน type ของ assetCode ไหน
-        //ระบบจะรวบรวมข้อมูลตาม type ของ assetCode
-        // {id: 6, asc_Code: '0401', asc_Name: 'คอมพิวเตอร์', assetCode: '004'} assetcategory เทียบ กับ 
-        // {id: 3, assetCode: '004', assetName: 'ครุภัณฑ์คอมพิวเตอร์'} assetType 
-
-       // กรองข้อมูลใน assetCategory เพื่อหากลุ่มที่มี asc_Code เริ่มต้นด้วย "004"
-        const filteredAssetCategory004 = this.assetCategory.filter((category: { asc_Code: string; assetCode: string }) =>
-          category.assetCode.startsWith("004")
-        );
-
-        // กรองข้อมูลใน data โดยใช้ filteredAssetCategory004 เพื่อหาข้อมูลที่มี assetCode ตรงกับ asc_Code ของกลุ่ม "004"
-        const filteredAssets = data.filter((asset: { assetCode: string }) =>
-          filteredAssetCategory004.some((category: { asc_Code: string; assetCode: string }) =>
-            asset.assetCode.startsWith(category.asc_Code)
-          )
-        );
-
-        // กรองข้อมูลใน assetCategory เพื่อหากลุ่มที่มี asc_Code เริ่มต้นด้วย "001"
-        const filteredAssetCategory001 = this.assetCategory.filter((category: { asc_Code: string; assetCode: string }) =>
-          category.assetCode.startsWith("001")
-        );
-
-        // กรองข้อมูลใน data โดยใช้ filteredAssetCategory001 เพื่อหาข้อมูลที่มี assetCode ตรงกับ asc_Code ของกลุ่ม "001"
-        const filteredAssets2 = data.filter((asset: { assetCode: string }) =>
-          filteredAssetCategory001.some((category: { asc_Code: string; assetCode: string }) =>
-            asset.assetCode.startsWith(category.asc_Code)
-          )
-        );
-
-        const filteredAssets3 = data.filter((asset: { assetCode: string; }) => 
-          asset.assetCode.indexOf(`003`) !== -1);
-
-        const filteredAssets4 = data.filter((asset: { assetCode: string; }) => 
-          asset.assetCode.indexOf(`006`) !== -1);
-
-          this.assetinter = filteredAssets2.length
-
-          this.assetoffice = filteredAssets3.length
-
-          this.assetcar =filteredAssets4.length
-        
-          this.assetcom = filteredAssets.length;
-        
-        this.numberOfAssets = data.filter((asset: { assetCode: string; agency:string }) => 
-          !asset.assetCode.startsWith("กกต." && "กกต")&& //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
-          asset.agency.startsWith(`${this.userinfo.workgroup}`)).length;
-      }
-      
-    });
+  link():void{
+    window.location.href="http://localhost:4200/#/system/AssetDetails";
   }
 
-  getUsers(): void {
-    this.apiService.fetchData('Users').subscribe(data => {
-      this.numberOfUsers = data.length;
-    });
-  }
-
-  getassettype():void{
-    this.apiService.fetchData('Assettypecodes')
-      .subscribe((data) => {
-        this.assetTypes = data;
-        // console.log(this.assetTypes);
-      }); 
-
-      this.apiService.fetchData('Assetcategories')
-      .subscribe((data) => {
-        this.assetCategory = data;
-        // console.log(this.assetCategory);
-      });
-
-    
+  linkassetall():void{
+    window.location.href="http://localhost:4200/#/assettable";
   }
   
+  linkassetcom():void{
+    window.location.href="http://localhost:4200/#/assettable";
+  }
+
+  loadData(): void {
+    forkJoin({
+      users: this.apiService.fetchData('Users'),
+      assetTypes: this.apiService.fetchData('Assettypecodes'),
+      assetCategories: this.apiService.fetchData('Assetcategories')
+    }).pipe(
+      tap(({ users, assetTypes, assetCategories }) => {
+        this.numberOfUsers = users.length;
+        this.assetTypes = assetTypes;
+        this.assetCategory = assetCategories;
+        this.dataService.setAssetTypes(this.assetTypes); // เก็บค่าใน Service
+        this.dataService.setAssetCategory(this.assetCategory); // เก็บค่าใน Service
+        this.loadAssetDetails(); // โหลดข้อมูลสินทรัพย์หลังจากโหลดประเภทสินทรัพย์และหมวดหมู่เสร็จแล้ว
+      })
+    ).subscribe();
+  }
+
+  loadAssetDetails(): void {
+      this.apiService.fetchDatahttp('assetDetails').subscribe
+        ((data) => {
+          this.processAssetDetails(data);
+        })
+  }
+
+  processAssetDetails(data: any): void {
+    
+    this.numberOfAssets = data.length;
+
+    this.dataService.setAssetDetails(data); // set dataservice 
+
+    this.dataService.setNumberOfAssets(this.numberOfAssets); // เก็บค่าใน Service
+
+    this.token = localStorage.getItem('token')!;
+    const decodedToken = jwtDecode(this.token);
+    this.userinfo = decodedToken;
+
+    if (this.userinfo.affiliation === 'กกต') {
+      this.filterAssetsForECT(data);
+    } else {
+      this.filterAssetsForOthers(data);
+    }
+  }
+
+  filterAssetsForECT(data: any[]): void {
+    const filteredAssetCategory001 = this.assetCategory.filter(
+      (category: { asc_Code: string; assetCode: string }) =>
+        category.assetCode.startsWith('001')
+    );
+    
+    const filteredAssetCategory003 = this.assetCategory.filter(
+      (category: { asc_Code: string; assetCode: string }) =>
+        category.assetCode.startsWith('003')
+    );
+    
+    const filteredAssetCategory004 = this.assetCategory.filter(
+      (category: { asc_Code: string; assetCode: string }) =>
+        category.assetCode.startsWith('004')
+    );
+    
+    const filteredAssetCategory006 = this.assetCategory.filter(
+      (category: { asc_Code: string; assetCode: string }) =>
+        category.assetCode.startsWith('006')
+    );
+    
+    const filteredAssets1 = data.filter((asset: { assetCode: string }) =>
+      filteredAssetCategory001.some(
+        (category: { asc_Code: string; assetCode: string }) =>
+          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
+      )
+    );
+    
+    const filteredAssets3 = data.filter((asset: { assetCode: string }) =>
+      filteredAssetCategory003.some(
+        (category: { asc_Code: string; assetCode: string }) =>
+          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
+      )
+    );
+    
+    const filteredAssets4 = data.filter((asset: { assetCode: string }) =>
+      filteredAssetCategory004.some(
+        (category: { asc_Code: string; assetCode: string }) =>
+          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
+      )
+    );
+    
+    const filteredAssets6 = data.filter((asset: { assetCode: string }) =>
+      filteredAssetCategory006.some(
+        (category: { asc_Code: string; assetCode: string }) =>
+          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
+      )
+    );
+    
+    this.assetinter = filteredAssets1.length;
+    this.assetoffice = filteredAssets3.length;
+    this.assetcom = filteredAssets4.length;
+    this.assetcar = filteredAssets6.length;
+    
+    this.numberOfAssets = data.filter(
+      (asset: { assetCode: string }) =>
+        asset.assetCode.startsWith(this.userinfo.affiliation) &&
+        !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+    ).length;
+  }    
+
+  filterAssetsForOthers(data: any[]): void {
+    const filteredAssetCategory004 = this.assetCategory.filter(
+      (category: { asc_Code: string; assetCode: string }) =>
+        category.assetCode.startsWith('004')
+    );
+
+    const filteredAssets = data.filter((asset: { assetCode: string }) =>
+      filteredAssetCategory004.some(
+        (category: { asc_Code: string; assetCode: string }) =>
+          asset.assetCode.startsWith(category.asc_Code)
+      )
+    );
+
+    const filteredAssetCategory001 = this.assetCategory.filter(
+      (category: { asc_Code: string; assetCode: string }) =>
+        category.assetCode.startsWith('001')
+    );
+
+    const filteredAssets2 = data.filter((asset: { assetCode: string }) =>
+      filteredAssetCategory001.some(
+        (category: { asc_Code: string; assetCode: string }) =>
+          asset.assetCode.startsWith(category.asc_Code)
+      )
+    );
+
+    const filteredAssets3 = data.filter(
+      (asset: { assetCode: string }) =>
+        asset.assetCode.indexOf(`003`) !== -1
+    );
+
+    const filteredAssets4 = data.filter(
+      (asset: { assetCode: string }) =>
+        asset.assetCode.indexOf(`006`) !== -1
+    );
+
+    this.assetinter = filteredAssets2.length;
+    this.assetoffice = filteredAssets3.length;
+    this.assetcar = filteredAssets4.length;
+    this.assetcom = filteredAssets.length;
+
+    this.numberOfAssets = data.filter(
+      (asset: { assetCode: string; agency: string }) =>
+        !asset.assetCode.startsWith('กกต.' && 'กกต') &&
+        asset.agency.startsWith(`${this.userinfo.workgroup}`)
+    ).length;
+  }
+
 
   data: any[] = [];
+  
   options: any[] = [];
+
   labels = [
     'January',
     'February',
@@ -201,44 +293,57 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
     'January',
     'February',
     'March',
-    'April'
+    'April',
   ];
+
   datasets = [
-    [{
-      label: 'My First dataset',
-      backgroundColor: 'transparent',
-      borderColor: 'rgba(255,255,255,.55)',
-      pointBackgroundColor: getStyle('--cui-primary'),
-      pointHoverBorderColor: getStyle('--cui-primary'),
-      data: [65, 59, 84, 84, 51, 55, 40]
-    }], [{
-      label: 'My Second dataset',
-      backgroundColor: 'transparent',
-      borderColor: 'rgba(255,255,255,.55)',
-      pointBackgroundColor: getStyle('--cui-info'),
-      pointHoverBorderColor: getStyle('--cui-info'),
-      data: [1, 18, 9, 17, 34, 22, 11]
-    }], [{
-      label: 'My Third dataset',
-      backgroundColor: 'rgba(255,255,255,.2)',
-      borderColor: 'rgba(255,255,255,.55)',
-      pointBackgroundColor: getStyle('--cui-warning'),
-      pointHoverBorderColor: getStyle('--cui-warning'),
-      data: [78, 81, 80, 45, 34, 12, 40],
-      fill: true
-    }], [{
-      label: 'My Fourth dataset',
-      backgroundColor: 'rgba(255,255,255,.2)',
-      borderColor: 'rgba(255,255,255,.55)',
-      data: [78, 81, 80, 45, 34, 12, 40, 85, 65, 23, 12, 98, 34, 84, 67, 82],
-      barPercentage: 0.7
-    }]
+    [
+      {
+        label: 'My First dataset',
+        backgroundColor: 'transparent',
+        borderColor: 'rgba(255,255,255,.55)',
+        pointBackgroundColor: getStyle('--cui-primary'),
+        pointHoverBorderColor: getStyle('--cui-primary'),
+        data: [65, 59, 84, 84, 51, 55, 40],
+      },
+    ],
+    [
+      {
+        label: 'My Second dataset',
+        backgroundColor: 'transparent',
+        borderColor: 'rgba(255,255,255,.55)',
+        pointBackgroundColor: getStyle('--cui-info'),
+        pointHoverBorderColor: getStyle('--cui-info'),
+        data: [1, 18, 9, 17, 34, 22, 11],
+      },
+    ],
+    [
+      {
+        label: 'My Third dataset',
+        backgroundColor: 'rgba(255,255,255,.2)',
+        borderColor: 'rgba(255,255,255,.55)',
+        pointBackgroundColor: getStyle('--cui-warning'),
+        pointHoverBorderColor: getStyle('--cui-warning'),
+        data: [78, 81, 80, 45, 34, 12, 40],
+        fill: true,
+      },
+    ],
+    [
+      {
+        label: 'My Fourth dataset',
+        backgroundColor: 'rgba(255,255,255,.2)',
+        borderColor: 'rgba(255,255,255,.55)',
+        data: [78, 81, 80, 45, 34, 12, 40, 85, 65, 23, 12, 98, 34, 84, 67, 82],
+        barPercentage: 0.7,
+      },
+    ],
   ];
+
   optionsDefault = {
     plugins: {
       legend: {
-        display: false
-      }
+        display: false,
+      },
     },
     maintainAspectRatio: false,
     scales: {
@@ -248,35 +353,35 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
         },
         grid: {
           display: false,
-          drawBorder: false
+          drawBorder: false,
         },
         ticks: {
-          display: false
-        }
+          display: false,
+        },
       },
       y: {
         min: 30,
         max: 89,
         display: false,
         grid: {
-          display: false
+          display: false,
         },
         ticks: {
-          display: false
-        }
-      }
+          display: false,
+        },
+      },
     },
     elements: {
       line: {
         borderWidth: 1,
-        tension: 0.4
+        tension: 0.4,
       },
       point: {
         radius: 4,
         hitRadius: 10,
-        hoverRadius: 4
-      }
-    }
+        hoverRadius: 4,
+      },
+    },
   };
 
   ngOnInit(): void {
@@ -285,14 +390,13 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
 
   ngAfterContentInit(): void {
     this.changeDetectorRef.detectChanges();
-
   }
 
   setData() {
     for (let idx = 0; idx < 4; idx++) {
       this.data[idx] = {
         labels: idx < 3 ? this.labels.slice(0, 7) : this.labels,
-        datasets: this.datasets[idx]
+        datasets: this.datasets[idx],
       };
     }
     this.setOptions();
@@ -323,7 +427,11 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
         }
         case 3: {
           options.scales.x.grid = { display: false, drawTicks: false };
-          options.scales.x.grid = { display: false, drawTicks: false, drawBorder: false };
+          options.scales.x.grid = {
+            display: false,
+            drawTicks: false,
+            drawBorder: false,
+          };
           options.scales.y.min = undefined;
           options.scales.y.max = undefined;
           options.elements = {};

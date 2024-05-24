@@ -65,7 +65,7 @@ export class AssetDetails2Component implements OnInit {
   
 
   getAssetDetails(): void {
-    this.apiService.fetchData('assetDetails').subscribe((data: any[]) => {
+    this.apiService.fetchData('assetDetails').catch((data: any[]) => {
         this.assetDetails = data.map(asset => {
             return {
                 assetCode: asset.assetCode,

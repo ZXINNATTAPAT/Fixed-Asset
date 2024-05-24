@@ -217,7 +217,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
-      .fetchData('assetDetails')
+      .fetchDatahttp('assetDetails')
       .subscribe((data) => {
         // console.log(this.userinfo.affiliation);
         this.assetDetails = data

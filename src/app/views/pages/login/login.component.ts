@@ -15,9 +15,8 @@ import axios from 'axios';
   imports: [ContainerComponent, RowComponent, ColComponent, CardGroupComponent, TextColorDirective, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective, NgStyle]
 })
 export class LoginComponent implements OnInit {
-  constructor(private http: HttpClient) {
-    
-   }
+  
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.http;
@@ -29,7 +28,7 @@ export class LoginComponent implements OnInit {
 
     try {
         const response = await axios.post<any>('https://localhost:7204/api/Authorization', credentials);
-        console.log(response.data);
+        // console.log(response.data);
 
         // แสดงการแจ้งเตือนเมื่อเข้าสู่ระบบสำเร็จ
         Swal.fire({

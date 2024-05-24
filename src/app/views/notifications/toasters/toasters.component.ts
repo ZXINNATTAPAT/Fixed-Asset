@@ -56,7 +56,7 @@ export class ToastersComponent implements OnInit {
   positionStatic = ToasterPlacement.Static;
   colors = Object.keys(Colors);
   autohide = true;
-  delay = 5000;
+  delay = 2000;
   fade = true;
 
   toasterForm = new UntypedFormGroup({

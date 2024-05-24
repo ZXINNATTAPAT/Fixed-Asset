@@ -55,12 +55,12 @@ export class DefaultLayoutComponent {
   token: any;
 
   public readinfo(){
+    
     this.token = localStorage.getItem('token');
 
     const decodedToken = jwtDecode(this.token);
     
     this.userinfo = decodedToken ;
-    // console.log(this.userinfo);
   }
 
   constructor() {this.readinfo()}

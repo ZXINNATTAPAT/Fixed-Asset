@@ -290,7 +290,7 @@ export class AssetcountComponent implements OnInit {
 
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
-      .fetchData('assetDetails')
+      .fetchDatahttp('assetDetails')
       .subscribe((data) => {
         this.assetData = data.map((asset: any) => {
           asset.purchaseDate = this.convertDate(asset.purchaseDate);

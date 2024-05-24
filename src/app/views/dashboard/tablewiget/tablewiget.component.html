@@ -1,126 +1,119 @@
 <c-card class="shadow" style="border: none">
   <c-card-body>
     <!-- <div style="display: flex; justify-content: space-between; align-items: center;"> -->
-    <h3 class="border-bottom">
+    <h2 class="border-bottom">
       <span class="anuphan-700" style="color: green"
-        >รายละเอียดครุภัฑณ์ล่าสุด</span
+        >รายละเอียดครุภัณฑ์ล่าสุด</span
       >
-    </h3>
+    </h2>
     <!-- </div> -->
 
-    <div class="table-responsive">
+    <div class="table-responsive " >
       <table
-      class="table table-striped table-hover"
-      style="font-size: 14px; width: max-content"
-      mat-table
-      [dataSource]="dataSource"
-      matSort
-    >
-      <!-- Actions Column -->
-      <ng-container matColumnDef="Aactions">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          style="color: black; font-weight: bold; font-size: 13px"
-        >
-          #
-        </th>
-        <td class="anuphan-500" mat-cell *matCellDef="let asset">
-          <button
-            class="btn btn-sm btn-primary m-1"
-            style="width: 28px; height: 28px; padding: 2px"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              class="bi bi-eye"
-              viewBox="0 0 16 16"
-              style="color: white; width: 100%; height: 100%"
-            >
-              <path
-                d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 
-                                    3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 
-                                    1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"
-              />
-              <path
-                d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"
-              />
-            </svg>
-            <!-- <svg [cIcon]="icons.cilInfo" style="color: white; width: 100%; height: 100%;"></svg> -->
-          </button>
-        </td>
-      </ng-container>
-    
-      <!-- Dynamic Columns -->
-      <ng-container
-        class="anuphan-500"
-        *ngFor="let column of displayedColumns2"
-        [matColumnDef]="column"
+        class="table table-striped table-hover"
+        style="font-size: 14px; width: max-content"
+        mat-table
+        [dataSource]="dataSource"
+        matSort
       >
-        <th
-          class="mat-header-cell anuphan-500"
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          style="color: black; font-weight: bold; font-size: 13px"
-        >
-          {{ column }}
-        </th>
-        <td
-          class="anuphan-400"
-          mat-cell
-          *matCellDef="let asset"
-          style="font-size: 12.5px"
-        >
-          {{
-            column === "ราคาต่อหน่วย"
-              ? (asset[column] | currency : "" : "" : "1.2-2")
-              : asset[column]
-          }}
-        </td>
-      </ng-container>
+        <!-- Actions Column -->
+        <ng-container matColumnDef="Aactions">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            style="color: black; font-weight: bold; font-size: 12px"
+          >
+            #
+          </th>
+          <td class="anuphan-500" mat-cell *matCellDef="let asset">
+            <button
+              class="btn btn-sm btn-primary m-1"
+              style="width: 28px; height: 28px; padding: 2px"
+            >
+              <svg
+                xmlns="http://www.w2.org/2000/svg"
+                fill="currentColor"
+                class="bi bi-eye"
+                viewBox="0 0 16 16"
+                style="color: white; width: 100%; height: 100%"
+              >
+                <path
+                  d="M16 8s-2-5.5-8-5.5S0 8 0 8s2 5.5 8 5.5S16 8 16 8M1.172 8a12 12 0 0 1 1.66-2.042C4.12 4.668 5.88 2.5 8 
+                                    2.5s2.879 1.168 5.168 2.457A12 12 0 0 1 14.828 8q-.086.12-.195.288c-.25.48-.82 1.12-1.465 
+                                    1.755C11.879 11.22 10.119 12.5 8 12.5s-2.879-1.168-5.168-2.457A12 12 0 0 1 1.172 8z"
+                />
+                <path
+                  d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a2.5 2.5 0 1 1 7 0 2.5 2.5 0 0 1-7 0"
+                />
+              </svg>
+              <!-- <svg [cIcon]="icons.cilInfo" style="color: white; width: 100%; height: 100%;"></svg> -->
+            </button>
+          </td>
+        </ng-container>
 
-      <!-- <ng-container matFooterRowDef="footerRow">
-        <td mat-footer-cell >{{ totalPricePerUnit() | currency: 'THB' }}</td>
-      </ng-container> -->
-    
-      <!-- Header Row -->
-      <tr
-      mat-header-row
-      *matHeaderRowDef="[
-        'Aactions',
-        'วันเดือนปี',
-        'รหัสครุภัณฑ์',
-        'รายการ',
-        'ราคาต่อหน่วย',
-        'ฝ่าย',
-        'ผู้ใช้งาน',
-        'หมายเหตุ'
-      ]"
-    ></tr>
+        <!-- Dynamic Columns -->
+        <ng-container
+          class="anuphan-500"
+          *ngFor="let column of displayedColumns2"
+          [matColumnDef]="column"
+        >
+          <th
+            class="mat-header-cell anuphan-500"
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header
+            style="color: black; font-weight: bold; font-size: 12px"
+          >
+            {{ column }}
+          </th>
+          <td
+            class="anuphan-400"
+            mat-cell
+            *matCellDef="let asset"
+            style="font-size: 12.5px"
+          >
+            {{
+              column === "ราคาต่อหน่วย"
+                ? (asset[column] | currency : "" : "" : "1.2-2")
+                : asset[column]
+            }}
+          </td>
+        </ng-container>
 
-    <!-- Data Rows -->
-    <tr
-      mat-row
-      *matRowDef="
-        let row;
-        columns: [
-          'Aactions',
-          'วันเดือนปี',
-          'รหัสครุภัณฑ์',
-          'รายการ',
-          'ราคาต่อหน่วย',
-          'ฝ่าย',
-          'ผู้ใช้งาน',
-          'หมายเหตุ'
-        ]
-      "
-    ></tr>
-      <!-- Footer Row -->
-      <!-- Footer Row Definition -->
-      <!-- <tr mat-footer-row *matFooterRowDef="['footerRow']"></tr> -->
-    </table>
-    
+        
+        <tr
+          mat-header-row
+          *matHeaderRowDef="[
+            'Aactions',
+            'วันเดือนปี',
+            'รหัสครุภัณฑ์',
+            'รายการ',
+            'ราคาต่อหน่วย',
+            'ฝ่าย',
+            'ผู้ใช้งาน',
+            'หมายเหตุ'
+          ]"
+        ></tr>
+
+        <!-- Data Rows -->
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: [
+              'Aactions',
+              'วันเดือนปี',
+              'รหัสครุภัณฑ์',
+              'รายการ',
+              'ราคาต่อหน่วย',
+              'ฝ่าย',
+              'ผู้ใช้งาน',
+              'หมายเหตุ'
+            ]
+          "
+        ></tr>
+       
+      </table>
 
       <!-- Paginator -->
       <mat-paginator

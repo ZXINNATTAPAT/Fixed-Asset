@@ -54,6 +54,7 @@ import { MatSort } from '@angular/material/sort';
 import 'moment/locale/th.js';
 import { Subject, Subscription } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { DataService } from 'src/app/data-service/data-service.component';
 
 interface AssetDetails {
   assetId: any;
@@ -186,7 +187,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     // console.log(this.userinfo);
   }
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,private dataService :DataService) {
     this.readinfo();
     this.getAssetDetails();
     // this.dataSource = new MatTableDataSource(this.assetDetails);
@@ -196,7 +197,48 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    this.dataSubscription = this.http
+
+    if(this.dataService.getAssetDetails()){
+      this.dataSubscription = this.dataService.getAssetDetails().subscribe((data: any[]) => {
+        this.assetDetails = data
+          .filter((asset) => {
+            if(this.userinfo.affiliation !== "กกต.สกล"){
+              return (
+                asset.assetCode.startsWith(this.userinfo.affiliation) &&
+                !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+              );
+            }
+            else{
+              return (
+                !asset.assetCode.startsWith("กกต." && "กกต") && //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
+                asset.agency.startsWith(`${this.userinfo.workgroup}`)
+              );
+            }
+            
+          })
+          .map((asset) => {
+            const date = new Date(asset.purchaseDate);
+            if (!isNaN(date.getTime())) {
+                const formattedDate = date.toLocaleDateString('th', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                });
+                asset = Object.assign({}, asset, { purchaseDate: formattedDate });
+                asset = this.translateToThai(asset);
+                return asset;
+            } else {
+                console.error('Invalid date format:', asset.purchaseDate);
+                return null; // หรืออื่น ๆ ตามที่คุณต้องการจัดการ
+            }
+          });
+        // Update the data source with the new asset details
+        this.dataSource.data = this.assetDetails;
+        // console.log(this.assetDetails)
+      });
+    }
+    else{
+      this.dataSubscription = this.http
       .get<any[]>('https://localhost:7204/api/AssetDetails')
       .subscribe((data) => {
         this.assetDetails = data
@@ -223,6 +265,8 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
         // Update the data source with the new asset details
         this.dataSource.data = this.assetDetails;
       });
+    }
+    
   }
 
   addasset(): void {
@@ -232,7 +276,6 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   totalPricePerUnit(): number {
     return this.dataSource.data.reduce((acc, curr) => acc +Number(curr['ราคาต่อหน่วย']) , 0);
 }
-
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {

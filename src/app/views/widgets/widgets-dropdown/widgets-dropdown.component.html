@@ -1,3 +1,71 @@
+<c-row class="g-2">
+  <c-col sm="6" md="4" xl="2">
+    <button class="btn custom-btn shadow anuphan-700 " (click)="link()" >
+        <!-- <svg [cIcon]="icons.cibAddthis" ></svg>  -->
+        <h3 class="custom-btn-text">
+            <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+               เพิ่มรายการครุภัณฑ์
+            </span>
+          </h3>      
+    </button>
+  </c-col>
+
+  <c-col sm="6" md="4" xl="2">
+    <button class="btn custom-btn shadow anuphan-700 " >
+      <h3 class="custom-btn-text">
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+            รายการครุภัณฑ์ทั้งหมด
+          </span>
+        </h3>
+    </button>
+  </c-col>
+
+  <c-col sm="6" md="4" xl="2">
+    <button class="btn custom-btn shadow anuphan-700 "  >
+      <h3 class="custom-btn-text">
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+            ซ่อมแซมครุภัณฑ์
+          </span>
+        </h3>
+    </button>
+  </c-col>
+
+  <c-col sm="6" md="4" xl="2">
+    <button class="btn custom-btn shadow anuphan-700 " >
+      <h3 class="custom-btn-text">
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+            ตรวจนับครุภัณฑ์
+          </span>
+        </h3>
+    </button>
+  </c-col>
+
+  <c-col sm="6" md="4" xl="2">
+    <button class="btn custom-btn shadow anuphan-700 " >
+      <h3 class="custom-btn-text " >
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+            โอนย้ายครุภัณฑ์
+          </span>
+      </h3>
+
+    </button>
+  </c-col>
+
+  <c-col sm="6" md="4" xl="2">
+    <button class="btn custom-btn shadow anuphan-700 " >
+      <h3 class="custom-btn-text">
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+            ขายครุภัณฑ์
+          </span>
+        </h3>
+    </button>
+  </c-col>
+
+  
+</c-row>
+
+<hr />
+
 <c-row class="g-3">
   <c-col sm="6" md="4" xl="2">
     <div
@@ -17,7 +85,7 @@
           </button>
           <ul cDropdownMenu>
             <li>
-              <p cDropdownItem>สินทรัพย์ทั้งหมด</p>
+              <p cDropdownItem>ครุภัณฑ์ทั้งหมด</p>
             </li>
           </ul>
         </c-dropdown>
@@ -26,16 +94,31 @@
           <iframe src="https://lottie.host/embed/29329dbc-a2ea-4ae6-a82a-24ad670f7fdd/FdsbK2G4Tq.lottie"></iframe>
         </div> -->
 
-        <h2 *ngIf="numberOfAssets">
-          <span class="anuphan-700" style="color: green"
-            >{{ numberOfAssets }} <br />ครุภัฑณ์
-            <svg [cIcon]="icons.cilSave" height="32" style="float: right"></svg
-          ></span>
+        <h2>
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: green">
+            <ng-container *ngIf="numberOfAssets; else loading">
+              {{ numberOfAssets }} <br />ครุภัณฑ์
+              <svg
+                [cIcon]="icons.cilSave"
+                height="32"
+                style="float: right"
+              ></svg>
+            </ng-container>
+            <ng-template #loading>
+              <img
+                src="../../../../assets/mc.gif"
+                alt="ss"
+                width="50px"
+                height="50px"
+              />
+            </ng-template>
+          </span>
         </h2>
         <div class="d-grid">
           <button
             class="btn btn-sm btn btn-outline-light"
             style="border-color: green; color: green"
+            (click)="linkassetall()"
           >
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
@@ -63,14 +146,14 @@
           </button>
           <ul cDropdownMenu>
             <li>
-              <p cDropdownItem>สินทรัพย์คอมพิวเตอร์</p>
+              <p cDropdownItem>ครุภัณฑ์คอมพิวเตอร์</p>
             </li>
           </ul>
         </c-dropdown>
 
         <h2 style="color: #000080">
-          <span class="anuphan-700" style="color: #000080">
-          {{ assetcom }} <br />
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: #000080">
+            {{ assetcom }} <br />
             คอมพิวเตอร์
             <svg
               [cIcon]="icons.cilDevices"
@@ -84,6 +167,7 @@
           <button
             class="btn btn-sm btn btn-outline-light"
             style="border-color: #000080; color: #000080"
+            (click)="linkassetcom()"
           >
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
@@ -111,13 +195,13 @@
           </button>
           <ul cDropdownMenu>
             <li>
-              <p cDropdownItem>สินทรัพย์สำนักงาน</p>
+              <p cDropdownItem>ครุภัณฑ์สำนักงาน</p>
             </li>
           </ul>
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700" style="color: orangered"
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: orangered"
             >{{ assetoffice }} <br />สำนักงาน
             <svg
               [cIcon]="icons.cilBuilding"
@@ -154,13 +238,13 @@
           </button>
           <ul cDropdownMenu>
             <li>
-              <p cDropdownItem>สินทรัพย์โฆษณา</p>
+              <p cDropdownItem>ครุภัณฑ์โฆษณา</p>
             </li>
           </ul>
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700" style="color: slateblue"
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: slateblue"
             >{{ assetinter }} <br />โฆษณา
             <svg
               [cIcon]="icons.cilBullhorn"
@@ -203,7 +287,7 @@
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700" style="color: orange"
+          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: orange"
             >{{ numberOfUsers }} <br />ผู้ใช้ในระบบ
             <svg [cIcon]="icons.cilUser" height="32" style="float: right"></svg
           ></span>

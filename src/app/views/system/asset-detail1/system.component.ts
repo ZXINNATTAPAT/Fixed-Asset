@@ -82,6 +82,7 @@ import {
 } from '@angular/material/form-field';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { jwtDecode } from 'jwt-decode';
+import { DataService } from 'src/app/data-service/data-service.component';
 
 // Define the default options for Material Form Field
 const formFieldOptions: MatFormFieldDefaultOptions = {
@@ -188,7 +189,8 @@ export interface asc {
     FormLabelDirective,
     FormControlDirective,
     ButtonDirective,
-    NgStyle,NgIf,
+    NgStyle,
+    NgIf,
     IconDirective,
     MatSelect,
     MatOption,
@@ -240,10 +242,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   token: any;
 
-  fixedPrefix: string = 'กกต 0401-';
-  fixedSuffix: string = '-2567';
-  editablePartLength: number = 3;
-
+  fixedPrefix: string = '';
+  fixedSuffix: string = '';
+  editablePartLength: number = 15;
 
   public readinfo() {
     this.token = localStorage.getItem('token');
@@ -253,10 +254,25 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userinfo = decodedToken;
   }
 
-  constructor(private http: HttpClient, private formBuilder: FormBuilder) {
-    this.readinfo();
+  constructor(private http: HttpClient, private formBuilder: FormBuilder,private dataService: DataService) {
 
-    this.http
+    this.readinfo();
+    // console.log(this.dataService)
+
+    if(this.dataService.getAssetTypes() && this.dataService.getAssetCategory()){
+
+      this.dataService.getAssetTypes().subscribe(assetTypes => {
+        this.assetTypes = Object.assign([], this.assetTypes, assetTypes);
+      });
+
+      this.dataService.getAssetCategory().subscribe(assetCategories => {
+        this.assetCategory = Object.assign([], this.assetCategory, assetCategories);
+      });
+
+      this.assetCategoryCtrl.setValue(this.assetCategory);
+    }
+    else{
+      this.http
       .get<any[]>('https://localhost:7204/api/Assettypecodes')
       .subscribe((data) => {
         this.assetTypes = data;
@@ -271,6 +287,10 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         // this.filteredAssetCategories.next(this.assetCategory.slice());
         // console.log(this.assetCategory);
       });
+    }
+      
+
+    
   }
 
   // เพิ่ม form control สำหรับ input เพิ่มเติม
@@ -284,10 +304,16 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     this.asset = this.formBuilder.group({
       assetType: [''],
       assetCategory: [''],
-      assetCode: ['', [Validators.required,Validators.pattern(/^[ก-๙]{3}\s\d{4}-\d{3}-\d{4}$/)]], // Set this initially as empty
+      assetCode: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[ก-๙]{3}\s\d{4}-\d{3}-\d{4}$/),
+        ],
+      ], // Set this initially as empty
       assetName: ['', Validators.required],
       quantity: ['1'],
-      unit:[''],
+      unit: [''],
       purchasedFrom: ['', Validators.required],
       department: [`${this.userinfo.position}`],
       agency: [`${this.userinfo.workgroup}`],
@@ -295,7 +321,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       responsibleEmployee: ['', Validators.required],
       documentNumber: [''],
       purchasePrice: [''],
-      CalculatedPrice:[''],
+      CalculatedPrice: [''],
       purchaseDate: [''], //วันที่ซื้อ
       ReceiptDate: [''], //วันที่ได้รับ
       TaxInvoiceNumber: [''], //เลขที่ใบกำกับภาษี
@@ -328,8 +354,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
           icon: 'error',
           html: `<span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: red;">รหัสรหัสครุภัณฑ์ซ้ำ</span>`,
         });
-      }
-      else{
+      } else {
         const Toast = Swal.mixin({
           toast: true,
           position: 'top-end',
@@ -355,8 +380,8 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    this.asset.get('purchasePrice')?.valueChanges.subscribe((value) =>{
-      this.asset.patchValue({CalculatedPrice : value});
+    this.asset.get('purchasePrice')?.valueChanges.subscribe((value) => {
+      this.asset.patchValue({ CalculatedPrice: value });
     });
 
     // Function to update assetCode
@@ -407,7 +432,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     // Subscribe to changes in ReceiptDate and update DepreciationStartDate and DepreciationCalculationStartDate
-    
+
     // Subscribe to value changes on assetType, assetCategory, and purchaseDate
     this.asset.get('assetType')?.valueChanges.subscribe(updateAssetCode);
 
@@ -425,20 +450,31 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const value = input.value;
-    const fixedPart = this.fixedPrefix;
-    const suffix = this.fixedSuffix;
-    const regex = /^กกต\s0401-\d{3}-2567$/;
-
-    // Ensure the fixed parts are not modified
+    const fixedPrefix = 'กกต 0401-'; // กำหนดค่า prefix คงที่
+    const fixedSuffix = '-2567'; // กำหนดค่า suffix คงที่
+    const editablePartLength = 3; // ความยาวของส่วนที่สามารถแก้ไขได้
+  
+    let value = input.value;
+  
+    // ตรวจสอบว่าค่า input มีรูปแบบที่ถูกต้อง
+    const regex = /^กกต\s\d{4}-\d{3}-\d{4}$/;
+  
+    // หากค่า input ไม่ตรงกับรูปแบบ ให้ตั้งค่ากลับไปเป็นค่าที่อยู่ในฟอร์มควบคุม
     if (!regex.test(value)) {
       input.value = this.asset.get('assetCode')!.value;
     } else {
-      const editablePart = value.slice(fixedPart.length, fixedPart.length + this.editablePartLength);
-      const newValue = `${fixedPart}${editablePart}${suffix}`;
+      // ดึงส่วนที่สามารถแก้ไขได้
+      const editablePart = value.slice(fixedPrefix.length, fixedPrefix.length + editablePartLength);
+  
+      // ประกอบค่าใหม่
+      const newValue = `${fixedPrefix}${editablePart}${fixedSuffix}`;
+  
+      // อัปเดตค่าใน input และฟอร์มควบคุม
+      input.value = newValue;
       this.asset.get('assetCode')!.setValue(newValue);
     }
   }
+  
 
   handleKeyDown(event: KeyboardEvent): void {
     const input = event.target as HTMLInputElement;
@@ -450,12 +486,35 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
-
-
   //เรียกข้อมูลรายการครุทั้งหมด
   getAssetDetails(): void {
-    this.http
+    if(this.dataService.getAssetDetails()){
+       this.dataService.getAssetDetails().subscribe((data) => {
+        this.assetDetails = data.filter((asset) => {
+          if (this.userinfo.affiliation !== 'กกต') {
+            return (
+              asset.assetCode.startsWith(this.userinfo.affiliation) &&
+              !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+            );
+          } else {
+            return (
+              !asset.assetCode.startsWith('กกต.') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
+              asset.agency.startsWith(`${this.userinfo.workgroup}`)
+            );
+          }
+        });
+        // .map((asset) => {
+        //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
+        //   asset = this.translateToThai(asset);
+        //   return asset;
+        // });
+        // Update the data source with the new asset details
+        // this.dataSource.data = this.assetDetails;
+      });
+    
+    }
+    else{
+      this.http
       .get<any[]>('https://localhost:7204/api/AssetDetails')
       .subscribe((data) => {
         this.assetDetails = data.filter((asset) => {
@@ -479,6 +538,8 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         // Update the data source with the new asset details
         // this.dataSource.data = this.assetDetails;
       });
+    }
+    
   }
 
   ngAfterViewInit() {
@@ -490,34 +551,30 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     this._onDestroy.complete();
   }
 
-  // filterAssetCategories(): void {
-  //   let search = this.assetCategoryFilterCtrl.value;
-  //   if (!search) {
-  //     // this.filteredAssetCategories.next(this.assetCategory.slice());
-  //     this.filteredAssetCategories.next(this.assetCategory.slice());//ใช้ระบุค่าใน
-  //     return;
-  //   } else {
-  //     search = search.toLowerCase();
-  //   }
-  //   this.filteredAssetCategories.next(
-  //     this.assetCategory.filter(
-  //       (category) => category.asc_Name.toLowerCase().indexOf(search) > -1
-  //     )
-  //   );
-  // }
-
   filterAssetCategories(): void {
     const searchValue = this.assetCategoryFilterCtrl.value?.toLowerCase();
     const assetType = this.asset.get('assetType')?.value;
-  
-    const filteredAssetCategories = this.assetCategory.filter(category => {
-      return category.assetCode === assetType &&
-        (searchValue? category.asc_Name.toLowerCase().includes(searchValue) : true);
+
+    const filteredAssetCategories = this.assetCategory.filter((category) => {
+      return (
+        category.assetCode === assetType &&
+        (searchValue
+          ? category.asc_Name.toLowerCase().includes(searchValue)
+          : true)
+      );
     });
-  
+
     this.filteredAssetCategories.next(filteredAssetCategories);
   }
 
+  showAlert(): void {
+    Swal.fire({
+      icon: 'warning',
+      title: 'กรุณาเลือกประเภทก่อน',
+      text: 'คุณต้องเลือกประเภทครุภัณฑ์ก่อนที่จะเลือกหมวดหมู่'
+    });
+  }
+  
 
   // setInitialValue(): void {
   //   this.filteredAssetCategories
@@ -557,9 +614,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
             html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
             icon: 'success',
             showCancelButton: false,
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
           }).then((result) => {
-          // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
+            // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
             this.getAssetDetails();
             this.asset.reset();
             this.assetCategoryCtrl.reset();
@@ -835,7 +892,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   autoInput() {
     this.asset.get('quantity')?.setValue(1); //เซคจำนวน
 
-    this.asset.get('CalculatedPrice')?.setValue(this.asset.get('purchasePrice')?.value); //เซคราคาคำนวณ
+    this.asset
+      .get('CalculatedPrice')
+      ?.setValue(this.asset.get('purchasePrice')?.value); //เซคราคาคำนวณ
 
     this.asset
       .get('DepreciationCalculationStartDate')

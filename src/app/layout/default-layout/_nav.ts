@@ -5,39 +5,24 @@ export const navItems: INavData[] = [
     name: 'แดชบอร์ดสรุปภาพรวม',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
-    // badge: {
-    //   color: 'info',
-    //   text: 'NEW'
-    // }
   },
-  
-  // {
-  //   name: 'เพิ่มข้อมูลตั้งต้น',
-  //   url: '/defaultdata',
-  //   iconComponent: { name: 'cil-pencil' }
-  
-  // {
-  //   title: true,
-  //   name: 'จัดการข้อมูลในระบบ'
-  // },
-  
   {
     name: 'บันทึกรายการรายวัน',
     url: '/system',
     iconComponent: { name: 'cil-pencil' },
     children: [
       {
-        name: 'เพิ่มรายการครุภัฑณ์',
+        name: 'เพิ่มรายการครุภัณฑ์',
         url: '/system/AssetDetails',
         icon: 'nav-icon-bullet'
       },
       {
-        name: 'ตรวจนับสินทรัพย์',
+        name: 'รายการตรวจนับครุภัณท์',
         url: '/system/Assetcount',
         icon: 'nav-icon-bullet'
       },
       {
-        name: 'ซ่อมแซมและบำรุงรักษา',
+        name: 'รายการซ่อมแซมและบำรุงรักษา',
         url: '/system/Repair',
         icon: 'nav-icon-bullet'
       },
