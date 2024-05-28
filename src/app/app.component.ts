@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
-
 import { VERSION } from '@angular/material/core';
-
-import { MatSelectSearchVersion } from 'ngx-mat-select-search';
+// import { MatSelectSearchVersion } from 'ngx-mat-select-search';
 
 @Component({
   selector: 'app-root',
@@ -39,7 +36,7 @@ export class AppComponent implements OnInit {
 
   version = VERSION;
 
-  matSelectSearchVersion = MatSelectSearchVersion;
+  // matSelectSearchVersion = MatSelectSearchVersion;
 
   private rightToLeft = false;
 

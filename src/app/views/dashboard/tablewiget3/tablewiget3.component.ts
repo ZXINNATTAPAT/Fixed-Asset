@@ -7,23 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ApiService } from 'src/app/api-service.service';
-import {
-  TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
-  RowComponent,
-  ColComponent,
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-import { HttpClient } from '@angular/common/http';
-
 import {
   cilPencil,
   cilTrash,
@@ -31,8 +15,6 @@ import {
   cilDataTransferDown,
   cilInfo,
 } from '@coreui/icons';
-import { IconDirective } from '@coreui/icons-angular';
-
 import {
   MatFooterRow,
   MatRowDef,
@@ -98,25 +80,10 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
     return $localize`Page ${page + 1} of ${amountPages}`;
   }
 }
-
 @Component({
   selector: 'app-tablewiget3',
   standalone: true,
   imports: [
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
-    RowComponent,
-    ColComponent,
-    TextColorDirective,
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    IconDirective,
-    FormDirective,
-    FormLabelDirective,
-    FormControlDirective,
-
     MatSortModule,
     MatPaginatorModule,
     MatTableModule,
@@ -124,10 +91,7 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
     MatPaginator,
     MatFooterRow,
     MatRowDef,
-
-    ButtonDirective,
     NgStyle,
-    
   ],
   providers: [{ provide: MatPaginatorIntl, useClass: MyCustomPaginatorIntl }],
   templateUrl: './tablewiget3.component.html',
@@ -170,7 +134,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  constructor( private apiService :ApiService ,private dataService :DataService) {
+  constructor( private ap :ApiService ,private dataService :DataService) {
     this.getAssetDetails();
     this.getAssetType();
   }
@@ -187,7 +151,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
         });
     }
     else{
-      this.apiService.fetchData('assetDetails')
+      this.ap.fetchData('assetDetails')
       .catch((data) => {
         this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
         this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
@@ -207,12 +171,12 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
       });
     }
     else{
-      this.apiService.fetchData('Assettypecodes').catch((data) => {
+      this.ap.fetchData('Assettypecodes').catch((data) => {
         this.assetTypes = data;
         // console.log(this.assetTypes);
       });
     
-      this.apiService.fetchData('Assetcategories').catch((data) => {
+      this.ap.fetchData('Assetcategories').catch((data) => {
         this.assetCategories = data;
         // console.log(this.assetCategories);
       });

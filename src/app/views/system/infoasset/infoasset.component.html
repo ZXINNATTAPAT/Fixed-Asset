@@ -1,5 +1,5 @@
-<c-card class="mb-4 shadow" style="border: none">
-  <c-card-body>
+<div class="mb-4 card shadow-sm" style="border: none">
+  <div class="card-body">
     <h1><span class="anuphan-700">รายละเอียดครุภัณฑ์</span></h1>
     <hr />
 
@@ -9,36 +9,121 @@
       </div>
 
       <div class="col">
-        <h3>
-          <span class="anuphan-600"
-            ><strong>รหัสครุภัณฑ์</strong> : {{ assets.assetCode }}
-          </span>
-        </h3>
+        <div class="row">
+          <div class="col">
+            <h3>
+              <span class="anuphan-600"
+                ><strong>รหัสครุภัณฑ์</strong> : {{ assets.assetCode }}
+              </span>
+            </h3>
 
-        <h3>
-          <span class="anuphan-600"
-            ><strong>ชื่อครุภัณฑ์</strong> : {{ assets.assetName }}</span
-          >
-        </h3>
+            <h3>
+              <span class="anuphan-600"
+                ><strong>ชื่อครุภัณฑ์</strong> : {{ assets.assetName }}</span
+              >
+            </h3>
 
-        <h3>
-          <span class="anuphan-600"
-            ><strong>ราคาต่อหน่วย</strong>: {{ assets.purchasePrice }}</span
-          >
-        </h3>
+            <h3>
+              <span class="anuphan-600"
+                ><strong>จำนวน</strong> : {{ assets.quantity }}</span
+              >
+            </h3>
 
-        <h3>
-          <span class="anuphan-600"
-            ><strong>วันที่ได้มา</strong> : {{ assets.purchaseDate }}
-          </span>
-        </h3>
+            <h3>
+              <span class="anuphan-600"
+                ><strong>หน่วยนับ</strong> : {{ assets.unit }}</span
+              >
+            </h3>
+            <h3>
+              <span class="anuphan-600"
+                ><strong>เลขที่เอกสาร</strong>:
+                {{ assets.documentNumber }}</span
+              >
+            </h3>
 
-        <h3>
-          <span class="anuphan-600"
-            ><strong>เลขที่เอกสาร</strong> : {{ assets.documentNumber }}</span
-          >
-        </h3>
+            <h3>
+              <span class="anuphan-600"
+                ><strong>ราคาต่อหน่วย</strong>: {{ assets.purchasePrice }}</span
+              >
+            </h3>
+          </div>
+
+          <div class="col">
+            <h3>
+              <span class="anuphan-600"
+                ><strong>ซื้อจาก</strong> : {{ assets.purchasedFrom }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>ประเภท</strong> : {{ assets.assetType }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>หมวดหมู่</strong> : {{ assets.assetCategory }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>แผนก</strong> : {{ assets.department }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>วันที่ได้มา</strong> : {{ convertDate(assets.purchaseDate) }}
+              </span>
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>พนักงานที่รับผิดชอบ</strong> :
+                {{ assets.responsibleEmployee }}
+              </span>
+            </h3>
+
+            
+          </div>
+
+          <div class="col">
+            <h3>
+              <span class="anuphan-600"
+                ><strong>สำนัก</strong> : {{ assets.agency }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>ที่ตั้ง</strong> : {{ assets.assetLocation }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>อายุการใช้งาน</strong> : {{ assets.assetAge }}</span
+              >
+            </h3>
+
+            <h3>
+              <span class="anuphan-600"
+                ><strong>เลขที่ใบกำกับภาษี</strong> :
+                {{ assets.taxInvoiceNumber }}</span
+              >
+            </h3>
+            
+            <h3>
+              <span class="anuphan-600"
+                ><strong>เลขที่เอกสาร</strong> :
+                {{ assets.documentNumber }}</span
+              >
+            </h3>
+          </div>
+        </div>
       </div>
     </div>
-  </c-card-body>
-</c-card>
+  </div>
+</div>

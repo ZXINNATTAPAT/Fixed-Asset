@@ -1,5 +1,4 @@
 import {
-  CUSTOM_ELEMENTS_SCHEMA,
   Component,
   Inject,
   OnInit,
@@ -33,9 +32,7 @@ import {
   ButtonDirective,
 } from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
-
 import { ApiService } from '../../../api-service.service';
-
 import Swal from 'sweetalert2';
 
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
@@ -108,10 +105,8 @@ interface AssetDetails {
   standalone: true,
   imports: [
     TextColorDirective,
-
     NgxMatSelectSearchModule,
     MatSelect,
-
     MatNativeDateModule,
     MatTabsModule,
     MatDatepicker,
@@ -126,12 +121,6 @@ interface AssetDetails {
     CommonModule,
     BorderDirective,
 
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
     InputGroupComponent,
 
     RowComponent,
@@ -161,6 +150,7 @@ export class AssetcountComponent implements OnInit {
   scanQr() {
   throw new Error('Method not implemented.');
   }
+
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
   isFormControl(control: any): boolean {
@@ -277,7 +267,7 @@ export class AssetcountComponent implements OnInit {
   _onDestroy = new Subject<void>();
 
   constructor(
-    private http: HttpClient,
+    // private http: HttpClient,
     private apiService: ApiService,
     private formBuilder: FormBuilder
   ) {
@@ -298,7 +288,7 @@ export class AssetcountComponent implements OnInit {
           return asset;
         });
 
-        console.log(this.assetData);
+        // console.log(this.assetData);
 
         // this.dataSource = new MatTableDataSource<AssetDetails>(this.assetData); 
         // Initialize dataSource here

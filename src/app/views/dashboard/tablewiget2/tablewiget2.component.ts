@@ -6,34 +6,10 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {
-  TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
-} from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-import {
-  RowComponent,
-  ColComponent,
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
-
 import { HttpClient } from '@angular/common/http';
 
-import {
-  cilPencil,
-  cilTrash,
-  cibAddthis,
-  cilDataTransferDown,
-  cilInfo,
-} from '@coreui/icons';
-import { IconDirective } from '@coreui/icons-angular';
+
 
 import {
   MatFooterRow,
@@ -93,20 +69,6 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   selector: 'app-tablewiget2',
   standalone: true,
   imports: [
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
-    RowComponent,
-    ColComponent,
-    TextColorDirective,
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    IconDirective,
-    FormDirective,
-    FormLabelDirective,
-    FormControlDirective,
-
     MatPaginatorModule,
     MatTableModule,
     MatPaginator,
@@ -115,8 +77,6 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
     MatPaginator,
     MatFooterRow,
     MatRowDef,
-
-    ButtonDirective,
     NgStyle,
   ],
   templateUrl: './tablewiget2.component.html',
@@ -167,8 +127,6 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
     'responsibleEmployee',
     'note',
   ];
-
-  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
   private dataSubscription!: Subscription;
 

@@ -1,93 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <base href="./" />
-    <meta
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-      name="viewport"
-    />
-    <title>ss</title>
+<head>
+  <meta charset="utf-8" />
+  <base href="./" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>Qset(ECT)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Load Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- Load Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    
+  <!-- Original -->
+  <!-- <link rel="stylesheet" href="src/scss/styles.scss" media="print" onload="media='all'"> -->
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Load other dependencies -->
-    <link
-      href="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png"
-      rel="icon"
-      type="image/x-icon"
-    />
-
-    <!-- <link rel="stylesheet" href="./scss/styles.scss"> -->
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Load Google Fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
-
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-
-    <!-- Preload CSS -->
-    <!-- <link rel="preload" href="./scss/" as="style"> -->
-    <!-- Link to the minified CSS -->
-    <!-- <link rel="stylesheet" href="./scss/styles.scss" media="print" onload="this.media='all'"> -->
-  </head>
-
-
-
-  <body class="mat-typography">
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-
-    <app-root>
-      <div
-        class="fade show"
-        style="text-align: center; padding-top: calc(100vh / 2); height: 100vh"
-      >
-        <i class="spinner-grow spinner-grow-sm"></i>
-        <img src="./assets/mc.gif" alt="ss" width="120px" height="120px" />
-        <!-- <span class="m-1">Loading...</span> -->
-      </div>
-    </app-root>
-  </body>
-  <style>
-    .loader {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #ff3d00;
-      position: relative;
-    }
-
-    .loader:before,
-    .loader:after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      inset: 0;
-      background: #fff;
-      transform: rotate(0deg) translate(30px);
-      animation: rotate 1s ease infinite;
-    }
-
-    .loader:after {
-      animation-delay: 0.5s;
-    }
-
-    @keyframes rotate {
-      100% {
-        transform: rotate(360deg) translate(30px);
-      }
-    }
-  </style>
+  <!-- Preload Critical CSS -->
+  <!-- <link rel="preload" href="./scss/styles.scss" as="style"> -->
+  <!-- Link to the minified CSS -->
+  <!-- <link rel="stylesheet" href="../src/scss/styles.scss" media="print" onload="media='all'"> -->
+</head>
+<body class="mat-typography">
+  <noscript >You need to enable JavaScript to run this app.</noscript>
+  <app-root>
+    <div class="fade show" style="text-align: center; padding-top: calc(100vh / 2); height: 100vh">
+        <img src="./assets/mc.gif" alt="ss" width="100px" height="100px" />
+    </div>
+  </app-root>
+  
+</body>
+  <!-- Load SweetAlert2 script at the bottom -->
+  <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/minify@11.2.0/lib/minify.min.js"></script> -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html-minifier/4.0.0/htmlminifier.min.js" integrity="sha512-4iIsNBIgG/kZCukIg4oZDZe1ZBRUFfklAGUVpbck6xqjd+tBeX2WqtZChk/HrERHqEBky20H+UqUabF9whH+cw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </html>

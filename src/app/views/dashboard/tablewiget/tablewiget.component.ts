@@ -6,26 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {
-  TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
-} from '@coreui/angular';
-import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-import {
-  RowComponent,
-  ColComponent,
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
-
-import { HttpClient } from '@angular/common/http';
-
+import { CommonModule, NgIf, NgStyle } from '@angular/common';
 import {
   cilPencil,
   cilTrash,
@@ -34,12 +15,8 @@ import {
   cilInfo,
 } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
-
 import {
-  MatFooterCell,
-  MatFooterCellDef,
   MatFooterRow,
-  MatFooterRowDef,
   MatRowDef,
   MatTableDataSource,
   MatTableModule,
@@ -50,11 +27,11 @@ import {
   MatPaginatorModule,
 } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-
 import 'moment/locale/th.js';
 import { Subject, Subscription } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import { DataService } from 'src/app/data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
+import { ApiService } from 'src/app/api-service.service';
 
 interface AssetDetails {
   assetId: any;
@@ -97,31 +74,14 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   selector: 'app-tablewiget',
   standalone: true,
   imports: [
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
-    RowComponent,
-    ColComponent,
-    TextColorDirective,
     CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
     IconDirective,
-    FormDirective,
-    FormLabelDirective,
-    FormControlDirective,
-
     MatPaginatorModule,
     MatTableModule,
     MatSort,
     MatPaginator,
     MatFooterRow,
     MatRowDef,
-    MatFooterCell,
-    MatFooterCellDef,
-    MatFooterRowDef,
-
-    ButtonDirective,
     NgStyle,NgIf
   ],
   templateUrl: './tablewiget.component.html',
@@ -187,7 +147,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     // console.log(this.userinfo);
   }
 
-  constructor(private http: HttpClient,private dataService :DataService) {
+  constructor(private dataService :DataService,private apiservice:ApiService) {
     this.readinfo();
     this.getAssetDetails();
     // this.dataSource = new MatTableDataSource(this.assetDetails);
@@ -238,11 +198,11 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
     else{
-      this.dataSubscription = this.http
-      .get<any[]>('https://localhost:7204/api/AssetDetails')
+      this.dataSubscription = this.apiservice
+      .fetchDatahttp('AssetDetails')
       .subscribe((data) => {
         this.assetDetails = data
-          .filter((asset) => {
+          .filter((asset: { assetCode: string; agency: string; }) => {
             if(this.userinfo.affiliation !== "กกต.สกล"){
               return (
                 asset.assetCode.startsWith(this.userinfo.affiliation) &&
@@ -251,13 +211,13 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
             }
             else{
               return (
-                !asset.assetCode.startsWith("กกต." && "กกต") && //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
+                !asset.assetCode.startsWith("กกต.") && //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
                 asset.agency.startsWith(`${this.userinfo.workgroup}`)
               );
             }
             
           })
-          .map((asset) => {
+          .map((asset: { purchaseDate: string; }) => {
             asset.purchaseDate = this.convertDate(asset.purchaseDate);
             asset = this.translateToThai(asset);
             return asset;

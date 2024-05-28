@@ -1,12 +1,10 @@
-<c-card class="mb-3 shadow" style="border: none">
+<div class="card mb-3 shadow-sm" style="border: none">
   <!-- <c-card-header>
     </c-card-header> -->
-  <c-card-body>
+  <div class="card-body">
     <h1><span class="anuphan-700">บันทึกรายการครุภัณท์</span></h1>
     <hr />
 
-    <!-- <mat-tab-group> -->
-    <!-- <mat-tab label="บันทึกครุภัณท์ 1"> -->
     <div
       style="display: flex; justify-content: space-between; align-items: center"
     >
@@ -16,10 +14,9 @@
       <p>
         นำเข้าข้อมูล :
         <button
-          class="btn btn-success anuphan-600"
+          class="btn btn-outline-success anuphan-600"
           type="button"
           (click)="openImport()"
-          style="color: white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +24,7 @@
             style="height: 22px"
           >
             <g
-              fill="#ffffff"
+              fill="green"
               fill-rule="nonzero"
               stroke="none"
               stroke-width="1"
@@ -65,33 +62,40 @@
         </button>
       </p>
     </div>
-    <c-card class="mb-4" style="border: none">
-      <c-card-body>
-        <c-card
-          class="shadow-sm"
+
+    <div class="mb-4 card" style="border: none">
+      <div class="card-body">
+        <div
+          class="card shadow-sm"
           [hidden]="hidden2"
           style="border-style: dotted; border-width: 3.5px"
         >
-          <!-- <c-card-header>นำเข้ามูลในรูปแบบ Excel</c-card-header> -->
-          <c-card-body>
+          <div class="card-body">
+            <h2><span class="anuphan-700">อัปโหลดไฟล์ของคุณ</span></h2>
             <form (submit)="onSubmit2()">
               <div class="row">
                 <div class="col">
-                  <input
-                    cFormControl
-                    type="file"
-                    (change)="importExcel($event)"
-                  />
+                  <div class="fileUploadInput">
+                    <label>✨ Upload File</label>
+                    <input
+                      type="file"
+                      (change)="importExcel($event)"
+                      accept=".xls,.xlsx"
+                    />
+                    <button>+</button>
+                  </div>
                 </div>
                 <div class="col-2 text-center">
+                  <br />
+                  <br />
                   <button class="btn btn-success text-white" type="submit">
                     ดำเนินการ
                   </button>
                 </div>
               </div>
             </form>
-          </c-card-body>
-        </c-card>
+          </div>
+        </div>
 
         <br />
 
@@ -172,7 +176,7 @@
                   style="font-family: 'Anuphan', sans-serif; font-weight: 400"
                   required
                   disabled="true"
-                  (click)=" showAlert()"
+                  (click)="showAlert()"
                 >
                 </mat-select>
               </div>
@@ -482,7 +486,7 @@
           <div class="row mb-3">
             <div class="col">
               <label cLabel style="font-weight: bold" for="scrapPriceInput"
-                >ราคาขีดความสามารถใช้</label
+                >ราคาซาก</label
               >
               <input
                 cFormControl
@@ -507,6 +511,7 @@
                   placeholder="ระบุอัตราการคิดค่าเสื่อม"
                   type="number"
                   formControlName="DepreciationRate"
+                  readonly
                 />
               </div>
             </div>
@@ -520,7 +525,8 @@
                 id="assetAgeInput"
                 placeholder="ระบุอายุของครุภัณฑ์"
                 type="number"
-                disabled
+                formControlName="AssetAge"
+                readonly
               />
             </div>
             <div class="col">
@@ -568,43 +574,24 @@
             </div>
           </div>
 
-          <!-- <div class="row mb-3"></div> -->
-
-          <!-- <div class="row mb-3">
-            
-          </div> -->
-
-          <!-- <button cButton class="anuphan-600" type="submit" color="success"  style="color: white;">ดำเนินการ</button> -->
         </form>
-      </c-card-body>
-    </c-card>
-    <!-- </mat-tab> -->
+      </div>
+    </div>
+  </div>
+</div>
 
-    <!-- this coreui-free-angular-admin-template\src\app\views\system\asset-detail1\system.component.html -->
-    <!-- <mat-tab label="บันทึกครุภัณท์ 2"><br />
-                <app-form-controls2></app-form-controls2>
-            </mat-tab> -->
-
-    <!-- <mat-tab label="บันทึกครุภัณท์ 3">
-                <app-form-controls-3></app-form-controls-3>
-            </mat-tab> -->
-
-    <!-- </mat-tab-group> -->
-  </c-card-body>
-</c-card>
-
-<c-card
+<div
   *ngIf="this.asset.get('assetType')?.value === '004'"
-  class="mb-3 shadow"
+  class="mb-3 shadow card"
   style="border: none"
 >
-  <c-card-body>
+  <div class="card-body">
     <h1>
       <span class="anuphan-700"
-        >บันทึกรายการเพิ่มเติมสำหรับ ครุภัณฑ์คอมพิวเตอร์</span
-      >
+        >บันทึกรายการเพิ่มเติมสำหรับ ครุภัณฑ์คอมพิวเตอร์
+      </span>
     </h1>
     <hr />
     <app-form-controls2></app-form-controls2>
-  </c-card-body>
-</c-card>
+  </div>
+</div>

@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-
   constructor(private router: Router) {}
 
   canActivate(): boolean {
@@ -19,20 +17,20 @@ export class AuthGuard implements CanActivate {
         return true;
       } else {
         Swal.fire({
-          title: "เซสซั่นหมดอายุ",
-          icon: "error"
+          title: 'เซสซั่นหมดอายุ',
+          icon: 'error',
         });
         // Token หมดอายุ
         this.router.navigate(['/login']);
-        
+
         return false;
       }
     } else {
       Swal.fire({
-        title: "โปรดทำการ Login",
-        icon: "error"
+        title: 'โปรดทำการ Login',
+        icon: 'error',
       });
-      this.router.navigate(['/login']);// ไม่มี Token ใน localStorage
+      this.router.navigate(['/login']); // ไม่มี Token ใน localStorage
       return false;
     }
   }

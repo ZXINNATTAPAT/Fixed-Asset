@@ -8,7 +8,10 @@
       "node"
     ],
     "paths": {
-      "@docs-components/*": ["./src/components/*"]
+      "@docs-components/*": ["./src/components/*"],
+      "@services/*": ["src/app/data-service/*"],
+      "@dashboard/*": ["src/app/views/dashboard/*"],
+      "@widgets/*": ["src/app/views/widgets/*"]
     }
   },
   "files": [

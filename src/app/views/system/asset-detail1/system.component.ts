@@ -8,9 +8,6 @@ import {
 } from '@angular/core';
 import {
   TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
   InputGroupComponent,
   BorderDirective,
 } from '@coreui/angular';
@@ -83,6 +80,7 @@ import {
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { jwtDecode } from 'jwt-decode';
 import { DataService } from 'src/app/data-service/data-service.component';
+import { ApiService } from 'src/app/api-service.service';
 
 // Define the default options for Material Form Field
 const formFieldOptions: MatFormFieldDefaultOptions = {
@@ -168,18 +166,7 @@ export interface asc {
 
     CommonModule,
     BorderDirective,
-
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
     InputGroupComponent,
-
-    RowComponent,
-    ColComponent,
-    TextColorDirective,
 
     ReactiveFormsModule,
     NgxMatSelectSearchModule,
@@ -216,6 +203,14 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openImport(): void {
     this.hidden2 = false;
+    Swal.fire({
+      title: 'กรอกข้อมูลที่จำเป็น',
+      html: `
+        <a href="link_to_sample_file">Download Sample File</a>
+      `,
+      icon: 'info'
+    });
+    window.open('https://example.com', '_blank');  
   }
 
   asset: FormGroup = new FormGroup({}); // สร้าง object เพื่อเก็บข้อมูลสินทรัพย์ที่ผู้ใช้ป้อน
@@ -243,7 +238,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   token: any;
 
   fixedPrefix: string = '';
+
   fixedSuffix: string = '';
+
   editablePartLength: number = 15;
 
   public readinfo() {
@@ -254,56 +251,60 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userinfo = decodedToken;
   }
 
-  constructor(private http: HttpClient, private formBuilder: FormBuilder,private dataService: DataService) {
+  constructor(
+    private http: HttpClient,
+    private formBuilder: FormBuilder,
+    private dataService: DataService,
+    private ap :ApiService
+  )
+  {
 
     this.readinfo();
-    // console.log(this.dataService)
+    this.getAssetDetails();
 
-    if(this.dataService.getAssetTypes() && this.dataService.getAssetCategory()){
-
-      this.dataService.getAssetTypes().subscribe(assetTypes => {
+    if (
+      this.dataService.getAssetTypes() && this.dataService.getAssetCategory() === null
+    ) {
+      this.dataService.getAssetTypes().subscribe((assetTypes) => {
         this.assetTypes = Object.assign([], this.assetTypes, assetTypes);
       });
 
-      this.dataService.getAssetCategory().subscribe(assetCategories => {
-        this.assetCategory = Object.assign([], this.assetCategory, assetCategories);
+      this.dataService.getAssetCategory().subscribe((assetCategories) => {
+        this.assetCategory = Object.assign(
+          [],
+          this.assetCategory,
+          assetCategories
+        );
       });
 
-      this.assetCategoryCtrl.setValue(this.assetCategory);
+      // this.assetCategoryCtrl.setValue(this.assetCategory);
+    } else {
+      this
+        .ap.fetchDatahttp('Assettypecodes')
+        .subscribe((data) => {
+          this.assetTypes = data;
+        });
+
+      this.ap
+        .fetchDatahttp('Assetcategories')
+        .subscribe((data) => {
+          this.assetCategory = data;
+          this.assetCategoryCtrl.setValue(this.assetCategory);
+        });
     }
-    else{
-      this.http
-      .get<any[]>('https://localhost:7204/api/Assettypecodes')
-      .subscribe((data) => {
-        this.assetTypes = data;
-        // console.log(this.assetTypes);
-      });
-
-    this.http
-      .get<any[]>('https://localhost:7204/api/Assetcategories')
-      .subscribe((data) => {
-        this.assetCategory = data;
-        this.assetCategoryCtrl.setValue(this.assetCategory);
-        // this.filteredAssetCategories.next(this.assetCategory.slice());
-        // console.log(this.assetCategory);
-      });
-    }
-      
-
-    
   }
-
   // เพิ่ม form control สำหรับ input เพิ่มเติม
   ngOnInit(): void {
-    this.getAssetDetails();
 
     this.assetCategoryCtrl = this.formBuilder.control(null);
-    // Initialize assetCategoryCtrl with a null value
 
     // Initialize the form group
     this.asset = this.formBuilder.group({
+
       assetType: [''],
+      
       assetCategory: [''],
+      
       assetCode: [
         '',
         [
@@ -311,24 +312,45 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
           Validators.pattern(/^[ก-๙]{3}\s\d{4}-\d{3}-\d{4}$/),
         ],
       ], // Set this initially as empty
+      
       assetName: ['', Validators.required],
+      
       quantity: ['1'],
+
       unit: [''],
+      
       purchasedFrom: ['', Validators.required],
+      
       department: [`${this.userinfo.position}`],
+      
       agency: [`${this.userinfo.workgroup}`],
+      
       assetLocation: ['', Validators.required],
+      
       responsibleEmployee: ['', Validators.required],
+      
       documentNumber: [''],
+      
       purchasePrice: [''],
+      
       CalculatedPrice: [''],
+      
       purchaseDate: [''], //วันที่ซื้อ
+      
       ReceiptDate: [''], //วันที่ได้รับ
+      
       TaxInvoiceNumber: [''], //เลขที่ใบกำกับภาษี
+      
       DepreciationRate: [''], //อัตราค่าเสื่อม
+
+      AssetAge:[''],
+      
       DepreciationStartDate: [''],
+      
       DepreciationCalculationStartDate: [''],
+      
       Note: [''],
+      
       additionalInput: [''],
     });
 
@@ -380,6 +402,17 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
+    this.asset.get('assetType')?.valueChanges.subscribe(value => {
+      console.log('DepreciationRate changed to:', value);
+    
+      const matchingAssetType = this.assetTypes.find(asset => asset.assetCode === value);
+      if (matchingAssetType) {
+        this.asset.get('DepreciationRate')?.setValue(matchingAssetType.rate_dep);
+        this.asset.get('AssetAge')?.setValue(matchingAssetType.servicelife);
+      }
+      
+    });
+    
     this.asset.get('purchasePrice')?.valueChanges.subscribe((value) => {
       this.asset.patchValue({ CalculatedPrice: value });
     });
@@ -453,28 +486,30 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     const fixedPrefix = 'กกต 0401-'; // กำหนดค่า prefix คงที่
     const fixedSuffix = '-2567'; // กำหนดค่า suffix คงที่
     const editablePartLength = 3; // ความยาวของส่วนที่สามารถแก้ไขได้
-  
+
     let value = input.value;
-  
+
     // ตรวจสอบว่าค่า input มีรูปแบบที่ถูกต้อง
     const regex = /^กกต\s\d{4}-\d{3}-\d{4}$/;
-  
+
     // หากค่า input ไม่ตรงกับรูปแบบ ให้ตั้งค่ากลับไปเป็นค่าที่อยู่ในฟอร์มควบคุม
     if (!regex.test(value)) {
       input.value = this.asset.get('assetCode')!.value;
     } else {
       // ดึงส่วนที่สามารถแก้ไขได้
-      const editablePart = value.slice(fixedPrefix.length, fixedPrefix.length + editablePartLength);
-  
+      const editablePart = value.slice(
+        fixedPrefix.length,
+        fixedPrefix.length + editablePartLength
+      );
+
       // ประกอบค่าใหม่
       const newValue = `${fixedPrefix}${editablePart}${fixedSuffix}`;
-  
+
       // อัปเดตค่าใน input และฟอร์มควบคุม
       input.value = newValue;
       this.asset.get('assetCode')!.setValue(newValue);
     }
   }
-  
 
   handleKeyDown(event: KeyboardEvent): void {
     const input = event.target as HTMLInputElement;
@@ -488,58 +523,58 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   //เรียกข้อมูลรายการครุทั้งหมด
   getAssetDetails(): void {
-    if(this.dataService.getAssetDetails()){
-       this.dataService.getAssetDetails().subscribe((data) => {
-        this.assetDetails = data.filter((asset) => {
-          if (this.userinfo.affiliation !== 'กกต') {
-            return (
-              asset.assetCode.startsWith(this.userinfo.affiliation) &&
-              !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-            );
-          } else {
-            return (
-              !asset.assetCode.startsWith('กกต.') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
-              asset.agency.startsWith(`${this.userinfo.workgroup}`)
-            );
-          }
+
+    // if (this.dataService.getAssetDetails()) {
+    //   this.dataService.getAssetDetails().subscribe((data) => {
+    //     this.assetDetails = data.filter((asset) => {
+    //       if (this.userinfo.affiliation !== 'กกต.สกล') {
+    //         return (
+    //           asset.assetCode.startsWith(this.userinfo.affiliation) &&
+    //           !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+    //         );
+    //       } 
+    //       else {
+    //         return (
+    //           !asset.assetCode.startsWith('กกต.' && 'กกต') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
+    //           asset.agency.startsWith(`${this.userinfo.workgroup}`)
+    //         );
+    //       }
+    //     });
+    //     // .map((asset) => {
+    //     //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
+    //     //   asset = this.translateToThai(asset);
+    //     //   return asset;
+    //     // });
+    //     // Update the data source with the new asset details
+    //     // this.dataSource.data = this.assetDetails;
+    //   });
+    // } 
+    // else {
+      this.ap
+        .fetchDatahttp('AssetDetails')
+        .subscribe((data) => {
+          this.assetDetails = data.filter((asset: { assetCode: string; agency: string; }) => {
+            if (this.userinfo.affiliation !== 'กกต.สกล') {
+              return (
+                asset.assetCode.startsWith(this.userinfo.affiliation) &&
+                !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+              );
+            } else {
+              return (
+                !asset.assetCode.startsWith('กกต.' && 'กกต') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
+                asset.agency.startsWith(`${this.userinfo.workgroup}`)
+              );
+            }
+          });
+          // .map((asset) => {
+          //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
+          //   asset = this.translateToThai(asset);
+          //   return asset;
+          // });
+          // Update the data source with the new asset details
+          // this.dataSource.data = this.assetDetails;
         });
-        // .map((asset) => {
-        //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
-        //   asset = this.translateToThai(asset);
-        //   return asset;
-        // });
-        // Update the data source with the new asset details
-        // this.dataSource.data = this.assetDetails;
-      });
-    
-    }
-    else{
-      this.http
-      .get<any[]>('https://localhost:7204/api/AssetDetails')
-      .subscribe((data) => {
-        this.assetDetails = data.filter((asset) => {
-          if (this.userinfo.affiliation !== 'กกต') {
-            return (
-              asset.assetCode.startsWith(this.userinfo.affiliation) &&
-              !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-            );
-          } else {
-            return (
-              !asset.assetCode.startsWith('กกต.') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
-              asset.agency.startsWith(`${this.userinfo.workgroup}`)
-            );
-          }
-        });
-        // .map((asset) => {
-        //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
-        //   asset = this.translateToThai(asset);
-        //   return asset;
-        // });
-        // Update the data source with the new asset details
-        // this.dataSource.data = this.assetDetails;
-      });
-    }
-    
+    // }
   }
 
   ngAfterViewInit() {
@@ -571,81 +606,66 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     Swal.fire({
       icon: 'warning',
       title: 'กรุณาเลือกประเภทก่อน',
-      text: 'คุณต้องเลือกประเภทครุภัณฑ์ก่อนที่จะเลือกหมวดหมู่'
+      text: 'คุณต้องเลือกประเภทครุภัณฑ์ก่อนที่จะเลือกหมวดหมู่',
     });
+  }
+
+  async onSubmit(): Promise<void> {
+    try {
+      const response = await this.ap.postData('AssetDetails', this.asset.value);
+      // console.log(response);
+      
+      Swal.fire({
+        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
+        icon: 'success',
+        showCancelButton: false,
+        confirmButtonText: 'OK',
+      }).then((result) => {
+        // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
+        this.getAssetDetails();
+        this.asset.reset();
+        this.assetCategoryCtrl.reset();
+      });
+    } catch (error) {
+      console.error(error);
+      
+      Swal.fire({
+        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
+        icon: 'error',
+      });
+  
+      console.log(this.asset);
+    }
   }
   
 
-  // setInitialValue(): void {
-  //   this.filteredAssetCategories
-  //     .pipe(take(1), takeUntil(this._onDestroy))
-  //     .subscribe(() => {
-  //       console.log(this.singleSelect);
-  //       this.singleSelect.compareWith = (a: any, b: any) =>
-  //         a && b && a.asc_Name === b.asc_Name;
-  //     });
-  // }
-
-  // selection(): void {
-  //   if (this.assetTypeSelect) {
-  //     const selectedValue = (
-  //       this.assetTypeSelect.nativeElement as HTMLSelectElement
-  //     ).value;
-  //     this.assetTypeInputVisible = selectedValue === '0';
-  //   }
-  // }
-
-  // toggleAssetCategoryInputVisibility(): void {
-  //   if (this.assetCategorySelect) {
-  //     const selectedValue = (
-  //       this.assetCategorySelect.nativeElement as HTMLSelectElement
-  //     ).value;
-  //     this.showAssetCategoryInput = selectedValue === '0';
-  //   }
-  // }
-
-  onSubmit(): void {
-    this.http
-      .post<any>('https://localhost:7204/api/AssetDetails', this.asset.value)
-      .subscribe(
-        (response) => {
-          console.log(response);
-          Swal.fire({
-            html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
-            icon: 'success',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-          }).then((result) => {
-            // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
-            this.getAssetDetails();
-            this.asset.reset();
-            this.assetCategoryCtrl.reset();
-          });
-        },
-        (error) => {
-          console.error(error);
-          if (error) {
-            Swal.fire({
-              html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
-              icon: 'error',
-            });
-            console.log(this.asset);
-          }
-        }
-      );
-  }
-
   translateToEnglish(asset: any): any {
     const translationMap: { [key: string]: string } = {
+      
       วันเดือนปี: 'purchaseDate',
+      
+      วันเดือนปีที่รับ: 'ReceiptDate',
+
       รหัสครุภัณฑ์: 'assetCode',
+      
       รายการ: 'assetName',
+      
+      ประเภทครุภัณฑ์:'assetType',
+      
+      หมวดหมู่ครุภัณฑ์:'assetCategory',
+      
       ราคาต่อหน่วย: 'purchasePrice',
+      
       วิธีการได้มา: 'purchasedFrom',
+      
       เลขที่เอกสาร: 'documentNumber',
+      
       ฝ่าย: 'department',
+      
       หน่วยงาน: 'agency',
+      
       ผู้ใช้งาน: 'responsibleEmployee',
+      
       หมายเหตุ: 'note',
     };
 
@@ -663,63 +683,87 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     const reader: FileReader = new FileReader();
 
     reader.onload = (e: any) => {
-      const data: string = e.target.result;
+        const data: string = e.target.result;
+        const workbook: XLSX.WorkBook = XLSX.read(data, { type: 'binary' });
+        const worksheetName: string = workbook.SheetNames[0];
+        const worksheet: XLSX.WorkSheet = workbook.Sheets[worksheetName];
+        const excelData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      const workbook: XLSX.WorkBook = XLSX.read(data, { type: 'binary' });
+        // Convert the array of arrays into an array of objects
+        const jsonArray: any[] = [];
 
-      const worksheetName: string = workbook.SheetNames[0];
+        for (let i = 1; i < excelData.length; i++) {
+            const rowData = excelData[i];
+            const jsonObject: any = {};
 
-      const worksheet: XLSX.WorkSheet = workbook.Sheets[worksheetName];
+            for (let j = 0; j < rowData.length; j++) {
+                const columnName = excelData[0][j];
+                let cellValue = rowData[j];
 
-      const excelData: any[] = XLSX.utils.sheet_to_json(worksheet, {
-        header: 1,
-      });
+                if (columnName.includes('ลำดับ') && !isNaN(cellValue)) {
+                    continue;
+                }
+                if (columnName.includes('วันเดือนปี') || columnName.includes('วัน') || columnName.includes('ว.ด.ป.ที่ซื้อ')) {
+                    if (cellValue) {
+                        cellValue = this.convertToDate(cellValue);
+                    }
+                }
 
-      // Convert the array of arrays into an array of objects
-      const jsonArray: any[] = [];
-
-      // Skip the first row (header row) as it contains column names
-      for (let i = 1; i < excelData.length; i++) {
-        const rowData = excelData[i];
-        const jsonObject: any = {};
-
-        for (let j = 0; j < rowData.length; j++) {
-          const columnName = excelData[0][j]; // Get the column name from the header row
-          let cellValue = rowData[j];
-
-          // Convert date string to Date object if the column name indicates it's a date
-          if (columnName.includes('ลำดับ') && !isNaN(cellValue)) {
-            // Skip conversion for 'ลำดับ' column
-            continue;
-          }
-          if (
-            columnName.includes('วันเดือนปี') ||
-            columnName.includes('วัน') ||
-            columnName.includes('ว.ด.ป.ที่ซื้อ')
-          ) {
-            if (cellValue) {
-              cellValue = this.convertToDate(cellValue);
+                jsonObject[columnName] = cellValue;
             }
-          }
 
-          jsonObject[columnName] = cellValue;
+            // Extract asset code prefix
+            const assetCode = jsonObject['รหัสครุภัณฑ์'];
+
+            if (assetCode && assetCode.startsWith('กกต')) {
+                const assetCategoryCode = assetCode.split(' ')[1]?.split('-')[0];
+
+                if (assetCategoryCode) {
+                    // ใช้ some เพื่อค้นหาค่าใน assetCategory
+                    const category = this.assetCategory.find(
+                        (cat) => cat.asc_Code === assetCategoryCode
+                    );
+
+                    if (category) {
+                        jsonObject['หมวดหมู่ครุภัณฑ์'] = category.asc_Code;
+
+                        // ใช้ some เพื่อค้นหาค่าใน assetTypes
+                        const assetType = this.assetTypes.find(
+                            (type) => type.assetCode === category.assetCode
+                        );
+
+                        if (assetType) {
+                            jsonObject['ประเภทครุภัณฑ์'] = assetType.assetCode;
+                        } else {
+                            console.error(`Asset type not found for code: ${category.assetCode}`);
+                            continue; // Skip this row
+                        }
+                    } else {
+                        console.error(`Category not found for code: ${assetCategoryCode}`);
+                        continue; // Skip this row
+                    }
+                } else {
+                    console.error(`Invalid asset code format: ${assetCode}`);
+                    continue; // Skip this row
+                }
+            }
+
+            const translatedData = this.translateToEnglish(jsonObject);
+            jsonArray.push(translatedData);
         }
 
-        // Translate the data to English
-        const translatedData = this.translateToEnglish(jsonObject);
-
-        jsonArray.push(translatedData);
-      }
-      // Assign the converted data to the asset property
-      this.asset2 = jsonArray;
-
-      // Process the imported JSON data
-      // console.log(jsonArray);
-      // console.log(this.asset2);
+        if (jsonArray.length > 0) 
+        {
+            this.asset2 = jsonArray;
+        } 
+        else 
+        {
+            console.log('No valid data found in the imported file.');
+        }
     };
 
     reader.readAsBinaryString(file);
-  }
+}
 
   convertToDate(dateString: string): Date {
     const thaiMonths = [
@@ -813,7 +857,8 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       asset.assetName &&
       asset.purchasePrice > 0
     ) {
-      return true; // ถ้าข้อมูลถูกต้องคืนค่าเป็น true
+      // ถ้าข้อมูลถูกต้องคืนค่าเป็น true
+      return true;
     } else {
       Swal.fire({
         title: 'มีข้อมูลมีบางอย่างผิดพลาด',
@@ -843,18 +888,22 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   async onSubmit2(): Promise<void> {
     // ตรวจสอบข้อมูลทั้งหมดก่อน
     if (!this.validateUniqueAssetCodes(this.asset2)) {
-      return; // หยุดการทำงานถ้าพบข้อมูลซ้ำกัน
+      return;
+      // หยุดการทำงานถ้าพบข้อมูลซ้ำกัน
     }
 
     for (let i = 0; i < this.asset2.length; i++) {
       const asset = this.asset2[i];
       if (!this.validateAsset(asset)) {
-        return; // หยุดการทำงานถ้าพบข้อมูลไม่ถูกต้อง
+        return;
+        // หยุดการทำงานถ้าพบข้อมูลไม่ถูกต้อง
       }
     }
 
     // ถ้าข้อมูลทั้งหมดถูกต้อง ให้ส่งคำขอ HTTP เป็น batch
-    const batchSize = 25; // ปรับขนาดของ batch ตามต้องการ
+    const batchSize = 25;
+
+    // ปรับขนาดของ batch ตามต้องการ
     for (let i = 0; i < this.asset2.length; i += batchSize) {
       const batch = this.asset2.slice(i, i + batchSize);
       await Promise.all(batch.map((asset: any) => this.sendRequest(asset)));
@@ -890,6 +939,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   autoInput() {
+
     this.asset.get('quantity')?.setValue(1); //เซคจำนวน
 
     this.asset
@@ -904,6 +954,20 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       .get('DepreciationStartDate')
       ?.setValue(this.asset.get('ReceiptDate')?.value);
 
+      const assetTypesControlValue = this.asset.get('assetType')?.value;
+      if (assetTypesControlValue) {
+        const matchingAssetType = this.assetTypes.find(asset => asset.assetCode === assetTypesControlValue);
+        
+        if (matchingAssetType) {
+          const depreciationRateControl = this.asset.get('DepreciationRate');
+          if (depreciationRateControl) {
+            depreciationRateControl.setValue(matchingAssetType.rate_dep);
+          }
+        }
+        // console.log(this.asset.get('DepreciationRate')?.value);
+      }
+
+      
     if (this.userinfo.affiliation === 'กกต') {
       this.asset.get('agency')?.setValue(`${this.userinfo.workgroup}`); //เซตสังกัด หรือ สำนัก
 

@@ -1,11 +1,9 @@
 import {
   AfterContentInit,
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   OnInit,
-  ViewChild,
 } from '@angular/core';
 import { getStyle } from '@coreui/utils';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
@@ -24,7 +22,6 @@ import {
   DropdownItemDirective,
   DropdownDividerDirective,
 } from '@coreui/angular';
-import { HttpClient } from '@angular/common/http';
 import { ApiService } from 'src/app/api-service.service';
 import {
   cibAddthis,
@@ -67,6 +64,7 @@ import { forkJoin, of, tap } from 'rxjs';
     ChartjsComponent,
     NgIf,
   ],
+  
 })
 export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   icons = {
@@ -100,11 +98,15 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   assetCategory: any[] = [];
 
   numberOfUsers!: number;
+  
   numberOfAssets!: number;
 
   assetinter!: number;
+  
   assetoffice!: number;
+  
   assetcar!: number;
+  
   assetcom!: number;
 
   // private assetDetailsCache: any[] | null = null;
@@ -139,10 +141,10 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   }
 
   loadAssetDetails(): void {
-      this.apiService.fetchDatahttp('assetDetails').subscribe
+    this.apiService.fetchDatahttp('assetDetails').subscribe
         ((data) => {
           this.processAssetDetails(data);
-        })
+        })  
   }
 
   processAssetDetails(data: any): void {
@@ -261,8 +263,11 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
     );
 
     this.assetinter = filteredAssets2.length;
+
     this.assetoffice = filteredAssets3.length;
+    
     this.assetcar = filteredAssets4.length;
+    
     this.assetcom = filteredAssets.length;
 
     this.numberOfAssets = data.filter(

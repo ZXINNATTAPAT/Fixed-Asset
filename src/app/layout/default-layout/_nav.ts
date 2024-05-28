@@ -2,6 +2,11 @@ import { INavData } from '@coreui/angular';
 
 export const navItems: INavData[] = [
   {
+    name: 'แดชบอร์ดกลาง',
+    url: '/mainpage',
+    iconComponent: { name: 'cil-speedometer' },
+  },
+  {
     name: 'แดชบอร์ดสรุปภาพรวม',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
@@ -22,7 +27,7 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet'
       },
       {
-        name: 'รายการซ่อมแซมและบำรุงรักษา',
+        name: 'บันทึกซ่อมแซม',
         url: '/system/Repair',
         icon: 'nav-icon-bullet'
       },

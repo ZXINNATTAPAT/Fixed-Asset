@@ -6,14 +6,11 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
-
-// import { Router } from '@angular/router';
 import {
   TextColorDirective,
   CardComponent,
   CardHeaderComponent,
   CardBodyComponent,
-  TableModule,
   UtilitiesModule,
 } from '@coreui/angular';
 import {
@@ -28,10 +25,13 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
+import { ApiService } from 'src/app/api-service.service';
 
 interface AssetDetails {
   assetCode: string;
   assetName: string;
+  rate_dep: string;
+  servicelife: string;
 }
 
 @Component({
@@ -64,36 +64,33 @@ interface AssetDetails {
   styleUrl: './defaultdata.component.scss',
 })
 export class DefaultdataComponent implements OnInit {
+  constructor(private http: HttpClient, private apiService: ApiService) {}
+
   yourFormName: FormGroup<any> | undefined;
 
   asset: any = {};
 
-  onSubmit() {
-    this.http
-      .post<any>('https://localhost:7204/api/Assettypecodes/', this.asset)
-      .subscribe(
-        (response) => {
-          // console.log(response);
-          const newAsset = response;
-          // console.log(newAsset);
-          this.assetDetails.push(this.translateToThai(newAsset));
-          this.dataSource.data = this.assetDetails;
-
-          Swal.fire({
-            title: 'บันทึกเสร็จสิ้น',
-            icon: 'success',
-          });
-        },
-        (error) => {
-          console.error(error);
-          if (error) {
-            Swal.fire({
-              title: 'มีข้อมูลในระบบอยู่แล้ว',
-              icon: 'error',
-            });
-          }
-        }
+  async onSubmit() {
+    try {
+      const response = await this.apiService.postData(
+        'Assettypecodes/',
+        this.asset
       );
+      const newAsset = response;
+      this.assetDetails.push(this.translateToThai(newAsset));
+      this.dataSource.data = this.assetDetails;
+
+      Swal.fire({
+        title: 'บันทึกเสร็จสิ้น',
+        icon: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: 'มีข้อมูลในระบบอยู่แล้ว',
+        icon: 'error',
+      });
+    }
   }
 
   icons = { cilPencil, cilTrash };
@@ -106,27 +103,28 @@ export class DefaultdataComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient) {}
-
-  displayedColumns2: string[] = ['รหัสประเภทสินทรัพย์', 'ชื่อประเภทสินทรัพย์'];
+  displayedColumns2: string[] = [
+    'รหัสประเภทสินทรัพย์',
+    'ชื่อประเภทสินทรัพย์',
+    'อัตราค่าเสื่อม',
+    'อายุการใช้งาน',
+  ];
 
   assetDetailsset: any[] = [];
 
   getAssetType(): void {
-    this.http
-      .get<any[]>('https://localhost:7204/api/Assettypecodes')
-      .subscribe((data) => {
-        this.assetDetails = data.map((asset) => {
-          asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
-          return asset;
-        });
-        // console.log(this.assetDetails);
-        this.assetDetailsset = this.assetDetails;
-        this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-        // console.log(this.dataSource)
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+    this.apiService.fetchDatahttp('Assettypecodes').subscribe((data) => {
+      this.assetDetails = data.map((asset: any) => {
+        asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
+        return asset;
       });
+      // console.log(this.assetDetails);
+      this.assetDetailsset = this.assetDetails;
+      this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
+      // console.log(this.dataSource)
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    });
   }
 
   ngOnInit(): void {
@@ -137,6 +135,8 @@ export class DefaultdataComponent implements OnInit {
     const translationMap: { [key: string]: string } = {
       assetCode: 'รหัสประเภทสินทรัพย์',
       assetName: 'ชื่อประเภทสินทรัพย์',
+      rate_dep: 'อัตราค่าเสื่อม',
+      servicelife: 'อายุการใช้งาน',
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {

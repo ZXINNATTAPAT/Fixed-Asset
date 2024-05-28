@@ -11,7 +11,7 @@
         <br />
 
         <form (ngSubmit)="onSubmit()">
-          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
+          <div class="row  mb-3">
             <div class="col">
               <label cLabel for="assetCodeInput">รหัสประเภทครุภัณท์</label>
               <input
@@ -33,6 +33,33 @@
                 name="assetName"
                 id="assetNameInput"
                 [(ngModel)]="asset.assetName"
+                placeholder="ระบุประเภทสินทรัพย์"
+                class="form-control"
+                type="text"
+                required
+              />
+            </div>
+            <div class="col">
+              <label cLabel for="rate_depInput">อัตราค่าเสื่อม</label>
+              <input
+                cFormControl
+                name="rate_dep"
+                id="rate_depInput"
+                [(ngModel)]="asset.rate_dep"
+                placeholder="ระบุประเภทสินทรัพย์"
+                class="form-control"
+                type="text"
+                required
+              />
+            </div>
+
+            <div class="col">
+              <label cLabel for="servicelifeInput">อายุการใช้งาน</label>
+              <input
+                cFormControl
+                name="servicelife"
+                id="servicelifeInput"
+                [(ngModel)]="asset.servicelife"
                 placeholder="ระบุประเภทสินทรัพย์"
                 class="form-control"
                 type="text"
@@ -95,7 +122,7 @@
                 class="anuphan-600 border"
                 *matHeaderCellDef
                 mat-sort-header
-                style="font-weight: bold ;color: green;font-size: medium;"
+                style="font-weight: bold ;font-size: medium;"
               >
                 {{ column }}
               </th>
@@ -110,7 +137,9 @@
               *matHeaderRowDef="[
                 'actions',
                 'รหัสประเภทสินทรัพย์',
-                'ชื่อประเภทสินทรัพย์'
+                'ชื่อประเภทสินทรัพย์',
+                'อัตราค่าเสื่อม',
+                'อายุการใช้งาน'
               ]"
             ></tr>
 
@@ -122,7 +151,9 @@
                 columns: [
                   'actions',
                   'รหัสประเภทสินทรัพย์',
-                  'ชื่อประเภทสินทรัพย์'
+                  'ชื่อประเภทสินทรัพย์',
+                  'อัตราค่าเสื่อม',
+                  'อายุการใช้งาน'
                 ]
               "
             ></tr>

@@ -1,9 +1,13 @@
+
 <c-row class="g-2">
+
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn shadow anuphan-700 " (click)="link()" >
+    <button class="btn custom-btn shadow-sm anuphan-700 " (click)="link()" 
+    style="background-image:url(https://img.icons8.com/?size=100&id=24717&format=png&color=000000);
+    background-repeat: no-repeat;background-position-x: 100%;background-position-y: 105%;background-size: 25%;">
         <!-- <svg [cIcon]="icons.cibAddthis" ></svg>  -->
         <h3 class="custom-btn-text">
-            <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+            <span class="anuphan-700 p-0" >
                เพิ่มรายการครุภัณฑ์
             </span>
           </h3>      
@@ -11,19 +15,24 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn shadow anuphan-700 " >
+    <button class="btn custom-btn shadow-sm anuphan-700 " 
+    style="background-image: url(https://img.icons8.com/?size=100&id=75QfRZgar9GS&format=png&color=000000);
+    background-repeat: no-repeat;background-position-x: 100%;background-position-y: 105%;background-size: 25%;">
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
-            รายการครุภัณฑ์ทั้งหมด
+          <span class="anuphan-700 p-0" >
+            รายการครุภัณฑ์
           </span>
         </h3>
     </button>
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn shadow anuphan-700 "  >
+    <button class="btn custom-btn shadow-sm anuphan-700 " 
+    style="background-image: url(https://img.icons8.com/?size=100&id=10758&format=png&color=000000);
+    background-repeat: no-repeat;background-position-x: 100%;background-position-y: 105%;background-size: 25%;
+    " >
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+          <span class="anuphan-700 p-0" >
             ซ่อมแซมครุภัณฑ์
           </span>
         </h3>
@@ -31,9 +40,12 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn shadow anuphan-700 " >
+    <button class="btn custom-btn shadow-sm anuphan-700 " 
+    style="background-image: url(https://img.icons8.com/?size=100&id=6ozUksPEPg6G&format=png&color=000000);
+    background-repeat: no-repeat;background-position-x: 100%;background-position-y: 105%;background-size: 25%;
+    ">
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+          <span class="anuphan-700 p-0" >
             ตรวจนับครุภัณฑ์
           </span>
         </h3>
@@ -41,9 +53,12 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn shadow anuphan-700 " >
+    <button class="btn custom-btn shadow-sm anuphan-700 " 
+    style="background-image: url(https://img.icons8.com/?size=100&id=9917&format=png&color=000000);
+    background-repeat: no-repeat;background-position-x: 100%;background-position-y: 105%;background-size: 25%;
+    " >
       <h3 class="custom-btn-text " >
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+          <span class="anuphan-700 p-0" >
             โอนย้ายครุภัณฑ์
           </span>
       </h3>
@@ -52,9 +67,12 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn shadow anuphan-700 " >
+    <button class="btn custom-btn shadow-sm anuphan-700 " 
+    style="background-image: url(https://img.icons8.com/?size=100&id=1387&format=png&color=000000) ;
+    background-repeat: no-repeat;background-position-x: 100%;background-position-y: 105%;background-size: 25%;
+    " >
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;">
+          <span class="anuphan-700 p-0" >
             ขายครุภัณฑ์
           </span>
         </h3>
@@ -69,7 +87,7 @@
 <c-row class="g-3">
   <c-col sm="6" md="4" xl="2">
     <div
-      class="card shadow"
+      class="card shadow-sm"
       style="border: none; background-color: white; color: green"
     >
       <div class="card-body">
@@ -95,7 +113,7 @@
         </div> -->
 
         <h2>
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: green">
+          <span class="anuphan-700 p-0" style="color: green">
             <ng-container *ngIf="numberOfAssets; else loading">
               {{ numberOfAssets }} <br />ครุภัณฑ์
               <svg
@@ -128,7 +146,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow" style="border: none; background-color: #ffffff">
+    <div class="card shadow-sm" style="border: none; background-color: #ffffff">
       <div class="card-body">
         <c-dropdown
           alignment="end"
@@ -152,15 +170,18 @@
         </c-dropdown>
 
         <h2 style="color: #000080">
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: #000080">
-            {{ assetcom }} <br />
-            คอมพิวเตอร์
-            <svg
-              [cIcon]="icons.cilDevices"
-              height="32"
-              style="float: right"
-            ></svg
-          ></span>
+          <span class="anuphan-700 p-0" style="color: #000080">
+            <ng-container *ngIf="assetcom; else loading">
+              {{ assetcom }} <br />
+              คอมพิวเตอร์
+              <svg
+                [cIcon]="icons.cilDevices"
+                height="32"
+                style="float: right"
+              ></svg>
+            </ng-container>
+            </span>
+        
         </h2>
 
         <div class="d-grid">
@@ -177,7 +198,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow" style="border: none; background-color: white">
+    <div class="card shadow-sm" style="border: none; background-color: white">
       <div class="card-body">
         <c-dropdown
           alignment="end"
@@ -201,14 +222,17 @@
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: orangered"
-            >{{ assetoffice }} <br />สำนักงาน
-            <svg
-              [cIcon]="icons.cilBuilding"
-              height="32"
-              style="float: right"
-            ></svg
-          ></span>
+          <span class="anuphan-700 p-0" style="color: orangered"
+            >
+            <ng-container *ngIf="assetoffice || assetoffice === 0; else loading">
+              {{ assetoffice }} <br />สำนักงาน
+              <svg
+                [cIcon]="icons.cilBuilding"
+                height="32"
+                style="float: right"
+              ></svg>
+            </ng-container>
+          </span>
         </h2>
 
         <div class="d-grid">
@@ -224,7 +248,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow" style="border: none; background-color: white">
+    <div class="card shadow-sm" style="border: none; background-color: white">
       <div class="card-body">
         <c-dropdown alignment="end" variant="btn-group" style="float: right">
           <button
@@ -244,14 +268,16 @@
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: slateblue"
-            >{{ assetinter }} <br />โฆษณา
+          <span class="anuphan-700 p-0" style="color: slateblue">
+            <ng-container *ngIf="assetinter || assetinter === 0; else loading">
+            {{ assetinter }} <br />โฆษณา
             <svg
               [cIcon]="icons.cilBullhorn"
               height="32"
               style="float: right"
-            ></svg
-          ></span>
+            ></svg>
+          </ng-container>
+        </span>
         </h2>
 
         <div class="d-grid">
@@ -267,7 +293,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow" style="border: none; background-color: white">
+    <div class="card shadow-sm" style="border: none; background-color: white">
       <div class="card-body">
         <c-dropdown alignment="end" variant="btn-group" style="float: right">
           <button
@@ -287,10 +313,12 @@
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700 p-1" style=" border-bottom: 2px solid green;"style="color: orange"
-            >{{ numberOfUsers }} <br />ผู้ใช้ในระบบ
-            <svg [cIcon]="icons.cilUser" height="32" style="float: right"></svg
-          ></span>
+            <span class="anuphan-700 p-0" style="color: orange">
+              <ng-container *ngIf="numberOfUsers; else loading">
+              {{ numberOfUsers }} <br />ผู้ใช้ในระบบ
+              <svg [cIcon]="icons.cilUser" height="32" style="float: right"></svg>
+            </ng-container>
+          </span>
         </h2>
 
         <div class="d-grid">
@@ -306,7 +334,7 @@
   </c-col>
 
   <!-- <c-col sm="6" md="4" xl="2">
-    <div class="card shadow" style="border: none;background-color: orange;color: white;">
+    <div class="card shadow-sm" style="border: none;background-color: orange;color: white;">
       <div class="card-body">
         <c-dropdown alignment="end" variant="btn-group" style="float: right;">
           <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
