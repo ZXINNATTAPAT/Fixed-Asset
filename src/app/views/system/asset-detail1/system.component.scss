@@ -1,5 +1,13 @@
 // YourComponent.component.scss
 /* Your custom CSS file */
+.card-custom{
+  border: none
+}
+.set-layout{
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center
+}
 
 .fileUploadInput {
   display: grid;

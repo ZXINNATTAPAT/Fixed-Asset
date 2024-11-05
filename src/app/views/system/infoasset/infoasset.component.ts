@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import QRCode from 'qrcode';
+import { MatTabsModule } from '@angular/material/tabs';
+import {HistoryComponent} from '../../../../app/views/system/history/history.component'
 
 interface AssetDetails {
   assetId: any;
@@ -32,19 +34,24 @@ interface AssetDetails {
 @Component({
   selector: 'app-infoasset',
   standalone: true,
-  imports: [],
+  imports: [MatTabsModule ,HistoryComponent],
   templateUrl: './infoasset.component.html',
   styleUrl: './infoasset.component.scss',
 })
 export class InfoassetComponent {
 
   // assetDetails: AssetDetails[] = [];
-
+ 
   assets: any = {};
 
   qrCodeUrl: string = '';
+  
 
   constructor(private http: HttpClient, private route: ActivatedRoute) {}
+
+  selectpage(){
+    
+  }
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
@@ -69,6 +76,7 @@ export class InfoassetComponent {
       }
     });
   }
+
   convertDate(dateString: string): string {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleDateString('th', {

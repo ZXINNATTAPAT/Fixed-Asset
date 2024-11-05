@@ -71,6 +71,9 @@ import { ReplaySubject, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { BarcodeFormat } from '@zxing/library';
+
 
 interface AssetDetails1 {
   Date: string;
@@ -122,7 +125,7 @@ interface AssetDetails {
     BorderDirective,
 
     InputGroupComponent,
-
+  
     RowComponent,
     ColComponent,
     TextColorDirective,
@@ -132,12 +135,14 @@ interface AssetDetails {
     MatSort,
     MatPaginatorModule,
 
+    // BarcodeFormat,
+
     ReactiveFormsModule,
     FormsModule,
     FormDirective,
     FormLabelDirective,
     FormControlDirective,
-
+    ZXingScannerModule,
     ButtonDirective,
     NgStyle,
     IconDirective,
@@ -147,8 +152,23 @@ interface AssetDetails {
 })
 export class AssetcountComponent implements OnInit {
 
-  scanQr() {
-  throw new Error('Method not implemented.');
+  startScanner = false;
+  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
+  availableDevices: MediaDeviceInfo[] = [];
+  selectedDevice: MediaDeviceInfo | undefined;
+
+  onScanSuccess(data: string) {
+    this.startScanner = false; // ปิดกล้องเมื่อสแกนสำเร็จ
+    console.log('QR Code Data:', data);
+  }
+
+  getAvailableDevices() {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
+      if (this.availableDevices.length > 0) {
+        this.selectedDevice = this.availableDevices[1]; // เลือกกล้องตัวแรกโดยค่าเริ่มต้น
+      }
+    });
   }
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
@@ -257,7 +277,7 @@ export class AssetcountComponent implements OnInit {
   dataSource!: MatTableDataSource<AssetDetails>; // Removed the initialization here
 
   dataSource2: any[] = []; // No changes
-  
+
   assetDataCtrl: FormControl = new FormControl();
 
   assetdataFilterCtrl: FormControl = new FormControl('');
@@ -274,9 +294,9 @@ export class AssetcountComponent implements OnInit {
     this.getAssetDetails();
   }
 
-  assetForm!: FormGroup; 
-  
-  form!: FormGroup; 
+  assetForm!: FormGroup;
+
+  form!: FormGroup;
 
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
@@ -326,13 +346,15 @@ export class AssetcountComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.readinfo() ;
+    this.readinfo();
+
+    this.getAvailableDevices();
 
     this.assetdataFilterCtrl.valueChanges
-    .pipe(takeUntil(this._onDestroy))
-    .subscribe(() => {
-      this.filterAsset();
-    });
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterAsset();
+      });
 
     this.assetForm = this.formBuilder.group({
       date: [new Date().toISOString()],
@@ -378,7 +400,7 @@ export class AssetcountComponent implements OnInit {
     const asset = this.assetData.find(data => data.assetId === assetId);
     return asset ? asset.assetName : '';
   }
-  
+
   addform() {
 
     const newFormItem = this.createItem(); // Create a new form control
@@ -393,7 +415,7 @@ export class AssetcountComponent implements OnInit {
       const requestBody = {
         data: [] as any[],
       };
-  
+
       this.formArray.controls.forEach((control) => {
         if (control instanceof FormGroup) {
           let formData: any = {};
@@ -403,7 +425,7 @@ export class AssetcountComponent implements OnInit {
           requestBody.data.push(formData);
         }
       });
-  
+
       requestBody.data.forEach((item, index) => {
         const assetset = {
           date: this.assetForm.get('date')?.value,
@@ -417,8 +439,8 @@ export class AssetcountComponent implements OnInit {
           // assetName: item.assetName,
         };
         console.log(assetset);
-      
-      
+
+
         // ส่งข้อมูลไปยังเซิร์ฟเวอร์ที่อยู่ที่ https://localhost:7204/api/AssetInventory
         // this.http.post('https://localhost:7204/api/AssetInventory', data)
         //   .subscribe(
@@ -436,7 +458,7 @@ export class AssetcountComponent implements OnInit {
       console.error('Form is invalid. Please fill in all required fields or add more forms.');
     }
   }
-  
+
 
   getSequence(index: number): number {
     return index + 1;

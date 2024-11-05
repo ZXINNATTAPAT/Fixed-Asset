@@ -1,81 +1,78 @@
 <!-- defaultdata.component.html -->
-<c-card class="mb-4 shadow" style="border: none">
-  <!-- <c-card-header>
-      <span>กำหนดรหัสประเภทสินทรัพย์</span>
-  </c-card-header> -->
-  <c-card-body>
+<div class="card shadow-sm" style="border: none">
+  <div class="card-body">
     <h1><span class="anuphan-700">กำหนดรหัสประเภทครุภัณท์</span></h1>
     <hr />
-    <div class="mb-3">
-      <div>
-        <br />
+    
+      <div class="card" style="border: none;">
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="row  mb-3">
+              <div class="col">
+                <label cLabel for="assetCodeInput">รหัสประเภทครุภัณท์</label>
+                <input
+                  cFormControl
+                  name="assetCode"
+                  id="assetCodeInput"
+                  [(ngModel)]="asset.assetCode"
+                  placeholder="ระบุรหัสสินทรัพย์"
+                  class="form-control p-3"
+                  type="text"
+                  required
+                />
+              </div>
 
-        <form (ngSubmit)="onSubmit()">
-          <div class="row  mb-3">
-            <div class="col">
-              <label cLabel for="assetCodeInput">รหัสประเภทครุภัณท์</label>
-              <input
-                cFormControl
-                name="assetCode"
-                id="assetCodeInput"
-                [(ngModel)]="asset.assetCode"
-                placeholder="ระบุรหัสสินทรัพย์"
-                class="form-control"
-                type="text"
-                required
-              />
-            </div>
+              <div class="col">
+                <label cLabel for="assetNameInput">ชื่อประเภทครุภัณท์</label>
+                <input
+                  cFormControl
+                  name="assetName"
+                  id="assetNameInput"
+                  [(ngModel)]="asset.assetName"
+                  placeholder="ระบุประเภทสินทรัพย์"
+                  class="form-control p-3"
+                  type="text"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label cLabel for="rate_depInput">อัตราค่าเสื่อม</label>
+                <input
+                  cFormControl
+                  name="rate_dep"
+                  id="rate_depInput"
+                  [(ngModel)]="asset.rate_dep"
+                  placeholder="ระบุประเภทสินทรัพย์"
+                  class="form-control p-3"
+                  type="text"
+                  required
+                />
+              </div>
 
-            <div class="col">
-              <label cLabel for="assetNameInput">ชื่อประเภทครุภัณท์</label>
-              <input
-                cFormControl
-                name="assetName"
-                id="assetNameInput"
-                [(ngModel)]="asset.assetName"
-                placeholder="ระบุประเภทสินทรัพย์"
-                class="form-control"
-                type="text"
-                required
-              />
-            </div>
-            <div class="col">
-              <label cLabel for="rate_depInput">อัตราค่าเสื่อม</label>
-              <input
-                cFormControl
-                name="rate_dep"
-                id="rate_depInput"
-                [(ngModel)]="asset.rate_dep"
-                placeholder="ระบุประเภทสินทรัพย์"
-                class="form-control"
-                type="text"
-                required
-              />
-            </div>
+              <div class="col">
+                <label cLabel for="servicelifeInput">อายุการใช้งาน</label>
+                <input
+                  cFormControl
+                  name="servicelife"
+                  id="servicelifeInput"
+                  [(ngModel)]="asset.servicelife"
+                  placeholder="ระบุประเภทสินทรัพย์"
+                  class="form-control p-3"
+                  type="text"
+                  required
+                />
+              </div>
 
-            <div class="col">
-              <label cLabel for="servicelifeInput">อายุการใช้งาน</label>
-              <input
-                cFormControl
-                name="servicelife"
-                id="servicelifeInput"
-                [(ngModel)]="asset.servicelife"
-                placeholder="ระบุประเภทสินทรัพย์"
-                class="form-control"
-                type="text"
-                required
-              />
+              <div class="col align-self-end">
+                <button type="submit" class="btn btn-success anuphan-600 p-3" style="color: white;">ดำเนินการ</button>
+              </div>
             </div>
+          </form>
 
-            <div class="col align-self-end">
-              <button type="submit" class="btn btn-primary">เพิ่ม</button>
-            </div>
-          </div>
-        </form>
-        <br />
+        </div>
       </div>
-      <div>
-        <div class="table-responsive">
+        
+      <div class="table-responsive " >
           <table
             mat-table
             [dataSource]="dataSource"
@@ -157,6 +154,7 @@
                 ]
               "
             ></tr>
+            
           </table>
 
           <!-- Paginator -->
@@ -165,8 +163,8 @@
             [pageSize]="15"
             showFirstLastButtons
           ></mat-paginator>
-        </div>
       </div>
+  
+   
     </div>
-  </c-card-body>
-</c-card>
+  </div>

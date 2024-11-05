@@ -11,6 +11,7 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
   styleUrl: './honeycomb.component.scss',
 })
 export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
+
   private root!: am5.Root;
 
   constructor() {}
@@ -21,7 +22,7 @@ export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
     this.root = am5.Root.new('chartdiv');
 
     this.root.setThemes([am5themes_Animated.new(this.root)]);
-
+    
     let chart = this.root.container.children.push(
       am5xy.XYChart.new(this.root, {})
     );
@@ -106,32 +107,85 @@ export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    series.bullets.push(() => {
-      let label = am5.Label.new(this.root, {
-        fontFamily: 'Anuphan',
-        fontWeight: '600',
-        fontStyle: 'normal',
-        populateText: true,
-        fill: am5.color(0xffffff) , // กำหนดสีฟอนต์เป็นสีเขียว
-        centerX: am5.p50,
-        centerY: am5.p50,
-        text: '{short}',
-      });
+    
+      // Custom click and double-click handler functions
+  let lastClick = 0;
+  let clickTimeout: string | number | NodeJS.Timeout | undefined;
+  const doubleClickDuration = 300; // ms
 
-      return am5.Bullet.new(this.root, {
-        sprite: label,
-      });
+  function doSingleClick(event: any) {
+    console.log("Single Click", event.target.dataItem?.dataContext);
+  }
+
+  function doDoubleClick(event: any) {
+    console.log("Double Click", event.target.dataItem?.dataContext);
+  }
+
+  function myClickHandler(event: any) {
+    const ts = (new Date()).getTime();
+    if ((ts - lastClick) < doubleClickDuration) {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+      }
+      lastClick = 0;
+      doDoubleClick(event);
+    } else {
+      clickTimeout = setTimeout(function () {
+        doSingleClick(event);
+      }, doubleClickDuration);
+    }
+    lastClick = ts;
+  }
+
+  series.bullets.push(() => {
+    let button = am5.Button.new(this.root, {
+      centerX: am5.p50,
+      centerY: am5.p50,
+      background: am5.RoundedRectangle.new(this.root, {
+        fill: am5.color(0x000000),
+        fillOpacity: 0, // Make the button background transparent
+      })
     });
 
-    series.set('heatRules', [
-      {
-        target: template,
-        min: am5.color(0x008000),
-        max: am5.color(0x32cd32),
-        dataField: 'value',
-        key: 'fill',
-      },
-    ]);
+    let label = am5.Label.new(this.root, {
+      text: "{short}",
+      fontFamily: 'Anuphan',
+      fontWeight: '600',
+      fontStyle: 'normal',
+      populateText: true,
+      fill: am5.color(0xffffff), // Set the font color to white
+      centerX: am5.p50,
+      centerY: am5.p50,
+    });
+
+    // Bind data to the label text
+    // label.adapters.add("text", function(text, target) {
+    //   return target.dataItem?.dataContext?.short || text;
+    // });
+
+    button.children.push(label);
+
+    // Attach combined click handler to the button
+    button.events.on("click", (ev) => {
+      console.log("Button clicked"); // Debugging line to check if the click is registered
+      myClickHandler(ev);
+    });
+
+    return am5.Bullet.new(this.root, {
+      sprite: button,
+    });
+  });
+
+  series.set('heatRules', [
+    {
+      target: template,
+      min: am5.color(0x008000),
+      max: am5.color(0x32cd32),
+      dataField: 'value',
+      key: 'fill',
+    },
+  ]);
+
 
     series.strokes.template.set('strokeOpacity', 0);
 
@@ -144,7 +198,7 @@ export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
       { short: 'สสว.2', name: 'Colorado', y: 2, x: 5, value: 5540500 },
       { short: 'CT', name: 'Connecticut', y: 3, x: 3, value: 3596600 },
       { short: 'DE', name: 'Delaware', y: 3, x: 4, value: 935600 },
-      { short: 'DC', name: 'District of Columbia', y: 1, x: 3, value: 672228 },
+      { short: 'DC', name: 'District of Columbia ', y: 1, x: 3, value: 672228 },
       { short: 'DC', name: 'District of Columbia', y: 1, x: 4, value: 672228 },
       { short: 'DC', name: 'District of Columbia', y: 1, x: 5, value: 672228 },
       { short: 'DC', name: 'District of Columbia', y: 2, x: 5, value: 672228 },
@@ -178,7 +232,34 @@ export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     series.data.setAll(data);
+
+    // Create and configure a button
+  // let button = am5.Button.new(this.root, {
+  //   centerX: am5.p50,
+  //   centerY: am5.p50,
+  //   x: am5.percent(50),
+  //   y: am5.percent(90),
+  //   label: am5.Label.new(this.root, {
+  //     text: "Click me",
+  //     fontSize: 20,
+  //     fill: am5.color(0xffffff)
+  //   }),
+  //   background: am5.RoundedRectangle.new(this.root, {
+  //     fill: am5.color(0x67b7dc)
+  //   })
+  // });
+
+  // // Add button to the root container
+  // this.root.container.children.push(button);
+
+  // // Attach click event to the button
+  // button.events.on("click", function() {
+  //   alert("Button clicked!");
+  // });
+
   }
+
+
 
   ngOnDestroy(): void {
     if (this.root) {

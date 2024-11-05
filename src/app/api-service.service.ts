@@ -9,6 +9,8 @@ import axios from 'axios';
 export class ApiService {
   
   private apiUrl = 'https://localhost:7204/api/';
+  
+  public apiUrl_link = 'http://localhost:4200/#/';
 
   constructor(private http: HttpClient) {}
 

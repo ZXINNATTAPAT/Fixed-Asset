@@ -4,7 +4,6 @@
       <span class="anuphan-700">รายการบันทึกการซ่อมแซมและบำรุงรักษา</span>
     </h1>
     <hr />
-
     <div class="card" style="border: none">
       <div class="card-body">
         <form cForm (submit)="onSubmit()">
@@ -21,7 +20,7 @@
               /> -->
               
               <mat-select
-              class="form-control"
+              class="form-control p-3"
               id="assetCode"
               [(ngModel)]="asset.assetId"
               name="assetCode"
@@ -55,7 +54,7 @@
                 name="SerialNumber"
                 id="assetCodeInput"
                 placeholder="เลขที่เอกสาร"
-                class="form-control"
+                class="form-control p-3"
                 type="text"
                 [(ngModel)]="asset.SerialNumber"
                 required
@@ -71,7 +70,7 @@
                 name="Description"
                 id="assetCodeInput"
                 placeholder="ระบุรายละเอียด"
-                class="form-control"
+                class="form-control p-3"
                 type="text"
                 [(ngModel)]="asset.Description"
                 required
@@ -85,7 +84,7 @@
                 name="Amount"
                 id="assetCodeInput"
                 placeholder="ระบุจำนวนเงิน"
-                class="form-control"
+                class="form-control p-3"
                 type="text"
                 [(ngModel)]="asset.Amount"
                 required
@@ -104,22 +103,21 @@
               </button>
             </div>
           </div>
+
         </form>
       </div>
     </div>
-
-    <br />
-
+    
     <div class="table-responsive">
       <table
         mat-table
         [dataSource]="dataSource"
         matSort
-        class="table table-striped table-hover"
+        class="table table-striped table-hover border"
       >
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
+          <th class="border" mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
           <td mat-cell *matCellDef="let asset">
             <button
               class="btn btn-sm btn-warning m-1"
@@ -154,11 +152,12 @@
             mat-header-cell
             *matHeaderCellDef
             mat-sort-header
+            class="border"
             style="font-weight: bold"
           >
             {{ column }}
           </th>
-          <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
+          <td mat-cell class="border" *matCellDef="let asset">{{ asset[column] }}</td>
         </ng-container>
 
         <!-- Header Row -->
@@ -198,5 +197,6 @@
         showFirstLastButtons
       ></mat-paginator>
     </div>
+    
   </div>
 </div>

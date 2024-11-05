@@ -12,3 +12,91 @@
     margin-top: 15px;
     color: green;
 }
+.btn.custom-btn {
+    position: relative;
+    overflow: hidden; /* เพื่อให้มั่นใจว่า overlay จะไม่เกินขอบของปุ่ม */
+}
+.btn.custom-btn1::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.icons8.com/?size=100&id=24717&format=png&color=000000');
+    background-repeat: no-repeat;
+    background-position: 100% 105%;
+    background-size: 25%;
+    opacity: 0.7;
+    pointer-events: none; 
+}
+.btn.custom-btn2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.icons8.com/?size=100&id=75QfRZgar9GS&format=png&color=000000');
+    background-repeat: no-repeat;
+    background-position: 100% 105%;
+    background-size: 25%;
+    opacity: 0.7;
+    pointer-events: none; 
+}
+.btn.custom-btn3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.icons8.com/?size=100&id=10758&format=png&color=000000');
+    background-repeat: no-repeat;
+    background-position: 100% 105%;
+    background-size: 25%;
+    opacity: 0.7;
+    pointer-events: none; 
+}
+.btn.custom-btn4::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.icons8.com/?size=100&id=6ozUksPEPg6G&format=png&color=000000');
+    background-repeat: no-repeat;
+    background-position: 100% 105%;
+    background-size: 25%;
+    opacity: 0.7;
+    pointer-events: none; 
+}
+.btn.custom-btn5::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.icons8.com/?size=100&id=9917&format=png&color=000000');
+    background-repeat: no-repeat;
+    background-position: 100% 105%;
+    background-size: 25%;
+    opacity: 0.7;
+    pointer-events: none; 
+}
+.btn.custom-btn6::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.icons8.com/?size=100&id=1387&format=png&color=000000');
+    background-repeat: no-repeat;
+    background-position: 100% 105%;
+    background-size: 25%;
+    opacity: 0.7;
+    pointer-events: none; 
+}

@@ -1,39 +1,9 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
-import {
-  TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
-} from '@coreui/angular';
+import {AfterViewInit,Component,OnDestroy,OnInit,ViewChild,} from '@angular/core';
+import { TextColorDirective } from '@coreui/angular';
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-import {
-  RowComponent,
-  ColComponent,
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
-
-import { HttpClient } from '@angular/common/http';
-
-import {
-  cilPencil,
-  cilTrash,
-  cibAddthis,
-  cilDataTransferDown,
-  cilInfo,
-} from '@coreui/icons';
+import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-
 import { ApiService } from '../../../api-service.service';
 
 import Swal from 'sweetalert2';
@@ -45,11 +15,12 @@ import { MatSort } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
 import 'moment/locale/th.js';
-import moment from 'moment';
+// import moment from 'moment';
 import { Subscription } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import QRCode from 'qrcode';
+import { myFunction } from './utils';
 
 interface AssetDetails {
   assetId: any;
@@ -71,11 +42,6 @@ interface AssetDetails {
   providers: [DatePipe],
   standalone: true,
   imports: [
-    CardComponent,
-    CardHeaderComponent,
-    CardBodyComponent,
-    RowComponent,
-    ColComponent,
     TextColorDirective,
     CommonModule,
     ReactiveFormsModule,
@@ -89,115 +55,47 @@ interface AssetDetails {
     MatFormFieldModule,
     MatSelectModule,
     ButtonDirective,
+    // ResizedDirective,
     NgStyle,
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
 })
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
+  
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
   @ViewChild(MatSort) sort!: MatSort;
 
-  //ไว้จัด Header row & col
-  displayedColumns3: string[] = [
-    'Aactions',
-    'วันเดือนปี',
-    'รหัสครุภัณฑ์',
-    'รายการ',
-    'ราคาต่อหน่วย',
-    'วิธีการได้มา',
-    'เลขที่เอกสาร',
-    'หน่วยงาน',
-    'ฝ่าย',
-    'ที่อยู่',
-    'ผู้ใช้งาน',
-    'หมายเหตุ',
-  ];
-
-  //ไว้เรียงข้อมูลในตาราง
-  displayedColumns2: string[] = [
-    'วันเดือนปี',
-    'รหัสครุภัณฑ์',
-    'รายการ',
-    'ราคาต่อหน่วย',
-    'วิธีการได้มา',
-    'เลขที่เอกสาร',
-    'หน่วยงาน',
-    'ฝ่าย',
-    'ที่อยู่',
-    'ผู้ใช้งาน',
-    'หมายเหตุ',
-  ];
-
-  // toggleColumn(event: MatSelectChange) {
-  //   const column = event.value;
-  //   const index = this.displayedColumns3.indexOf(column);
-  //   if (index >= 0) {
-  //     this.displayedColumns3.splice(index, 1);  // Remove column
-  //   } else {
-  //     this.displayedColumns3.push(column);     // Add column
-  //   }
-  // }
-
-  // toggleColumn(event: MatSelectChange) {
-
-  //   const selectedColumns = event.value;
-    
-  //   this.displayedColumns3 = this.displayedColumns2.filter(column => selectedColumns.includes(column));
-  // }
-
-  toggleColumn(event: MatSelectChange) {
-    const selectedColumns = event.value;
-    if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
-        // เซตค่าคืนทุกคอลัมน์
-        this.displayedColumns3 = ['Aactions',...this.displayedColumns2];
-    } else {
-        // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
-        this.displayedColumns3 = ['Aactions', ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด')];
-    }
-}
-
-
-
-  displayedColumns: string[] = [
-    'purchaseDate',
-    'assetCode',
-    'assetName',
-    'purchasePrice',
-    'purchasedFrom',
-    'documentNumber',
-    'agency',
-    'department',
-    'assetLocation',
-    'responsibleEmployee',
-    'note',
-  ];
-
-  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
-
+  assets: any = {};
+  qrCodeUrl: string = '';
+  selectedAssetType: string = '';
+  displayedColumns: string[];  //Eng
+  displayedColumns1: string[]; //ทั้งหมด
+  displayedColumns2: string[]; //ไว้เรียงข้อมูลในตาราง
+  displayedColumns3!: string[]; //ไว้จัด Header row & col
+  icons = {};
   userinfo: any = [];
-
-  token: any;
-
-  readinfo() {
-    this.token = localStorage.getItem('token');
-
-    const decodedToken = jwtDecode(this.token);
-
-    this.userinfo = decodedToken;
-    // console.log(this.userinfo);
-  }
-
+  assetTypes: any[] = [];
+  myFunctionInstance: myFunction | undefined;
   assetDetails: AssetDetails[] = [];
-
   dataSource: MatTableDataSource<AssetDetails> =
     new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   private dataSubscription!: Subscription;
-
-  ngOnInit(): void {
+  
+  constructor(private apiService: ApiService) {
+    this.myFunctionInstance = new myFunction();
+    this.icons = this.myFunctionInstance.icons;
+    this.userinfo = this.myFunctionInstance.readinfo();
+    this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
+    this.displayedColumns2 = this.myFunctionInstance.displayedColumns2;
+    this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
+    this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
   }
 
   ngOnDestroy(): void {
@@ -206,166 +104,81 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
-
-  constructor(private http: HttpClient, private apiService: ApiService) {
-    this.readinfo();
+  ngOnInit(): void {
     this.getAssetDetails();
+    this.apiService.fetchDatahttp('Assettypecodes').subscribe((data) => {
+      this.assetTypes = data;
+    });
   }
 
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
       .fetchDatahttp('assetDetails')
       .subscribe((data) => {
-        // console.log(this.userinfo.affiliation);
-        this.assetDetails = data
-          .filter((asset: any) => {
-            // จัดการกรณีค่า null
-            const agency = asset.agency || '';
-            const assetCode = asset.assetCode || '';
-
-            // if (this.userinfo.affiliation === "กกต.สกล") {
-
-            //   return assetCode.startsWith(this.userinfo.affiliation) ||
-            //          !asset.assetCode.startsWith("กกต") ||
-            //          agency === this.userinfo.workgroup;
-
-            // }
-            // if(this.userinfo.affiliation === "กกต")
-            // {
-            //   return assetCode.startsWith("กกต") && !asset.assetCode.startsWith("กกต.");
-            // }
-            // else {
-            // }
-
-            //เช็คว่าใช่ส่วนกลางไหม (กกต)
-            if (this.userinfo.affiliation === 'กกต') {
-              return (
-                assetCode.startsWith('กกต') &&
-                !asset.assetCode.startsWith('กกต.')
-              );
-              //กัน กกต. ส่วนจังหวัด
-            } else {
-              return assetCode.startsWith(`${this.userinfo.affiliation}`);
-            }
-          })
-          .sort((a: any, b: any) => {
-            // Convert dates to timestamp for comparison
-            const dateA = new Date(a.purchaseDate).getTime();
-            const dateB = new Date(b.purchaseDate).getTime();
-            // Sort in descending order (latest date first)
-            return dateB - dateA;
-          })
-          .map((asset: any) => {
-            // Convert purchaseDate
-            asset.purchaseDate = this.convertDate(asset.purchaseDate);
-
-            // Remove prefix from assetCode if it exists
-            // if (asset.assetCode && this.userinfo.affiliation === "กกต.สกล") {
-            //     const parts = asset.assetCode.split(' ');
-            //     if (parts.length > 1) {
-            //         asset.assetCode = parts.slice(1).join(' ');
-            //     }
-            // }
-
-            // Translate to Thai
-            asset = this.translateToThai(asset);
-
-            return asset;
-          });
-
-        // Update the data source with the new asset details
-        this.dataSource.data = this.assetDetails;
+        this.processAssetData(data);
       });
   }
 
-  addasset(): void {
-    window.location.href = '#/system/AssetDetails';
+  processAssetData(data: any[]): void {
+    this.assetDetails = data
+      .filter((asset: any) => {
+        const agency = asset.agency || '';
+        const assetCode = asset.assetCode || '';
+
+        if (this.userinfo.affiliation === 'กกต') {
+          return assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.');
+        } else {
+          return assetCode.startsWith(this.userinfo.affiliation);
+        }
+      })
+      .sort((a: any, b: any) => {
+        const dateA = new Date(a.purchaseDate).getTime();
+        const dateB = new Date(b.purchaseDate).getTime();
+        return dateB - dateA;
+      })
+      .map((asset: any) => {
+        asset.purchaseDate = this.myFunctionInstance!.convertDate(asset.purchaseDate);
+        asset = this.myFunctionInstance!.translateToThai(asset);
+        const path =
+          'http://localhost:4200/#/system/infoasset/' + asset.assetId;
+        QRCode.toDataURL(path, (err, url) => {
+          if (err) throw err;
+          asset.qrCodeUrl = url;
+        });
+        return asset;
+      });
+
+    this.filterAssets();
   }
 
-  infoasset(asset: any): void {
-    window.location.href = `#/system/infoasset/${asset.assetId}`;
-  }
-
-  editAsset(asset: any): void {
-    window.location.href = `#/system/Editasset/${asset.assetId}`;
-  }
-
-  translateToThai(asset: any): any {
-    const translationMap: { [key: string]: string } = {
-      purchaseDate: 'วันเดือนปี',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการ',
-      purchasePrice: 'ราคาต่อหน่วย',
-      purchasedFrom: 'วิธีการได้มา',
-      documentNumber: 'เลขที่เอกสาร',
-      assetLocation: 'ที่อยู่',
-      agency: 'หน่วยงาน',
-      department: 'ฝ่าย',
-      responsibleEmployee: 'ผู้ใช้งาน',
-      note: 'หมายเหตุ',
-    };
-
-    const translatedAsset: { [key: string]: any } = {};
-    for (const key in asset) {
-      if (asset.hasOwnProperty(key)) {
-        translatedAsset[translationMap[key] || key] = asset[key];
-      }
+  filterAssets(): void {
+    if (this.selectedAssetType) {
+      this.dataSource.data = this.assetDetails.filter(
+        (asset) => asset['assetType'] === this.selectedAssetType
+      );
+    } else {
+      this.dataSource.data = this.assetDetails;
     }
-    return translatedAsset;
   }
 
-  // convertDate(dateString: string): string {
-  //   const formattedDate = moment(dateString).locale('th').format('ll');
-  //   return formattedDate ?? '';
-  // }
-
-  convertDate(dateString: string): string {
-    const date = new Date(dateString);
-    const formattedDate = date.toLocaleDateString('th', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-    return formattedDate ?? '';
+  onAssetTypeChange(): void {
+    this.filterAssets();
   }
 
-  // applyFilter(event: Event): void {
-  //   const filterValue = (event.target as HTMLInputElement).value;
-
-  //   this.dataSource.filter = filterValue
-
-  //   if (this.dataSource?.paginator) {
-  //     this.dataSource.paginator.firstPage();
-  //   }
-  // }
-
-  //   applyFilter(column: string, event: Event): void {
-  //     const filterValue = (event.target as HTMLInputElement).value;
-  //     this.filterByColumn(column, filterValue);
-  //   }
-
-  // filterByColumn(column: string, filterValue: string): void {
-  //     // Implement your filtering logic here using the column name and filter value
-  //     console.log(column, filterValue);
-
-  //     // For example, if you have a dataSource array, you can filter it like this:
-  //     this.dataSource.data = this.dataSource.data.filter((item: any) => {
-  //         // Convert the item's value for the specified column to lowercase for case-insensitive comparison
-  //         const columnValue = (item[column] || '').toString().toLowerCase();
-  //         // Convert the filterValue to lowercase for case-insensitive comparison
-  //         const filterText = filterValue.trim().toLowerCase();
-  //         // Check if the columnValue includes the filterText
-  //         return columnValue.includes(filterText);
-  //     });
-
-  //     // Optionally, you can reapply pagination if using a paginator
-  //     if (this.dataSource?.paginator) {
-  //         this.dataSource.paginator.firstPage();
-  //     }
-  // }
+  toggleColumn(event: MatSelectChange) {
+    const selectedColumns = event.value;
+    if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
+      this.displayedColumns3 = ['Aactions', ...this.displayedColumns2];
+    } else {
+      // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
+      this.displayedColumns3 = [
+        'Aactions',
+        ...selectedColumns.filter(
+          (column: string) => column !== 'เซตค่าคืนทั้งหมด'
+        ),
+      ];
+    }
+  }
 
   setupFilter(column: string) {
     const isPriceColumn = column === 'ราคาต่อหน่วย';
@@ -391,54 +204,54 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.filter = filterValue;
   }
 
-  deleteAsset(asset: any): void {
-    Swal.fire({
+  showQrAsset(asset: any): void {
+    this.apiService
+      .fetchDatahttp('AssetDetails/' + asset.assetId)
+      .subscribe((data: any) => {
+        this.assets = data;
+
+        const path =
+          `${this.apiService.apiUrl_link}system/infoasset/` + asset.assetId;
+        QRCode.toDataURL(path, (err, url) => {
+          if (err) throw err;
+          // นำ URL ของ QR code ไปใช้งานต่อ
+          // console.log('QR code URL:', url);
+          this.qrCodeUrl = url;
+          // ในที่นี้คุณสามารถส่ง URL ไปยัง HTML template เพื่อแสดงผลได้
+        });
+      });
+  }
+
+  async deleteAsset(asset: any): Promise<void> {
+    const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
       text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'ใช่',
       cancelButtonText: 'ไม่',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http
-          .delete(`https://localhost:7204/api/AssetDetails/${asset.assetId}`)
-          .subscribe(
-            () => {
-              const index = this.assetDetails.findIndex(
-                (a) => a.assetId === asset.assetId
-              );
-              if (index !== -1) {
-                this.assetDetails.splice(index, 1);
-                // Update the data source after deletion
-                this.dataSource.data = this.assetDetails;
-              }
-              Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
-            },
-            (error) => {
-              console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-              Swal.fire(
-                'ข้อผิดพลาด!',
-                'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
-                'error'
-              );
-            }
-          );
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
-        Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        await this.apiService.deleteData(`AssetDetails/${asset.assetId}`);
+        const index = this.assetDetails.findIndex((a) => a.assetId === asset.assetId);
+        if (index !== -1) {
+          this.assetDetails.splice(index, 1);
+          // Update the data source after deletion
+          this.dataSource.data = this.assetDetails;
+        }
+        Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+        Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์', 'error');
       }
-    });
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
+      Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
+    }
   }
-
-  formatCurrency(price: number): string {
-    return price.toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    });
-  }
-
+  
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
 
@@ -466,7 +279,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       row.push(asset.วันเดือนปี);
       row.push(asset.รหัสครุภัณฑ์);
       row.push(asset.รายการ);
-      row.push(this.formatCurrency(asset.ราคาต่อหน่วย));
+      row.push(this.myFunctionInstance!.formatCurrency(asset.ราคาต่อหน่วย));
       row.push(asset.วิธีการได้มา);
       row.push(asset.เลขที่เอกสาร);
       row.push(asset.หน่วยงาน);

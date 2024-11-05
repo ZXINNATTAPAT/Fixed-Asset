@@ -260,6 +260,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   {
 
     this.readinfo();
+    
     this.getAssetDetails();
 
     if (
@@ -614,7 +615,6 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       const response = await this.ap.postData('AssetDetails', this.asset.value);
       // console.log(response);
-      
       Swal.fire({
         html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
         icon: 'success',
@@ -638,7 +638,6 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   
-
   translateToEnglish(asset: any): any {
     const translationMap: { [key: string]: string } = {
       

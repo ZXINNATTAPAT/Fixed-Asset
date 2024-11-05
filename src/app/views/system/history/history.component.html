@@ -1,0 +1,47 @@
+<div class="card" style="border: none;">
+    <div class="card-body">
+        <br/>
+        <h1><span class="anuphan-700">ประวัติการแก้ไขและใช้งาน</span></h1><hr/>
+        <div *ngIf="data && data.length">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <!-- <th class="border">ID</th> -->
+                  <!-- <th class="border">Asset ID</th> -->
+                  <th class="border"></th>
+                  
+                  <th class="border">วันที่แก้ไข</th>
+
+                  <th class="border">รายการที่แก้ไข</th>
+                  
+                  <th class="border">ข้อมูลเดิม</th>
+                  
+                  <th class="border">ข้อมูลใหม่</th>
+                  
+                  <th class="border">Modified By</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of data">
+                  <!-- <td class="border">{{ item.id }}</td> -->
+                  <!-- <td class="border">{{ item.assetId }}</td> -->
+                  <td class="border"  ><svg [cIcon]="icons.cilPencil"></svg></td>
+                  <td class="border">{{ convertDate(item.modifiedDate) }}</td>
+                  <!-- <td class="border">{{ item.propertyName }}</td> -->
+                  <td class="border" *ngIf="item.propertyName !== 'AssetLocation'">{{ item.propertyName }}</td>
+                  <td class="border" *ngIf="item.propertyName === 'AssetLocation'">ที่อยู่ครุภัณฑ์</td>
+
+                  <td class="border">{{ item.oldValue }}</td>
+                  <td class="border">{{ item.newValue }}</td>
+                  
+                  <td class="border">{{ item.modifiedBy }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!data || !data.length">
+            No data found.
+          </div>
+          
+    </div>
+</div>

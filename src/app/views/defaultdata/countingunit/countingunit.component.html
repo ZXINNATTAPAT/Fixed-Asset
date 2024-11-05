@@ -1,45 +1,46 @@
-<!-- defaultdata.component.html -->
-
-<c-card class="mb-4 shadow-sm">
-  <!-- <c-card-header>
-      <strong>กำหนดหน่วยนับ</strong>
-  </c-card-header> -->
-  <c-card-body>
+<div class="card shadow-sm" style="border: none">
+  <div class="card-body">
     <h1><span class="anuphan-700">กำหนดหน่วยนับ</span></h1>
     <hr />
     <form cForm (submit)="onSubmit()">
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
-        <div class="col">
-          <label cLabel for="assetCodeInput">รหัสหน่วยนับ</label>
-          <input
-            cFormControl
-            id="assetCodeInput"
-            placeholder="ระบุหน่วยนับ"
-            name="unitCode"
-            [(ngModel)]="asset.unitCode"
-            class="form-control"
-            type="text"
-          />
-        </div>
+      <div class="card" style="border: none">
+        <div class="card-body">
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
+            <div class="col">
+              <label class="form-label" for="assetCodeInput"
+                >รหัสหน่วยนับ</label
+              >
+              <input
+                id="assetCodeInput"
+                placeholder="ระบุหน่วยนับ"
+                name="unitCode"
+                [(ngModel)]="asset.unitCode"
+                class="form-control"
+                type="text"
+              />
+            </div>
 
-        <div class="col">
-          <label cLabel for="assetNameInput">ชื่อหน่วยนับ</label>
-          <input
-            cFormControl
-            id="assetNameInput"
-            placeholder="ระบุชื่อหน่วยนับ"
-            class="form-control"
-            name="unitName"
-            [(ngModel)]="asset.unitName"
-            type="text"
-          />
-        </div>
-        <div class="col align-self-end">
-          <button class="btn btn-primary">เพิ่ม</button>
+            <div class="col">
+              <label class="form-label" for="assetNameInput"
+                >ชื่อหน่วยนับ</label
+              >
+              <input
+                id="assetNameInput"
+                placeholder="ระบุชื่อหน่วยนับ"
+                class="form-control"
+                name="unitName"
+                [(ngModel)]="asset.unitName"
+                type="text"
+              />
+            </div>
+
+            <div class="col align-self-end">
+              <button class="btn btn-primary">เพิ่ม</button>
+            </div>
+          </div>
         </div>
       </div>
     </form>
-    <br />
 
     <div class="table-responsive">
       <table
@@ -116,5 +117,5 @@
         showFirstLastButtons
       ></mat-paginator>
     </div>
-  </c-card-body>
-</c-card>
+  </div>
+</div>

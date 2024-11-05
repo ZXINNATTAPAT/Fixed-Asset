@@ -12,6 +12,8 @@ import { DropdownModule, SidebarModule } from '@coreui/angular';
 import { IconSetService } from '@coreui/icons-angular';
 import { routes } from './app.routes';
 import { HttpClientModule } from '@angular/common/http';
+import { ResizedDirective } from 'angular-resize-event';
+// import { ResizableModule } from 'angular-resizable-element';
 
 // กำหนดค่าสำหรับการใช้งานของแอพพลิเคชั่น
 export const appConfig: ApplicationConfig = {
@@ -33,6 +35,7 @@ export const appConfig: ApplicationConfig = {
       // กำหนดการทำงานเมื่อเริ่มต้นแอพพลิเคชั่น
       withEnabledBlockingInitialNavigation(),
       // กำหนดการเปลี่ยนแปลงมุมมอง
+      
       withViewTransitions(),
       // กำหนดการจัดการเมื่อมีการเปลี่ยน hash location
       withHashLocation()
@@ -41,6 +44,8 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(SidebarModule, DropdownModule),
     // กำหนดค่าสำหรับการใช้งานของ IconSetService
     IconSetService,
+
+    ResizedDirective,
     // กำหนดค่าสำหรับการใช้งานของ animations
     provideAnimations(),
   ],
