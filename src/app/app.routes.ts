@@ -22,14 +22,14 @@ export const routes: Routes = [
   {
     path: 'mainpage',
     loadComponent: () =>
-      import('../app/views/pages/mainpage/mainpage.component').then(
+      import('./views/pages/mainpage/mainpage.component').then(
         (m) => m.MainpageComponent
       ),
   },
   {
     path: '',
     component: DefaultLayoutComponent,
-    canActivate: [AuthGuard], // ใช้ AuthGuard ที่สร้างขึ้นเพื่อตรวจสอบ Token
+    canActivate: [AuthGuard], // ใช้ AuthGuard เพื่อตรวจสอบ Token
     data: {
       title: 'Home',
     },
@@ -37,7 +37,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('./views/dashboard/routes').then((m) => m.routes),
+          import('./dashboard/routes').then((m) => m.routes),
       },
       {
         path: 'assettable',
@@ -60,30 +60,10 @@ export const routes: Routes = [
           import('./views/system/routes').then((m) => m.routes),
       },
       {
-        path: 'system',
+        path: 'system2',
         loadChildren: () =>
           import('./views/system2/routes').then((m) => m.routes),
       },
-      // {
-      //   path: 'icons',
-      //   loadChildren: () =>
-      //     import('./views/icons/routes').then((m) => m.routes),
-      // },
-      // {
-      //   path: 'notifications',
-      //   loadChildren: () =>
-      //     import('./views/notifications/routes').then((m) => m.routes),
-      // },
-      // {
-      //   path: 'widgets',
-      //   loadChildren: () =>
-      //     import('./views/widgets/routes').then((m) => m.routes),
-      // },
-      // {
-      //   path: 'charts',
-      //   loadChildren: () =>
-      //     import('./views/charts/routes').then((m) => m.routes),
-      // },
       {
         path: 'pages',
         loadChildren: () =>
@@ -111,10 +91,14 @@ export const routes: Routes = [
       title: 'Page 500',
     },
   },
+  {
+    path: '**',
+    redirectTo: '404',
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

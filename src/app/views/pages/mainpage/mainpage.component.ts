@@ -1,10 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AvatarComponent,
   BadgeComponent,
   BreadcrumbRouterComponent,
-  ColorModeService,
   ContainerComponent,
   DropdownDividerDirective,
   DropdownHeaderDirective,
@@ -19,11 +17,9 @@ import { AvatarComponent,
   NavLinkDirective,
   ProgressBarDirective,
   ProgressComponent,
-  SidebarToggleDirective,
-  TextColorDirective,
-  ThemeDirective,} from '@coreui/angular';
-  import { HoneycombComponent } from '../../dashboard/honeycomb/honeycomb.component';
-  import { ThailandMapComponent} from '../../dashboard/thailand-map/thailand-map.component'
+  TextColorDirective,} from '@coreui/angular';
+  import { HoneycombComponent } from '../../../dashboard/honeycomb/honeycomb.component';
+  import { ThailandMapComponent} from '../../../dashboard/thailand-map/thailand-map.component'
   
 
 @Component({

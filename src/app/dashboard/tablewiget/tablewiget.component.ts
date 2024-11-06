@@ -30,7 +30,7 @@ import { MatSort } from '@angular/material/sort';
 import 'moment/locale/th.js';
 import { Subject, Subscription } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import { DataService } from '../../../data-service/data-service.component';
+import { DataService } from '../../data-service/data-service.component';
 import { ApiService } from 'src/app/api-service.service';
 
 interface AssetDetails {
