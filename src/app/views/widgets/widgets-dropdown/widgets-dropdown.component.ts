@@ -111,12 +111,28 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
 
   // private assetDetailsCache: any[] | null = null;
 
-  link():void{
+  linkadd():void{
     window.location.href="http://localhost:4200/#/system/AssetDetails";
+  }
+
+  linkdisasc():void{
+    window.location.href="http://localhost:4200/#/system/disassets";
+  }
+
+  linkcount():void{
+    window.location.href="http://localhost:4200/#/system/Assetcount";
   }
 
   linkassetall():void{
     window.location.href="http://localhost:4200/#/assettable";
+  }
+
+  linkrepair():void{
+    window.location.href="http://localhost:4200/#/system/Repair";
+  }
+
+  linktranfer():void{
+    window.location.href="http://localhost:4200/#/system/transferassets";
   }
   
   linkassetcom():void{

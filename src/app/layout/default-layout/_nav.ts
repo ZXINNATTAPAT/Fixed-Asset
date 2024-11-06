@@ -1,15 +1,23 @@
 import { INavData } from '@coreui/angular';
 
 export const navItems: INavData[] = [
+
   {
-    name: 'แดชบอร์ดกลาง',
-    url: '/mainpage',
+    name: 'แดชบอร์ด',
+    url: '/system',
     iconComponent: { name: 'cil-speedometer' },
-  },
-  {
-    name: 'แดชบอร์ดสรุปภาพรวม',
-    url: '/dashboard',
-    iconComponent: { name: 'cil-speedometer' },
+    children: [
+      {
+        name: 'แดชบอร์ดกลาง',
+        url: '/mainpage',
+        icon:'nav-icon-bullet' ,
+      },
+      {
+        name: 'แดชบอร์ดสรุปภาพรวม',
+        url: '/dashboard',
+        icon:'nav-icon-bullet' ,
+      },
+    ]
   },
   {
     name: 'บันทึกรายการรายวัน',

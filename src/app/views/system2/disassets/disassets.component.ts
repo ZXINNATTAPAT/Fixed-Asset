@@ -1,26 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormControl,
-} from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
+import { ReactiveFormsModule,FormsModule,FormControl,} from '@angular/forms';
+import { MatPaginator ,MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import {
-  TextColorDirective,
-  TableModule,
-  UtilitiesModule,
-} from '@coreui/angular';
-import {
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
+import {TextColorDirective,TableModule,UtilitiesModule,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +14,8 @@ import { ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ApiService } from 'src/app/api-service.service';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { BarcodeFormat } from '@zxing/library';
 
 interface AssetDetails {
   repairAssetId: any;
@@ -53,6 +40,8 @@ interface AssetDetails {
     MatSelect,
     MatOption,
 
+    ZXingScannerModule,
+
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
@@ -67,9 +56,27 @@ interface AssetDetails {
   templateUrl: './disassets.component.html',
   styleUrl: './disassets.component.scss'
 })
+
 export class DisassetsComponent implements OnInit, OnDestroy {
 
-  assetCode: string = ''; //for input
+  startScanner = false;
+  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
+  availableDevices: MediaDeviceInfo[] = [];
+  selectedDevice: MediaDeviceInfo | undefined;
+
+  onScanSuccess(data: string) {
+    this.startScanner = false; // ปิดกล้องเมื่อสแกนสำเร็จ
+    console.log('QR Code Data:', data);
+  }
+
+  getAvailableDevices() {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
+      if (this.availableDevices.length > 0) {
+        this.selectedDevice = this.availableDevices[1]; // เลือกกล้องตัวแรกโดยค่าเริ่มต้น
+      }
+    });
+  }
 
   constructor(private http: HttpClient , private ap: ApiService) {}
 

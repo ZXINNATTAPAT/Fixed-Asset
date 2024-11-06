@@ -5,17 +5,14 @@ import {
   FormsModule,
   FormControl,
 } from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator ,MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import {
   TextColorDirective,
   TableModule,
   UtilitiesModule,
-} from '@coreui/angular';
-import {
   FormDirective,
   FormLabelDirective,
   FormControlDirective,
@@ -29,8 +26,6 @@ import { ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ApiService } from 'src/app/api-service.service';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { BarcodeFormat } from '@zxing/library';
 
 interface AssetDetails {
   repairAssetId: any;
@@ -42,8 +37,9 @@ interface AssetDetails {
   Amount: string;
 }
 
+
 @Component({
-  selector: 'app-transferassets',
+  selector: 'app-tablewiget4',
   standalone: true,
   imports: [TextColorDirective,
     CommonModule,
@@ -59,9 +55,6 @@ interface AssetDetails {
     MatTableModule,
     MatSortModule,
     MatButtonModule,
-     
-    ZXingScannerModule,
-
     UtilitiesModule,
     ButtonDirective,
     NgStyle,
@@ -69,30 +62,12 @@ interface AssetDetails {
     FormDirective,
     FormLabelDirective,
     FormControlDirective,],
-  templateUrl: './transferassets.component.html',
-  styleUrl: './transferassets.component.scss'
+  templateUrl: './tablewiget4.component.html',
+  styleUrl: './tablewiget4.component.scss'
 })
+export class Tablewiget4Component implements OnInit, OnDestroy {
 
-export class TransferassetsComponent implements OnInit, OnDestroy {
-
-  startScanner = false;
-  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
-  availableDevices: MediaDeviceInfo[] = [];
-  selectedDevice: MediaDeviceInfo | undefined;
-
-  onScanSuccess(data: string) {
-    this.startScanner = false; // ปิดกล้องเมื่อสแกนสำเร็จ
-    console.log('QR Code Data:', data);
-  }
-
-  getAvailableDevices() {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
-      if (this.availableDevices.length > 0) {
-        this.selectedDevice = this.availableDevices[1]; // เลือกกล้องตัวแรกโดยค่าเริ่มต้น
-      }
-    });
-  }
+  assetCode: string = ''; //for input
 
   constructor(private http: HttpClient , private ap: ApiService) {}
 
@@ -316,5 +291,4 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
   editAsset(_t35: any) {
     throw new Error('Method not implemented.');
   }
-
 }

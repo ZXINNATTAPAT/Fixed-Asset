@@ -1,6 +1,6 @@
 <c-row class="g-2">
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn1 shadow-sm anuphan-700 " (click)="link()" >
+    <button class="btn custom-btn custom-btn1 shadow-sm anuphan-700 " (click)="linkadd()" >
         <h3 class="custom-btn-text">
             <span class="anuphan-700 p-0" >
                เพิ่มครุภัณฑ์
@@ -10,7 +10,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn2 shadow-sm anuphan-700 " >
+    <button class="btn custom-btn custom-btn2 shadow-sm anuphan-700 " (click)="linkassetall()" >
       <h3 class="custom-btn-text">
           <span class="anuphan-700 p-0" >
             รายการครุภัณฑ์
@@ -20,7 +20,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn3 shadow-sm anuphan-700 " >
+    <button class="btn custom-btn custom-btn3 shadow-sm anuphan-700 "  (click)="linkrepair()">
       <h3 class="custom-btn-text">
           <span class="anuphan-700 p-0" >
             ซ่อมแซมครุภัณฑ์
@@ -30,7 +30,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn4 shadow-sm anuphan-700 ">
+    <button class="btn custom-btn custom-btn4 shadow-sm anuphan-700 " (click)="linkcount()">
       <h3 class="custom-btn-text">
           <span class="anuphan-700 p-0" >
             ตรวจนับครุภัณฑ์
@@ -40,7 +40,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn5 shadow-sm anuphan-700 " >
+    <button class="btn custom-btn custom-btn5 shadow-sm anuphan-700 " (click)="linktranfer()">
       <h3 class="custom-btn-text " >
           <span class="anuphan-700 p-0" >
             โอนย้ายครุภัณฑ์
@@ -51,7 +51,7 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn6 shadow-sm anuphan-700 " >
+    <button class="btn custom-btn custom-btn6 shadow-sm anuphan-700 " (click)="linkdisasc()">
       <h3 class="custom-btn-text">
           <span class="anuphan-700 p-0" >
             จำหน่ายครุภัณฑ์
@@ -251,7 +251,7 @@
         <h2>
           <span class="anuphan-700 p-0" style="color: slateblue">
             <ng-container *ngIf="assetinter || assetinter === 0; else loading">
-            {{ assetinter }} <br />โฆษณา
+            {{ assetinter }} <br />ไฟฟ้าและวิทยุ
             <svg
               [cIcon]="icons.cilBullhorn"
               height="32"
