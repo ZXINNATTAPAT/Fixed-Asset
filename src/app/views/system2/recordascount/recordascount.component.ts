@@ -10,11 +10,6 @@ import {
   CardComponent,
   CardHeaderComponent,
   CardBodyComponent,
-} from '@coreui/angular';
-import { CommonModule, DatePipe, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-import {
   RowComponent,
   ColComponent,
   FormDirective,
@@ -22,16 +17,11 @@ import {
   FormControlDirective,
   ButtonDirective,
 } from '@coreui/angular';
-
+import { CommonModule, DatePipe, NgStyle } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
-import {
-  cilPencil,
-  cilTrash,
-  cibAddthis,
-  cilDataTransferDown,
-  cilInfo,
-} from '@coreui/icons';
+import {cilPencil,cilTrash,cibAddthis,cilDataTransferDown,cilInfo,} from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
 import { ApiService } from '../../../api-service.service';
@@ -40,9 +30,8 @@ import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator,MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator';
 
 import 'moment/locale/th.js';
 import moment from 'moment';
@@ -157,7 +146,7 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
     this.dataSource.paginator = this.paginator;
   }
 
-  constructor(private http: HttpClient, private apiService: ApiService) {
+  constructor(private http: HttpClient, private apiService: ApiService,private router: Router) {
     this.readinfo();
     this.getAssetDetails();
   }
@@ -190,15 +179,15 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   addasset(): void {
-    window.location.href = '#/system/AssetDetails';
+    this.router.navigate(['/system/AssetDetails']);
   }
 
   infoasset(asset: any): void {
-    window.location.href = `#/system/infoasset/${asset.assetId}`;
+    this.router.navigate([`#/system/infoasset/${asset.assetId}`]);
   }
 
   editAsset(asset: any): void {
-    window.location.href = `#/system/Editasset/${asset.assetId}`;
+    this.router.navigate([`#/system/Editasset/${asset.assetId}`]);
   }
 
   translateToThai(asset: any): any {

@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { getStyle } from '@coreui/utils';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
-import { RouterLink } from '@angular/router';
+import { RouterLink ,Router } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   RowComponent,
@@ -41,6 +41,7 @@ import { NgIf } from '@angular/common';
 import { DataService } from '../../../data-service/data-service.component';
 import { forkJoin, of, tap } from 'rxjs';
 
+
 @Component({
   selector: 'app-widgets-dropdown',
   templateUrl: './widgets-dropdown.component.html',
@@ -63,6 +64,7 @@ import { forkJoin, of, tap } from 'rxjs';
     DropdownDividerDirective,
     ChartjsComponent,
     NgIf,
+    
   ],
   
 })
@@ -84,7 +86,8 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private apiService: ApiService,
-    private dataService: DataService
+    private dataService: DataService,
+    private router: Router
   ) {
     this.loadData();
   }
@@ -111,32 +114,32 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
 
   // private assetDetailsCache: any[] | null = null;
 
-  linkadd():void{
-    window.location.href="http://localhost:4200/#/system/AssetDetails";
+  linkadd(): void {
+    this.router.navigate(['/system/AssetDetails']);
   }
 
-  linkdisasc():void{
-    window.location.href="http://localhost:4200/#/system/disassets";
+  linkdisasc(): void {
+    this.router.navigate(['/system/disassets']);
   }
 
-  linkcount():void{
-    window.location.href="http://localhost:4200/#/system/Assetcount";
+  linkcount(): void {
+    this.router.navigate(['/system/Assetcount']);
   }
 
-  linkassetall():void{
-    window.location.href="http://localhost:4200/#/assettable";
+  linkassetall(): void {
+    this.router.navigate(['/assettable']);
   }
 
-  linkrepair():void{
-    window.location.href="http://localhost:4200/#/system/Repair";
+  linkrepair(): void {
+    this.router.navigate(['/system/Repair']);
   }
 
-  linktranfer():void{
-    window.location.href="http://localhost:4200/#/system/transferassets";
+  linktranfer(): void {
+    this.router.navigate(['/system/transferassets']);
   }
   
   linkassetcom():void{
-    window.location.href="http://localhost:4200/#/assettable";
+    window.location.href="http://localhost:4200/assettable";
   }
 
   loadData(): void {

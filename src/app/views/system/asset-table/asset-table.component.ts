@@ -1,8 +1,7 @@
 import {AfterViewInit,Component,OnDestroy,OnInit,ViewChild,} from '@angular/core';
-import { TextColorDirective } from '@coreui/angular';
+import { TextColorDirective,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective, } from '@coreui/angular';
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ApiService } from '../../../api-service.service';
 
@@ -21,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
+import { Router } from '@angular/router';
 
 interface AssetDetails {
   assetId: any;
@@ -83,8 +83,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private dataSubscription!: Subscription;
   
-  constructor(private apiService: ApiService) {
-    this.myFunctionInstance = new myFunction();
+  constructor(private apiService: ApiService,private router: Router) {
+    this.myFunctionInstance = new myFunction(router);
     this.icons = this.myFunctionInstance.icons;
     this.userinfo = this.myFunctionInstance.readinfo();
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -303,24 +303,4 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 }
 
-//   async searchAsset(): Promise<void> {
-//     const assetCode = this.assetCodeInput;
 
-//     // ใช้เงื่อนไขการเปรียบเทียบค่าที่ต้องการ (เช่น >=, <=, === เป็นต้น) กับค่าที่มีอยู่ในรายการ
-//     const foundAsset = this.assetDetailsset.find(asset => {
-//         // เช็คว่ารหัสครุภัณฑ์ในรายการเป็นค่าที่คล้ายค่าที่ผู้ใช้ป้อนเข้ามาหรือไม่
-//         return asset.รหัสครุภัณฑ์.startsWith(assetCode) || asset.รหัสครุภัณฑ์.startsWith(assetCode + "-");
-//     });
-
-//     if (foundAsset) {
-//         // พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Found asset:', foundAsset);
-//         this.dataSource = new MatTableDataSource<any>([foundAsset]); // แปลงเป็นอาร์เรย์เดี่ยวแล้วสร้าง MatTableDataSource
-
-//         // ทำอย่างไรก็ได้ตามที่ต้องการกับข้อมูลที่พบ
-//     } else {
-//         // ไม่พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Asset with code', assetCode, 'not found.');
-//         // จัดการกรณีที่ไม่พบรหัสครุภัณฑ์ที่ต้องการ
-//     }
-// }

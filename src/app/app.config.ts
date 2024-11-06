@@ -5,8 +5,7 @@ import {
   withRouterConfig,
   withInMemoryScrolling,
   withEnabledBlockingInitialNavigation,
-  withViewTransitions,
-  withHashLocation,
+  withViewTransitions
 } from '@angular/router';
 import { DropdownModule, SidebarModule } from '@coreui/angular';
 import { IconSetService } from '@coreui/icons-angular';
@@ -35,10 +34,7 @@ export const appConfig: ApplicationConfig = {
       // กำหนดการทำงานเมื่อเริ่มต้นแอพพลิเคชั่น
       withEnabledBlockingInitialNavigation(),
       // กำหนดการเปลี่ยนแปลงมุมมอง
-      
-      withViewTransitions(),
-      // กำหนดการจัดการเมื่อมีการเปลี่ยน hash location
-      withHashLocation()
+      withViewTransitions()
     ),
     // Import providers ที่เกี่ยวข้องกับ DropdownModule และ SidebarModule
     importProvidersFrom(SidebarModule, DropdownModule),

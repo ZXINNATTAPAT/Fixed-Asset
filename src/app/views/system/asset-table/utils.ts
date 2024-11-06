@@ -1,22 +1,20 @@
+import { Router } from '@angular/router';
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
 import { jwtDecode } from 'jwt-decode';
 
 
 export class myFunction {
-
+  // แก้ไขให้เป็นการประกาศแบบไม่ระบุค่าเริ่มต้น
   userinfo: any = [];
-
   token: any;
-
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
+
+  constructor(private router: Router) {}
 
   readinfo() {
     this.token = localStorage.getItem('token');
-
     const decodedToken = jwtDecode(this.token);
-
     this.userinfo = decodedToken;
-    // console.log(this.userinfo);
     return this.userinfo;
   }
 
@@ -31,11 +29,11 @@ export class myFunction {
   }
 
   addasset(): void {
-    window.location.href = '#/system/AssetDetails';
+    this.router.navigate(['/system/AssetDetails']);
   }
 
   infoasset(asset: any): void {
-    window.location.href = `#/system/infoasset/${asset.assetId}`;
+    this.router.navigate([`/system/infoasset/${asset.assetId}`]);
   }
 
   translateToThai(asset: any): any {

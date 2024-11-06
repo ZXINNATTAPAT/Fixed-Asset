@@ -1,22 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormControl,
-} from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
+import {ReactiveFormsModule,FormsModule,FormControl,} from '@angular/forms';
+import { MatPaginator , MatPaginatorModule} from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import {
   TextColorDirective,
   TableModule,
-  UtilitiesModule,
-} from '@coreui/angular';
-import {
-  FormDirective,
+  UtilitiesModule,FormDirective,
   FormLabelDirective,
   FormControlDirective,
   ButtonDirective,
