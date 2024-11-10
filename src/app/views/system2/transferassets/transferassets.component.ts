@@ -32,14 +32,28 @@ import { ApiService } from 'src/app/api-service.service';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 interface AssetDetails {
   repairAssetId: any;
   assetCode: string;
-  assetName:string;
+  assetName: string;
   assetId: string;
   SerialNumber: string;
   Description: string;
   Amount: string;
+}
+
+interface AssetTransferLog {
+  TransferId: number;
+  Date: Date;
+  ReferenceNumber?: string;
+  Note?: string;
+  AssetId: number;
+  AssetName?: string;
+  Quantity: number;
+  TransferredFrom?: string;
+  TransferredTo?: string;
 }
 
 @Component({
@@ -59,7 +73,7 @@ interface AssetDetails {
     MatTableModule,
     MatSortModule,
     MatButtonModule,
-     
+
     ZXingScannerModule,
 
     UtilitiesModule,
@@ -74,27 +88,24 @@ interface AssetDetails {
 })
 
 export class TransferassetsComponent implements OnInit, OnDestroy {
+  
+  assetTransferForm: FormGroup;
+  assetTransferData: AssetTransferLog | undefined;
 
-  startScanner = false;
-  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
-  availableDevices: MediaDeviceInfo[] = [];
-  selectedDevice: MediaDeviceInfo | undefined;
-
-  onScanSuccess(data: string) {
-    this.startScanner = false; // ปิดกล้องเมื่อสแกนสำเร็จ
-    console.log('QR Code Data:', data);
-  }
-
-  getAvailableDevices() {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
-      if (this.availableDevices.length > 0) {
-        this.selectedDevice = this.availableDevices[1]; // เลือกกล้องตัวแรกโดยค่าเริ่มต้น
-      }
+  constructor(private http: HttpClient, private ap: ApiService ,private fb: FormBuilder) 
+  {
+    this.assetTransferForm = this.fb.group({
+      TransferId: [{ value: '', disabled: true }], // ไม่ต้องให้ผู้ใช้กรอก
+      Date: ['', Validators.required],
+      ReferenceNumber: [''],
+      Note: [''],
+      AssetId: ['', Validators.required],
+      AssetName: [''],//ตัดออก
+      Quantity: ['1'],
+      TransferredFrom: [''],
+      TransferredTo: ['']
     });
-  }
-
-  constructor(private http: HttpClient , private ap: ApiService) {}
+   }
 
   assetDetails: AssetDetails[] = [];
 
@@ -129,6 +140,58 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
   filteredAssetData: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
 
   _onDestroy = new Subject<void>();
+
+  onSubmit() {
+    if (this.assetTransferForm.valid) {  // ตรวจสอบความถูกต้องของฟอร์มก่อน
+      this.http
+        .post<any>('https://localhost:7204/api/AssetTransferLog/', this.assetTransferForm.value)
+        .subscribe(
+          (response) => {
+            const newAsset = response;
+            this.assetDetails.push(this.translateToThai(newAsset));
+            this.dataSource.data = this.assetDetails;
+            this.getAssetType();
+            
+            // อัปเดตสถานะของสินทรัพย์หลังจากบันทึกสำเร็จ
+            this.updateAssetStatus(newAsset.assetId, 'โอนย้าย'); // สถานะใหม่ เช่น "Completed"
+            
+            Swal.fire({
+              title: 'บันทึกเสร็จสิ้น',
+              icon: 'success',
+            });
+          },
+          (error) => {
+            console.error(error);
+            if (error) {
+              Swal.fire({
+                title: 'มีข้อมูลในระบบอยู่แล้ว',
+                icon: 'error',
+              });
+            }
+          }
+        );
+    } else {
+      Swal.fire({
+        title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        icon: 'warning',
+      });
+    }
+  }
+  
+  updateAssetStatus(assetId: number, status: string) {
+    const url = `https://localhost:7204/api/AssetTransferLog/${assetId}/status`;
+    this.http.patch(url, JSON.stringify(status), { headers: { 'Content-Type': 'application/json' } })
+      .subscribe(
+        () => {
+          console.log('Status updated successfully');
+        },
+        (error) => {
+          console.error('Error updating status', error);
+        }
+      );
+  }
+  
+  
 
   filterAsset(): void {
     let search = this.assetdataFilterCtrl.value;
@@ -176,32 +239,6 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
     this._onDestroy.complete();
   }
 
-  onSubmit() {
-    this.http
-      .post<any>('https://localhost:7204/api/RepairAsset/', this.asset)
-      .subscribe(
-        (response) => {
-          const newAsset = response;
-          this.assetDetails.push(this.translateToThai(newAsset));
-          this.dataSource.data = this.assetDetails;
-          this.getAssetType();
-          Swal.fire({
-            title: 'บันทึกเสร็จสิ้น',
-            icon: 'success',
-          });
-        },
-        (error) => {
-          console.error(error);
-          if (error) {
-            Swal.fire({
-              title: 'มีข้อมูลในระบบอยู่แล้ว',
-              icon: 'error',
-            });
-          }
-        }
-      );
-  }
-
   getAssetType(): void {
     this.http
       .get<any[]>('https://localhost:7204/api/RepairAsset')
@@ -209,7 +246,7 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
         this.assetDetails = data.map((asset) => {
           const foundAsset = this.assetDetails2.find(
             (asset2) => asset2.assetId === asset.assetId
-            
+
           );
           if (foundAsset) {
             asset.assetCode = foundAsset.assetCode; // เพิ่ม property assetCode เข้าไปในข้อมูล asset
@@ -242,7 +279,7 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
             assetName: asset.assetName,
           };
         });
-        
+
         // อัปเดตค่าใน filteredAssetData ซึ่งเป็นตัวกรองข้อมูลสำหรับ dropdown ที่ใช้ในการเลือก asset
         this.filteredAssetData.next(this.assetDetails2.slice());
 
@@ -317,4 +354,27 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
     throw new Error('Method not implemented.');
   }
 
+  //Qr-code method
+
+  startScanner = false;
+
+  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
+
+  availableDevices: MediaDeviceInfo[] = [];
+
+  selectedDevice: MediaDeviceInfo | undefined;
+
+  onScanSuccess(data: string) {
+    this.startScanner = false; // ปิดกล้องเมื่อสแกนสำเร็จ
+    console.log('QR Code Data:', data);
+  }
+
+  getAvailableDevices() {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
+      if (this.availableDevices.length > 0) {
+        this.selectedDevice = this.availableDevices[1]; // เลือกกล้องตัวแรกโดยค่าเริ่มต้น
+      }
+    });
+  }
 }

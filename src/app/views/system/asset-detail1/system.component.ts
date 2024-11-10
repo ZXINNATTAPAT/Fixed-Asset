@@ -525,32 +525,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   //เรียกข้อมูลรายการครุทั้งหมด
   getAssetDetails(): void {
 
-    // if (this.dataService.getAssetDetails()) {
-    //   this.dataService.getAssetDetails().subscribe((data) => {
-    //     this.assetDetails = data.filter((asset) => {
-    //       if (this.userinfo.affiliation !== 'กกต.สกล') {
-    //         return (
-    //           asset.assetCode.startsWith(this.userinfo.affiliation) &&
-    //           !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-    //         );
-    //       } 
-    //       else {
-    //         return (
-    //           !asset.assetCode.startsWith('กกต.' && 'กกต') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
-    //           asset.agency.startsWith(`${this.userinfo.workgroup}`)
-    //         );
-    //       }
-    //     });
-    //     // .map((asset) => {
-    //     //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
-    //     //   asset = this.translateToThai(asset);
-    //     //   return asset;
-    //     // });
-    //     // Update the data source with the new asset details
-    //     // this.dataSource.data = this.assetDetails;
-    //   });
-    // } 
-    // else {
+   
       this.ap
         .fetchDatahttp('AssetDetails')
         .subscribe((data) => {

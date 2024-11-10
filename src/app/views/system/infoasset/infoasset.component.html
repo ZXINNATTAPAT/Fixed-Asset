@@ -1,138 +1,166 @@
 <div class="card shadow-sm" style="border: none;">
   <div class="card-body">
-    <mat-tab-group  mat-stretch-tabs="false" mat-align-tabs="start"  >
+    
+    <mat-tab-group class="m-1" mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab>
         <ng-template mat-tab-label>
-          <span class=" anuphan-700" >ข้อมูล</span>
+          <h3><span class="anuphan-700">ข้อมูลรายละเอียดครุภัณฑ์</span></h3>
         </ng-template>
-        <br/>
+        <br />
         <div class="card" style="border: none;">
           <div class="card-body">
-            <h1><span class="anuphan-700">ข้อมูลรายละเอียดครุภัณฑ์</span></h1>
-            <hr />
+            
             <div class="row">
-              <div class="col m-1" >
+              <div class="col m-1">
                 <div class="col">
 
-                  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2">
-
-                    <div class="col" style="text-align: left;">
-                      <img class="border" src="{{ qrCodeUrl }}"/>
+                  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 m-2">
+                    
+                    <div class="col">
+                      <img src="https://notebookspec.com/storage/desktop/468_BO.jpg" alt="" 
+                        class="img-fluid shadow-sm rounded h-100 border" style="object-fit: cover; ">
                     </div>
 
-                    <div class="col" style="text-align: left;">
-                      <h2>
-                        <span class="anuphan-600">{{ assets.assetCode }} <br/>
-                          {{ assets.assetName }}</span>
-                      </h2>
+                    <div class="col">
+                      <img class="shadow-sm w-100 border" src="{{ qrCodeUrl }}" alt="" />
                     </div>
+
                   </div>
-                </div>
-                <br />
 
-                <div class="col d-grid">
-                  <button class="anuphan-700 btn btn-outline-success p-2 m-1" >
-                    อัปเดตข้อมูล
-                  </button>
-                  <button class="anuphan-700 btn btn-outline-success p-2 m-1">
-                    แก้ไข
-                  </button>
-                  <button class="anuphan-700 btn btn-outline-success p-2 m-1">
-                    สร้าง Label code
-                  </button>
+
+                  <br />
+                  <div class="m-1">
+                    <h2 class="text-center">
+                      <span class="anuphan-600">{{ assets.assetCode }} {{ assets.department }} ({{assets.agency}})<br />
+                        {{ assets.assetName }} 
+                        <br />
+                        ผู้คุมครุภัณฑ์ : {{ assets.responsibleEmployee }}</span>
+                    </h2>
+                  </div>
+
+                </div>
+                
+
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3">
+                  <div class="col d-grid">
+                    <button class="anuphan-700 btn btn-outline-success p-2 m-1">
+                      อัปเดตข้อมูล
+                    </button> 
+                  </div>
+
+                  <div class="col d-grid">
+                    <button class="anuphan-700 btn btn-outline-success p-2 m-1">
+                      แก้ไข
+                    </button>
+                  </div>
+
+                  <div class="col d-grid">
+                      <button class="anuphan-700 btn btn-outline-success p-2 m-1">
+                        สร้าง Label code
+                      </button>
+                    </div>
+                
                 </div>
               </div>
+             
+
               <div class="col">
-                <div class="">
+                
                   <table class="table table-striped table-hover">
                     <tbody class="border">
-                      
-                      <tr >
-                        <th class="border" >ชื่อรายการ</th>
-                        <th class="border" >รายการ</th>
+                      <tr>
+                        <th class="border">ชื่อรายการ</th>
+                        <th class="border">รายการ</th>
                       </tr>
+
+                      <!-- รายการสำคัญ -->
                       <tr>
                         <th class="anuphan-600 border">สถานะ</th>
                         <td class="anuphan-500" style="color: green;">
                           <button class="btn btn-sm btn-success" style="color: white;">{{ assets.status }}</button>
                         </td>
                       </tr>
+
                       <tr>
                         <th class="anuphan-600 border">รหัสครุภัณฑ์</th>
                         <td class="anuphan-500">{{ assets.assetCode }}</td>
                       </tr>
-                      <tr>
-                        <th class="anuphan-600 border">ชื่อครุภัณฑ์</th>
-                        <td class="anuphan-500">{{ assets.assetName }}</td>
-                      </tr>
-                      <tr>
-                        <th class="anuphan-600 border">จำนวน</th>
-                        <td class="anuphan-500">{{ assets.quantity }}</td>
-                      </tr>
-                      <tr>
-                        <th class="anuphan-600 border">หน่วยนับ</th>
-                        <td class="anuphan-500">{{ assets.unit }}</td>
-                      </tr>
-                      
+
                       <tr>
                         <th class="anuphan-600 border">เลขที่เอกสาร</th>
                         <td class="anuphan-500">{{ assets.documentNumber }}</td>
                       </tr>
+
+                      <tr>
+                        <th class="anuphan-600 border">วันที่ได้มา</th>
+                        <td class="anuphan-500">{{ convertDate(assets.purchaseDate) }}</td>
+                      </tr>
+
+                      <tr>
+                        <th class="anuphan-600 border">ค่าเสื่อมราคาสะสม</th>
+                        <td class="anuphan-500">{{ calculateDepreciation() | number:'1.2-2' }} บาท</td>
+                      </tr>
+
+                      <!-- รายละเอียดทั่วไปของสินทรัพย์ -->
                       <tr>
                         <th class="anuphan-600 border">ราคาต่อหน่วย</th>
-                        <td class="anuphan-500">{{ assets.purchasePrice }}</td>
+                        <td class="anuphan-500">{{ assets.purchasePrice | number:'1.2-2' }} บาท</td>
+                      </tr>
+
+                      <tr>
+                        <th class="anuphan-600 border">อายุการใช้งาน</th>
+                        <td class="anuphan-500">{{ assets.assetAge }}</td>
+                      </tr>
+
+                      <tr>
+                        <th class="anuphan-600 border">ประเภท</th>
+                        <td class="anuphan-500">{{ assets.assetType }}</td>
+                      </tr>
+
+                      <tr>
+                        <th class="anuphan-600 border">หมวดหมู่</th>
+                        <td class="anuphan-500">{{ assets.assetCategory }}</td>
                       </tr>
 
                       <tr>
                         <th class="anuphan-600 border">ซื้อจาก</th>
                         <td class="anuphan-500">{{ assets.purchasedFrom }}</td>
                       </tr>
+
                       <tr>
-                        <th class="anuphan-600 border">ประเภท</th>
-                        <td class="anuphan-500">{{ assets.assetType }}</td>
+                        <th class="anuphan-600 border">หน่วยนับ</th>
+                        <td class="anuphan-500">{{ assets.unit }}</td>
                       </tr>
-                      <tr>
-                        <th class="anuphan-600 border">หมวดหมู่</th>
-                        <td class="anuphan-500">{{ assets.assetCategory }}</td>
-                      </tr>
-                      <tr>
+
+                      <!-- รายละเอียดตำแหน่งและผู้รับผิดชอบ -->
+                      <!-- <tr>
                         <th class="anuphan-600 border">แผนก</th>
                         <td class="anuphan-500">{{ assets.department }}</td>
-                      </tr>
-                      <tr>
-                        <th class="anuphan-600 border">วันที่ได้มา</th>
-                        <td class="anuphan-500">
-                          {{ convertDate(assets.purchaseDate) }}
-                        </td>
-                      </tr>
-                      <tr>
+                      </tr> -->
+
+                      <!-- <tr>
                         <th class="anuphan-600 border">พนักงานที่รับผิดชอบ</th>
                         <td class="anuphan-500">{{ assets.responsibleEmployee }}</td>
-                      </tr>
+                      </tr> -->
 
                       <tr>
                         <th class="anuphan-600 border">สำนัก</th>
                         <td class="anuphan-500">{{ assets.agency }}</td>
                       </tr>
+
                       <tr>
                         <th class="anuphan-600 border">ที่ตั้ง</th>
                         <td class="anuphan-500">{{ assets.assetLocation }}</td>
                       </tr>
-                      <tr>
-                        <th class="anuphan-600 border">อายุการใช้งาน</th>
-                        <td class="anuphan-500">{{ assets.assetAge }}</td>
-                      </tr>
+
+                      <!-- รายละเอียดเพิ่มเติม -->
                       <tr>
                         <th class="anuphan-600 border">เลขที่ใบกำกับภาษี</th>
                         <td class="anuphan-500">{{ assets.taxInvoiceNumber }}</td>
                       </tr>
-                      <tr>
-                        <th class="anuphan-600 border">เลขที่เอกสาร</th>
-                        <td class="anuphan-500">{{ assets.documentNumber }}</td>
-                      </tr>
                     </tbody>
                   </table>
-                </div>
+                
               </div>
             </div>
 
@@ -142,21 +170,21 @@
         </div>
       </mat-tab>
 
-      <mat-tab > 
+      <mat-tab>
         <ng-template mat-tab-label>
-          <span class="anuphan-700">ประวัติการใช้งาน</span>
+          <h3><span class="anuphan-700">ประวัติการใช้งาน</span></h3>
         </ng-template>
 
-        <app-history/>
-        
+        <app-history />
+
       </mat-tab>
-      <mat-tab > 
+      <mat-tab>
         <ng-template mat-tab-label>
-          <span class="anuphan-700">ประวัติการซ่อมแซม</span>
+          <h3><span class="anuphan-700">ประวัติการซ่อมแซม</span></h3>
         </ng-template>
-        
+
       </mat-tab>
     </mat-tab-group>
+
   </div>
 </div>
-

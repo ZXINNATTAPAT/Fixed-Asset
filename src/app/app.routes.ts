@@ -60,7 +60,7 @@ export const routes: Routes = [
           import('./views/system/routes').then((m) => m.routes),
       },
       {
-        path: 'system2',
+        path: 'system',
         loadChildren: () =>
           import('./views/system2/routes').then((m) => m.routes),
       },

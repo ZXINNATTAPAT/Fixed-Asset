@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import QRCode from 'qrcode';
 import { MatTabsModule } from '@angular/material/tabs';
 import {HistoryComponent} from '../../../../app/views/system/history/history.component'
+import { CommonModule } from '@angular/common';
 
 interface AssetDetails {
   assetId: any;
@@ -34,24 +35,20 @@ interface AssetDetails {
 @Component({
   selector: 'app-infoasset',
   standalone: true,
-  imports: [MatTabsModule ,HistoryComponent],
+  imports: [MatTabsModule ,HistoryComponent,CommonModule],
   templateUrl: './infoasset.component.html',
   styleUrl: './infoasset.component.scss',
 })
 export class InfoassetComponent {
 
   // assetDetails: AssetDetails[] = [];
- 
+
   assets: any = {};
 
   qrCodeUrl: string = '';
   
 
   constructor(private http: HttpClient, private route: ActivatedRoute) {}
-
-  selectpage(){
-    
-  }
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
@@ -86,4 +83,39 @@ export class InfoassetComponent {
     });
     return formattedDate ?? '';
   }
+
+  annualDepreciationRate = 0.25; // อัตราค่าเสื่อมต่อปี
+
+  calculateDepreciation(): number {
+    const purchasePrice = this.assets.purchasePrice;
+    const purchaseDate = new Date(this.assets.purchaseDate);
+    const assetAge = this.assets.assetAge;
+
+    const purchaseDay = purchaseDate.getDate();
+    const purchaseMonth = purchaseDate.getMonth();
+    const purchaseYear = purchaseDate.getFullYear();
+
+    // ตรวจสอบว่าวันที่เป็นวันที่ 1-15 ของเดือนหรือไม่
+    const isFullMonth = purchaseDay <= 15;
+
+    // กำหนดเดือนเริ่มต้นการคำนวณ
+    const startMonth = isFullMonth ? purchaseMonth : purchaseMonth + 1;
+    const startYear = isFullMonth ? purchaseYear : (startMonth > 11 ? purchaseYear + 1 : purchaseYear);
+
+    // คำนวณจำนวนเดือนที่ใช้งานจนถึงปัจจุบัน
+    const currentDate = new Date();
+    let monthsUsed = (currentDate.getFullYear() - startYear) * 12 + (currentDate.getMonth() - startMonth + 1);
+
+    if (monthsUsed < 0) {
+      monthsUsed = 0;
+    }
+
+    // คำนวณค่าเสื่อมราคาสะสม
+    const monthlyDepreciationRate = this.annualDepreciationRate / 12;
+    const depreciation = monthlyDepreciationRate * monthsUsed * purchasePrice;
+
+    return Math.round(depreciation * 100) / 100; // ปัดเศษทศนิยมสองตำแหน่ง
+  }
+  
+  
 }

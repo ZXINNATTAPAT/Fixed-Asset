@@ -1,74 +1,46 @@
 <div class="card border shadow">
     <div class="card-body">
-      <h3 class="border-bottom">
-        <span class="anuphan-700" style="color: green;">ครุภัณฑ์ที่ซ่อมแซม</span></h3>
+        <h3 class="border-bottom">
+            <span class="anuphan-700" style="color: green;">ครุภัณฑ์ที่ซ่อมแซม</span>
+        </h3>
+
         <div class="table-responsive">
-            <table
-            mat-table
-            [dataSource]="dataSource"
-            matSort
-            class="table table-striped table-hover border"
-            >
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-                <th class="border" mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
-                <td mat-cell *matCellDef="let asset">
-                <button
-                    class="btn btn-sm btn-warning m-1"
-                    (click)="editAsset(asset)"
-                    style="width: 28px; height: 28px; padding: 4px"
-                >
-                    <svg
-                    [cIcon]="icons.cilPencil"
-                    style="color: white; width: 100%; height: 100%"
-                    ></svg>
-                </button>
+            <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover "
+                style="border: none;">
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th class="border" mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
+                    <td mat-cell *matCellDef="let asset">
+                        <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)"
+                            style="width: 28px; height: 28px; padding: 4px">
+                            <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%"></svg>
+                        </button>
 
-                <button
-                    class="btn btn-sm btn-danger m-1"
-                    (click)="deleteAsset(asset)"
-                    style="width: 28px; height: 28px; padding: 4px"
-                >
-                    <svg
-                    [cIcon]="icons.cilTrash"
-                    style="color: white; width: 100%; height: 100%"
-                    ></svg>
-                </button>
-                </td>
-            </ng-container>
+                        <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)"
+                            style="width: 28px; height: 28px; padding: 4px">
+                            <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%"></svg>
+                        </button>
+                    </td>
+                </ng-container>
 
-            <!-- Dynamic Columns -->
-            <ng-container
-                *ngFor="let column of displayedColumns2"
-                [matColumnDef]="column"
-            >
-                <th
-                mat-header-cell
-                *matHeaderCellDef
-                mat-sort-header
-                class="border"
-                style="font-weight: bold"
-                >
-                {{ column }}
-                </th>
-                <td mat-cell class="border" *matCellDef="let asset">{{ asset[column] }}</td>
-            </ng-container>
+                <!-- Dynamic Columns -->
+                <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold">
+                        {{ column }}
+                    </th>
+                    <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
+                </ng-container>
 
-            <!-- Header Row -->
-            <tr
-                mat-header-row
-                *matHeaderRowDef="[
+                <!-- Header Row -->
+                <tr mat-header-row *matHeaderRowDef="[
                
                 'รหัสครุภัณฑ์',
                 'รายการครุภัณฑ์',
                 
-                ]"
-            ></tr>
+                ]"></tr>
 
-            <!-- Data Rows -->
-            <tr
-                mat-row
-                *matRowDef="
+                <!-- Data Rows -->
+                <tr mat-row *matRowDef="
                 let row;
                 columns: [
                     
@@ -76,16 +48,11 @@
                     'รายการครุภัณฑ์',
                     
                 ]
-                "
-            ></tr>
+                "></tr>
             </table>
 
             <!-- Paginator -->
-            <mat-paginator
-            [pageSizeOptions]="[30, 50, 70, 100]"
-            [pageSize]="15"
-            showFirstLastButtons
-            ></mat-paginator>
+            <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" [pageSize]="15" showFirstLastButtons></mat-paginator>
         </div>
     </div>
 </div>

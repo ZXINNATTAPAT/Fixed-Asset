@@ -4,7 +4,7 @@ export const navItems: INavData[] = [
 
   {
     name: 'แดชบอร์ด',
-    url: '/system',
+    url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
     children: [
       {

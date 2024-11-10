@@ -1,46 +1,15 @@
-import {
-  Component,
-  Inject,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
-import {
-  TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
-  InputGroupComponent,
-  BorderDirective,
-} from '@coreui/angular';
+import {Component,OnInit,ViewChild} from '@angular/core';
+import {TextColorDirective,InputGroupComponent,BorderDirective,} from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormControl,
-  Validators,
-  FormGroup,
-  FormBuilder,
-} from '@angular/forms';
+import { ReactiveFormsModule,FormsModule,FormControl,FormGroup,FormBuilder,} from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-
-import {
-  RowComponent,
-  ColComponent,
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
+import {RowComponent,ColComponent,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../api-service.service';
 import Swal from 'sweetalert2';
 
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
-import {
-  MatDatepicker,
-  MatDatepickerToggle,
-  MatDatepickerInput,
-} from '@angular/material/datepicker';
+import {MatDatepicker,MatDatepickerToggle,MatDatepickerInput,} from '@angular/material/datepicker';
 import {
   MatFormField,
   MatFormFieldModule,
@@ -58,15 +27,8 @@ import { FormArray } from '@angular/forms';
 // import 'moment/locale/th';
 // import 'date-fns/locale/th';
 import 'moment/locale/th.js';
-
 import { IconDirective } from '@coreui/icons-angular';
-import {
-  cibAddthis,
-  cilDataTransferDown,
-  cilInfo,
-  cilPencil,
-  cilTrash,
-} from '@coreui/icons';
+import {cibAddthis,cilDataTransferDown,cilInfo,cilPencil,cilTrash,} from '@coreui/icons';
 import { ReplaySubject, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { MatSelect } from '@angular/material/select';
@@ -74,20 +36,6 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 
-
-interface AssetDetails1 {
-  Date: string;
-  SerialNumber: string;
-  DepartmentCode: string;
-  LocationCode: string;
-  Inspector: string;
-  Verifier: string;
-  Note: string;
-  AssetId: string;
-  AssetName: string;
-  BookValue: string;
-  InventoryValue: string;
-}
 
 interface AssetDetails {
   assetId: any;
@@ -150,6 +98,7 @@ interface AssetDetails {
   templateUrl: './assetcount.component.html',
   styleUrl: './assetcount.component.scss',
 })
+
 export class AssetcountComponent implements OnInit {
 
   startScanner = false;

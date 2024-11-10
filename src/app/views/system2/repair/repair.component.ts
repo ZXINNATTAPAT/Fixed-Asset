@@ -33,7 +33,7 @@ import { ApiService } from 'src/app/api-service.service';
 interface AssetDetails {
   repairAssetId: any;
   assetCode: string;
-  assetName:string;
+  assetName: string;
   assetId: string;
   SerialNumber: string;
   Description: string;
@@ -73,7 +73,7 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   assetCode: string = ''; //for input
 
-  constructor(private http: HttpClient , private ap: ApiService) {}
+  constructor(private http: HttpClient, private ap: ApiService) { }
 
   assetDetails: AssetDetails[] = [];
 
@@ -164,6 +164,10 @@ export class RepairComponent implements OnInit, OnDestroy {
           this.assetDetails.push(this.translateToThai(newAsset));
           this.dataSource.data = this.assetDetails;
           this.getAssetType();
+
+          // อัปเดตสถานะเป็น "ซ่อมแซม" หลังจากบันทึกสำเร็จ
+          this.updateAssetStatus(newAsset.assetId, 'ซ่อมแซม');
+
           Swal.fire({
             title: 'บันทึกเสร็จสิ้น',
             icon: 'success',
@@ -181,6 +185,21 @@ export class RepairComponent implements OnInit, OnDestroy {
       );
   }
 
+  // ฟังก์ชันสำหรับอัปเดตสถานะของสินทรัพย์
+  updateAssetStatus(assetId: number, status: string) {
+    const url = `https://localhost:7204/api/AssetTransferLog/${assetId}/status`;
+    this.http.patch(url, JSON.stringify(status), { headers: { 'Content-Type': 'application/json' } })
+      .subscribe(
+        () => {
+          console.log('Status updated successfully');
+        },
+        (error) => {
+          console.error('Error updating status', error);
+        }
+      );
+  }
+
+
   getAssetType(): void {
     this.http
       .get<any[]>('https://localhost:7204/api/RepairAsset')
@@ -188,7 +207,7 @@ export class RepairComponent implements OnInit, OnDestroy {
         this.assetDetails = data.map((asset) => {
           const foundAsset = this.assetDetails2.find(
             (asset2) => asset2.assetId === asset.assetId
-            
+
           );
           if (foundAsset) {
             asset.assetCode = foundAsset.assetCode; // เพิ่ม property assetCode เข้าไปในข้อมูล asset
@@ -221,7 +240,7 @@ export class RepairComponent implements OnInit, OnDestroy {
             assetName: asset.assetName,
           };
         });
-        
+
         // อัปเดตค่าใน filteredAssetData ซึ่งเป็นตัวกรองข้อมูลสำหรับ dropdown ที่ใช้ในการเลือก asset
         this.filteredAssetData.next(this.assetDetails2.slice());
 
