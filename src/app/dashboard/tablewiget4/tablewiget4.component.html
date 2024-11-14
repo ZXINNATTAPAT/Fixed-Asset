@@ -5,12 +5,13 @@
         </h3>
 
         <div class="table-responsive">
-            <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover "
+            <table  mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover anuphan-600"
                 style="border: none;">
                 <!-- Actions Column -->
                 <ng-container matColumnDef="actions">
                     <th class="border" mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
-                    <td mat-cell *matCellDef="let asset">
+                    <td  mat-cell *matCellDef="let asset">
+
                         <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)"
                             style="width: 28px; height: 28px; padding: 4px">
                             <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%"></svg>
@@ -20,15 +21,16 @@
                             style="width: 28px; height: 28px; padding: 4px">
                             <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%"></svg>
                         </button>
+
                     </td>
                 </ng-container>
 
                 <!-- Dynamic Columns -->
                 <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="anuphan-600" style="font-weight: bold">
                         {{ column }}
                     </th>
-                    <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
+                    <td mat-cell *matCellDef="let asset" class="anuphan-400">{{ asset[column] }}</td>
                 </ng-container>
 
                 <!-- Header Row -->

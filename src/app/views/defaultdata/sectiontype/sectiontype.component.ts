@@ -46,12 +46,10 @@ interface AssetDetails {
   styleUrl: './sectiontype.component.scss'
 })
 export class SectiontypeComponent {
-
   icons = { cilPencil, cilTrash };
   assetDetails: AssetDetails[] = [];
-
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
-
+  
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -62,25 +60,23 @@ export class SectiontypeComponent {
     "ชื่อแผนก"
   ];
 
-  assetDetailsset: any[] = []
+  assetDetailsset: any[] = [];
+
+  ngOnInit(): void {
+    this.getAssetType();
+  }
 
   getAssetType(): void {
     this.http.get<any[]>('https://localhost:7204/api/SectionTypeCodes').subscribe(data => {
       this.assetDetails = data.map(asset => {
-        asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
+        asset = this.translateToThai(asset);
         return asset;
       });
-      console.log(this.assetDetails);
       this.assetDetailsset = this.assetDetails;
       this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-      // console.log(this.dataSource)
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });
-  }
-
-  ngOnInit(): void {
-    this.getAssetType();
   }
 
   translateToThai(asset: any): any {
@@ -96,11 +92,28 @@ export class SectiontypeComponent {
     }
     return translatedAsset;
   }
+
+  postAssetType(sectionCode: string, sectionName: string): void {
+    const newAssetType = {
+      sectionCode,
+      sectionName
+    };
+    this.http.post('https://localhost:7204/api/SectionTypeCodes', newAssetType).subscribe(
+      response => {
+        console.log('Asset Type created:', response);
+        this.getAssetType(); // Refresh data after post
+      },
+      error => {
+        console.error('Error creating Asset Type:', error);
+      }
+    );
+  }
+
   deleteAsset(_t27: any) {
     throw new Error('Method not implemented.');
   }
   editAsset(_t27: any) {
     throw new Error('Method not implemented.');
   }
-
 }
+

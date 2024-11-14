@@ -64,12 +64,18 @@ export const navItems: INavData[] = [
   
   },
   {
-    name: 'บันทึกการตรวจนับ',
-    url: 'system/recordAssetcount',
+    name: 'ทะเบียนผู้ใช้งาน',
+    url: '/usersmanagement',
     // icon: 'nav-cil-folder',
     iconComponent: { name: 'cil-pencil' }
   
   },
+  // {
+  //   name: 'บันทึกการตรวจนับ',
+  //   url: 'system/recordAssetcount',
+  //   // icon: 'nav-cil-folder',
+  //   iconComponent: { name: 'cil-pencil' }
+  // },
   // {
   //   title: true,
   //   name: 'แก้ไขข้อมูลในระบบ'

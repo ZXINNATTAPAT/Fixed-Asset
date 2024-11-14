@@ -1,15 +1,15 @@
-import {Component,OnInit,ViewChild} from '@angular/core';
-import {TextColorDirective,InputGroupComponent,BorderDirective,} from '@coreui/angular';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { TextColorDirective, InputGroupComponent, BorderDirective, } from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ReactiveFormsModule,FormsModule,FormControl,FormGroup,FormBuilder,} from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-import {RowComponent,ColComponent,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
+import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../api-service.service';
 import Swal from 'sweetalert2';
 
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
-import {MatDatepicker,MatDatepickerToggle,MatDatepickerInput,} from '@angular/material/datepicker';
+import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angular/material/datepicker';
 import {
   MatFormField,
   MatFormFieldModule,
@@ -28,13 +28,15 @@ import { FormArray } from '@angular/forms';
 // import 'date-fns/locale/th';
 import 'moment/locale/th.js';
 import { IconDirective } from '@coreui/icons-angular';
-import {cibAddthis,cilDataTransferDown,cilInfo,cilPencil,cilTrash,} from '@coreui/icons';
+import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash, } from '@coreui/icons';
 import { ReplaySubject, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
+
+import { MatDialog } from '@angular/material/dialog';
 
 
 interface AssetDetails {
@@ -73,7 +75,7 @@ interface AssetDetails {
     BorderDirective,
 
     InputGroupComponent,
-  
+
     RowComponent,
     ColComponent,
     TextColorDirective,
@@ -101,30 +103,7 @@ interface AssetDetails {
 
 export class AssetcountComponent implements OnInit {
 
-  startScanner = false;
-  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
-  availableDevices: MediaDeviceInfo[] = [];
-  selectedDevice: MediaDeviceInfo | undefined;
-
-  onScanSuccess(data: string) {
-    this.startScanner = false; // ปิดกล้องเมื่อสแกนสำเร็จ
-    console.log('QR Code Data:', data);
-  }
-
-  getAvailableDevices() {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
-      if (this.availableDevices.length > 0) {
-        this.selectedDevice = this.availableDevices[1]; // เลือกกล้องตัวแรกโดยค่าเริ่มต้น
-      }
-    });
-  }
-
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
-
-  isFormControl(control: any): boolean {
-    return control instanceof FormControl;
-  }
 
   displayedColumns2: string[] = [
     'การดำเนินการ',
@@ -151,6 +130,16 @@ export class AssetcountComponent implements OnInit {
     'note',
   ];
 
+  startScanner = false;
+
+  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
+
+  availableDevices: MediaDeviceInfo[] = [];
+
+  selectedDevice: MediaDeviceInfo | undefined;
+
+
+
   // displayedColumns3: string[] = ["รหัสครุภัณฑ์","รายการ","ยอดตามบัญชี","ยอดตรวจนับ","ผลต่าง","หมายเหตุ"];
   displayedColumns3: string[] = ['รหัสครุภัณฑ์', 'รายการ'];
 
@@ -174,53 +163,6 @@ export class AssetcountComponent implements OnInit {
 
   @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
-  ngOnDestroy(): void {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
-    this._onDestroy.next();
-    this._onDestroy.complete();
-  }
-
-  editAsset(_t115: any) {
-    throw new Error('Method not implemented.');
-  }
-
-  deleteAsset(_t115: any) {
-    throw new Error('Method not implemented.');
-  }
-
-  translateToThai(asset: any): any {
-    const translationMap: { [key: string]: string } = {
-      purchaseDate: 'วันเดือนปี',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการ',
-      purchasePrice: 'ราคาต่อหน่วย',
-      purchasedFrom: 'วิธีการได้มา',
-      documentNumber: 'เลขที่เอกสาร',
-      department: 'แผนก',
-      responsibleEmployee: 'ผู้ใช้งาน',
-      note: 'หมายเหตุ',
-    };
-    const translatedAsset: { [key: string]: any } = {};
-    for (const key in asset) {
-      if (asset.hasOwnProperty(key)) {
-        translatedAsset[translationMap[key] || key] = asset[key];
-      }
-    }
-    return translatedAsset;
-  }
-
-  convertDate(dateString: string): string {
-    const date = new Date(dateString);
-    const formattedDate = date.toLocaleDateString('th', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-    return formattedDate ?? '';
-  }
-
   assetData: any[] = []; // Initialize assetData as an empty array
 
   dataSource!: MatTableDataSource<AssetDetails>; // Removed the initialization here
@@ -235,13 +177,7 @@ export class AssetcountComponent implements OnInit {
 
   _onDestroy = new Subject<void>();
 
-  constructor(
-    // private http: HttpClient,
-    private apiService: ApiService,
-    private formBuilder: FormBuilder
-  ) {
-    this.getAssetDetails();
-  }
+  constructor(private apiService: ApiService, private formBuilder: FormBuilder,) { this.getAssetDetails(); }
 
   assetForm!: FormGroup;
 
@@ -264,9 +200,63 @@ export class AssetcountComponent implements OnInit {
       });
   }
 
+  // Handle successful QR scan
+  onScanSuccess(data: string) {
+    this.startScanner = false; // Close scanner after success
+    console.log('QR Code Data:', data);
+
+    // Extract ID from URL
+    const id = this.extractAssetIdFromUrl(data);
+    if (id) {
+      this.fetchAssetById(id); // Fetch data using the extracted ID
+    } else {
+      console.warn('Invalid QR Code format');
+    }
+  }
+
+  // Function to extract asset ID from URL
+  extractAssetIdFromUrl(url: string): string | null {
+    const match = url.match(/\/(\d+)$/); // Matches the ID at the end of the URL
+    return match ? match[1] : null;
+  }
+
+  // Fetch asset details by ID
+  fetchAssetById(id: string) {
+    this.apiService.fetchDatahttp(`assetDetails/${id}`).subscribe(
+      (assetData) => {
+        console.log('Asset Data:', assetData);
+        // Handle asset data (e.g., update form or display data in UI)
+      },
+      (error) => {
+        console.error('Error fetching asset data:', error);
+      }
+    );
+  }
+
+  // Get available devices for the scanner
+  getAvailableDevices() {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.availableDevices = devices.filter((device) => device.kind === 'videoinput');
+      if (this.availableDevices.length > 0) {
+        this.selectedDevice = this.availableDevices[1]; // Select first camera by default
+      }
+    });
+  }
+
+
+  isFormControl(control: any): boolean {
+    return control instanceof FormControl;
+  }
+
   inputform: any[] = [];
 
   formArray!: FormArray; // No changes
+
+  getAssetName(assetId: number): string {
+    // หาชื่อของครุภัณฑ์จาก ID ของครุภัณฑ์
+    const asset = this.assetData.find(data => data.assetId === assetId);
+    return asset ? asset.assetName : '';
+  }
 
   filterAsset(): void {
     let search = this.assetdataFilterCtrl.value;
@@ -344,12 +334,6 @@ export class AssetcountComponent implements OnInit {
     });
   }
 
-  getAssetName(assetId: number): string {
-    // หาชื่อของครุภัณฑ์จาก ID ของครุภัณฑ์
-    const asset = this.assetData.find(data => data.assetId === assetId);
-    return asset ? asset.assetName : '';
-  }
-
   addform() {
 
     const newFormItem = this.createItem(); // Create a new form control
@@ -408,8 +392,55 @@ export class AssetcountComponent implements OnInit {
     }
   }
 
-
   getSequence(index: number): number {
     return index + 1;
   }
+
+  ngOnDestroy(): void {
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+    }
+    this._onDestroy.next();
+    this._onDestroy.complete();
+  }
+
+  editAsset(_t115: any) {
+    throw new Error('Method not implemented.');
+  }
+
+  deleteAsset(_t115: any) {
+    throw new Error('Method not implemented.');
+  }
+
+  translateToThai(asset: any): any {
+    const translationMap: { [key: string]: string } = {
+      purchaseDate: 'วันเดือนปี',
+      assetCode: 'รหัสครุภัณฑ์',
+      assetName: 'รายการ',
+      purchasePrice: 'ราคาต่อหน่วย',
+      purchasedFrom: 'วิธีการได้มา',
+      documentNumber: 'เลขที่เอกสาร',
+      department: 'แผนก',
+      responsibleEmployee: 'ผู้ใช้งาน',
+      note: 'หมายเหตุ',
+    };
+    const translatedAsset: { [key: string]: any } = {};
+    for (const key in asset) {
+      if (asset.hasOwnProperty(key)) {
+        translatedAsset[translationMap[key] || key] = asset[key];
+      }
+    }
+    return translatedAsset;
+  }
+
+  convertDate(dateString: string): string {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('th', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    return formattedDate ?? '';
+  }
 }
+

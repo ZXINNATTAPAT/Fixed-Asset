@@ -11,7 +11,7 @@ import { TablewigetComponent } from './tablewiget/tablewiget.component';
 import { Tablewiget2Component } from './tablewiget2/tablewiget2.component';
 import { Tablewiget3Component } from './tablewiget3/tablewiget3.component';
 import { Tablewiget4Component } from './tablewiget4/tablewiget4.component';
-
+import { Tablewidget5Component } from './tablewiget5/tablewidget5.component';
 import { DataService } from '../data-service/data-service.component';
 
 @Component({
@@ -27,15 +27,19 @@ import { DataService } from '../data-service/data-service.component';
     Tablewiget2Component,
     Tablewiget3Component,
     Tablewiget4Component,
+    Tablewidget5Component
   ],
 })
 
 export class DashboardComponent implements OnInit {
+  
   assetDetails: any = [];
+
   assetcom: string = '';
+
   numberOfAssets!: number;
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
     this.numberOfAssets = this.dataService.getNumberOfAssets();

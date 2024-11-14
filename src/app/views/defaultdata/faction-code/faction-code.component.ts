@@ -46,54 +46,51 @@ interface AssetDetails {
   templateUrl: './faction-code.component.html',
   styleUrl: './faction-code.component.scss'
 })
-export class FactionCodeComponent implements OnInit{
-  
-icons = { cilPencil, cilTrash };
-assetDetails: AssetDetails[] = [];
+export class FactionCodeComponent implements OnInit {
 
-dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
+  icons = { cilPencil, cilTrash };
+  assetDetails: any[] = []; // Array to hold the faction details data
 
-@ViewChild(MatPaginator) paginator!: MatPaginator;
-@ViewChild(MatSort) sort!: MatSort;
+  dataSource: MatTableDataSource<any> = new MatTableDataSource<any>(this.assetDetails);
 
-constructor(private http: HttpClient, private router: Router) { }
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
-displayedColumns2: string[] = [
-  "รหัสแผนก",
-  "ชื่อแผนก"
-];
+  constructor(private http: HttpClient) { }
 
-assetDetailsset: any[] = []
+  displayedColumns2: string[] = [
+    "รหัสฝ่าย",
+    "ชื่อฝ่าย",
+  ];
 
-getAssetType(): void {
-  this.http.get<any[]>('https://localhost:7204/api/Factiontypecodes').subscribe(data => {
-    this.assetDetails = data.map(asset => {
-      asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
-      return asset;
+  asset: any = {};
+
+  ngOnInit(): void {
+    this.getAssetType();
+  }
+
+  getAssetType(): void {
+    this.http.get<any[]>('https://localhost:7204/api/Factiontypecodes').subscribe(data => {
+
+      this.assetDetails = data.map(asset => this.translateToThai(asset));
+
+      this.dataSource = new MatTableDataSource<any>(this.assetDetails);
+
+      this.dataSource.paginator = this.paginator;
+
+      this.dataSource.sort = this.sort;
+
+      console.log(this.assetDetails);
+
     });
-    console.log(this.assetDetails);
-    this.assetDetailsset = this.assetDetails;
-    this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-    // console.log(this.dataSource)
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  });
-}
+  }
 
-ngOnInit(): void {
-  this.getAssetType();
-}
-
-asset:any = {};
-
-onSubmit() {
-  this.http.post<any>('https://localhost:7204/api/Factiontypecodes', this.asset)
+  onSubmit(): void {
+    this.http.post<any>('https://localhost:7204/api/Factiontypecodes', this.asset)
       .subscribe(
         response => {
-          // console.log(response);
-          const newAsset = response;
-          // console.log(newAsset);
-          this.assetDetails.push(this.translateToThai(newAsset));
+          const newAsset = this.translateToThai(response);
+          this.assetDetails.push(newAsset);
           this.dataSource.data = this.assetDetails;
 
           Swal.fire({
@@ -103,77 +100,64 @@ onSubmit() {
         },
         error => {
           console.error(error);
-          if (error) {
-            Swal.fire({
-              title: "มีข้อมูลในระบบอยู่แล้ว",
-              icon: "error"
-            });
-          }
+          Swal.fire({
+            title: "มีข้อมูลในระบบอยู่แล้ว",
+            icon: "error"
+          });
         }
       );
-}
-
-translateToThai(asset: any): any {
-  const translationMap: { [key: string]: string } = {
-    "FactionCode": "รหัสแผนก",
-    "FactionName": "ชื่อแผนก"
-  };
-  const translatedAsset: { [key: string]: any } = {};
-  for (const key in asset) {
-    if (asset.hasOwnProperty(key)) {
-      translatedAsset[translationMap[key] || key] = asset[key];
-    }
   }
-  return translatedAsset;
-}
-deleteAsset(asset: any): void {
-  Swal.fire({
-    title: 'คุณแน่ใจหรือไม่?',
-    text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'ใช่',
-    cancelButtonText: 'ไม่'
-  }).then((result) => {
 
-    if (result.isConfirmed) {
-      // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-      this.http.delete(`https://localhost:7204/api/Factiontypecodes/${asset.id}`).subscribe(
-        () => {
-          const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
+  translateToThai(asset: any): any {
+    const translationMap: { [key: string]: string } = {
+      "factionCode": "รหัสฝ่าย",
+      "factionName": "ชื่อฝ่าย"
+    };
+    
+    const translatedAsset: { [key: string]: any } = {};
+    for (const key in asset) {
+      if (asset.hasOwnProperty(key)) {
+        translatedAsset[translationMap[key] || key] = asset[key];
+      }
+    }
+    
+    console.log("Translated Asset:", translatedAsset); // Log translated object for debugging
+    return translatedAsset;
+  }
+  
+
+  deleteAsset(asset: any): void {
+    Swal.fire({
+      title: 'คุณแน่ใจหรือไม่?',
+      text: 'คุณต้องการลบข้อมูลฝ่ายนี้หรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่',
+      cancelButtonText: 'ไม่'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(`https://localhost:7204/api/Factiontypecodes/${asset.id}`).subscribe(
+          () => {
+            const index = this.assetDetails.findIndex(a => a.id === asset.id);
             if (index !== -1) {
               this.assetDetails.splice(index, 1);
               this.dataSource.data = this.assetDetails;
             }
-          Swal.fire(
-            'ลบแล้ว!',
-            'สินทรัพย์ของคุณถูกลบแล้ว',
-            'success'
-          );
-        },
-        (error) => {
-          console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-          Swal.fire(
-            'ข้อผิดพลาด!',
-            'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
-            'error'
-          );
-        }
-      );
-      
-    } else if (result.dismiss === Swal.DismissReason.cancel) {
-      // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
-      Swal.fire(
-        'ยกเลิกแล้ว',
-        'สินทรัพย์ของคุณปลอดภัย :)',
-        'info'
-      );
-    }
-  });
-}
-editAsset(_t27: any) {
-  throw new Error('Method not implemented.');
-}
+            Swal.fire('ลบแล้ว!', 'ข้อมูลฝ่ายของคุณถูกลบแล้ว', 'success');
+          },
+          (error) => {
+            console.error('เกิดข้อผิดพลาดในการลบข้อมูลฝ่าย:', error);
+            Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบข้อมูลฝ่าย', 'error');
+          }
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire('ยกเลิกแล้ว', 'ข้อมูลฝ่ายของคุณปลอดภัย :)', 'info');
+      }
+    });
+  }
 
+  editAsset(asset: any): void {
+    Swal.fire('ยังไม่ได้พัฒนา', 'ฟังก์ชันแก้ไขอยู่ระหว่างการพัฒนา', 'info');
+  }
 }
 

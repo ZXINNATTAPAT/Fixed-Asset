@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -13,6 +13,8 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
 import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
+import Swal from 'sweetalert2';
+
 
 interface AssetDetails {
   rP_Code: "string",
@@ -45,54 +47,53 @@ interface AssetDetails {
   templateUrl: './responsibleperson.component.html',
   styleUrl: './responsibleperson.component.scss'
 })
+
 export class ResponsiblepersonComponent implements OnInit {
 
-  yourFormName: FormGroup<any> | undefined;
-
-onSubmit() {
-  throw new Error('Method not implemented.');
-}
-
   icons = { cilPencil, cilTrash };
-  assetDetails: AssetDetails[] = [];
+  assetDetails: any[] = [];
+  dataSource: MatTableDataSource<any> = new MatTableDataSource<any>(this.assetDetails);
 
-  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
+  // Define the asset property to bind form inputs
+  asset: any = {
+    rP_Code: '',
+    rP_Name: ''
+  };
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  yourFormName: FormGroup;
+
+  constructor(private http: HttpClient, private formBuilder: FormBuilder) {
+    this.yourFormName = this.formBuilder.group({
+      rP_Code: '',
+      rP_Name: ''
+    });
+  }
 
   displayedColumns2: string[] = [
     "รหัสพนักงาน",
-    "ชื่อพนักงาน"
+    "ชื่อพนักงาน",
   ];
 
-  assetDetailsset: any[] = []
+  ngOnInit(): void {
+    this.getAssetType();
+  }
 
   getAssetType(): void {
     this.http.get<any[]>('https://localhost:7204/api/ResponsiblePersons').subscribe(data => {
-      this.assetDetails = data.map(asset => {
-        asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
-        return asset;
-      });
-      console.log(this.assetDetails);
-      this.assetDetailsset = this.assetDetails;
-      this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-      // console.log(this.dataSource)
+      this.assetDetails = data.map(asset => this.translateToThai(asset));
+      this.dataSource = new MatTableDataSource<any>(this.assetDetails);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });
   }
 
-  ngOnInit(): void {
-    this.getAssetType();
-  }
-  
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
       "rP_Code": "รหัสพนักงาน",
-      "rP_Name": "ชื่อพนักงาน",
+      "rP_Name": "ชื่อพนักงาน"
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {
@@ -103,11 +104,61 @@ onSubmit() {
     return translatedAsset;
   }
 
-  deleteAsset(_t35: any) {
-    throw new Error('Method not implemented.');
+  onSubmit(): void {
+    const formData = this.yourFormName.value;
+    this.http.post<any>('https://localhost:7204/api/ResponsiblePersons', formData).subscribe(
+      response => {
+        const newAsset = this.translateToThai(response);
+        this.assetDetails.push(newAsset);
+        this.dataSource.data = this.assetDetails;
+
+        Swal.fire({
+          title: "บันทึกเสร็จสิ้น",
+          icon: "success"
+        });
+      },
+      error => {
+        console.error('Error:', error);
+        Swal.fire({
+          title: "เกิดข้อผิดพลาดในการบันทึก",
+          icon: "error"
+        });
+      }
+    );
   }
-  editAsset(_t35: any) {
-    throw new Error('Method not implemented.');
+
+  deleteAsset(asset: any): void {
+    Swal.fire({
+      title: 'คุณแน่ใจหรือไม่?',
+      text: 'คุณต้องการลบข้อมูลพนักงานนี้หรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่',
+      cancelButtonText: 'ไม่'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(`https://localhost:7204/api/ResponsiblePersons/${asset.id}`).subscribe(
+          () => {
+            const index = this.assetDetails.findIndex(a => a.id === asset.id);
+            if (index !== -1) {
+              this.assetDetails.splice(index, 1);
+              this.dataSource.data = this.assetDetails;
+            }
+            Swal.fire('ลบแล้ว!', 'ข้อมูลพนักงานของคุณถูกลบแล้ว', 'success');
+          },
+          (error) => {
+            console.error('เกิดข้อผิดพลาดในการลบข้อมูลพนักงาน:', error);
+            Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบข้อมูลพนักงาน', 'error');
+          }
+        );
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire('ยกเลิกแล้ว', 'ข้อมูลพนักงานของคุณปลอดภัย :)', 'info');
+      }
+    });
+  }
+
+  editAsset(asset: any): void {
+    Swal.fire('ยังไม่ได้พัฒนา', 'ฟังก์ชันแก้ไขอยู่ระหว่างการพัฒนา', 'info');
   }
 
 }

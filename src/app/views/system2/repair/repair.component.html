@@ -7,38 +7,44 @@
     <div class="card" style="border: none">
       <div class="card-body">
         <form cForm (submit)="onSubmit()">
+
           <div class="row mb-3">
+          
             <div class="col">
               <label cLabel for="assetCode">รหัสครุภัณฑ์</label>
-              <!-- <input
-                cFormControl
-                [(ngModel)]="assetCode"
-                type="text"
-                id="assetCode"
-                name="assetCode"
-                required
-              /> -->
-              
               <mat-select
-              class="form-control p-3"
-              id="assetCode"
-              [(ngModel)]="asset.assetId"
-              name="assetCode"
-              placeholder="เลือกครุภัณฑ์"
-              #singleSelect
-            >
-              <mat-option>
-                <ngx-mat-select-search [formControl]="assetdataFilterCtrl">
-                </ngx-mat-select-search>
-              </mat-option>
-              <mat-option
-                *ngFor="let asset of filteredAssetData | async"
-                [value]="asset.assetId"
+                class="form-control p-3"
+                id="assetCode"
+                [(ngModel)]="asset.assetId"
+                name="assetCode"
+                placeholder="เลือกครุภัณฑ์"
+                #singleSelect
+                (selectionChange)="updateAssetName($event.value)"
               >
-                {{ asset.assetCode }} {{asset.assetName}}
-              </mat-option>
-            </mat-select>
-
+                <mat-option>
+                  <ngx-mat-select-search [formControl]="assetdataFilterCtrl">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option
+                  *ngFor="let asset of filteredAssetData | async"
+                  [value]="asset.assetId"
+                >
+                  {{ asset.assetCode }}
+                </mat-option>
+              </mat-select>
+            </div>
+            
+            <div class="col">
+              <label cLabel for="assetName">ชื่อครุภัณฑ์</label>
+              <input
+                cFormControl
+                type="text"
+                id="assetName"
+                placeholder="ชื่อครุภัณฑ์จะปรากฏที่นี่"
+                [value]="asset.assetName"
+                disabled
+                class="form-control p-3"
+              />
             </div>
 
             <!-- <div class="col-1 align-self-end">
@@ -47,8 +53,8 @@
               </button>
             </div> -->
 
-            <div class="col">
-              <label cLabel for="assetCodeInput">เลขที่เอกสาร</label>
+            <!-- <div class="col"> -->
+              <label cLabel for="assetCodeInput" style="display: none;">เลขที่เอกสาร</label>
               <input
                 cFormControl
                 name="SerialNumber"
@@ -57,10 +63,10 @@
                 class="form-control p-3"
                 type="text"
                 [(ngModel)]="asset.SerialNumber"
-                required
+                style="display: none;"
               />
             </div>
-          </div>
+          <!-- </div> -->
 
           <div class="row mb-3">
             <div class="col">

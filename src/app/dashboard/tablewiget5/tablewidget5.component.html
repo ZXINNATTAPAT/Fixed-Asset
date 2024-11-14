@@ -1,11 +1,12 @@
-<div class="card">
-    <div class="card-header">สถานะของสินทรัพย์ในสำนักงาน</div>
-    <div class="card-body">
-      <canvas baseChart
-        [data]="doughnutChartData"
-        [type]="doughnutChartType"
-        [options]="chartOptions">
-      </canvas>
-    </div>
+<div class="card border shadow ">
+  <div class="card-body ">
+
+    <h3 class="border-bottom mb-4">
+      <span class="anuphan-700" style="color: green;">สถานะของสินทรัพย์ในสำนักงาน</span>
+    </h3>
+
+        <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'" [options]="chartOptions" style="position: relative; height:40vh; width:80vw"></canvas>
+
+
   </div>
-  
+</div>

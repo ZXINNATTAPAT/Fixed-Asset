@@ -50,6 +50,15 @@ export const routes: Routes = [
           import('./views/defaultdata/routes').then((m) => m.routes),
       },
       {
+        path: 'usersmanagement',
+        loadComponent: () => import('../app/views/system/user-management/user-management.component').then(
+          (m) => m.UserManagementComponent
+        ),
+        data: {
+          title: 'usersmanagement'
+        }
+      },
+      {
         path: 'theme',
         loadChildren: () =>
           import('./views/theme/routes').then((m) => m.routes),
@@ -69,6 +78,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./views/pages/routes').then((m) => m.routes),
       },
+      
     ],
   },
   {

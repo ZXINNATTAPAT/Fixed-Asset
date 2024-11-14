@@ -282,21 +282,21 @@
             </div>
 
             <div class="col-2">
-            <label
-                class="form-label"
-                style="font-weight: bold"
-                for="unitInput"
-                >หน่วยนับ</label
-              >
-              <input
-                class="p-3"
-                cFormControl
-                id="unitInput"
-                placeholder="ระบุหน่วยนับ"
-                formControlName="unit"
-                type="text"
-                readonly
-              />
+              <label for="Unitsinput"
+              class="form-label"
+                style="font-weight: bold">หน่วยนับ</label>
+             
+                <mat-select
+                  class="form-control p-3"
+                  placeholder="เลือกหน่วยนับ"
+                  id="Unitsinput"
+                  [formControl]="unitFilterCtrl"
+                  (selectionChange)="filterUnits()">
+                  <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit.unitCode">
+                    {{ unit.unitName }}
+                  </mat-option>
+                </mat-select>
+              
             </div>
           </div>
 

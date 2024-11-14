@@ -29,7 +29,6 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}${endpoint}`, { params });
   }
   
-  
   // Example method to post data to the API
   async postData(endpoint: string, data: any): Promise<any> {
     const response = await axios.post(`${this.apiUrl}${endpoint}`, data);
@@ -47,5 +46,10 @@ export class ApiService {
     const response = await axios.delete(`${this.apiUrl}${endpoint}`);
     return response.data;
   }
+
+  getStatusCounts(): Observable<any> {
+    return this.http.get<any>('https://localhost:7204/api/AssetDetails/statuscount');
+  }
+  
 }
 

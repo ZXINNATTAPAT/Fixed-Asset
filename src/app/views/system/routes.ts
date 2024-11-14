@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
-import { AssetDetails3Component } from './asset-details3/asset-details3.component';
-import { AssetDetails2Component } from './asset-details2/asset-details2.component';
-import { SystemComponent } from './asset-detail1/system.component';
+
 
 export const routes: Routes = [
   {
@@ -13,6 +11,7 @@ export const routes: Routes = [
     data: {
       title: 'Asset-table',
     },
+    pathMatch: 'full', 
   },
   {
     path: '',
@@ -50,7 +49,6 @@ export const routes: Routes = [
           title: 'AssetDetails3',
         },
       },
-
       {
         path: 'Editasset/:assetId',
         loadComponent: () =>
@@ -72,27 +70,6 @@ export const routes: Routes = [
         },
       },
 
-      // {
-      //   path: 'form-step-1',
-      //   loadChildren: () => import('./asset-detail1/system.component').then(m => m.SystemComponent),
-      //   data: {
-      //     title: 'AssetDetails'
-      //   }
-      // },
-      // {
-      //   path: 'form-step-2',
-      //   loadChildren: () => import('./asset-details2/asset-details2.component').then(m => m.AssetDetails2Component),
-      //   data: {
-      //     title: 'AssetDetails2'
-      //   }
-      // },
-      // {
-      //   path: 'form-step-3',
-      //   loadChildren: () => import('./asset-details3/asset-details3.component').then(m => m.AssetDetails3Component),
-      //   data: {
-      //     title: 'AssetDetails3'
-      //   }
-      // }
     ],
   },
 ];

@@ -1,17 +1,19 @@
 <!-- defaultdata.component.html -->
-
 <c-card class="mb-4 shadow-sm" style="border: none">
   <c-card-body>
+
     <h1><span class="anuphan-700">กำหนดรหัสฝ่าย</span></h1>
+
     <hr />
+
     <form cForm (submit)="onSubmit()">
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3">
         <div class="col">
-          <label cLabel for="assetCodeInput">รหัสที่ตั้ง</label>
+          <label cLabel for="factionCodeInput">รหัสฝ่าย</label>
           <input
             cFormControl
-            id="assetCodeInput"
-            placeholder="ระบุรหัสสินทรัพย์"
+            id="factionCodeInput"
+            placeholder="ระบุรหัสฝ่าย"
             name="FactionCode"
             [(ngModel)]="asset.FactionCode"
             class="form-control"
@@ -19,11 +21,11 @@
           />
         </div>
         <div class="col">
-          <label cLabel for="assetNameInput">ชื่อที่ตั้ง</label>
+          <label cLabel for="factionNameInput">ชื่อฝ่าย</label>
           <input
             cFormControl
-            id="assetNameInput"
-            placeholder="ระบุชื่อ/ลักษณะ/ยี่ห้อ สินทรัพย์"
+            id="factionNameInput"
+            placeholder="ระบุชื่อฝ่าย"
             name="FactionName"
             [(ngModel)]="asset.FactionName"
             class="form-control"
@@ -31,10 +33,11 @@
           />
         </div>
         <div class="col align-self-end">
-          <button class="btn btn-primary">เพิ่ม</button>
+          <button type="submit" class="btn btn-primary">เพิ่ม</button>
         </div>
       </div>
     </form>
+    
     <br />
 
     <div class="table-responsive">
@@ -58,7 +61,7 @@
                 style="color: white; width: 100%; height: 100%"
               ></svg>
             </button>
-
+    
             <button
               class="btn btn-sm btn-danger m-1"
               (click)="deleteAsset(asset)"
@@ -71,7 +74,7 @@
             </button>
           </td>
         </ng-container>
-
+    
         <!-- Dynamic Columns -->
         <ng-container
           *ngFor="let column of displayedColumns2"
@@ -87,20 +90,20 @@
           </th>
           <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
         </ng-container>
-
+    
         <!-- Header Row -->
         <tr
           mat-header-row
-          *matHeaderRowDef="['actions', 'รหัสแผนก', 'ชื่อแผนก']"
+          *matHeaderRowDef="['actions', 'รหัสฝ่าย', 'ชื่อฝ่าย']"
         ></tr>
-
+    
         <!-- Data Rows -->
         <tr
           mat-row
-          *matRowDef="let row; columns: ['actions', 'รหัสแผนก', 'ชื่อแผนก']"
+          *matRowDef="let row; columns: ['actions', 'รหัสฝ่าย', 'ชื่อฝ่าย']"
         ></tr>
       </table>
-
+    
       <!-- Paginator -->
       <mat-paginator
         [pageSizeOptions]="[30, 50, 70, 100]"
@@ -108,5 +111,6 @@
         showFirstLastButtons
       ></mat-paginator>
     </div>
+    
   </c-card-body>
 </c-card>

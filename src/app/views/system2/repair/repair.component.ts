@@ -39,7 +39,6 @@ interface AssetDetails {
   Description: string;
   Amount: string;
 }
-
 @Component({
   selector: 'app-repair',
   standalone: true,
@@ -71,15 +70,17 @@ interface AssetDetails {
 })
 export class RepairComponent implements OnInit, OnDestroy {
 
-  assetCode: string = ''; //for input
-
   constructor(private http: HttpClient, private ap: ApiService) { }
 
+  assetCode: string = ''; //for input
+  
   assetDetails: AssetDetails[] = [];
 
   assetDetails2: any[] = [];
 
   assetDetailsset: any[] = [];
+  
+  asset: any = {assetName:""};
 
   dataSource: MatTableDataSource<AssetDetails> =
     new MatTableDataSource<AssetDetails>(this.assetDetails);
@@ -90,7 +91,7 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
-  asset: any = {};
+  
   icons = { cilPencil, cilTrash, cilMagnifyingGlass };
 
   displayedColumns2: string[] = [
@@ -125,6 +126,14 @@ export class RepairComponent implements OnInit, OnDestroy {
     );
   }
 
+  updateAssetName(assetId: string): void {
+    this.filteredAssetData.subscribe((data) => {
+      const selectedAsset = data.find((item: { assetId: string }) => item.assetId === assetId);
+      this.asset.assetName = selectedAsset ? selectedAsset.assetName : '';
+    });
+  }
+  
+
   setInitialValue(): void {
     this.filteredAssetData
       .pipe(take(1), takeUntil(this._onDestroy))
@@ -156,34 +165,96 @@ export class RepairComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    this.http
-      .post<any>('https://localhost:7204/api/RepairAsset/', this.asset)
-      .subscribe(
-        (response) => {
-          const newAsset = response;
-          this.assetDetails.push(this.translateToThai(newAsset));
-          this.dataSource.data = this.assetDetails;
-          this.getAssetType();
-
-          // อัปเดตสถานะเป็น "ซ่อมแซม" หลังจากบันทึกสำเร็จ
-          this.updateAssetStatus(newAsset.assetId, 'ซ่อมแซม');
-
-          Swal.fire({
-            title: 'บันทึกเสร็จสิ้น',
-            icon: 'success',
-          });
-        },
-        (error) => {
-          console.error(error);
-          if (error) {
+    this.generateDocumentNumber().then(() => {
+      this.http
+        .post<any>('https://localhost:7204/api/RepairAsset/', this.asset)
+        .subscribe(
+          (response) => {
+            const newAsset = response;
+            this.assetDetails.push(this.translateToThai(newAsset));
+            this.dataSource.data = this.assetDetails;
+            this.getAssetType();
+  
+            // อัปเดตสถานะเป็น "ซ่อมแซม" หลังจากบันทึกสำเร็จ
+            this.updateAssetStatus(newAsset.assetId, 'ซ่อมแซม');
+  
+            Swal.fire({
+              title: 'บันทึกเสร็จสิ้น',
+              icon: 'success',
+            });
+          },
+          (error) => {
+            console.error(error);
             Swal.fire({
               title: 'มีข้อมูลในระบบอยู่แล้ว',
               icon: 'error',
             });
           }
+        );
+    });
+  }
+  
+  generateDocumentNumber(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http.get('https://localhost:7204/api/RepairAsset/latestSerialNumber', { responseType: 'text' }).subscribe(
+        (response: string) => {
+          // ดึง orderNumber จาก Serial Number ที่ได้จาก API เช่น "กกต-02-0001-67"
+          const match = response.match(/กกต-02-(\d+)-\d{2}/);
+          let lastOrderNumber = match ? parseInt(match[1], 10) : 0;
+
+          const currentYear = new Date().getFullYear() + 543 - 2500;
+          const documentPrefix = 'กกต-02';
+
+          const checkAndGenerateUniqueSerial = async () => {
+            let isUnique = false;
+
+            while (!isUnique) {
+              lastOrderNumber += 1;
+              const newOrderNumber = lastOrderNumber.toString().padStart(4, '0');
+              const serialNumber = `${documentPrefix}-${newOrderNumber}-${currentYear}`;
+
+              console.log("Checking Serial Number:", serialNumber); // ตรวจสอบในคอนโซล
+
+              const exists = await this.checkIfSerialExists(serialNumber);
+              if (!exists) {
+                isUnique = true;
+                this.asset.SerialNumber = serialNumber; // ใช้ SerialNumber ที่ไม่ซ้ำ
+                console.log("Unique Serial Number Found:", serialNumber);
+                resolve();
+              } else {
+                console.log("Duplicate found, trying next number");
+              }
+            }
+          };
+
+          checkAndGenerateUniqueSerial();
+        },
+        (error) => {
+          console.warn("ไม่พบ Serial Number ล่าสุดในระบบ, สร้าง Serial Number ใหม่");
+
+          const newOrderNumber = '0001';
+          const currentYear = new Date().getFullYear() + 543 - 2500;
+          const documentPrefix = 'กกต-02';
+          const serialNumber = `${documentPrefix}-${newOrderNumber}-${currentYear}`;
+          
+          this.asset.SerialNumber = serialNumber;
+          resolve();
         }
       );
+    });
   }
+
+  // ฟังก์ชันตรวจสอบ SerialNumber ที่มีอยู่แล้ว
+  checkIfSerialExists(serialNumber: string): Promise<boolean> {
+    return this.http
+      .get<boolean>(`https://localhost:7204/api/RepairAsset/existsSerialNumber/${serialNumber}`)
+      .toPromise()
+      .then(result => result ?? false);
+  }
+
+  
+
+
 
   // ฟังก์ชันสำหรับอัปเดตสถานะของสินทรัพย์
   updateAssetStatus(assetId: number, status: string) {
@@ -198,7 +269,6 @@ export class RepairComponent implements OnInit, OnDestroy {
         }
       );
   }
-
 
   getAssetType(): void {
     this.http
