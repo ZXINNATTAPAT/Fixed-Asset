@@ -25,6 +25,12 @@ import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
+import { MatOption } from '@angular/material/core';
+import { MatLabel, MatSelect } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { RoleDialogComponent } from './dialog/role-dialog.component';
+import { UserEditDialogComponent } from './dialog/user-edit-dialog/user-edit-dialog.component'
+import { MatIcon } from '@angular/material/icon';
 
 
 @Component({
@@ -38,9 +44,12 @@ import Swal from 'sweetalert2';
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
-    MatButtonModule, // Example: Add any other required Angular Material modules here
+    MatButtonModule, 
     UtilitiesModule,
     ButtonDirective,
+    MatOption,
+    MatSelect,MatIcon,MatLabel,
+    MatDialogModule,
     NgStyle,
     IconDirective,FormDirective, FormLabelDirective, FormControlDirective,
   ],
@@ -48,6 +57,8 @@ import Swal from 'sweetalert2';
   styleUrl: './user-management.component.scss'
 })
 export class UserManagementComponent implements OnInit {
+
+  availableRoles: string[] = ["Admin", "เจ้าหน้าที่พัศดุ", "ผู้อำนวยการ", "เจ้าหน้าที่ตรวจนับ", "เจ้าหน้าที่ทั่วไป"];
 
   icons = { cilPencil, cilTrash };
   userDetails: any[] = [];
@@ -67,13 +78,45 @@ export class UserManagementComponent implements OnInit {
     "กลุ่มงาน",
     "บทบาท"
   ];
-
-  constructor(private http: HttpClient) { }
+  
+  constructor(private http: HttpClient,private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.getUsers();
   }
 
+  editUser(user: any): void {
+    const dialogRef = this.dialog.open(UserEditDialogComponent, {
+      width: '1000px',
+      height: '500px',
+      data: { ...user } // Pass the user data to the dialog
+    });
+  
+    dialogRef.afterClosed().subscribe((updatedUser) => {
+      if (updatedUser) {
+        // Call API to update user details
+        this.http.put(`https://localhost:7204/api/Users/${user.id}`, updatedUser).subscribe(
+          () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'ข้อมูลอัปเดตเรียบร้อยแล้ว',
+            });
+            this.getUsers(); // Refresh the user list
+          },
+          (error) => {
+            console.error('Error updating user:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'เกิดข้อผิดพลาด',
+              text: 'ไม่สามารถอัปเดตข้อมูลผู้ใช้ได้',
+            });
+          }
+        );
+      }
+    });
+  }
+  
+  
   getUsers(): void {
     this.http.get<any[]>('https://localhost:7204/api/users').subscribe(data => {
       this.userDetails = data;
@@ -82,55 +125,69 @@ export class UserManagementComponent implements OnInit {
       this.dataSource.sort = this.sort;
     });
   }
+  searchValue: string = '';
 
-  editUser(user: any): void {
-    // Define the available roles
-    const roles = ['SAdmin', 'Admin', 'user']; 
-    
-    // Use SweetAlert2 to show a dropdown prompt
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.searchValue = filterValue.trim().toLowerCase();
+    this.dataSource.filter = this.searchValue; // กรองข้อมูลใน MatTableDataSource
+  }
+
+  clearSearch(): void {
+    this.searchValue = '';
+    this.dataSource.filter = ''; // รีเซ็ตการกรองข้อมูล
+  }
+
+  refreshData(): void {
+    this.getUsers(); // โหลดข้อมูลใหม่
+  }
+
+  
+  // Function to update the user role with confirmation
+  updateUserRole(userId: number, role: string): void {
     Swal.fire({
-      title: `แก้ไขบทบาทของ ${user.username}`,
-      input: 'select',
-      inputOptions: roles.reduce((options, role) => ({ ...options, [role]: role }), {}),
-      inputPlaceholder: 'เลือกบทบาท',
+      title: 'คุณแน่ใจหรือไม่?',
+      text: `คุณต้องการเปลี่ยนบทบาทผู้ใช้นี้เป็น "${role}" หรือไม่?`,
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'บันทึก',
-      cancelButtonText: 'ยกเลิก'
+      confirmButtonText: 'ยืนยัน',
+      cancelButtonText: 'ยกเลิก',
     }).then((result) => {
       if (result.isConfirmed) {
-        const selectedRole = result.value;
-  
-        // Call API to update user role
-        this.updateUserRole(user.id, selectedRole);
+        this.http.patch(`https://localhost:7204/api/Users/${userId}/role`, JSON.stringify(role), {
+          headers: { 'Content-Type': 'application/json' },
+        }).subscribe(
+          () => {
+            // อัปเดตบทบาทใน userDetails
+            const userIndex = this.userDetails.findIndex(user => user.id === userId);
+            if (userIndex !== -1) {
+              this.userDetails[userIndex].roles = role;
+            }
+
+            // รีเฟรช dataSource
+            this.dataSource.data = [...this.userDetails];
+
+            Swal.fire({
+              icon: 'success',
+              title: 'อัปเดตบทบาทเรียบร้อยแล้ว',
+            });
+          },
+          (error) => {
+            console.error('Error updating role:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'เกิดข้อผิดพลาด',
+              text: 'ไม่สามารถแก้ไขบทบาทได้',
+            });
+          }
+        );
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'การเปลี่ยนบทบาทถูกยกเลิก',
+        });
       }
     });
-  }
-  
-  // Method to send the updated role to the server
-  updateUserRole(userId: number, role: string): void {
-    this.http.put(`https://localhost:7204/api/users/${userId}`, { roles: role })
-      .subscribe(
-        response => {
-          // Update user role in the local list to reflect the change immediately
-          const user = this.userDetails.find(u => u.id === userId);
-          if (user) user.roles = role;
-          this.dataSource.data = [...this.userDetails]; // Update table data
-  
-          Swal.fire({
-            title: 'อัปเดตสำเร็จ',
-            text: `บทบาทผู้ใช้ถูกอัปเดตเป็น ${role}`,
-            icon: 'success'
-          });
-        },
-        error => {
-          console.error('Error updating user role:', error);
-          Swal.fire({
-            title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถอัปเดตบทบาทของผู้ใช้ได้',
-            icon: 'error'
-          });
-        }
-      );
   }
 
   deleteUser(user: any): void {
@@ -159,4 +216,39 @@ export class UserManagementComponent implements OnInit {
       }
     });
   }
+
+  openRoleDialog(user: any): void {
+    const dialogRef = this.dialog.open(RoleDialogComponent, {
+      width: '600px',
+      height: '400px',
+      data: {
+        availableRoles: this.availableRoles,
+        currentRole: user.roles
+      }
+    });
+  
+    dialogRef.afterClosed().subscribe((selectedRole: string) => {
+      if (selectedRole) {
+        this.updateUserRole(user.id, selectedRole);
+      }
+    });
+  }
+
+  getRoleClass(role: string): string {
+    switch (role) {
+      case 'Admin':
+        return 'btn-outline-danger'; // สีแดง
+      case 'เจ้าหน้าที่พัสดุ':
+        return 'btn-outline-primary'; // สีน้ำเงิน
+      case 'ผู้อำนวยการ':
+        return 'btn-outline-warning'; // สีเหลือง
+      case 'เจ้าหน้าที่ตรวจนับ':
+        return 'btn-outline-success'; // สีเขียว
+      case 'เจ้าหน้าที่ทั่วไป':
+        return 'btn-outline-info'; // สีฟ้า
+      default:
+        return 'btn-outline-secondary'; // สีเทา
+    }
+  }
+  
 }
