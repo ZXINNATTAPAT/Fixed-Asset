@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { WidgetsBrandComponent } from '@widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '@widgets/widgets-dropdown/widgets-dropdown.component';
-import { AssetTableComponent } from '../views/system/asset-table/asset-table.component';
+import { AssetTableComponent } from '../views/main_system/asset-table/asset-table.component';
 
 import { TablewigetComponent } from './tablewiget/tablewiget.component';
 import { Tablewiget2Component } from './tablewiget2/tablewiget2.component';
