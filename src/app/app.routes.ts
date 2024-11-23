@@ -35,14 +35,14 @@ export const routes: Routes = [
     },
     children: [
       {
-        path: 'dashboard',
+        path: 'dashboard/:id',
         loadChildren: () =>
           import('./dashboard/routes').then((m) => m.routes),
       },
       {
         path: 'assettable',
         loadChildren: () =>
-          import('./views/system/routes').then((m) => m.routes),
+          import('./views/main_system/routes').then((m) => m.routes),
       },
       {
         path: 'defaultdata',
@@ -51,7 +51,7 @@ export const routes: Routes = [
       },
       {
         path: 'usersmanagement',
-        loadComponent: () => import('../app/views/system/user-management/user-management.component').then(
+        loadComponent: () => import('../app/views/main_system/user-management/user-management.component').then(
           (m) => m.UserManagementComponent
         ),
         data: {
@@ -66,12 +66,12 @@ export const routes: Routes = [
       {
         path: 'system',
         loadChildren: () =>
-          import('./views/system/routes').then((m) => m.routes),
+          import('./views/main_system/routes').then((m) => m.routes),
       },
       {
         path: 'system',
         loadChildren: () =>
-          import('./views/system2/routes').then((m) => m.routes),
+          import('./views/sub_system/routes').then((m) => m.routes),
       },
       {
         path: 'pages',

@@ -19,6 +19,8 @@ import { HttpClient } from '@angular/common/http';
 // import { FormsModule } from '@angular/forms'; // Import FormsModules
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -43,11 +45,13 @@ import axios from 'axios';
   ],
 })
 export class LoginComponent implements OnInit {
-  constructor(private http: HttpClient) {}
+  userinfo: any = [];
+  param: string | null = '';
+  token: string | null = '';
 
-  ngOnInit(): void {
-    this.http;
-  }
+  constructor(private http: HttpClient, private router: Router) {}
+
+  ngOnInit(): void {}
 
   async login(event: Event, username: string, password: string) {
     event.preventDefault();
@@ -58,24 +62,37 @@ export class LoginComponent implements OnInit {
         'https://localhost:7204/api/Authorization',
         credentials
       );
-      // console.log(response.data);
 
-      // แสดงการแจ้งเตือนเมื่อเข้าสู่ระบบสำเร็จ
-      Swal.fire({
-        icon: 'success',
-        title: 'Login Successful',
-        text: 'You have successfully logged in!',
-        showConfirmButton: false,
-        timer: 1500,
-      });
+      // ตรวจสอบว่ามี token ใน response
+      if (response.data) {
+        // เก็บ token ใน localStorage
+        localStorage.setItem('token', response.data);
 
-      // เก็บ token ใน localStorage
-      localStorage.setItem('token', response.data);
+        // Decode token
+        this.token = response.data;
+        const decodedToken: any = jwtDecode(this.token!);
+        this.userinfo = decodedToken;
 
-      // นำผู้ใช้ไปที่หน้าดashboard
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1500); // รอการแจ้งเตือนแสดงเสร็จ
+
+        // ดึง workgroup จาก token
+        this.param = this.userinfo?.workgroup;
+
+        // แสดงการแจ้งเตือนเมื่อเข้าสู่ระบบสำเร็จ
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Successful',
+          text: 'You have successfully logged in!',
+          showConfirmButton: false,
+          timer: 1000,
+        });
+
+        // นำผู้ใช้ไปที่หน้าดashboard
+        setTimeout(() => {
+          this.router.navigate([`/dashboard/${this.param}`]);
+        }, 1500); // รอการแจ้งเตือนแสดงเสร็จ
+      } else {
+        throw new Error('Token not received');
+      }
     } catch (error) {
       console.error(error);
 

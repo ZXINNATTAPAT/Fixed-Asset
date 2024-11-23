@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import QRCode from 'qrcode';
 import { MatTabsModule } from '@angular/material/tabs';
-import {HistoryComponent} from '../../../../app/views/system/history/history.component'
+import {HistoryComponent} from '../../../../app/views/main_system/history/history.component'
 import { CommonModule } from '@angular/common';
 
 interface AssetDetails {

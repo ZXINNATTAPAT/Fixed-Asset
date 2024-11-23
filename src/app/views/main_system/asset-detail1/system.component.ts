@@ -10,31 +10,33 @@ import { SingleSelectionComponent } from '../single-selection/single-selection.c
 import Swal from 'sweetalert2';
 
 import { AssetDetails3Component } from '../asset-details3/asset-details3.component';
-import {DateAdapter,MAT_DATE_FORMATS,MAT_DATE_LOCALE,MatNativeDateModule,} from '@angular/material/core';
-import {MatDatepicker,MatDatepickerToggle,MatDatepickerInput,} from '@angular/material/datepicker';
-import {MatFormField,MatFormFieldModule,MatLabel,} from '@angular/material/form-field';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, } from '@angular/material/core';
+import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angular/material/datepicker';
+import { MatFormField, MatFormFieldModule, MatLabel, } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import * as XLSX from 'xlsx';
 
-import {MAT_MOMENT_DATE_ADAPTER_OPTIONS,MomentDateAdapter,MomentDateModule,provideMomentDateAdapter,} from '@angular/material-moment-adapter';
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter, MomentDateModule, provideMomentDateAdapter, } from '@angular/material-moment-adapter';
 
 import 'moment/locale/th.js';
 import { cilDataTransferUp } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
-import { MatSelect } from '@angular/material/select';
+import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { ReplaySubject, Subject, firstValueFrom } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
 
-import {MAT_FORM_FIELD_DEFAULT_OPTIONS,MatFormFieldDefaultOptions,} from '@angular/material/form-field';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions, } from '@angular/material/form-field';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { jwtDecode } from 'jwt-decode';
 import { DataService } from 'src/app/data-service/data-service.component';
 import { ApiService } from 'src/app/api-service.service';
 import { AssetService } from './Service/asset.service'
+import { MatDialog } from '@angular/material/dialog';
+import { forkJoin } from 'rxjs';
 
-// Define the default options for Material Form Field
+
 const formFieldOptions: MatFormFieldDefaultOptions = {
   hideRequiredMarker: true,
   // Optional: hide the required marker (*) globally
@@ -138,45 +140,56 @@ export interface asc {
 
 export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
- // References for elements using @ViewChild
- @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
- @ViewChild('assetCategorySelect') assetCategorySelect!: ElementRef;
- @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
+  // References for elements using @ViewChild
+  @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
+  @ViewChild('assetCategorySelect') assetCategorySelect!: ElementRef;
+  @ViewChild('factions') factionsElementRef!: ElementRef;
+  @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
- // Asset-related properties
- asset: FormGroup = new FormGroup({});
- asset2: any = {};
- assetDetails: any[] = [];
- assetTypes: any[] = [];
- assetCategory: any[] = [];
- countingUnits: any[] = [];
+  // Asset-related properties
+  asset: FormGroup = new FormGroup({});
+  asset2: any = {};
+  assetDetails: any[] = [];
+  assetTypes: any[] = [];
+  factions: any[] = [];
+  assetCategory: any[] = [];
+  countingUnits: any[] = [];
 
- // Controls and filters for dropdowns
- assetCategoryCtrl: FormControl = new FormControl();
- assetCategoryFilterCtrl: FormControl = new FormControl('');
- filteredAssetCategories: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
- unitFilterCtrl: FormControl = new FormControl();
- filteredUnits: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
+  selectedFaction: string | null = null;
 
- // Toggle visibility
- hidden: boolean = true;
- hidden2: boolean = true;
+  isCustomInput: boolean = false;
 
- // User info and token management
- userinfo: any = [];
- token: any;
+  // Controls and filters for dropdowns
+  assetCategoryCtrl: FormControl = new FormControl();
+  assetCategoryFilterCtrl: FormControl = new FormControl('');
+  filteredAssetCategories: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
 
- // Fixed settings
- fixedPrefix: string = '';
- fixedSuffix: string = '';
- editablePartLength: number = 15;
+  unitCtrl: FormControl = new FormControl(); 
+  unitFilterCtrl: FormControl = new FormControl('');
+  filteredUnits: ReplaySubject<any[]> = new ReplaySubject<any[]>(1); 
 
- // Icons and styles
- icons = { cilDataTransferUp };
- colors = { color: 'primary', textColor: 'primary' };
 
- // Lifecycle hooks and RxJS subjects
- _onDestroy = new Subject<void>();
+  factionsCtrl: FormControl = new FormControl();
+  factionsFilterCtrl: FormControl = new FormControl('');
+  filteredFactions: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
+
+  // Toggle visibility
+  hidden: boolean = true;
+  hidden2: boolean = true;
+
+  // User info and token management
+  userinfo: any = [];
+  token: any;
+
+  // Fixed settings
+  fixedPrefix: string = '';
+  fixedSuffix: string = '';
+  editablePartLength: number = 15;
+
+  icons = { cilDataTransferUp };
+  colors = { color: 'primary', textColor: 'primary' };
+
+  _onDestroy = new Subject<void>();
 
   // Token and user info reading
   public readinfo() {
@@ -185,21 +198,11 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userinfo = decodedToken;
   }
 
-  // Open import prompt with information
-  openImport(): void {
-    this.hidden2 = false;
-    Swal.fire({
-      title: 'กรอกข้อมูลที่จำเป็น',
-      html: `<a href="link_to_sample_file">Download Sample File</a>`,
-      icon: 'info'
-    });
-  }
-
- constructor(private http: HttpClient,private formBuilder: FormBuilder,private dataService: DataService,private service: AssetService,private ap: ApiService) {
+  constructor(private http: HttpClient, private formBuilder: FormBuilder, private dataService: DataService, private service: AssetService, private ap: ApiService, private dialog: MatDialog) {
 
     this.readinfo();
 
-    this.getAssetDetails();
+    this.loadAllData();
 
     if (
       this.dataService.getAssetTypes() && this.dataService.getAssetCategory() === null
@@ -232,9 +235,14 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
   }
+
   // เพิ่ม form control สำหรับ input เพิ่มเติม
   ngOnInit(): void {
 
+    // this.loadAllData();
+    // this.loadFactions();
+    // this.getCountingUnits();
+    
     this.assetCategoryCtrl = this.formBuilder.control(null);
 
     // Initialize the form group
@@ -358,10 +366,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Function to update assetCode
     const updateAssetCode = () => {
-      // const assetType = this.asset.get('assetType')?.value || '';
-
       const assetCategory = this.asset.get('assetCategory')?.value || '';
-
       const purchaseDate = this.asset.get('purchaseDate')?.value || '';
 
       let year = '';
@@ -376,7 +381,6 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const newAssetCode = `${this.userinfo.affiliation} ${assetCategory}-001-${year}`;
 
-      // Check if the new asset code already exists in assetDetails
       const isAssetCodeExist = this.assetDetails.some(
         (asset) => asset.assetCode === newAssetCode
       );
@@ -402,8 +406,6 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     };
 
-    // Subscribe to changes in ReceiptDate and update DepreciationStartDate and DepreciationCalculationStartDate
-
     // Subscribe to value changes on assetType, assetCategory, and purchaseDate
     this.asset.get('assetType')?.valueChanges.subscribe(updateAssetCode);
 
@@ -418,55 +420,28 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filterAssetCategories();
       });
 
-    this.getCountingUnits();
+    this.factionsFilterCtrl.valueChanges
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterFactions();
+      });
+
+     this.unitFilterCtrl.valueChanges
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterUnits();
+     });
   }
 
-  handleInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const fixedPrefix = 'กกต 0401-'; // กำหนดค่า prefix คงที่
-    const fixedSuffix = '-2567'; // กำหนดค่า suffix คงที่
-    const editablePartLength = 3; // ความยาวของส่วนที่สามารถแก้ไขได้
-
-    let value = input.value;
-
-    // ตรวจสอบว่าค่า input มีรูปแบบที่ถูกต้อง
-    const regex = /^กกต\s\d{4}-\d{3}-\d{4}$/;
-
-    // หากค่า input ไม่ตรงกับรูปแบบ ให้ตั้งค่ากลับไปเป็นค่าที่อยู่ในฟอร์มควบคุม
-    if (!regex.test(value)) {
-      input.value = this.asset.get('assetCode')!.value;
-    } else {
-      // ดึงส่วนที่สามารถแก้ไขได้
-      const editablePart = value.slice(
-        fixedPrefix.length,
-        fixedPrefix.length + editablePartLength
-      );
-
-      // ประกอบค่าใหม่
-      const newValue = `${fixedPrefix}${editablePart}${fixedSuffix}`;
-
-      // อัปเดตค่าใน input และฟอร์มควบคุม
-      input.value = newValue;
-      this.asset.get('assetCode')!.setValue(newValue);
-    }
-  }
-
-  handleKeyDown(event: KeyboardEvent): void {
-    const input = event.target as HTMLInputElement;
-    const cursorPosition = input.selectionStart;
-
-    // Prevent editing fixed parts of the input
-    if (cursorPosition! < 10 || cursorPosition! >= 13) {
-      event.preventDefault();
-    }
-  }
-
-  //เรียกข้อมูลรายการครุทั้งหมด
-  getAssetDetails(): void {
-    this.ap
-      .fetchDatahttp('AssetDetails')
-      .subscribe((data) => {
-        this.assetDetails = data.filter((asset: { assetCode: string; agency: string; }) => {
+  loadAllData(): void {
+    forkJoin({
+      assetDetails: this.ap.fetchDatahttp('AssetDetails'),
+      countingUnits: this.http.get<any[]>('https://localhost:7204/api/Countingunits'),
+      factions: this.http.get<any[]>('https://localhost:7204/api/Factiontypecodes'),
+    }).subscribe(
+      ({ assetDetails, countingUnits, factions }) => {
+        // Process assetDetails
+        this.assetDetails = assetDetails.filter((asset: { assetCode: string; agency: string }) => {
           if (this.userinfo.affiliation !== 'กกต.สกล') {
             return (
               asset.assetCode.startsWith(this.userinfo.affiliation) &&
@@ -474,31 +449,22 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
             );
           } else {
             return (
-              !asset.assetCode.startsWith('กกต.' && 'กกต') && //กันข้อมูลที่ขึ้นต้นด้วย  กกต.
+              !asset.assetCode.startsWith('กกต.') && // Filter out items starting with 'กกต.'
               asset.agency.startsWith(`${this.userinfo.workgroup}`)
             );
           }
         });
-        // .map((asset) => {
-        //   asset.purchaseDate = this.convertDate(asset.purchaseDate);
-        //   asset = this.translateToThai(asset);
-        //   return asset;
-        // });
-        // Update the data source with the new asset details
-        // this.dataSource.data = this.assetDetails;
-      });
-    // }
-  }
-
-  // ฟังก์ชันดึงข้อมูลจาก API
-  getCountingUnits(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Countingunits').subscribe(
-      (data) => {
-        this.countingUnits = data;
-        this.filteredUnits.next(this.countingUnits.slice()); // กำหนดข้อมูลเริ่มต้น
+  
+        // Populate countingUnits and initialize filtered units
+        this.countingUnits = countingUnits;
+        this.filteredUnits.next(this.countingUnits.slice());
+  
+        // Populate factions and initialize filtered factions
+        this.factions = factions;
+        this.filteredFactions.next(this.factions);
       },
       (error) => {
-        console.error('Error fetching counting units:', error);
+        console.error('Error fetching data:', error);
       }
     );
   }
@@ -507,41 +473,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     // this.setInitialValue();
   }
 
-  ngOnDestroy(): void {
-    this._onDestroy.next();
-    this._onDestroy.complete();
-  }
+  ngOnDestroy(): void { this._onDestroy.next(); this._onDestroy.complete(); }
 
-  filterAssetCategories(): void {
-    const searchValue = this.assetCategoryFilterCtrl.value?.toLowerCase();
-    const assetType = this.asset.get('assetType')?.value;
-
-    const filteredAssetCategories = this.assetCategory.filter((category) => {
-      return (
-        category.assetCode === assetType &&
-        (searchValue
-          ? category.asc_Name.toLowerCase().includes(searchValue)
-          : true)
-      );
-    });
-
-    this.filteredAssetCategories.next(filteredAssetCategories);
-  }
-
-  filterUnits(): void {
-    const searchValue = this.unitFilterCtrl.value?.toLowerCase();
-
-    // กรอง unitName ตามค่า unitCode หรือข้อความค้นหา
-    const filtered = this.countingUnits.filter((unit) =>
-      searchValue ? unit.unitName.toLowerCase().includes(searchValue) : true
-    );
-
-    this.filteredUnits.next(filtered);
-  }
-
-  showAlert(): void {
-    this.service.showAlert();
-  }
+  showAlert(): void { this.service.showAlert(); }
 
   async onSubmit(): Promise<void> {
     try {
@@ -554,7 +488,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         confirmButtonText: 'OK',
       }).then((result) => {
         // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
-        this.getAssetDetails();
+        this.loadAllData();
         this.asset.reset();
         this.assetCategoryCtrl.reset();
       });
@@ -857,6 +791,121 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         nextInput.focus();
       }
     }
+  }
+
+  handleInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const fixedPrefix = 'กกต 0401-'; // กำหนดค่า prefix คงที่
+    const fixedSuffix = '-2567'; // กำหนดค่า suffix คงที่
+    const editablePartLength = 3; // ความยาวของส่วนที่สามารถแก้ไขได้
+
+    let value = input.value;
+
+    // ตรวจสอบว่าค่า input มีรูปแบบที่ถูกต้อง
+    const regex = /^กกต\s\d{4}-\d{3}-\d{4}$/;
+
+    // หากค่า input ไม่ตรงกับรูปแบบ ให้ตั้งค่ากลับไปเป็นค่าที่อยู่ในฟอร์มควบคุม
+    if (!regex.test(value)) {
+      input.value = this.asset.get('assetCode')!.value;
+    } else {
+      // ดึงส่วนที่สามารถแก้ไขได้
+      const editablePart = value.slice(
+        fixedPrefix.length,
+        fixedPrefix.length + editablePartLength
+      );
+
+      // ประกอบค่าใหม่
+      const newValue = `${fixedPrefix}${editablePart}${fixedSuffix}`;
+
+      // อัปเดตค่าใน input และฟอร์มควบคุม
+      input.value = newValue;
+      this.asset.get('assetCode')!.setValue(newValue);
+    }
+  }
+
+  handleKeyDown(event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    const cursorPosition = input.selectionStart;
+
+    // Prevent editing fixed parts of the input
+    if (cursorPosition! < 10 || cursorPosition! >= 13) {
+      event.preventDefault();
+    }
+  }
+
+  filterAssetCategories(): void {
+    const searchValue = this.assetCategoryFilterCtrl.value?.toLowerCase();
+    const assetType = this.asset.get('assetType')?.value;
+
+    const filteredAssetCategories = this.assetCategory.filter((category) => {
+      return (
+        category.assetCode === assetType &&
+        (searchValue
+          ? category.asc_Name.toLowerCase().includes(searchValue)
+          : true)
+      );
+    });
+
+    this.filteredAssetCategories.next(filteredAssetCategories);
+  }
+
+  filterFactions(): void {
+    const searchValue = this.factionsFilterCtrl.value?.toLowerCase();
+
+    const filteredFactions = this.factions.filter((faction) => {
+      return searchValue
+        ? faction.factionName.toLowerCase().includes(searchValue)
+        : true;
+    });
+
+    this.filteredFactions.next(filteredFactions);
+  }
+
+  // Handle faction selection
+  onFactionChange(event: MatSelectChange): void {
+    console.log('Selected value:', event.value); // e.g., "ฝวส"
+    // console.log('MatSelect source:', event.source); // _MatSelect instance
+    this.asset.patchValue({ assetLocation: event.value }); // Update form control value
+  }
+
+  filterUnits(): void {
+    const searchValue = this.unitFilterCtrl.value?.toLowerCase();
+
+    const filteredUnits = this.countingUnits.filter((u) => {
+      return searchValue
+        ? u.unitName.toLowerCase().includes(searchValue)
+        : true;
+    }); // Update the filtered list
+
+    this.filteredUnits.next(filteredUnits);
+  }
+  
+  onUnitChange(event: MatSelectChange): void {
+    console.log('Selected value:', event.value); 
+    // console.log('MatSelect source:', event.source); 
+    this.asset.patchValue({ unit: event.value }); // Update form control value
+  }
+  
+
+  enableCustomInput(): void {
+    this.isCustomInput = true;
+    this.selectedFaction = null; // Clear any selected value
+  }
+
+  disableCustomInput(): void {
+    this.isCustomInput = false;
+    this.asset.patchValue({ assetLocation: '' });
+  }
+
+
+  // Open import prompt with information
+  openImport(): void {
+    this.hidden2 = false;
+    Swal.fire({
+      title: 'กรอกข้อมูลที่จำเป็น',
+      html: `<a href="link_to_sample_file">Download Sample File</a>`,
+      icon: 'info'
+    });
   }
 
 }
