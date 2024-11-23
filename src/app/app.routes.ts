@@ -35,7 +35,7 @@ export const routes: Routes = [
     },
     children: [
       {
-        path: 'dashboard',
+        path: 'dashboard/:id',
         loadChildren: () =>
           import('./dashboard/routes').then((m) => m.routes),
       },

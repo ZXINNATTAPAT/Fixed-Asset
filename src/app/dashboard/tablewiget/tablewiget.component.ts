@@ -157,77 +157,76 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-
-    if(this.dataService.getAssetDetails()){
-      this.dataSubscription = this.dataService.getAssetDetails().subscribe((data: any[]) => {
-        this.assetDetails = data
-          .filter((asset) => {
-            if(this.userinfo.affiliation !== "กกต.สกล"){
-              return (
-                asset.assetCode.startsWith(this.userinfo.affiliation) &&
-                !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-              );
-            }
-            else{
-              return (
-                !asset.assetCode.startsWith("กกต." && "กกต") && //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
-                asset.agency.startsWith(`${this.userinfo.workgroup}`)
-              );
-            }
-            
-          })
-          .map((asset) => {
-            const date = new Date(asset.purchaseDate);
-            if (!isNaN(date.getTime())) {
-                const formattedDate = date.toLocaleDateString('th', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
+    if (this.dataService.getAssetDetails()) {
+        this.dataSubscription = this.dataService.getAssetDetails().subscribe((data: any[]) => {
+            this.assetDetails = data
+                .filter((asset) => {
+                    if (this.userinfo.affiliation === "กกต") {
+                        // เงื่อนไขสำหรับส่วนกลาง
+                        return (
+                            asset.assetCode.startsWith(this.userinfo.affiliation) &&
+                            !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+                        );
+                    } else {
+                        // เงื่อนไขสำหรับจังหวัด เช่น กกต.กทม, กกต.มช
+                        return (
+                            asset.assetCode.startsWith(`${this.userinfo.affiliation}.`) &&
+                            asset.agency.startsWith(`${this.userinfo.workgroup}`)
+                        );
+                    }
+                })
+                .map((asset) => {
+                    const date = new Date(asset.purchaseDate);
+                    if (!isNaN(date.getTime())) {
+                        const formattedDate = date.toLocaleDateString('th', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                        });
+                        asset = Object.assign({}, asset, { purchaseDate: formattedDate });
+                        asset = this.translateToThai(asset);
+                        return asset;
+                    } else {
+                        console.error('Invalid date format:', asset.purchaseDate);
+                        return null; // จัดการกรณีที่ข้อมูลไม่ถูกต้อง
+                    }
                 });
-                asset = Object.assign({}, asset, { purchaseDate: formattedDate });
-                asset = this.translateToThai(asset);
-                return asset;
-            } else {
-                console.error('Invalid date format:', asset.purchaseDate);
-                return null; // หรืออื่น ๆ ตามที่คุณต้องการจัดการ
-            }
-          });
-        // Update the data source with the new asset details
-        this.dataSource.data = this.assetDetails;
-        // console.log(this.assetDetails)
-      });
+
+            // Update the data source with the new asset details
+            this.dataSource.data = this.assetDetails;
+        });
+    } else {
+        this.dataSubscription = this.apiservice
+            .fetchDatahttp('AssetDetails')
+            .subscribe((data) => {
+                this.assetDetails = data
+                    .filter((asset: { assetCode: string; agency: string; }) => {
+                        if (this.userinfo.affiliation === "กกต") {
+                            // เงื่อนไขสำหรับส่วนกลาง
+                            return (
+                                asset.assetCode.startsWith(this.userinfo.affiliation) &&
+                                !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
+                            );
+                        } else {
+                            // เงื่อนไขสำหรับจังหวัด เช่น กกต.กทม, กกต.มช
+                            return (
+                                asset.assetCode.startsWith(`${this.userinfo.affiliation}.`) &&
+                                asset.agency.startsWith(`${this.userinfo.workgroup}`)
+                            );
+                        }
+                    })
+                    .map((asset: { purchaseDate: string; }) => {
+                        asset.purchaseDate = this.convertDate(asset.purchaseDate);
+                        asset = this.translateToThai(asset);
+                        return asset;
+                    });
+
+                // Update the data source with the new asset details
+                this.dataSource.data = this.assetDetails;
+            });
     }
-    else{
-      this.dataSubscription = this.apiservice
-      .fetchDatahttp('AssetDetails')
-      .subscribe((data) => {
-        this.assetDetails = data
-          .filter((asset: { assetCode: string; agency: string; }) => {
-            if(this.userinfo.affiliation !== "กกต.สกล"){
-              return (
-                asset.assetCode.startsWith(this.userinfo.affiliation) &&
-                !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-              );
-            }
-            else{
-              return (
-                !asset.assetCode.startsWith("กกต.") && //กันข้อมูลที่ขึ้นต้นด้วย กกต.สกล + กกต. + กกต 
-                asset.agency.startsWith(`${this.userinfo.workgroup}`)
-              );
-            }
-            
-          })
-          .map((asset: { purchaseDate: string; }) => {
-            asset.purchaseDate = this.convertDate(asset.purchaseDate);
-            asset = this.translateToThai(asset);
-            return asset;
-          });
-        // Update the data source with the new asset details
-        this.dataSource.data = this.assetDetails;
-      });
-    }
-    
-  }
+}
+
 
   addasset(): void {
     window.location.href = '#/system/AssetDetails';

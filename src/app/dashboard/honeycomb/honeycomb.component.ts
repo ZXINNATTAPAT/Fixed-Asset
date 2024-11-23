@@ -115,6 +115,8 @@ export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
 
   function doSingleClick(event: any) {
     console.log("Single Click", event.target.dataItem?.dataContext);
+    window.location.href = `/#/dashboard/${event.target.dataItem?.dataContext.short}`
+    
   }
 
   function doDoubleClick(event: any) {
@@ -167,8 +169,10 @@ export class HoneycombComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Attach combined click handler to the button
     button.events.on("click", (ev) => {
-      console.log("Button clicked"); // Debugging line to check if the click is registered
+      console.log("Button clicked"); 
+      // Debugging line to check if the click is registered
       myClickHandler(ev);
+      // window.location.href = '/#/dashboard'
     });
 
     return am5.Bullet.new(this.root, {

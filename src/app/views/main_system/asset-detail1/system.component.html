@@ -169,8 +169,6 @@
                  #singleSelect
               >
                 
-                
-
                 <mat-option>
                   <ngx-mat-select-search 
                     placeholderLabel="ค้นหาสถานที่" 
@@ -184,7 +182,7 @@
                 </mat-option>
             
                 <!-- Dynamically filtered options -->
-                <mat-option *ngFor="let faction of filteredFactions | async" [value]="faction.factionCode">
+                <mat-option *ngFor="let faction of filteredFactions | async" [value]="faction.factionName">
                   <span class="anuphan-600">{{ faction.factionName }}</span>
                 </mat-option>
                 
@@ -208,11 +206,9 @@
             
           </div>
           
-            
-
             <div class="col">
               <label class="form-label" style="font-weight: bold;" for="EmployeeInput">
-                <span class="text-danger">*</span> เจ้าหน้าที่รับผิดชอบ
+                <span class="text-danger">*</span> เจ้าหน้าที่
               </label>
               <input class="form-control " cFormControl id="EmployeeInput" placeholder="ระบุชื่อเจ้าหน้าที่ที่รับผิดชอบ"
                 formControlName="responsibleEmployee" type="text"
@@ -221,17 +217,33 @@
 
             <div class="col">
               <label for="Unitsinput" class="form-label" style="font-weight: bold">หน่วยนับ</label>
-
-              <div class="form-control ">
-                <mat-select placeholder="เลือกหน่วยนับ" id="Unitsinput" [formControl]="unitFilterCtrl"
-                  (selectionChange)="filterUnits()">
-                  <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit.unitCode">
+              <div class="form-control">
+                <mat-select
+                  placeholder="เลือกหน่วยนับ"
+                  id="Unitsinput"
+                  [formControl]="unitCtrl"
+                  (selectionChange)="onUnitChange($event)"
+                  panelClass="mat-select-panel"
+                  #singleSelect
+                >
+                  <!-- Search Input for Filtering -->
+                  <mat-option>
+                    <ngx-mat-select-search 
+                      placeholderLabel="ค้นหาหน่วยนับ" 
+                      noEntriesFoundLabel="ไม่พบข้อมูล"
+                      [formControl]="unitFilterCtrl">
+                    </ngx-mat-select-search>
+                  </mat-option>
+              
+                  <!-- Display Filtered Units -->
+                  <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit.unitName">
                     {{ unit.unitName }}
                   </mat-option>
                 </mat-select>
               </div>
-
             </div>
+            
+            
           </div>
 
           <!-- ######## line 2 ############ -->

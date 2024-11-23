@@ -14,7 +14,7 @@ export const navItems: INavData[] = [
       },
       {
         name: 'แดชบอร์ดสรุปภาพรวม',
-        url: '/dashboard',
+        url: '/dashboard/$param',
         icon:'nav-icon-bullet' ,
       },
     ]

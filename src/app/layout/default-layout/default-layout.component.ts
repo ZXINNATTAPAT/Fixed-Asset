@@ -5,6 +5,7 @@ import { NgScrollbar } from 'ngx-scrollbar';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ContainerComponent,
+  INavData,
   ShadowOnScrollDirective,
   SidebarBrandComponent,
   SidebarComponent,
@@ -16,7 +17,7 @@ import {
 } from '@coreui/angular';
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
-import { navItems } from './_nav';
+import { navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
 import { jwtDecode } from 'jwt-decode';
 
 function isOverflown(element: HTMLElement) {
@@ -50,25 +51,47 @@ function isOverflown(element: HTMLElement) {
   ]
 })
 export class DefaultLayoutComponent {
-
-  userinfo:any = []
+  userinfo: any = [];
   token: any;
+  public navItems: INavData[] = [];
 
-  public readinfo(){
-    
-    this.token = localStorage.getItem('token');
-
-    const decodedToken = jwtDecode(this.token);
-    
-    this.userinfo = decodedToken ;
+  constructor() {
+    this.readinfo();
+    this.updateNavItems();
   }
 
-  constructor() {this.readinfo()}
+  public readinfo() {
+    this.token = localStorage.getItem('token');
+    if (this.token) {
+      const decodedToken = jwtDecode(this.token);
+      this.userinfo = decodedToken;
+    }
+  }
 
-  public navItems = navItems;
+  private updateNavItems() {
+    // กำหนดค่าพารามิเตอร์จาก userinfo
+    const workgroup = this.userinfo?.workgroup ;
+  
+    // สร้าง navItems ใหม่โดยแทนที่ dynamic parameter
+    this.navItems = staticNavItems.map((item) => {
+      if (item.children) {
+        // อัปเดต URL ใน children
+        item.children = item.children.map((child) => {
+          if (typeof child.url === 'string' && child.url.includes('$param')) {
+            return {
+              ...child,
+              url: child.url.replace('$param', workgroup),
+            };
+          }
+          return child;
+        });
+      }
+      return item;
+    });
+  }
+  
+
   onScrollbarUpdate($event: any) {
-    // if ($event.verticalUsed) {
-    // console.log('verticalUsed', $event.verticalUsed);
-    // }
+    // โค้ดสำหรับ Scrollbar (ตามต้องการ)
   }
 }
