@@ -135,13 +135,13 @@
             </ng-template>
 
             <ng-template #status>
-              <button class="btn btn-sm" [ngClass]="{
-                  'btn-success': asset[column] !== 'โอนย้าย' && asset[column] !== 'ซ่อมแซม' && asset[column] !== '',
-                  'btn-warning': asset[column] === 'โอนย้าย',
-                  'btn-danger': asset[column] === 'ซ่อมแซม'
-                }" style="color: white;">
+              <span class="badge text-light"  [ngClass]="{
+                  'text-bg-success': asset[column] !== 'โอนย้าย' && asset[column] !== 'ซ่อมแซม' && asset[column] !== '',
+                  'text-bg-warning': asset[column] === 'โอนย้าย',
+                  'text-bg-danger': asset[column] === 'ซ่อมแซม'
+                }" style="color: black; font-size: 16px;">
                 {{ asset[column] || 'ปกติ' }}
-              </button>
+              </span>
             </ng-template>
           </td>
 

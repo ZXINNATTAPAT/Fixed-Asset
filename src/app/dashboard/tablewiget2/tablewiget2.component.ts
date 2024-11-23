@@ -8,9 +8,6 @@ import {
 } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-
-
-
 import {
   MatFooterRow,
   MatRowDef,
@@ -110,7 +107,7 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngAfterViewInit() {
-      this.dataSource.paginator = this.paginator;
+    this.dataSource.paginator = this.paginator;
   }
 
   // dataSource2 = new MatTableDataSource<any>();
@@ -139,14 +136,14 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
       this.dataSubscription.unsubscribe();
     }
   }
-  constructor(private http: HttpClient ,private dataService :DataService) {
+  constructor(private http: HttpClient, private dataService: DataService) {
     this.getAssetDetails();
   }
 
   @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    if(this.dataService.getAssetDetails()){
+    if (this.dataService.getAssetDetails()) {
       this.dataSubscription = this.dataService.getAssetDetails()
         .subscribe((data) => {
           this.assetDetails2 = data.map((asset) => {
@@ -155,17 +152,17 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
           this.countAssetsByLocation();
         });
     }
-    else{
+    else {
       this.dataSubscription = this.http
-      .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
-      .subscribe((data) => {
-        this.assetDetails2 = data.map((asset) => {
-          return asset;
+        .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
+        .subscribe((data) => {
+          this.assetDetails2 = data.map((asset) => {
+            return asset;
+          });
+          this.countAssetsByLocation();
         });
-        this.countAssetsByLocation();
-      });
     }
-    
+
   }
 
   countAssetsByLocation(): void {
