@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ApiService } from 'src/app/api-service.service';
-import { CommonModule, NgStyle } from '@angular/common';
+import { NgStyle } from '@angular/common';
 import {
   cilPencil,
   cilTrash,
