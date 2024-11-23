@@ -27,7 +27,8 @@ import { DataService } from '../data-service/data-service.component';
     Tablewiget2Component,
     Tablewiget3Component,
     Tablewiget4Component,
-    Tablewidget5Component
+    Tablewidget5Component,
+    AssetTableComponent
   ],
 })
 
