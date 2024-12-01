@@ -71,6 +71,8 @@
       class="card shadow-sm"
       style="border: none; background-color: white; color: green"
     >
+
+    
       <div class="card-body">
         <c-dropdown alignment="end" variant="btn-group" style="float: right">
           <button
@@ -123,6 +125,7 @@
           </button>
         </div>
       </div>
+
     </div>
   </c-col>
 
@@ -295,8 +298,9 @@
 
         <h2>
             <span class="anuphan-700 p-0" style="color: orange">
-              <ng-container *ngIf="numberOfUsers; else loading">
-              {{ numberOfUsers }} <br />ผู้ใช้ในระบบ
+              <!-- <ng-container *ngIf="numberOfUsers; else loading"> -->
+              <ng-container >
+              <!-- {{ numberOfUsers }} <br />ผู้ใช้ในระบบ -->
               <svg [cIcon]="icons.cilUser" height="32" style="float: right"></svg>
             </ng-container>
           </span>

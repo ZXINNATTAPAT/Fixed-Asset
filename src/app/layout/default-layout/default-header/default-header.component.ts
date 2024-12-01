@@ -38,6 +38,7 @@ import { jwtDecode } from 'jwt-decode';
 import CountyData from './County.json';
 import { HttpClient } from '@angular/common/http';
 import { json } from 'stream/consumers';
+import { ApiService } from 'src/app/api-service.service';
 
 interface povice {
   id: number;
@@ -98,7 +99,8 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     private http: HttpClient,
     private activatedRoute: ActivatedRoute,
     private colorModeService: ColorModeService,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private authService:ApiService
   ) {
     super();
   }
@@ -121,16 +123,21 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
       )
       .subscribe();
 
-    this.readinfo();
+    this.readInfo();
 
     this.setshow();
   }
 
-  readinfo() {
-    this.token = localStorage.getItem('token');
-    const decodedToken = jwtDecode(this.token);
-    this.userinfo = decodedToken;
-    // console.log(this.userinfo);
+  readInfo(): void {
+    this.authService.getUserClaims().subscribe(
+      (data) => {
+        this.userinfo = data.claims; // ดึง claims จาก Response
+        console.log('User Info:', this.userinfo);
+      },
+      (error) => {
+        console.error('Error fetching claims:', error);
+      }
+    );
   }
   setshow() {
     this.http
@@ -148,9 +155,9 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
           // console.log(CountyData.codecounty);
 
           for (const county of CountyData.codecounty) {
-            if (this.userinfo.affiliation.toString() !== 'กกต') {
+            if (this.userinfo.Affiliation.toString() !== 'กกต') {
               // ตรวจสอบเงื่อนไขของการเปรียบเทียบชื่อ
-              if (this.userinfo.affiliation.toString() === county.name_th) {
+              if (this.userinfo.Affiliation.toString() === county.name_th) {
                 console.log('Found matching affiliation:', county);
                 // หาข้อมูลจังหวัดที่มีการจับคู่กับเขตปัจจุบัน
                 const matchedProvinces = this.provinceset.filter(
@@ -177,8 +184,8 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   }
 
   Logout(): void {
-    localStorage.clear();
-    window.location.reload();
+    // localStorage.clear();
+    // window.location.reload();
   }
 
   @Input() sidebarId: string = 'sidebar1';

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, map, Observable } from 'rxjs';
 import axios from 'axios';
 
 @Injectable({
@@ -9,10 +9,42 @@ import axios from 'axios';
 export class ApiService {
   
   private apiUrl = 'https://localhost:7204/api/';
+
+  private apiUrlauth = 'https://localhost:7204/auth/';
+
+  private profileUrl = 'https://localhost:7204/auth/profile'; // URL ของ Endpoint
+
   
   public apiUrl_link = 'http://localhost:4200/#/';
 
   constructor(private http: HttpClient) {}
+
+  // Login
+  login(credentials: { username: string; password: string }) {
+    return this.http.post(`${this.apiUrlauth}login`, credentials, { withCredentials: true });
+  }
+
+  // Logout
+  logout() {
+    return this.http.post(`${this.apiUrlauth}logout`, {}, { withCredentials: true });
+  }
+
+  // ตรวจสอบสถานะการล็อกอิน
+  getUserInfo() {
+    return this.http.get(`${this.apiUrlauth}userinfo`, { withCredentials: true });
+  }
+
+  getUserClaims(): Observable<any> {
+    return this.http.get<any>(this.profileUrl, { withCredentials: true });
+  }
+
+  // ตรวจสอบสถานะการล็อกอิน
+  isLoggedIn(): Observable<boolean> {
+    return this.http.get(`${this.apiUrlauth}isLoggedIn`, { withCredentials: true }).pipe(
+      map(() => true), // หาก API ตอบกลับ 200 แปลว่าล็อกอิน
+      catchError(async () => (false)) // หากเกิดข้อผิดพลาด แปลว่ายังไม่ได้ล็อกอิน
+    );
+  }
 
   // Example method to fetch data from the API
   async fetchData(endpoint: string): Promise<any> {

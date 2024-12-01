@@ -48,23 +48,30 @@ export class Tablewidget5Component implements OnInit {
           counts[status] = (counts[status] || 0) + 1;
           return counts;
         }, {});
-
+  
+        // Update the chart data to include the problem status
         this.doughnutChartData.datasets[0].data = [
-          (this.statusCounts['ปกติ'] || 0) + (this.statusCounts[''] || 0),
-          this.statusCounts['โอนย้าย'] || 0,
-          this.statusCounts['ซ่อมแซม'] || 0,
-          this.statusCounts['เลิกใช้งาน'] || 0,
-          this.statusCounts['รอซ่อม'] || 0,
+          (this.statusCounts['ปกติ'] || 0) + (this.statusCounts[''] || 0), // Normal
+          this.statusCounts['โอนย้าย'] || 0, // Transferred
+          this.statusCounts['ซ่อมแซม'] || 0, // Repaired
+          this.statusCounts['เลิกใช้งาน'] || 0, // Retired
+          this.statusCounts['รอซ่อม'] || 0, // Waiting for repair
+          this.statusCounts['มีปัญหา'] || 0, // Problematic
         ];
-
-        // บังคับให้ Angular ตรวจสอบและอัปเดตข้อมูลชาร์ต
+  
+        // Force Angular to detect changes and update the chart
         this.cdr.detectChanges();
       },
       (error: any) => {
         console.error('Error fetching asset statuses:', error);
+  
+        // Handle error by resetting the chart data to defaults
+        this.doughnutChartData.datasets[0].data = [0, 0, 0, 0, 0, 0];
+        this.cdr.detectChanges();
       }
     );
   }
+  
 
 
 }

@@ -106,7 +106,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.getAssetDetails();
-    this.apiService.fetchDatahttp('Assettypecodes').subscribe((data) => {
+    this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
       this.assetTypes = data;
     });
   }

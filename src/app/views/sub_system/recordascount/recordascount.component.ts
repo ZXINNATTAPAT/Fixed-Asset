@@ -127,13 +127,16 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
   userinfo: any = [];
   token: any;
 
-  readinfo() {
-    this.token = localStorage.getItem('token');
-
-    const decodedToken = jwtDecode(this.token);
-
-    this.userinfo = decodedToken;
-    // console.log(this.userinfo);
+  readInfo(): void {
+    this.apiService.getUserClaims().subscribe(
+      (data) => {
+        this.userinfo = data.claims; // ดึง claims จาก Response
+        console.log('User Info:', this.userinfo);
+      },
+      (error) => {
+        console.error('Error fetching claims:', error);
+      }
+    );
   }
 
   assetDetails: AssetDetails[] = [];
@@ -158,7 +161,7 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   constructor(private http: HttpClient, private apiService: ApiService) {
-    this.readinfo();
+    this.readInfo();
     this.getAssetDetails();
   }
 

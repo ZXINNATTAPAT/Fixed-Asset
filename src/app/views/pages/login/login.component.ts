@@ -21,6 +21,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
+import { ApiService } from 'src/app/api-service.service';
 
 @Component({
   selector: 'app-login',
@@ -49,60 +50,36 @@ export class LoginComponent implements OnInit {
   param: string | null = '';
   token: string | null = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  username: string = '';
+  password: string = '';
+
+  constructor(private authService: ApiService, private router: Router) {}
 
   ngOnInit(): void {}
 
-  async login(event: Event, username: string, password: string) {
-    event.preventDefault();
+  login(event: Event, username: string, password: string): void {
+    event.preventDefault(); // ป้องกันการ Reload หน้า
     const credentials = { username, password };
 
-    try {
-      const response = await axios.post<any>(
-        'https://localhost:7204/api/Authorization',
-        credentials
-      );
-
-      // ตรวจสอบว่ามี token ใน response
-      if (response.data) {
-        // เก็บ token ใน localStorage
-        localStorage.setItem('token', response.data);
-
-        // Decode token
-        this.token = response.data;
-        const decodedToken: any = jwtDecode(this.token!);
-        this.userinfo = decodedToken;
-
-
-        // ดึง workgroup จาก token
-        this.param = this.userinfo?.workgroup;
-
-        // แสดงการแจ้งเตือนเมื่อเข้าสู่ระบบสำเร็จ
+    this.authService.login(credentials).subscribe(
+      (response) => {
         Swal.fire({
           icon: 'success',
           title: 'Login Successful',
           text: 'You have successfully logged in!',
-          showConfirmButton: false,
           timer: 1000,
+          showConfirmButton: false,
         });
-
-        // นำผู้ใช้ไปที่หน้าดashboard
-        setTimeout(() => {
-          this.router.navigate([`/dashboard/${this.param}`]);
-        }, 1500); // รอการแจ้งเตือนแสดงเสร็จ
-      } else {
-        throw new Error('Token not received');
+        this.router.navigate(['/dashboard']); // นำผู้ใช้ไปหน้า Dashboard
+      },
+      (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'Invalid username or password. Please try again.',
+          confirmButtonText: 'OK',
+        });
       }
-    } catch (error) {
-      console.error(error);
-
-      // แสดงการแจ้งเตือนเมื่อเข้าสู่ระบบไม่สำเร็จ
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: 'Invalid username or password. Please try again.',
-        confirmButtonText: 'OK',
-      });
-    }
+    );
   }
 }

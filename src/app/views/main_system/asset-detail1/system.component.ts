@@ -222,7 +222,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       // this.assetCategoryCtrl.setValue(this.assetCategory);
     } else {
       this
-        .ap.fetchDatahttp('Assettypecodes')
+        .ap.fetchDatahttp('Assettype')
         .subscribe((data) => {
           this.assetTypes = data;
         });

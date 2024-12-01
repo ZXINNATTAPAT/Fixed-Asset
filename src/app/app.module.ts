@@ -9,11 +9,11 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BaseChartDirective } from 'ng2-charts';
 import { MatDialog, MatDialogActions, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { AssetcountComponent } from './views/system2/assetcount/assetcount.component';
-import { DemoMaterialModule } from './views/system2/assetcount/material-module';
-import { RoleDialogComponent } from './views/system/user-management/dialog/role-dialog.component';
+import { AssetcountComponent } from './views/sub_system/assetcount/assetcount.component';
+import { DemoMaterialModule } from './views/sub_system/assetcount/material-module';
+import { RoleDialogComponent } from './views/main_system/user-management/dialog/role-dialog.component';
 import { MatSelect } from '@angular/material/select';
-import { UserEditDialogComponent } from './views/system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
+import { UserEditDialogComponent } from './views/main_system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
 // สร้าง InjectionToken เพื่อใช้ในการให้ค่า appConfig

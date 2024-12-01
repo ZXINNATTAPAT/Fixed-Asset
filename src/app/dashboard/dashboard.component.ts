@@ -5,7 +5,6 @@ import {
 } from '@angular/core';
 import { WidgetsBrandComponent } from '@widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '@widgets/widgets-dropdown/widgets-dropdown.component';
-import { AssetTableComponent } from '../views/main_system/asset-table/asset-table.component';
 
 import { TablewigetComponent } from './tablewiget/tablewiget.component';
 import { Tablewiget2Component } from './tablewiget2/tablewiget2.component';
@@ -15,6 +14,7 @@ import { Tablewidget5Component } from './tablewiget5/tablewidget5.component';
 import { DataService } from '../data-service/data-service.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
+import { ApiService } from '../api-service.service';
 
 @Component({
   templateUrl: 'dashboard.component.html',
@@ -24,13 +24,11 @@ import { jwtDecode } from 'jwt-decode';
     WidgetsDropdownComponent,
     NgStyle,
     WidgetsBrandComponent,
-    AssetTableComponent,
     TablewigetComponent,
     Tablewiget2Component,
     Tablewiget3Component,
     Tablewiget4Component,
     Tablewidget5Component,
-    AssetTableComponent
   ],
 })
 
@@ -39,39 +37,59 @@ export class DashboardComponent implements OnInit {
   userinfo: any = [];
   token: any;
 
-  readinfo() {
-    this.token = localStorage.getItem('token');
-    const decodedToken = jwtDecode(this.token);
-    this.userinfo = decodedToken;
-    // console.log(this.userinfo);
-  }
 
   assetDetails: any = [];
   assetcom: string = '';
   numberOfAssets!: number;
   param: string | null = '';
 
-  constructor(private dataService: DataService, private route: ActivatedRoute, private router: Router) { }
-
-  ngOnInit(): void {
-    this.readinfo(); // อ่านข้อมูล userinfo
+  constructor(private dataService: DataService, private route: ActivatedRoute, private router: Router ,private authService :ApiService) { }
+ 
+  readInfo(): void {
+    this.authService.getUserClaims().subscribe(
+      (data) => {
+        this.userinfo = data.claims; // ดึง claims จาก Response
+        console.log('User Info:', this.userinfo);
   
+        // เรียกฟังก์ชันจัดการ param หลังจากดึง userinfo สำเร็จ
+        this.handleParam();
+      },
+      (error) => {
+        console.error('Error fetching claims:', error);
+        this.userinfo = null;
+        this.handleParam(); // เรียกฟังก์ชันจัดการ param แม้จะเกิดข้อผิดพลาด
+      }
+    );
+  }
+  
+  ngOnInit(): void {
+    this.readInfo(); // อ่านข้อมูล userinfo
+  }
+  
+  // ฟังก์ชันจัดการพารามิเตอร์
+  handleParam(): void {
     // ดึงพารามิเตอร์จาก URL
-    this.param = this.route.snapshot.paramMap.get('angency');
-    console.log(this.param)
+    // this.param = this.route.snapshot.paramMap.get('angency');
+    // console.log('URL Parameter:', this.param);
   
     if (!this.param) {
       // ถ้าไม่มีพารามิเตอร์ใน URL
-      if (this.userinfo?.workgroup) {
-        // ถ้ามี workgroup ใน userinfo
-        this.param = this.userinfo.workgroup;
+      if (this.userinfo?.Faction) {
+        // ถ้ามี Faction ใน userinfo
+        this.param = this.userinfo.Faction;
+        console.log('Setting param from userinfo:', this.param);
   
         // เปลี่ยนเส้นทางโดยใช้ Angular Router
-        this.router.navigate([`/dashboard/${this.param}`]);
-        return; // หยุดการทำงานใน ngOnInit หลังเปลี่ยนเส้นทาง
+        this.router.navigate([`/dashboard/${this.param}`]).then(() => {
+          console.log('Navigation successful to:', `/dashboard/${this.param}`);
+        }).catch((err) => {
+          console.error('Navigation error:', err);
+        });
+  
+        return; // หยุดการทำงานใน handleParam หลังเปลี่ยนเส้นทาง
       } else {
-        console.error('No param or workgroup found!');
-        return; // หยุดการทำงานหากไม่มีพารามิเตอร์หรือ workgroup
+        console.error('No URL parameter or Faction found in userinfo!');
+        return; // หยุดการทำงานหากไม่มีพารามิเตอร์หรือ Faction
       }
     }
   
@@ -79,8 +97,9 @@ export class DashboardComponent implements OnInit {
     console.log('Received parameter from URL:', this.param);
   
     // เรียกใช้งาน DataService เพื่อดึงจำนวน assets
-    this.numberOfAssets = this.dataService.getNumberOfAssets();
+    // this.numberOfAssets = this.dataService.getNumberOfAssets();
   }
+  
   
   
 }  

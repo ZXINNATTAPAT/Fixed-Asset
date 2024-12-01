@@ -39,7 +39,7 @@ import {
 import { jwtDecode } from 'jwt-decode';
 import { NgIf } from '@angular/common';
 import { DataService } from '../../../data-service/data-service.component';
-import { forkJoin, of, tap } from 'rxjs';
+import { catchError, forkJoin, map, of, tap } from 'rxjs';
 
 @Component({
   selector: 'app-widgets-dropdown',
@@ -90,208 +90,132 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   }
 
   userinfo: any = [];
+token: any;
+assetTypes: any[] = [];
+assetCategory: any[] = [];
+numberOfUsers!: number;
+numberOfAssets!: number;
+assetinter!: number;
+assetoffice!: number;
+assetcar!: number;
+assetcom!: number;
 
-  token: any;
+linkadd(): void {
+  window.location.href = "http://localhost:4200/#/system/AssetDetails";
+}
 
-  assetTypes: any[] = [];
+linkdisasc(): void {
+  window.location.href = "http://localhost:4200/#/system/disassets";
+}
 
-  assetCategory: any[] = [];
+linkcount(): void {
+  window.location.href = "http://localhost:4200/#/system/Assetcount";
+}
 
-  numberOfUsers!: number;
-  
-  numberOfAssets!: number;
+linkassetall(): void {
+  window.location.href = "http://localhost:4200/#/assettable";
+}
 
-  assetinter!: number;
-  
-  assetoffice!: number;
-  
-  assetcar!: number;
-  
-  assetcom!: number;
+linkrepair(): void {
+  window.location.href = "http://localhost:4200/#/system/Repair";
+}
 
-  // private assetDetailsCache: any[] | null = null;
+linktranfer(): void {
+  window.location.href = "http://localhost:4200/#/system/transferassets";
+}
 
-  linkadd():void{
-    window.location.href="http://localhost:4200/#/system/AssetDetails";
-  }
+linkassetcom(): void {
+  window.location.href = "http://localhost:4200/#/assettable";
+}
 
-  linkdisasc():void{
-    window.location.href="http://localhost:4200/#/system/disassets";
-  }
-
-  linkcount():void{
-    window.location.href="http://localhost:4200/#/system/Assetcount";
-  }
-
-  linkassetall():void{
-    window.location.href="http://localhost:4200/#/assettable";
-  }
-
-  linkrepair():void{
-    window.location.href="http://localhost:4200/#/system/Repair";
-  }
-
-  linktranfer():void{
-    window.location.href="http://localhost:4200/#/system/transferassets";
-  }
-  
-  linkassetcom():void{
-    window.location.href="http://localhost:4200/#/assettable";
-  }
-
-  loadData(): void {
-    forkJoin({
-      users: this.apiService.fetchData('Users'),
-      assetTypes: this.apiService.fetchData('Assettypecodes'),
-      assetCategories: this.apiService.fetchData('Assetcategories')
-    }).pipe(
+loadData(): void {
+  forkJoin({
+    users: this.apiService.fetchData('Users'),
+    assetTypes: this.apiService.fetchData('Assettype'),
+    assetCategories: this.apiService.fetchData('Assetcategories')
+  })
+    .pipe(
       tap(({ users, assetTypes, assetCategories }) => {
+        // Assign the fetched data
         this.numberOfUsers = users.length;
         this.assetTypes = assetTypes;
         this.assetCategory = assetCategories;
-        this.dataService.setAssetTypes(this.assetTypes); // เก็บค่าใน Service
-        this.dataService.setAssetCategory(this.assetCategory); // เก็บค่าใน Service
-        this.loadAssetDetails(); // โหลดข้อมูลสินทรัพย์หลังจากโหลดประเภทสินทรัพย์และหมวดหมู่เสร็จแล้ว
+
+        // Store the data in the service
+        this.dataService.setAssetTypes(this.assetTypes);
+        this.dataService.setAssetCategory(this.assetCategory);
+
+        // Fetch asset counts
+        this.loadAssetCounts();
+      }),
+      catchError((error) => {
+        console.error('Error loading data:', error);
+        return of({ users: [], assetTypes: [], assetCategories: [] }); // Fallback to empty data
       })
-    ).subscribe();
+    )
+    .subscribe();
+}
+
+loadAssetCounts(): void {
+  this.apiService
+    .fetchDatahttp('Assettype/AssetCountsByTypeCode')
+    .pipe(
+      map((response: any) => {
+        // Extract the $values array if present
+        return response?.$values || [];
+      }),
+      tap((counts: any[]) => {
+        this.processAssetCounts(counts);
+      }),
+      catchError((error) => {
+        console.error('Error loading asset counts:', error);
+        return of([]); // Fallback to empty counts
+      })
+    )
+    .subscribe();
+}
+
+
+processAssetCounts(counts: any[]): void {
+  if (!Array.isArray(counts)) {
+    console.error('Invalid data format: counts is not an array', counts);
+    return;
   }
 
-  loadAssetDetails(): void {
-    this.apiService.fetchDatahttp('assetDetails').subscribe
-        ((data) => {
-          this.processAssetDetails(data);
-        })  
-  }
+  // Map counts to specific typeCodes
+  this.assetinter = this.getCountByTypeCode(counts, '001'); // Electrical and Radio
+  this.assetoffice = this.getCountByTypeCode(counts, '003'); // Office Equipment
+  this.assetcom = this.getCountByTypeCode(counts, '004'); // Computer Equipment
+  this.assetcar = this.getCountByTypeCode(counts, '006'); // Vehicles
 
-  processAssetDetails(data: any): void {
+  // Sum the total number of assets
+  this.numberOfAssets = counts.reduce((total, count) => total + count.count, 0);
+}
+
+
+getCountByTypeCode(counts: any[], typeCode: string): number {
+  const count = counts.find((item: any) => item.typeCode === typeCode)?.count;
+  return count || 0; // Default to 0 if no matching typeCode
+}
+
+
+readInfo(): void {
+  this.apiService.getUserClaims()
+    .pipe(
+      tap((data) => {
+        this.userinfo = data.claims; // Extract and assign user claims
+      }),
+      catchError((error) => {
+        console.error('Error fetching user claims:', error);
+        this.userinfo = null; // Reset userinfo on error
+        return of(null); // Fallback to null
+      })
+    )
+    .subscribe();
+}
+
     
-    this.numberOfAssets = data.length;
 
-    this.dataService.setAssetDetails(data); // set dataservice 
-
-    this.dataService.setNumberOfAssets(this.numberOfAssets); // เก็บค่าใน Service
-
-    this.token = localStorage.getItem('token')!;
-    const decodedToken = jwtDecode(this.token);
-    this.userinfo = decodedToken;
-
-    if (this.userinfo.affiliation === 'กกต') {
-      this.filterAssetsForECT(data);
-    } else {
-      this.filterAssetsForOthers(data);
-    }
-  }
-
-  filterAssetsForECT(data: any[]): void {
-    const filteredAssetCategory001 = this.assetCategory.filter(
-      (category: { asc_Code: string; assetCode: string }) =>
-        category.assetCode.startsWith('001')
-    );
-    
-    const filteredAssetCategory003 = this.assetCategory.filter(
-      (category: { asc_Code: string; assetCode: string }) =>
-        category.assetCode.startsWith('003')
-    );
-    
-    const filteredAssetCategory004 = this.assetCategory.filter(
-      (category: { asc_Code: string; assetCode: string }) =>
-        category.assetCode.startsWith('004')
-    );
-    
-    const filteredAssetCategory006 = this.assetCategory.filter(
-      (category: { asc_Code: string; assetCode: string }) =>
-        category.assetCode.startsWith('006')
-    );
-    
-    const filteredAssets1 = data.filter((asset: { assetCode: string }) =>
-      filteredAssetCategory001.some(
-        (category: { asc_Code: string; assetCode: string }) =>
-          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
-      )
-    );
-    
-    const filteredAssets3 = data.filter((asset: { assetCode: string }) =>
-      filteredAssetCategory003.some(
-        (category: { asc_Code: string; assetCode: string }) =>
-          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
-      )
-    );
-    
-    const filteredAssets4 = data.filter((asset: { assetCode: string }) =>
-      filteredAssetCategory004.some(
-        (category: { asc_Code: string; assetCode: string }) =>
-          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
-      )
-    );
-    
-    const filteredAssets6 = data.filter((asset: { assetCode: string }) =>
-      filteredAssetCategory006.some(
-        (category: { asc_Code: string; assetCode: string }) =>
-          asset.assetCode.startsWith(`${this.userinfo.affiliation} ${category.asc_Code}`)
-      )
-    );
-    
-    this.assetinter = filteredAssets1.length;
-    this.assetoffice = filteredAssets3.length;
-    this.assetcom = filteredAssets4.length;
-    this.assetcar = filteredAssets6.length;
-    
-    this.numberOfAssets = data.filter(
-      (asset: { assetCode: string }) =>
-        asset.assetCode.startsWith(this.userinfo.affiliation) &&
-        !asset.assetCode.includes(`${this.userinfo.affiliation}.`)
-    ).length;
-  }    
-
-  filterAssetsForOthers(data: any[]): void {
-    const filteredAssetCategory004 = this.assetCategory.filter(
-      (category: { asc_Code: string; assetCode: string }) =>
-        category.assetCode.startsWith('004')
-    );
-
-    const filteredAssets = data.filter((asset: { assetCode: string }) =>
-      filteredAssetCategory004.some(
-        (category: { asc_Code: string; assetCode: string }) =>
-          asset.assetCode.startsWith(category.asc_Code)
-      )
-    );
-
-    const filteredAssetCategory001 = this.assetCategory.filter(
-      (category: { asc_Code: string; assetCode: string }) =>
-        category.assetCode.startsWith('001')
-    );
-
-    const filteredAssets2 = data.filter((asset: { assetCode: string }) =>
-      filteredAssetCategory001.some(
-        (category: { asc_Code: string; assetCode: string }) =>
-          asset.assetCode.startsWith(category.asc_Code)
-      )
-    );
-
-    const filteredAssets3 = data.filter(
-      (asset: { assetCode: string }) =>
-        asset.assetCode.indexOf(`003`) !== -1
-    );
-
-    const filteredAssets4 = data.filter(
-      (asset: { assetCode: string }) =>
-        asset.assetCode.indexOf(`006`) !== -1
-    );
-
-    this.assetinter = filteredAssets2.length;
-
-    this.assetoffice = filteredAssets3.length;
-    
-    this.assetcar = filteredAssets4.length;
-    
-    this.assetcom = filteredAssets.length;
-
-    this.numberOfAssets = data.filter(
-      (asset: { assetCode: string; agency: string }) =>
-        !asset.assetCode.startsWith('กกต.' && 'กกต') &&
-        asset.agency.startsWith(`${this.userinfo.workgroup}`)
-    ).length;
-  }
 
 
   data: any[] = [];

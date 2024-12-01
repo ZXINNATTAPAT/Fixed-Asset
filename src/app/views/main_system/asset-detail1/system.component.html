@@ -75,7 +75,7 @@
                 <mat-select formControlName="assetType" panelClass="mat-select-panel"
                   placeholder="เลือกหมวดหมู่ครุภัณฑ์" style="font-family: 'Anuphan', sans-serif; font-weight: 400">
                   <mat-option class="anuphan-700" *ngFor="let type of assetTypes" [value]="type.assetCode">
-                    <span class="anuphan-600">{{ type.assetName }}</span>
+                    <span class="anuphan-600">{{ type.assetCode }} : {{ type.assetName }}</span>
                   </mat-option>
                 </mat-select>
               </div>
@@ -112,7 +112,7 @@
                     </mat-option>
 
                     <mat-option *ngFor="let category of filteredAssetCategories | async" [value]="category.asc_Code">
-                      <span class="anuphan-600">{{ category.asc_Name }}</span>
+                      <span class="anuphan-600">{{ category.asc_Code }} : {{ category.asc_Name }}</span>
                     </mat-option>
 
                   </mat-select>

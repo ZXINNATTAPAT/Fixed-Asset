@@ -73,7 +73,7 @@ export class DefaultdataComponent implements OnInit {
   async onSubmit() {
     try {
       const response = await this.apiService.postData(
-        'Assettypecodes/',
+        'Assettype/',
         this.asset
       );
       const newAsset = response;

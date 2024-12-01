@@ -138,8 +138,6 @@ export class AssetcountComponent implements OnInit {
 
   selectedDevice: MediaDeviceInfo | undefined;
 
-
-
   // displayedColumns3: string[] = ["รหัสครุภัณฑ์","รายการ","ยอดตามบัญชี","ยอดตรวจนับ","ผลต่าง","หมายเหตุ"];
   displayedColumns3: string[] = ['รหัสครุภัณฑ์', 'รายการ'];
 
@@ -147,12 +145,16 @@ export class AssetcountComponent implements OnInit {
 
   token: any;
 
-  public readinfo() {
-    this.token = localStorage.getItem('token');
-
-    const decodedToken = jwtDecode(this.token);
-
-    this.userinfo = decodedToken;
+  readInfo(): void {
+    this.authService.getUserClaims().subscribe(
+      (data) => {
+        this.userinfo = data.claims; // ดึง claims จาก Response
+        console.log('User Info:', this.userinfo);
+      },
+      (error) => {
+        console.error('Error fetching claims:', error);
+      }
+    );
   }
 
   private dataSubscription!: Subscription;
@@ -177,7 +179,7 @@ export class AssetcountComponent implements OnInit {
 
   _onDestroy = new Subject<void>();
 
-  constructor(private apiService: ApiService, private formBuilder: FormBuilder,) { this.getAssetDetails(); }
+  constructor(private apiService: ApiService, private formBuilder: FormBuilder,private authService:ApiService) { this.getAssetDetails(); }
 
   assetForm!: FormGroup;
 
@@ -285,7 +287,7 @@ export class AssetcountComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.readinfo();
+    this.readInfo();
 
     this.getAvailableDevices();
 
@@ -297,7 +299,7 @@ export class AssetcountComponent implements OnInit {
 
     this.assetForm = this.formBuilder.group({
       date: [new Date().toISOString()],
-      serialNumber: [`${this.userinfo.affiliation}-ตน-0001`],
+      serialNumber: [`${this.userinfo.affiliation}-ตน-0001`],//เปลี่ยน
       departmentCode: [''],
       locationCode: [''],
       inspector: [''],

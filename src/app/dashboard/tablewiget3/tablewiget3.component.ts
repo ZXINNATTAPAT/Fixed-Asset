@@ -171,7 +171,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
       });
     }
     else{
-      this.ap.fetchData('Assettypecodes').catch((data) => {
+      this.ap.fetchData('Assettype').catch((data) => {
         this.assetTypes = data;
         // console.log(this.assetTypes);
       });

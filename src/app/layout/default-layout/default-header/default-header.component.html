@@ -20,24 +20,24 @@
         ></svg>
       </button>
 
-      <c-nav-item *ngIf="userinfo.affiliation === 'กกต'">
+      <c-nav-item *ngIf="userinfo.Affiliation === 'ส่วนกลาง'">
         <a
           cNavLink
           class="anuphan-700"
           style="font-size: large; color: rgb(255, 255, 255)"
         >
-          สำนักงานคณะกรรมการการเลือกตั้ง{{ this.showCounty }} ({{ userinfo.workgroup }})
+          สำนักงานคณะกรรมการการเลือกตั้งส่วนกลาง ({{ userinfo.Faction }})
         </a>
       </c-nav-item>
 
-      <c-nav-item *ngIf="userinfo.affiliation !== 'กกต'">
+      <c-nav-item *ngIf="userinfo.Affiliation !== 'ส่วนกลาง'">
         <a
           cNavLink
           class="anuphan-700"
           style="font-size: large; color: rgb(255, 255, 255)"
         >
           สำนักงานคณะกรรมการการเลือกตั้งส่วนภูมิภาค {{ this.showCounty }} ({{
-            this.userinfo.affiliation
+            this.userinfo.Faction
           }})
         </a>
       </c-nav-item>
