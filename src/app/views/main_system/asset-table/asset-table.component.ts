@@ -23,16 +23,16 @@ import QRCode from 'qrcode';
 import { myFunction } from './utils';
 
 interface AssetDetails {
-  assetId: any;
-  purchaseDate: string;
-  assetCode: string;
-  assetName: string;
-  purchasePrice: number;
-  purchasedFrom: string;
-  documentNumber: string;
-  department: string;
-  assetLocation: string;
-  responsibleEmployee: string;
+  AssetId: any;
+  PurchaseDate: string;
+  AssetCode: string;
+  AssetName: string;
+  PurchasePrice: number;
+  PurchasedFrom: string;
+  DocumentNumber: string;
+  Department: string;
+  AssetLocation: string;
+  ResponsibleEmployee: string;
   Note: string;
   [key: string]: string | number; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
 }
@@ -66,7 +66,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  assets: any = {};
+  assets: AssetDetails[] = []; // แก้จาก any = {} เป็น array
   qrCodeUrl: string = '';
   selectedAssetType: string = '';
   displayedColumns: string[];  //Eng
@@ -78,20 +78,33 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   assetTypes: any[] = [];
   myFunctionInstance: myFunction | undefined;
   assetDetails: AssetDetails[] = [];
-  dataSource: MatTableDataSource<AssetDetails> =
-    new MatTableDataSource<AssetDetails>(this.assetDetails);
+  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   private dataSubscription!: Subscription;
   
   constructor(private apiService: ApiService) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
-    this.userinfo = this.myFunctionInstance.readinfo();
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
     this.displayedColumns2 = this.myFunctionInstance.displayedColumns2;
     this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
+    this.readinfo();
+    
+  }
+
+  readinfo() {
+    this.apiService.getUserClaims().subscribe(
+      (data) => {
+        this.userinfo = data.claims; // ดึง claims จาก Response
+        console.log('User Info:', this.userinfo.Affiliation);
+      },
+      (error) => {
+        console.error('Error fetching claims:', error);
+        this.userinfo = null;
+      }
+    );
   }
 
   ngAfterViewInit() {
@@ -106,59 +119,72 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.getAssetDetails();
+    this.loadAssetTypes();
+  }
+  
+  loadAssetTypes(): void {
     this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
       this.assetTypes = data;
     });
   }
-
+  
   getAssetDetails(): void {
     this.dataSubscription = this.apiService
-      .fetchDatahttp('assetDetails')
+      .fetchDatahttp('AssetDetails')
       .subscribe((data) => {
+        // console.log(data);
         this.processAssetData(data);
+        this.dataSource.data = this.assetDetails; // อัปเดต dataSource
+        console.log(this.assetDetails);
       });
   }
-
+  
   processAssetData(data: any[]): void {
     this.assetDetails = data
-      .filter((asset: any) => {
-        const agency = asset.agency || '';
-        const assetCode = asset.assetCode || '';
+      .filter((asset: any) => this.filterAssetByAffiliation(asset))
+      .sort((a: any, b: any) => this.sortByPurchaseDate(a, b))
+      .map((asset: any) => this.transformAsset(asset));
 
-        if (this.userinfo.affiliation === 'กกต') {
-          return assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.');
-        } else {
-          return assetCode.startsWith(this.userinfo.affiliation);
-        }
-      })
-      .sort((a: any, b: any) => {
-        const dateA = new Date(a.purchaseDate).getTime();
-        const dateB = new Date(b.purchaseDate).getTime();
-        return dateB - dateA;
-      })
-      .map((asset: any) => {
-        asset.purchaseDate = this.myFunctionInstance!.convertDate(asset.purchaseDate);
-        asset = this.myFunctionInstance!.translateToThai(asset);
-        const path =
-          'http://localhost:4200/#/system/infoasset/' + asset.assetId;
-        QRCode.toDataURL(path, (err, url) => {
-          if (err) throw err;
-          asset.qrCodeUrl = url;
-        });
-        return asset;
-      });
-
-    this.filterAssets();
+    // this.filterAssets(); // เรียกใช้ฟังก์ชันฟิลเตอร์เพิ่มเติมหากมี
   }
+  
+  filterAssetByAffiliation(asset: any): boolean {
+    const AssetCode = asset.AssetCode || '';
+    const affiliation = this.userinfo?.Affiliation || ''; // ใช้ optional chaining
+    console.log(affiliation);
+    return affiliation === "ส่วนกลาง"
+      ? AssetCode.startsWith('กกต') && !AssetCode.startsWith('กกต.')
+      : AssetCode.startsWith(AssetCode.startsWith('กกต'));
+  }
+  
+  sortByPurchaseDate(a: any, b: any): number {
+    const dateA = new Date(a.PurchaseDate).getTime();
+    const dateB = new Date(b.PurchaseDate).getTime();
+    return dateB - dateA; // เรียงลำดับจากล่าสุดไปเก่าสุด
+  }
+  
+  transformAsset(asset: any): any {
+    asset.PurchaseDate = this.myFunctionInstance!.convertDate(asset.PurchaseDate);
+    asset = this.myFunctionInstance!.translateToThai(asset);
+  
+    const path = `http://localhost:4200/#/system/infoasset/${asset.AssetId}`;
+    QRCode.toDataURL(path, (err, url) => {
+      if (err) console.error('QR Code generation error:', err);
+      asset.qrCodeUrl = url;
+    });
+  
+    return asset;
+  }
+  
 
   filterAssets(): void {
-    if (this.selectedAssetType) {
-      this.dataSource.data = this.assetDetails.filter(
-        (asset) => asset['assetType'] === this.selectedAssetType
-      );
-    } else {
-      this.dataSource.data = this.assetDetails;
-    }
+    // if (this.selectedAssetType) {
+    //   this.dataSource.data = this.assetDetails.filter(
+    //     (asset) => asset['AssetType'] === this.selectedAssetType
+    //   );
+    // } else {
+    //   this.dataSource.data = this.assetDetails;
+    // }
   }
 
   onAssetTypeChange(): void {
@@ -181,37 +207,37 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   setupFilter(column: string) {
-    const isPriceColumn = column === 'ราคาต่อหน่วย';
+    // const isPriceColumn = column === 'ราคาต่อหน่วย';
 
-    this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
-      const textToSearch = d[column];
-      if (typeof textToSearch === 'string') {
-        return isPriceColumn
-          ? textToSearch.includes(filter)
-          : textToSearch.toLowerCase().includes(filter);
-      } else if (typeof textToSearch === 'number') {
-        return textToSearch.toString().includes(filter);
-      } else {
-        return false; // or some other default behavior
-      }
-    };
+    // this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
+    //   const textToSearch = d[column];
+    //   if (typeof textToSearch === 'string') {
+    //     return isPriceColumn
+    //       ? textToSearch.includes(filter)
+    //       : textToSearch.toLowerCase().includes(filter);
+    //   } else if (typeof textToSearch === 'number') {
+    //     return textToSearch.toString().includes(filter);
+    //   } else {
+    //     return false; // or some other default behavior
+    //   }
+    // };
   }
 
   applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value
-      .trim()
-      .toLowerCase();
-    this.dataSource.filter = filterValue;
+    // const filterValue = (event.target as HTMLInputElement).value
+    //   .trim()
+    //   .toLowerCase();
+    // this.dataSource.filter = filterValue;
   }
 
   showQrAsset(asset: any): void {
     this.apiService
-      .fetchDatahttp('AssetDetails/' + asset.assetId)
+      .fetchDatahttp('AssetDetails/' + asset.AssetId)
       .subscribe((data: any) => {
         this.assets = data;
 
         const path =
-          `${this.apiService.apiUrl_link}system/infoasset/` + asset.assetId;
+          `${this.apiService.apiUrl_link}system/infoasset/` + asset.AssetId;
         QRCode.toDataURL(path, (err, url) => {
           if (err) throw err;
           // นำ URL ของ QR code ไปใช้งานต่อ
@@ -234,8 +260,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
     if (result.isConfirmed) {
       try {
-        await this.apiService.deleteData(`AssetDetails/${asset.assetId}`);
-        const index = this.assetDetails.findIndex((a) => a.assetId === asset.assetId);
+        await this.apiService.deleteData(`AssetDetails/${asset.AssetId}`);
+        const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
         if (index !== -1) {
           this.assetDetails.splice(index, 1);
           // Update the data source after deletion
@@ -304,12 +330,12 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 }
 
 //   async searchAsset(): Promise<void> {
-//     const assetCode = this.assetCodeInput;
+//     const AssetCode = this.AssetCodeInput;
 
 //     // ใช้เงื่อนไขการเปรียบเทียบค่าที่ต้องการ (เช่น >=, <=, === เป็นต้น) กับค่าที่มีอยู่ในรายการ
 //     const foundAsset = this.assetDetailsset.find(asset => {
 //         // เช็คว่ารหัสครุภัณฑ์ในรายการเป็นค่าที่คล้ายค่าที่ผู้ใช้ป้อนเข้ามาหรือไม่
-//         return asset.รหัสครุภัณฑ์.startsWith(assetCode) || asset.รหัสครุภัณฑ์.startsWith(assetCode + "-");
+//         return asset.รหัสครุภัณฑ์.startsWith(AssetCode) || asset.รหัสครุภัณฑ์.startsWith(AssetCode + "-");
 //     });
 
 //     if (foundAsset) {
@@ -320,7 +346,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 //         // ทำอย่างไรก็ได้ตามที่ต้องการกับข้อมูลที่พบ
 //     } else {
 //         // ไม่พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Asset with code', assetCode, 'not found.');
+//         console.log('Asset with code', AssetCode, 'not found.');
 //         // จัดการกรณีที่ไม่พบรหัสครุภัณฑ์ที่ต้องการ
 //     }
 // }

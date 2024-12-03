@@ -45,18 +45,18 @@
           </mat-select-trigger>
           <mat-option value="เซตค่าคืนทั้งหมด">เซตค่าคืนทั้งหมด</mat-option>
           <hr />
-          <mat-option *ngFor="let column of displayedColumns2" [value]="column">
+          <!-- <mat-option *ngFor="let column of displayedColumns2" [value]="column">
             {{ column }}
-          </mat-option>
+          </mat-option> -->
         </mat-select>
       </div>
 
       <div class="col-2">
         <label class="form-label">กรองตามประเภทครุภัณฑ์</label>
-        <mat-select class="form-control p-3" [(ngModel)]="selectedAssetType" (selectionChange)="onAssetTypeChange()">
+        <!-- <mat-select class="form-control p-3" [(ngModel)]="selectedAssetType" (selectionChange)="onAssetTypeChange()">
           <mat-option value="">ทั้งหมด</mat-option>
           <mat-option *ngFor="let type of assetTypes" [value]="type.assetCode">{{ type.assetName }}</mat-option>
-        </mat-select>
+        </mat-select> -->
       </div>
 
       <div class="col">
@@ -72,6 +72,7 @@
         [dataSource]="dataSource" matSort>
         <!-- Actions Column -->
         <ng-container matColumnDef="Aactions">
+          
           <th class="text-center border" mat-header-cell *matHeaderCellDef style="color: black; font-weight: bold">
             # <input cFormControl sizing="sm" disabled />
           </th>

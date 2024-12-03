@@ -1,8 +1,11 @@
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
 import { jwtDecode } from 'jwt-decode';
+import { ApiService } from 'src/app/api-service.service';
 
 
 export class myFunction {
+
+
 
   userinfo: any = [];
 
@@ -10,15 +13,7 @@ export class myFunction {
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
-  readinfo() {
-    this.token = localStorage.getItem('token');
-
-    const decodedToken = jwtDecode(this.token);
-
-    this.userinfo = decodedToken;
-    // console.log(this.userinfo);
-    return this.userinfo;
-  }
+ 
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);
@@ -40,18 +35,18 @@ export class myFunction {
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      purchaseDate: 'วันเดือนปี',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการ',
-      purchasePrice: 'ราคาต่อหน่วย',
-      purchasedFrom: 'วิธีการได้มา',
-      documentNumber: 'เลขที่เอกสาร',
-      assetLocation: 'ที่อยู่',
-      agency: 'หน่วยงาน',
-      department: 'ฝ่าย',
-      responsibleEmployee: 'ผู้ใช้งาน',
-      status: 'สถานะ',
-      note: 'หมายเหตุ',
+      PurchaseDate: 'วันเดือนปี',
+      AssetCode: 'รหัสครุภัณฑ์',
+      AssetName: 'รายการ',
+      PurchasePrice: 'ราคาต่อหน่วย',
+      PurchasedFrom: 'วิธีการได้มา',
+      DocumentNumber: 'เลขที่เอกสาร',
+      AssetLocation: 'ที่อยู่',
+      Department: 'สำนัก',
+      Faction: 'ฝ่าย',
+      ResponsibleEmployee: 'ผู้ใช้งาน',
+      Status: 'สถานะ',
+      Note: 'หมายเหตุ',
     };
 
     const translatedAsset: { [key: string]: any } = {};
@@ -96,6 +91,7 @@ export class myFunction {
     'วิธีการได้มา',
     // 'เลขที่เอกสาร',
     // 'หน่วยงาน',
+    
     'ฝ่าย',
     'ที่อยู่',
     'ผู้ใช้งาน',

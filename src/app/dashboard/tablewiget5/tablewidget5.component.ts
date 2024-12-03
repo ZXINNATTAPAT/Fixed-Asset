@@ -41,35 +41,35 @@ export class Tablewidget5Component implements OnInit {
   }
 
   private loadChartData() {
-    this.ap.getStatusCounts().subscribe(
-      (assets: any[]) => {
-        this.statusCounts = assets.reduce((counts: { [key: string]: number }, asset: any) => {
-          const status = asset.status || 'ปกติ';
-          counts[status] = (counts[status] || 0) + 1;
-          return counts;
-        }, {});
+    // this.ap.getStatusCounts().subscribe(
+    //   (assets: any[]) => {
+    //     this.statusCounts = assets.reduce((counts: { [key: string]: number }, asset: any) => {
+    //       const status = asset.status || 'ปกติ';
+    //       counts[status] = (counts[status] || 0) + 1;
+    //       return counts;
+    //     }, {});
   
-        // Update the chart data to include the problem status
-        this.doughnutChartData.datasets[0].data = [
-          (this.statusCounts['ปกติ'] || 0) + (this.statusCounts[''] || 0), // Normal
-          this.statusCounts['โอนย้าย'] || 0, // Transferred
-          this.statusCounts['ซ่อมแซม'] || 0, // Repaired
-          this.statusCounts['เลิกใช้งาน'] || 0, // Retired
-          this.statusCounts['รอซ่อม'] || 0, // Waiting for repair
-          this.statusCounts['มีปัญหา'] || 0, // Problematic
-        ];
+    //     // Update the chart data to include the problem status
+    //     this.doughnutChartData.datasets[0].data = [
+    //       (this.statusCounts['ปกติ'] || 0) + (this.statusCounts[''] || 0), // Normal
+    //       this.statusCounts['โอนย้าย'] || 0, // Transferred
+    //       this.statusCounts['ซ่อมแซม'] || 0, // Repaired
+    //       this.statusCounts['เลิกใช้งาน'] || 0, // Retired
+    //       this.statusCounts['รอซ่อม'] || 0, // Waiting for repair
+    //       this.statusCounts['มีปัญหา'] || 0, // Problematic
+    //     ];
   
-        // Force Angular to detect changes and update the chart
-        this.cdr.detectChanges();
-      },
-      (error: any) => {
-        console.error('Error fetching asset statuses:', error);
+    //     // Force Angular to detect changes and update the chart
+    //     this.cdr.detectChanges();
+    //   },
+    //   (error: any) => {
+    //     console.error('Error fetching asset statuses:', error);
   
-        // Handle error by resetting the chart data to defaults
-        this.doughnutChartData.datasets[0].data = [0, 0, 0, 0, 0, 0];
-        this.cdr.detectChanges();
-      }
-    );
+    //     // Handle error by resetting the chart data to defaults
+    //     this.doughnutChartData.datasets[0].data = [0, 0, 0, 0, 0, 0];
+    //     this.cdr.detectChanges();
+    //   }
+    // );
   }
   
 
