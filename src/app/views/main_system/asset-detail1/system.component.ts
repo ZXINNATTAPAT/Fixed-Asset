@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, } from '@angular/core';
 import { TextColorDirective, InputGroupComponent, BorderDirective, } from '@coreui/angular';
 import { CommonModule, NgIf, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, Validators, FormGroup, FormBuilder, FormArray } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
@@ -29,7 +29,7 @@ import { takeUntil, take } from 'rxjs/operators';
 
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions, } from '@angular/material/form-field';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { jwtDecode } from 'jwt-decode';
+
 import { DataService } from 'src/app/data-service/data-service.component';
 import { ApiService } from 'src/app/api-service.service';
 import { AssetService } from './Service/asset.service'
@@ -164,9 +164,9 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
   assetCategoryFilterCtrl: FormControl = new FormControl('');
   filteredAssetCategories: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
 
-  unitCtrl: FormControl = new FormControl(); 
+  unitCtrl: FormControl = new FormControl();
   unitFilterCtrl: FormControl = new FormControl('');
-  filteredUnits: ReplaySubject<any[]> = new ReplaySubject<any[]>(1); 
+  filteredUnits: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
 
 
   factionsCtrl: FormControl = new FormControl();
@@ -193,12 +193,21 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Token and user info reading
   public readinfo() {
-    this.token = localStorage.getItem('token');
-    const decodedToken = jwtDecode(this.token);
-    this.userinfo = decodedToken;
+    this.ap.getUserClaims().subscribe(
+      (data) => {
+        this.userinfo = data.claims; // ดึง claims จาก Response
+        // console.log('User Info:', this.userinfo.Affiliation);
+      },
+      (error) => {
+        console.error('Error fetching claims:', error);
+        this.userinfo = null;
+      }
+    );
   }
 
-  constructor(private http: HttpClient, private formBuilder: FormBuilder, private dataService: DataService, private service: AssetService, private ap: ApiService, private dialog: MatDialog) {
+  constructor(private http: HttpClient, private formBuilder: FormBuilder,
+    private dataService: DataService, private service: AssetService,
+    private ap: ApiService, private dialog: MatDialog) {
 
     this.readinfo();
 
@@ -238,71 +247,48 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // เพิ่ม form control สำหรับ input เพิ่มเติม
   ngOnInit(): void {
-
-    // this.loadAllData();
-    // this.loadFactions();
-    // this.getCountingUnits();
-    
     this.assetCategoryCtrl = this.formBuilder.control(null);
 
     // Initialize the form group
     this.asset = this.formBuilder.group({
-
-      assetType: [''],
-
-      assetCategory: [''],
-
+      assetId: [0, Validators.required], // AssetId
       assetCode: [
         '',
         [
           Validators.required,
-          Validators.pattern(/^[ก-๙]{3}\s\d{4}-\d{3}-\d{4}$/),
+          Validators.pattern(/^[a-zA-Z0-9\s\-]+$/), // ปรับรูปแบบตาม AssetCode
         ],
-      ], // Set this initially as empty
-
-      assetName: ['', Validators.required],
-
-      quantity: ['1'],
-
-      unit: [''],
-
-      purchasedFrom: ['', Validators.required],
-
-      department: [`${this.userinfo.position}`],
-
-      agency: [`${this.userinfo.workgroup}`],
-
-      assetLocation: ['', Validators.required],
-
-      responsibleEmployee: ['', Validators.required],
-
-      documentNumber: [''],
-
-      purchasePrice: [''],
-
-      CalculatedPrice: [''],
-
-      purchaseDate: [''], //วันที่ซื้อ
-
-      ReceiptDate: [''], //วันที่ได้รับ
-
-      TaxInvoiceNumber: [''], //เลขที่ใบกำกับภาษี
-
-      DepreciationRate: [''], //อัตราค่าเสื่อม
-
-      AssetAge: [''],
-
-      DepreciationStartDate: [''],
-
-      DepreciationCalculationStartDate: [''],
-
-      Note: [''],
-
-      additionalInput: [''],
+      ],
+      assetName: ['', Validators.required], // AssetName
+      quantity: [0, [Validators.required, Validators.min(1)]], // Quantity
+      unitId: [0, Validators.required], // UnitId
+      propertySellerId: [0, Validators.required], // PropertySellerId
+      typeId: [0, Validators.required], // TypeId
+      categoryId: [0, Validators.required], // CategoryId
+      departmentId: ['', Validators.required], // DepartmentId
+      factionId: ['', Validators.required], // FactionId
+      assetLocation: ['', Validators.required], // AssetLocation
+      responsibleEmployee: ['', Validators.required], // ResponsibleEmployee
+      documentNumber: ['', Validators.required], // DocumentNumber
+      taxInvoiceNumber: ['', Validators.required], // TaxInvoiceNumber
+      purchaseDate: ['', Validators.required], // PurchaseDate
+      receiptDate: ['', Validators.required], // ReceiptDate
+      depreciationStartDate: ['', Validators.required], // DepreciationStartDate
+      depreciationCalculationStartDate: ['', Validators.required], // DepreciationCalculationStartDate
+      purchasePrice: [0, [Validators.required, Validators.min(0)]], // PurchasePrice
+      calculatedPrice: [0, [Validators.required, Validators.min(0)]], // CalculatedPrice
+      scrapPrice: [0, [Validators.required, Validators.min(0)]], // ScrapPrice
+      depreciationRate: [0, [Validators.required, Validators.min(0)]], // DepreciationRate
+      assetAge: [0, [Validators.required, Validators.min(0)]], // AssetAge
+      depreciationEndDate: ['', Validators.required], // DepreciationEndDate
+      accumulatedDepreciation: [0, [Validators.required, Validators.min(0)]], // AccumulatedDepreciation
+      depreciationValue: [0, [Validators.required, Validators.min(0)]], // DepreciationValue
+      bookValue: [0, [Validators.required, Validators.min(0)]], // BookValue
+      note: [''], // Note
+      statusId: [0, Validators.required], // StatusId
+      subAssets: this.formBuilder.array([]), // SubAssets เป็น Array
     });
-
-    // this.asset.get('agency')?.valueChanges.subscribe(this.userinfo.workgroup);
-
+    
     this.asset.get('assetCode')?.valueChanges.subscribe((value) => {
       const check = this.assetDetails.some(
         (asset) => asset.assetCode === value
@@ -379,7 +365,7 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
           : (date.getFullYear() + 543).toString();
       }
 
-      const newAssetCode = `${this.userinfo.affiliation} ${assetCategory}-001-${year}`;
+      const newAssetCode = `กกต ${assetCategory}-001-${year}`;
 
       const isAssetCodeExist = this.assetDetails.some(
         (asset) => asset.assetCode === newAssetCode
@@ -426,11 +412,11 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filterFactions();
       });
 
-     this.unitFilterCtrl.valueChanges
+    this.unitFilterCtrl.valueChanges
       .pipe(takeUntil(this._onDestroy))
       .subscribe(() => {
         this.filterUnits();
-     });
+      });
   }
 
   loadAllData(): void {
@@ -454,11 +440,11 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
             );
           }
         });
-  
+
         // Populate countingUnits and initialize filtered units
         this.countingUnits = countingUnits;
         this.filteredUnits.next(this.countingUnits.slice());
-  
+
         // Populate factions and initialize filtered factions
         this.factions = factions;
         this.filteredFactions.next(this.factions);
@@ -468,6 +454,37 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     );
   }
+
+  get subAssets(): FormArray {return this.asset.get('subAssets') as FormArray;}
+  
+  addSubAsset(subAssetData?: any): void {
+    this.subAssets.push(
+      this.formBuilder.group({
+        subAssetId: [subAssetData?.SubAssetId || 0, Validators.required], // SubAssetId
+        assetId: [subAssetData?.AssetId || 0, Validators.required], // AssetId
+        subAssetCode: [
+          subAssetData?.SubAssetCode || '',
+          Validators.required,
+        ], // SubAssetCode
+        subAssetName: [subAssetData?.SubAssetName || '', Validators.required], // SubAssetName
+        unit: [subAssetData?.Unit || '', Validators.required], // Unit
+        assetLocation: [
+          subAssetData?.AssetLocation || '',
+          Validators.required,
+        ], // AssetLocation
+        responsibleEmployee: [
+          subAssetData?.ResponsibleEmployee || '',
+          Validators.required,
+        ], // ResponsibleEmployee
+        status: [subAssetData?.Status || ''], // Status
+        note: [subAssetData?.Note || ''], // Note
+        assetDetails: [subAssetData?.AssetDetails || ''], // AssetDetails
+      })
+    );
+  }
+  
+  removeSubAsset(index: number): void {this.subAssets.removeAt(index); }
+  
 
   ngAfterViewInit() {
     // this.setInitialValue();
@@ -758,10 +775,10 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
 
-    if (this.userinfo.affiliation === 'กกต') {
-      this.asset.get('agency')?.setValue(`${this.userinfo.workgroup}`); //เซตสังกัด หรือ สำนัก
+    if (this.userinfo.Affiliation === 'ส่วนกลาง') {
+      this.asset.get('departmentId')?.setValue(`${this.userinfo?.DepartmentId}`); //เซตสังกัด หรือ สำนัก
 
-      this.asset.get('department')?.setValue(`${this.userinfo.position}`); //เซตฝ่าย
+      this.asset.get('factionId')?.setValue(`${this.userinfo?.FactionId}`); //เซตฝ่าย
     } else {
       // this.asset.get('agen')
     }
@@ -835,13 +852,13 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
   filterAssetCategories(): void {
     const searchValue = this.assetCategoryFilterCtrl.value?.toLowerCase();
-    const assetType = this.asset.get('assetType')?.value;
+    const assetType = this.asset.get('typeId')?.value;
 
     const filteredAssetCategories = this.assetCategory.filter((category) => {
       return (
-        category.assetCode === assetType &&
+        category.TypeId === assetType &&
         (searchValue
-          ? category.asc_Name.toLowerCase().includes(searchValue)
+          ? category.CategoryName.toLowerCase().includes(searchValue)
           : true)
       );
     });
@@ -879,13 +896,13 @@ export class SystemComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.filteredUnits.next(filteredUnits);
   }
-  
+
   onUnitChange(event: MatSelectChange): void {
-    console.log('Selected value:', event.value); 
+    console.log('Selected value:', event.value);
     // console.log('MatSelect source:', event.source); 
     this.asset.patchValue({ unit: event.value }); // Update form control value
   }
-  
+
 
   enableCustomInput(): void {
     this.isCustomInput = true;
