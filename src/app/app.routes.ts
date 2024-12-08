@@ -30,28 +30,31 @@ export const routes: Routes = [
     path: '',
     component: DefaultLayoutComponent,
     canActivate: [AuthGuard], // ใช้ AuthGuard เพื่อตรวจสอบ Token
-    data: {
-      title: 'Home',
-    },
+    data: {title: 'Home',},
     children: [
       {
-        path: 'dashboard/:id',
+        path: 'dashboard/ส่วนกลาง/:fid/:sid',
+        loadChildren: () =>
+          import('./dashboard/routes').then((m) => m.routes),
+      },
+      {
+        path: 'dashboard/ส่วนภูมิภาค/:fid/:sid',
         loadChildren: () =>
           import('./dashboard/routes').then((m) => m.routes),
       },
       {
         path: 'assettable',
         loadChildren: () =>
-          import('./views/main_system/routes').then((m) => m.routes),
+          import('./main_system/routes').then((m) => m.routes),
       },
       {
         path: 'defaultdata',
         loadChildren: () =>
-          import('./views/defaultdata/routes').then((m) => m.routes),
+          import('./defaultdata/routes').then((m) => m.routes),
       },
       {
         path: 'usersmanagement',
-        loadComponent: () => import('../app/views/main_system/user-management/user-management.component').then(
+        loadComponent: () => import('./main_system/user-management/user-management.component').then(
           (m) => m.UserManagementComponent
         ),
         data: {
@@ -66,12 +69,12 @@ export const routes: Routes = [
       {
         path: 'system',
         loadChildren: () =>
-          import('./views/main_system/routes').then((m) => m.routes),
+          import('./main_system/routes').then((m) => m.routes),
       },
       {
         path: 'system',
         loadChildren: () =>
-          import('./views/sub_system/routes').then((m) => m.routes),
+          import('./sub_system/routes').then((m) => m.routes),
       },
       {
         path: 'pages',

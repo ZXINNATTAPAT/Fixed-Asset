@@ -4,7 +4,6 @@ import { Title } from '@angular/platform-browser';
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
 import { VERSION } from '@angular/material/core';
-// import { MatSelectSearchVersion } from 'ngx-mat-select-search';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +12,7 @@ import { VERSION } from '@angular/material/core';
   imports: [RouterOutlet]
 })
 export class AppComponent implements OnInit {
-  title = 'CoreUI Angular Admin Template';
+  title = 'ETC-ASE';
 
   constructor(
     private router: Router,

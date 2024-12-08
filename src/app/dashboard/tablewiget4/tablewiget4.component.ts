@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 import { ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
 
 interface AssetDetails {
   repairAssetId: any;
@@ -122,13 +122,13 @@ export class Tablewiget4Component implements OnInit, OnDestroy {
   }
 
   setInitialValue(): void {
-    this.filteredAssetData
-      .pipe(take(1), takeUntil(this._onDestroy))
-      .subscribe(() => {
-        // console.log(this.singleSelect);
-        this.singleSelect.compareWith = (a: any, b: any) =>
-          a && b && a.assetCode === b.assetCode;
-      });
+    // this.filteredAssetData
+    //   .pipe(take(1), takeUntil(this._onDestroy))
+    //   .subscribe(() => {
+    //     // console.log(this.singleSelect);
+    //     this.singleSelect.compareWith = (a: any, b: any) =>
+    //       a && b && a.AssetCode === b.AssetCode;
+    //   });
   }
 
   ngOnInit(): void {

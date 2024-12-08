@@ -1,6 +1,6 @@
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
 import { jwtDecode } from 'jwt-decode';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
 
 
 export class myFunction {
@@ -13,19 +13,6 @@ export class myFunction {
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
-  readInfo(): void {
-    this.authService.getUserClaims().subscribe(
-      (data) => {
-        this.userinfo = data.claims; // ดึง claims จาก Response
-        console.log('User Info:', this.userinfo);
-     
-      },
-      (error) => {
-        console.error('Error fetching claims:', error);
-        this.userinfo = null;
-      }
-    );
-  }
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);

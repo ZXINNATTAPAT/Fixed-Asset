@@ -13,8 +13,13 @@ export const navItems: INavData[] = [
         icon:'nav-icon-bullet' ,
       },
       {
-        name: 'แดชบอร์ดสรุปภาพรวม',
-        url: '/dashboard/$param',
+        name: 'แดชบอร์ดสรุปภาพรวม(ส่วนกลาง)',
+        url: '/dashboard/ส่วนกลาง/$param/$param',
+        icon:'nav-icon-bullet' ,
+      },
+      {
+        name: 'แดชบอร์ดสรุปภาพรวม(ส่วนภูมิภาค)',
+        url: '/dashboard/ส่วนภูมิภาค/$param/$param',
         icon:'nav-icon-bullet' ,
       },
     ]

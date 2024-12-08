@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Upload Your File</h2>
+<mat-dialog-content>
+  <form (ngSubmit)="onSubmit()">
+    <div class="row">
+      <div class="col mb-2">
+        <label class="m-2">✨ Upload File</label>
+
+        <input
+          class="form-control"
+          type="file"
+          (change)="onFileChange($event)"
+          accept=".xls,.xlsx"
+        />
+      </div>
+      <div class="col text-center mt-3">
+
+        <button
+          class="btn btn-success text-white"
+          type="submit"
+          [disabled]="!asset2.length"
+        >
+          Import
+        </button>
+        
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+

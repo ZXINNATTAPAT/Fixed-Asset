@@ -11,42 +11,48 @@ import {
 import { DropdownModule, SidebarModule } from '@coreui/angular';
 import { IconSetService } from '@coreui/icons-angular';
 import { routes } from './app.routes';
-import { HttpClientModule } from '@angular/common/http';
-import { ResizedDirective } from 'angular-resize-event';
-// import { ResizableModule } from 'angular-resizable-element';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { CacheInterceptor } from './ApiController/interceptors/cache.interceptor'
 
 // กำหนดค่าสำหรับการใช้งานของแอพพลิเคชั่น
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Import providers ที่เกี่ยวข้องกับการทำงานร่วมกับ HttpClientModule
+    // Import HttpClientModule เพื่อรองรับ HTTP Requests
     importProvidersFrom(HttpClientModule),
-    // กำหนดเส้นทางของแอพพลิเคชั่น
+
+    // กำหนดเส้นทางและตั้งค่า Routing
     provideRouter(
       routes,
-      // กำหนดการตั้งค่าเส้นทาง
       withRouterConfig({
-        onSameUrlNavigation: 'reload', // การรีโหลดหน้าเว็บเมื่อเปลี่ยน URL เดิม
+        onSameUrlNavigation: 'reload', // รีโหลดหน้าเมื่อ URL ซ้ำเดิม
       }),
-      // กำหนดการจัดการเมื่อมีการเลื่อนหน้า
-      withInMemoryScrolling({
-        scrollPositionRestoration: 'top', // ตำแหน่งเลื่อนไปที่ด้านบนเมื่อเปลี่ยนเส้นทาง
-        anchorScrolling: 'enabled', // เปิดใช้งานการเลื่อนไปยังตำแหน่งสมุดบัญชี
+      withInMemoryScrolling({scrollPositionRestoration: 'top', // คืนค่า Scroll Position ด้านบน
+        anchorScrolling: 'enabled', // เปิดใช้งานการเลื่อนไปยัง Anchor
       }),
-      // กำหนดการทำงานเมื่อเริ่มต้นแอพพลิเคชั่น
-      withEnabledBlockingInitialNavigation(),
-      // กำหนดการเปลี่ยนแปลงมุมมอง
-      
-      withViewTransitions(),
-      // กำหนดการจัดการเมื่อมีการเปลี่ยน hash location
-      withHashLocation()
+
+      withEnabledBlockingInitialNavigation(), // บล็อค Navigation เริ่มต้นจนกว่าโหลดเสร็จ
+
+      withViewTransitions(), // เปิดใช้งาน View Transitions
+
+      // withHashLocation() // ใช้ Hash-based Navigation (#)
     ),
-    // Import providers ที่เกี่ยวข้องกับ DropdownModule และ SidebarModule
+
+    // Import SidebarModule และ DropdownModule
     importProvidersFrom(SidebarModule, DropdownModule),
-    // กำหนดค่าสำหรับการใช้งานของ IconSetService
+
+    // กำหนด IconSetService เพื่อใช้ Icon
     IconSetService,
 
-    ResizedDirective,
-    // กำหนดค่าสำหรับการใช้งานของ animations
+    // เปิดใช้งาน Animation
     provideAnimations(),
+
+
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CacheInterceptor, // เพิ่ม Interceptor ที่ต้องการ
+      multi: true, // รองรับหลาย Interceptor
+    },
+    
+
   ],
 };

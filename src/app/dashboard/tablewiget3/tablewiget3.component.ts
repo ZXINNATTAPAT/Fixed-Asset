@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
 import { NgStyle } from '@angular/common';
 import {
   cilPencil,

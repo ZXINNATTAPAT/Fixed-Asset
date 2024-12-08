@@ -1,8 +1,5 @@
 import { NgStyle } from '@angular/common';
-import {
-  Component,
-  OnInit,
-} from '@angular/core';
+import {Component,OnInit,} from '@angular/core';
 import { WidgetsBrandComponent } from '@widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '@widgets/widgets-dropdown/widgets-dropdown.component';
 
@@ -13,8 +10,7 @@ import { Tablewiget4Component } from './tablewiget4/tablewiget4.component';
 import { Tablewidget5Component } from './tablewiget5/tablewidget5.component';
 import { DataService } from '../data-service/data-service.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { jwtDecode } from 'jwt-decode';
-import { ApiService } from '../api-service.service';
+import { ApiService } from '../ApiController/api-service.service';
 
 @Component({
   templateUrl: 'dashboard.component.html',
@@ -35,35 +31,29 @@ import { ApiService } from '../api-service.service';
 export class DashboardComponent implements OnInit {
 
   userinfo: any = [];
-  token: any;
-
-
   assetDetails: any = [];
   assetcom: string = '';
   numberOfAssets!: number;
   param: string | null = '';
+  param2: string | null = '';
+  param3: string | null = '';
 
   constructor(private dataService: DataService, private route: ActivatedRoute, private router: Router ,private authService :ApiService) { }
- 
-  readInfo(): void {
-    this.authService.getUserClaims().subscribe(
-      (data) => {
-        this.userinfo = data.claims; // ดึง claims จาก Response
-        console.log('User Info:', this.userinfo);
+
   
-        // เรียกฟังก์ชันจัดการ param หลังจากดึง userinfo สำเร็จ
-        this.handleParam();
-      },
-      (error) => {
-        console.error('Error fetching claims:', error);
-        this.userinfo = null;
-        this.handleParam(); // เรียกฟังก์ชันจัดการ param แม้จะเกิดข้อผิดพลาด
-      }
-    );
-  }
-  
-  ngOnInit(): void {
-    this.readInfo(); // อ่านข้อมูล userinfo
+  async ngOnInit(): Promise<void> {
+    
+    // await this.dataService.loadUserInfo();
+
+   
+      this.dataService.loadUserInfo().then(() => {
+        const userInfo = this.dataService.getUserInfo();
+        this.userinfo = userInfo.claims;
+        console.log('UserInfo Loaded:', userInfo);
+      });
+    
+    
+
   }
   
   // ฟังก์ชันจัดการพารามิเตอร์
@@ -77,10 +67,12 @@ export class DashboardComponent implements OnInit {
       if (this.userinfo?.Faction) {
         // ถ้ามี Faction ใน userinfo
         this.param = this.userinfo.Faction;
+        this.param2 = this.userinfo.Affiliation;
+        this.param3 = this.userinfo.Department;
         console.log('Setting param from userinfo:', this.param);
   
         // เปลี่ยนเส้นทางโดยใช้ Angular Router
-        this.router.navigate([`/dashboard/${this.param}`]).then(() => {
+        this.router.navigate([`/dashboard/${this.param2}/${this.param3}/${this.param}`]).then(() => {
           console.log('Navigation successful to:', `/dashboard/${this.param}`);
         }).catch((err) => {
           console.error('Navigation error:', err);
