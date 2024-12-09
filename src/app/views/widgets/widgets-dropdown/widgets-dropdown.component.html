@@ -97,8 +97,8 @@
 
         <h2>
           <span class="anuphan-700 p-0" style="color: green">
-            <ng-container *ngIf="numberOfAssets; else loading">
-              {{ numberOfAssets }} <br />ครุภัณฑ์
+            <ng-container *ngIf="numberOfAssets || numberOfAssets === 0 ; else loading">
+              {{ numberOfAssets  }} <br />ครุภัณฑ์
               <svg
                 [cIcon]="icons.cilSave"
                 height="32"
@@ -155,7 +155,7 @@
 
         <h2 style="color: #000080">
           <span class="anuphan-700 p-0" style="color: #000080">
-            <ng-container *ngIf="assetcom; else loading">
+            <ng-container *ngIf="assetcom || assetcom === 0; else loading">
               {{ assetcom }} <br />
               คอมพิวเตอร์
               <svg

@@ -1,0 +1,96 @@
+<h2 mat-dialog-title 
+    style="font-family:Anuphan,sans-serif;font-optical-sizing:auto;font-weight:600;font-style:normal">
+    แก้ไขข้อมูลผู้ใช้
+</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="userForm">
+        <div class="row g-2 m-1">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="codeId">รหัสพนักงาน</label>
+                    <input type="text" class="form-control" id="codeId" formControlName="codeId" />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="username">Email</label>
+                    <input type="email" class="form-control" id="username" formControlName="username" />
+                </div>
+            </div>
+       
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="prefix">คำนำหน้า</label>
+                    <input type="text" class="form-control" id="prefix" formControlName="prefix" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="sname">ชื่อ</label>
+                    <input type="text" class="form-control" id="sname" formControlName="sname" />
+                </div>
+            </div>
+        
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="lname">นามสกุล</label>
+                    <input type="text" class="form-control" id="lname" formControlName="lname" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="position">ตำแหน่ง</label>
+                    <input type="text" class="form-control" id="position" formControlName="position" />
+                </div>
+            </div>
+     
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="subposition">ตำแหน่งย่อย</label>
+                    <input type="text" class="form-control" id="subposition" formControlName="subposition" />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="workgroup">กลุ่มงาน</label>
+                    <input type="text" class="form-control" id="workgroup" formControlName="workgroup" required />
+                </div>
+            </div>
+       
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="affiliation">สังกัด</label>
+                    <input type="text" class="form-control" id="affiliation" formControlName="affiliation" required />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label anuphan-600" for="positiontype">ประเภทตำแหน่ง</label>
+                    <input type="text" class="form-control" id="positiontype" formControlName="positiontype" required />
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label anuphan-600" for="roles">บทบาท</label>
+                <select class="form-control" id="roles" formControlName="roles">
+                    <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                </select>
+            </div>
+        </div>
+
+
+        
+
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">ยกเลิก</button>
+    <button mat-button color="primary" (click)="save()" [disabled]="userForm.invalid">บันทึก</button>
+</mat-dialog-actions>

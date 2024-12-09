@@ -1,7 +1,6 @@
 import {
   Component,
   DestroyRef,
-  inject,
   Injectable,
   Input,
   OnInit,
@@ -34,11 +33,11 @@ import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, filter, map, tap } from 'rxjs/operators';
 import { cilAccountLogout, cilUser } from '@coreui/icons';
-import { jwtDecode } from 'jwt-decode';
 import CountyData from './County.json';
 import { HttpClient } from '@angular/common/http';
 import { json } from 'stream/consumers';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
+import { DataService } from '@services/data-service.component';
 
 interface povice {
   id: number;
@@ -100,12 +99,20 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private colorModeService: ColorModeService,
     private destroyRef: DestroyRef,
-    private authService:ApiService
+    private authService:ApiService ,
+    private dataService :DataService
   ) {
     super();
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo?.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
+      console.log('DefaultHeader UserInfo:', this.userinfo);
+    });
+  
+  
+   
     this.colorModeService.localStorageItemName.set(
       'coreui-free-angular-admin-template-theme-default'
     );
@@ -123,22 +130,10 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
       )
       .subscribe();
 
-    this.readInfo();
-
     this.setshow();
   }
 
-  readInfo(): void {
-    this.authService.getUserClaims().subscribe(
-      (data) => {
-        this.userinfo = data.claims; // ดึง claims จาก Response
-        console.log('User Info:', this.userinfo);
-      },
-      (error) => {
-        console.error('Error fetching claims:', error);
-      }
-    );
-  }
+ 
   setshow() {
     this.http
       .get<any>(
@@ -155,9 +150,9 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
           // console.log(CountyData.codecounty);
 
           for (const county of CountyData.codecounty) {
-            if (this.userinfo.Affiliation.toString() !== 'กกต') {
+            if (this.userinfo.Affiliation !== 'ส่วนกลาง') {
               // ตรวจสอบเงื่อนไขของการเปรียบเทียบชื่อ
-              if (this.userinfo.Affiliation.toString() === county.name_th) {
+              if (this.userinfo.Affiliation === county.name_th) {
                 console.log('Found matching affiliation:', county);
                 // หาข้อมูลจังหวัดที่มีการจับคู่กับเขตปัจจุบัน
                 const matchedProvinces = this.provinceset.filter(

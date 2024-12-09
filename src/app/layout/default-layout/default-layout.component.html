@@ -48,14 +48,10 @@
       </div>
       <div class="col-10">
         <span style="font-size: 15.5px">
-          {{ userinfo.position }} ({{
-            userinfo[
-              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-            ]
-          }})</span
+          {{ userProfile }}</span
         ><br />
         <span style="font-size: 11.5px"
-          >คุณ {{ userinfo.Sname }} {{ userinfo.Lname }}
+          >คุณ {{ userProfile }} {{ userProfile }}
         </span>
         <br />
         <!-- <span style="font-size: 10px;">{{userinfo.position}}/{{userinfo.positiontype}}</span> -->

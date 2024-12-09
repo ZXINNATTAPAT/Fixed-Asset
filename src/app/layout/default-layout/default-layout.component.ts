@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
 
@@ -18,7 +18,7 @@ import {
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
-import { jwtDecode } from 'jwt-decode';
+import { DataService } from '@services/data-service.component';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -50,24 +50,68 @@ function isOverflown(element: HTMLElement) {
     DefaultFooterComponent
   ]
 })
-export class DefaultLayoutComponent {
+export class DefaultLayoutComponent implements OnInit {
   userinfo: any = [];
-  token: any;
+  userId:any = '';
+  userProfile: any = [];
+
   public navItems: INavData[] = [];
 
-  constructor() {
-    this.readinfo();
+  constructor(private dataService : DataService) {
     this.updateNavItems();
   }
 
-  public readinfo() {
-    this.token = localStorage.getItem('token');
-    if (this.token) {
-      const decodedToken = jwtDecode(this.token);
-      this.userinfo = decodedToken;
+  ngOnInit(): void {
+    this.initializeUserData();
+  }
+  
+  private async initializeUserData(): Promise<void> {
+    try {
+      // Subscribe to userInfo$ to get real-time updates
+      this.dataService.userInfo$.subscribe((userInfo) => {
+        if (userInfo) {
+          this.userinfo = userInfo.claims;
+          this.userId = userInfo.userId;
+
+  
+          console.log('UserInfo Loaded:', this.userinfo);
+  
+          // โหลด UserProfile เมื่อ userId พร้อม
+          if (this.userId) {
+            const userId = this.userId ;
+            this.loadUserProfile(userId);
+          } else {
+            console.warn('UserId not found in UserInfo');
+          }
+        } else {
+          console.warn('UserInfo is not available.');
+        }
+      });
+  
+      
+    } catch (error) {
+      console.error('Error initializing user data:', error);
     }
   }
-
+  
+  private async loadUserProfile(userId: string): Promise<void> {
+    try {
+      // เรียกใช้ `DataService` เพื่อโหลดข้อมูลโปรไฟล์
+      await this.dataService.loadUserProfile(userId);
+  
+      // ดึงข้อมูลจาก BehaviorSubject
+      this.userProfile = this.dataService.getUserProfileSnapshot();
+  
+      if (this.userProfile) {
+        console.log('User Profile Loaded:', this.userProfile);
+      } else {
+        console.warn('User Profile is not available.');
+      }
+    } catch (error) {
+      console.error('Error loading User Profile:', error);
+    }
+  }
+  
   private updateNavItems() {
     // กำหนดค่าพารามิเตอร์จาก userinfo
     const workgroup = this.userinfo?.workgroup ;

@@ -22,7 +22,7 @@ import {
   DropdownItemDirective,
   DropdownDividerDirective,
 } from '@coreui/angular';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
 import {
   cibAddthis,
   cilArrowCircleRight,
@@ -36,7 +36,6 @@ import {
   cilTrash,
   cilUser,
 } from '@coreui/icons';
-import { jwtDecode } from 'jwt-decode';
 import { NgIf } from '@angular/common';
 import { DataService } from '../../../data-service/data-service.component';
 import { catchError, forkJoin, map, of, tap } from 'rxjs';
@@ -161,8 +160,8 @@ loadAssetCounts(): void {
     .fetchDatahttp('Assettype/AssetCountsByTypeCode')
     .pipe(
       map((response: any) => {
-        // Extract the $values array if present
-        return response?.$values || [];
+        console.log(response);
+        return response;
       }),
       tap((counts: any[]) => {
         this.processAssetCounts(counts);
@@ -177,6 +176,7 @@ loadAssetCounts(): void {
 
 
 processAssetCounts(counts: any[]): void {
+
   if (!Array.isArray(counts)) {
     console.error('Invalid data format: counts is not an array', counts);
     return;
@@ -189,34 +189,14 @@ processAssetCounts(counts: any[]): void {
   this.assetcar = this.getCountByTypeCode(counts, '006'); // Vehicles
 
   // Sum the total number of assets
-  this.numberOfAssets = counts.reduce((total, count) => total + count.count, 0);
+  this.numberOfAssets = counts.reduce((total, count) => total + count.Count, 0);
 }
 
 
 getCountByTypeCode(counts: any[], typeCode: string): number {
-  const count = counts.find((item: any) => item.typeCode === typeCode)?.count;
+  const count = counts.find((item: any) => item.TypeCode === typeCode)?.Count;
   return count || 0; // Default to 0 if no matching typeCode
 }
-
-
-readInfo(): void {
-  this.apiService.getUserClaims()
-    .pipe(
-      tap((data) => {
-        this.userinfo = data.claims; // Extract and assign user claims
-      }),
-      catchError((error) => {
-        console.error('Error fetching user claims:', error);
-        this.userinfo = null; // Reset userinfo on error
-        return of(null); // Fallback to null
-      })
-    )
-    .subscribe();
-}
-
-    
-
-
 
   data: any[] = [];
   
@@ -330,6 +310,11 @@ readInfo(): void {
   };
 
   ngOnInit(): void {
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo;
+      console.log('DefaultHeader UserInfo:', userInfo);
+    });
+  
     this.setData();
   }
 

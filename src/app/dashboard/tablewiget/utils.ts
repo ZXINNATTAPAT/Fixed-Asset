@@ -1,6 +1,6 @@
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
 import { jwtDecode } from 'jwt-decode';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
 
 
 export class myFunction {
@@ -13,19 +13,6 @@ export class myFunction {
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
 
-  readInfo(): void {
-    this.authService.getUserClaims().subscribe(
-      (data) => {
-        this.userinfo = data.claims; // ดึง claims จาก Response
-        console.log('User Info:', this.userinfo);
-     
-      },
-      (error) => {
-        console.error('Error fetching claims:', error);
-        this.userinfo = null;
-      }
-    );
-  }
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);
@@ -47,18 +34,18 @@ export class myFunction {
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      purchaseDate: 'วันเดือนปี',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการ',
-      purchasePrice: 'ราคาต่อหน่วย',
-      purchasedFrom: 'วิธีการได้มา',
-      documentNumber: 'เลขที่เอกสาร',
-      assetLocation: 'ที่อยู่',
-      agency: 'หน่วยงาน',
-      department: 'ฝ่าย',
-      responsibleEmployee: 'ผู้ใช้งาน',
-      status: 'สถานะ',
-      note: 'หมายเหตุ',
+      PurchaseDate: 'วันเดือนปี',
+      AssetCode: 'รหัสครุภัณฑ์',
+      AssetName: 'รายการ',
+      PurchasePrice: 'ราคาต่อหน่วย',
+      PurchasedFrom: 'วิธีการได้มา',
+      DocumentNumber: 'เลขที่เอกสาร',
+      AssetLocation: 'ที่อยู่',
+      Agency: 'หน่วยงาน',
+      Department: 'ฝ่าย',
+      ResponsibleEmployee: 'ผู้ใช้งาน',
+      Status: 'สถานะ',
+      Note: 'หมายเหตุ',
     };
 
     const translatedAsset: { [key: string]: any } = {};

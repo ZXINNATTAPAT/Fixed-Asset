@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
-import { ApiService } from './api-service.service';
+import { ApiService } from './ApiController/api-service.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router, private authService: ApiService) {}
 
+  constructor(private router: Router, private authService: ApiService) {}
+  
   canActivate(): Observable<boolean> {
     return this.authService.isLoggedIn().pipe(
       map((isLoggedIn) => {

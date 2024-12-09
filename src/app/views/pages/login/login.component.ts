@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgStyle } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ContainerComponent,
@@ -15,13 +15,9 @@ import {
   FormControlDirective,
   ButtonDirective,
 } from '@coreui/angular';
-import { HttpClient } from '@angular/common/http';
-// import { FormsModule } from '@angular/forms'; // Import FormsModules
 import Swal from 'sweetalert2';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
-import { ApiService } from 'src/app/api-service.service';
+import { ApiService } from 'src/app/ApiController/api-service.service';
 
 @Component({
   selector: 'app-login',
@@ -42,13 +38,14 @@ import { ApiService } from 'src/app/api-service.service';
     IconDirective,
     FormControlDirective,
     ButtonDirective,
-    NgStyle,
+    NgStyle,NgIf
   ],
 })
 export class LoginComponent implements OnInit {
   userinfo: any = [];
+  isLoading: boolean = false;
+
   param: string | null = '';
-  token: string | null = '';
 
   username: string = '';
   password: string = '';
@@ -60,19 +57,51 @@ export class LoginComponent implements OnInit {
   login(event: Event, username: string, password: string): void {
     event.preventDefault(); // ป้องกันการ Reload หน้า
     const credentials = { username, password };
-
+    this.isLoading = true; // เริ่ม Loading
+  
     this.authService.login(credentials).subscribe(
-      (response) => {
+      (response: any) => {
         Swal.fire({
           icon: 'success',
           title: 'Login Successful',
           text: 'You have successfully logged in!',
           timer: 1000,
           showConfirmButton: false,
+        }).then(() => {
+          // โหลดข้อมูล UserInfo หลังจากล็อกอินสำเร็จ
+          this.authService.getUserInfos().subscribe(
+            (userinfo) => {
+              this.userinfo = userinfo;
+              this.isLoading = false; // หยุด Loading
+  
+              // ตรวจสอบว่ามีข้อมูล Page ก่อนนำทาง
+              if (response && response.page && response.department && response.affiliation) {
+                this.router.navigate([
+                  `/dashboard/${response.affiliation}/${response.department}/${response.page}`,
+                ]);
+              } else {
+                console.error('Page information is missing in the response.');
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Navigation Error',
+                  text: 'Unable to navigate to the Dashboard. Please try again.',
+                });
+              }
+            },
+            (error) => {
+              this.isLoading = false; // หยุด Loading
+              console.error('Error loading user info:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Unable to load user information. Please try again.',
+              });
+            }
+          );
         });
-        this.router.navigate(['/dashboard']); // นำผู้ใช้ไปหน้า Dashboard
       },
       (error) => {
+        this.isLoading = false; // หยุด Loading
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',
@@ -82,4 +111,6 @@ export class LoginComponent implements OnInit {
       }
     );
   }
+  
+  
 }

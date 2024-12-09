@@ -84,18 +84,25 @@
 
           <td class="border" mat-cell *matCellDef="let asset" style="width: fit-content">
             
-            <button class="btn btn-sm btn-warning m-1" (click)="this.myFunctionInstance!.infoasset(asset)"
+            <button 
+              class="btn btn-sm btn-warning m-1" 
+              (click)="this.myFunctionInstance!.infoasset(asset)"
               style="width: 28px; height: 28px; padding: 4px">
+
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
-                style="color: white; width: 100%; height: 100%"></svg>
+                style="color: white; width: 100%; height: 100%">
+              </svg>
+
             </button>
 
-            <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)"
+            <!-- <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)"
               style="width: 28px; height: 28px; padding: 4px">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilTrash"
                 style="color: white; width: 100%; height: 100%"></svg>
-            </button>
+            </button> -->
+            
           </td>
+
         </ng-container>
 
         <ng-container matColumnDef="Qrcode">
@@ -118,8 +125,11 @@
           <th class="mat-header-cell anuphan-600 border" mat-header-cell *matHeaderCellDef mat-sort-header>
             <div style="color: black; font-weight: bold">
               <label cLabel>{{ column }}</label>
-              <input cFormControl sizing="sm" placeholder="ค้นหาข้อมูล" (keyup)="applyFilter($event)"
-                (focus)="setupFilter(column)" />
+              <input 
+                cFormControl sizing="sm" 
+                placeholder="ค้นหาข้อมูล" 
+                (keyup)="applyFilter($event ,column)"
+                />
             </div>
           </th>
 
