@@ -28,6 +28,7 @@ interface AssetDetails {
   PurchaseDate: string;
   AssetCode: string;
   AssetName: string;
+  TypeId:number;
   PurchasePrice: number;
   PurchasedFrom: string;
   DocumentNumber: string;
@@ -104,101 +105,106 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  ngOnInit():void {
-    
-    this.dataService.loadUserInfo().then(() => {
-      const userInfo = this.dataService.getUserInfo();
+  ngOnInit(): void {
+    this.initializeUserInfo();
+    this.loadAssetTypes();
+    this.getAssetDetails();
+  }
+  
+  // โหลดข้อมูล UserInfo
+  private async initializeUserInfo(): Promise<void> {
+    // await this.dataService.loadUserInfo();
+    const userInfo = this.dataService.getUserInfo();
+    if (userInfo) {
       this.userinfo = userInfo.claims;
       console.log('UserInfo Loaded:', userInfo);
+    } else {
+      console.warn('UserInfo not available');
+    }
+  }
+  
+  // โหลดข้อมูล Asset Types
+  private loadAssetTypes(): void {
+    this.apiService.fetchDatahttp('Assettype').subscribe({
+      next: (data) => (this.assetTypes = data),
+      error: (err) => console.error('Error loading Asset Types:', err),
     });
-
-    this.getAssetDetails();
-    this.loadAssetTypes();
   }
   
-  loadAssetTypes(): void {
-    this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
-      this.assetTypes = data;
+  // โหลดข้อมูล Asset Details
+  private getAssetDetails(): void {
+    this.apiService.fetchDatahttp('AssetDetails').subscribe({
+      next: (data) => this.handleAssetDetails(data),
+      error: (err) => console.error('Error loading Asset Details:', err),
     });
   }
   
-  getAssetDetails(): void {
-    this.dataSubscription = this.apiService
-      .fetchDatahttp('AssetDetails')
-      .subscribe((data) => {
-        // console.log(data);
-        this.processAssetData(data);
-        this.dataSource.data = this.assetDetails; // อัปเดต dataSource
-        console.log(this.assetDetails);
-      });
-  }
-  
-  processAssetData(data: any[]): void {
+  // จัดการข้อมูล Asset Details
+  private handleAssetDetails(data: any[]): void {
     this.assetDetails = data
-      .filter((asset: any) => this.filterAssetByAffiliation(asset))
-      .sort((a: any, b: any) => this.sortByPurchaseDate(a, b))
-      .map((asset: any) => this.transformAsset(asset));
-
-    // this.filterAssets(); // เรียกใช้ฟังก์ชันฟิลเตอร์เพิ่มเติมหากมี
+      .filter((asset) => this.filterAssetByAffiliation(asset))
+      .sort((a, b) => this.sortByPurchaseDate(a, b))
+      .map((asset) => this.transformAsset(asset));
+  
+    this.dataSource.data = this.assetDetails;
+    console.log('Processed Asset Details:', this.assetDetails);
   }
   
-  filterAssetByAffiliation(asset: any): boolean {
-    const AssetCode = asset.AssetCode || '';
-    const affiliation = this.userinfo?.Affiliation || ''; // ใช้ optional chaining
-    // console.log(affiliation);
-    return affiliation === "ส่วนกลาง"
-      ? AssetCode.startsWith('กกต') && !AssetCode.startsWith('กกต.')
-      : AssetCode.startsWith(AssetCode.startsWith('กกต'));
+  // ฟิลเตอร์ข้อมูล Asset ตาม Affiliation
+  private filterAssetByAffiliation(asset: any): boolean {
+    const assetCode = asset.AssetCode || '';
+    const affiliation = this.userinfo?.Affiliation || '';
+  
+    return affiliation === 'ส่วนกลาง'
+      ? assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.')
+      : assetCode.startsWith('กกต');
   }
   
-  sortByPurchaseDate(a: any, b: any): number {
-    const dateA = new Date(a.PurchaseDate).getTime();
-    const dateB = new Date(b.PurchaseDate).getTime();
-    return dateB - dateA; // เรียงลำดับจากล่าสุดไปเก่าสุด
+  // จัดเรียงข้อมูล Asset ตามวันที่ซื้อ
+  private sortByPurchaseDate(a: any, b: any): number {
+    return new Date(b.PurchaseDate).getTime() - new Date(a.PurchaseDate).getTime();
   }
   
-  transformAsset(asset: any): any {
-    asset.PurchaseDate = this.myFunctionInstance!.convertDate(asset.PurchaseDate);
-    asset = this.myFunctionInstance!.translateToThai(asset);
+  // แปลงข้อมูล Asset และสร้าง QR Code
+  private transformAsset(asset: any): any {
+    asset.PurchaseDate = this.myFunctionInstance?.convertDate(asset.PurchaseDate);
+    asset = this.myFunctionInstance?.translateToThai(asset);
   
-    const path = `http://localhost:4200/#/system/infoasset/${asset.AssetId}`;
+    const path = `http://localhost:4200/system/infoasset/${asset.AssetId}`;
     QRCode.toDataURL(path, (err, url) => {
-      if (err) console.error('QR Code generation error:', err);
-      asset.qrCodeUrl = url;
+      if (err) {
+        console.error('QR Code generation error:', err);
+      } else {
+        asset.qrCodeUrl = url;
+      }
     });
   
     return asset;
   }
   
-
+  // ฟิลเตอร์ Asset ตามประเภท
   filterAssets(): void {
-    // if (this.selectedAssetType) {
-    //   this.dataSource.data = this.assetDetails.filter(
-    //     (asset) => asset['AssetType'] === this.selectedAssetType
-    //   );
-    // } else {
-    //   this.dataSource.data = this.assetDetails;
-    // }
+    this.dataSource.data = this.selectedAssetType
+      ? this.assetDetails.filter((asset) => asset.TypeId.toString() === this.selectedAssetType)
+      : this.assetDetails;
   }
-
+  
+  // เรียกเมื่อประเภท Asset เปลี่ยน
   onAssetTypeChange(): void {
     this.filterAssets();
   }
-
-  toggleColumn(event: MatSelectChange) {
+  
+  // สลับคอลัมน์ที่แสดง
+  toggleColumn(event: MatSelectChange): void {
     const selectedColumns = event.value;
-    if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
-      this.displayedColumns3 = ['Aactions', ...this.displayedColumns2];
-    } else {
-      // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
-      this.displayedColumns3 = [
-        'Aactions',
-        ...selectedColumns.filter(
-          (column: string) => column !== 'เซตค่าคืนทั้งหมด'
-        ),
-      ];
-    }
+    this.displayedColumns3 = selectedColumns.includes('เซตค่าคืนทั้งหมด')
+      ? ['Aactions', ...this.displayedColumns2]
+      : [
+          'Aactions',
+          ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด'),
+        ];
   }
+  
 
   setupFilter(column: string) {
     // const isPriceColumn = column === 'ราคาต่อหน่วย';

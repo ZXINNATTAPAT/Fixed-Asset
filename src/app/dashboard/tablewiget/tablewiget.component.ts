@@ -54,7 +54,6 @@ interface AssetDetails {
     MatFormFieldModule,
     MatSelectModule,
     ButtonDirective,
-    // ResizedDirective,
     NgStyle,
   ],
   templateUrl: './tablewiget.component.html',
@@ -103,11 +102,9 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  async ngOnInit(): Promise<void> {
+   ngOnInit(): void {
     
-    // await this.dataService.loadUserInfo();
-
-    await this.dataService.userInfo$.subscribe((userinfo) => {
+     this.dataService.userInfo$.subscribe((userinfo) => {
       if (userinfo) {
         this.userinfo = userinfo;
         // console.log('Userinfo loaded:', this.userinfo);
@@ -137,7 +134,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // กรองข้อมูลตามเงื่อนไขของผู้ใช้
       const filteredAssets = data.filter((asset: any) => {
-        const assetCode = asset.assetCode || '';
+        const assetCode = asset.AssetCode || '';
         if (userAffiliation === 'ส่วนกลาง') {
           return assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.');
         } else {
@@ -147,18 +144,18 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // จัดเรียงข้อมูลตามวันที่ซื้อ (purchaseDate)
       const sortedAssets = filteredAssets.sort((a: any, b: any) => {
-        const dateA = new Date(a.purchaseDate).getTime();
-        const dateB = new Date(b.purchaseDate).getTime();
+        const dateA = new Date(a.PurchaseDate).getTime();
+        const dateB = new Date(b.PurchaseDate).getTime();
         return dateB - dateA; // เรียงลำดับจากใหม่ไปเก่า
       });
 
       // แปลงข้อมูลและสร้าง QR Code
       this.assetDetails = sortedAssets.map((asset: any) => {
         let transformedAsset = { ...asset }; // ทำการ copy เพื่อไม่เปลี่ยนข้อมูลต้นฉบับ
-        transformedAsset.purchaseDate = this.myFunctionInstance!.convertDate(asset.purchaseDate);
+        transformedAsset.PurchaseDate = this.myFunctionInstance!.convertDate(asset.PurchaseDate);
         transformedAsset = this.myFunctionInstance!.translateToThai(transformedAsset);
 
-        const path = `http://localhost:4200/#/system/infoasset/${asset.assetId}`;
+        const path = `http://localhost:4200/system/infoasset/${asset.assetId}`;
         try {
           QRCode.toDataURL(path, (err, url) => {
             if (err) {
@@ -198,44 +195,39 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filterAssets();
   }
 
-  toggleColumn(event: MatSelectChange) {
-    const selectedColumns = event.value;
-    if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
-      this.displayedColumns3 = ['Aactions', ...this.displayedColumns2];
-    } else {
-      // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
-      this.displayedColumns3 = [
-        'Aactions',
-        ...selectedColumns.filter(
-          (column: string) => column !== 'เซตค่าคืนทั้งหมด'
-        ),
-      ];
-    }
-  }
+  // toggleColumn(event: MatSelectChange) {
+  //   const selectedColumns = event.value;
+  //   if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
+  //     this.displayedColumns3 = ['Aactions', ...this.displayedColumns2];
+  //   } else {
+  //     // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
+  //     this.displayedColumns3 = [
+  //       'Aactions',
+  //       ...selectedColumns.filter(
+  //         (column: string) => column !== 'เซตค่าคืนทั้งหมด'
+  //       ),
+  //     ];
+  //   }
+  // }
 
-  setupFilter(column: string) {
-    const isPriceColumn = column === 'ราคาต่อหน่วย';
-
-    this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
-      const textToSearch = d[column];
+  setupFilter(column: string): void {
+    this.dataSource.filterPredicate = (data: AssetDetails, filter: string): boolean => {
+      const textToSearch = data[column];
       if (typeof textToSearch === 'string') {
-        return isPriceColumn
-          ? textToSearch.includes(filter)
-          : textToSearch.toLowerCase().includes(filter);
+        return textToSearch.toLowerCase().includes(filter);
       } else if (typeof textToSearch === 'number') {
         return textToSearch.toString().includes(filter);
-      } else {
-        return false; // or some other default behavior
       }
+      return false; // ค่าเริ่มต้นในกรณีไม่สามารถกรองได้
     };
   }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value
-      .trim()
-      .toLowerCase();
-    this.dataSource.filter = filterValue;
+  
+  applyFilter(event: Event, column: string): void {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.setupFilter(column); // ตั้งค่าการกรองสำหรับคอลัมน์ที่เลือก
+    this.dataSource.filter = filterValue; // ใช้ค่ากรองใน DataSource
   }
+  
 
   showQrAsset(asset: any): void {
     this.apiService

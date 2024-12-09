@@ -38,22 +38,17 @@ export class DashboardComponent implements OnInit {
   param2: string | null = '';
   param3: string | null = '';
 
-  constructor(private dataService: DataService, private route: ActivatedRoute, private router: Router ,private authService :ApiService) { }
+  constructor(private dataService: DataService, private route: ActivatedRoute, private router: Router ,private authService :ApiService) 
+  { 
+    
+  }
 
   
-  async ngOnInit(): Promise<void> {
-    
-    // await this.dataService.loadUserInfo();
-
-   
-      this.dataService.loadUserInfo().then(() => {
-        const userInfo = this.dataService.getUserInfo();
-        this.userinfo = userInfo.claims;
-        console.log('UserInfo Loaded:', userInfo);
-      });
-    
-    
-
+  ngOnInit(): void {
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo;
+      console.log('DefaultHeader UserInfo:', userInfo);
+    });
   }
   
   // ฟังก์ชันจัดการพารามิเตอร์

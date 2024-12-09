@@ -119,12 +119,11 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
   private dataSubscription!: Subscription;
 
   ngOnInit(): void {
-    
-    this.dataService.loadUserInfo().then(() => {
-      const userInfo = this.dataService.getUserInfo();
-      this.userinfo = userInfo.claims;
-      console.log('UserInfo Loaded:', userInfo);
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo;
+      console.log('DefaultHeader UserInfo:', userInfo);
     });
+  
     
     this.getAssetDetails();
   }

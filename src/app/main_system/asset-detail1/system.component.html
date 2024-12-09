@@ -314,8 +314,15 @@
                 (keypress)="handleKeyPress($event, 'documentNumberInput')" />
             </div>
 
+          </div>
+
+          <!-- ######## line 2 ############ -->
+          <div class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-lg-3 ">
+
             <div class="col">
+
               <label for="Unitsinput" class="form-label" style="font-weight: bold">หน่วยนับ</label>
+              
               <div class="form-control">
                 <mat-select
                   placeholder="เลือกหน่วยนับ"
@@ -341,19 +348,14 @@
                 </mat-select>
               </div>
             </div>
-            
-          </div>
 
-          <!-- ######## line 2 ############ -->
-          <div class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-3 ">
-            
             <div class="col">
 
               <label 
                 class="form-label" 
                 style="font-weight: bold;" 
                 for="purchasePriceInput">
-                <span class="text-danger">*</span>ราคาซื้อ
+                <span class="text-danger">*</span> ราคาซื้อ
               </label>
 
               <input class="form-control" 
@@ -374,7 +376,6 @@
                 for="purchasedFromInput">ซื้อจาก
               </label>
 
-
               <!-- ปรับเป็นยัง Form แบบ บันทึก สอง แบบ แบบ id กับ แบบ string อัตโนมัติ -->
               <input 
                 class="form-control" 
@@ -385,6 +386,7 @@
                 (keypress)="handleKeyPress($event, 'assetTypeInput')" />
 
             </div>
+
             <div class="col">
               <label 
                   class="form-label" 
@@ -500,16 +502,12 @@
                 </tr>
 
                 <tr>
-                  <!-- <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="agencyInput"
-                      placeholder="ระบุหน่วยหน่วยงาน" formControlName="departmentId" type="text"
-                      (keypress)="handleKeyPress($event, 'assetLocationInput')" style="border: none;" />
+                  <td colspan="4">
+                    
                   </td>
                   <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="departmentInput"
-                      placeholder="ระบุแผนก" formControlName="factionId" type="text"
-                      (keypress)="handleKeyPress($event, 'assetLocationInput')" style="border: none;" />
-                  </td> -->
+                 
+                  </td>
                   <td colspan="4">
 
                     <input class="form-control  p-1" cFormControl id="quantityInput"

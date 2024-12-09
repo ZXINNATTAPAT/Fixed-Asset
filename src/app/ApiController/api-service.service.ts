@@ -8,6 +8,7 @@ import axios from 'axios';
 })
 export class ApiService {
   
+  private baseUrl = 'https://localhost:7204/api/Users'; // URL หลักของ API
   private apiUrl     = 'https://localhost:7204/api/';
   private apiUrlauth = 'https://localhost:7204/auth/';
   private profileUrl = 'https://localhost:7204/auth/profile'; // URL ของ Endpoint
@@ -25,9 +26,8 @@ export class ApiService {
     return this.http.post(`${this.apiUrlauth}logout`, {}, { withCredentials: true });
   }
 
-  // ตรวจสอบสถานะการล็อกอิน
-  getUserInfo() {
-    return this.http.get(`${this.apiUrlauth}userinfo`, { withCredentials: true });
+  getUserProfile(userId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/${userId}`, { withCredentials: true });
   }
 
   getUserInfos(): Observable<any> {

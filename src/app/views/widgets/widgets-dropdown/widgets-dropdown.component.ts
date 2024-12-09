@@ -310,13 +310,11 @@ getCountByTypeCode(counts: any[], typeCode: string): number {
   };
 
   ngOnInit(): void {
-    
-    this.dataService.loadUserInfo().then(() => {
-      const userInfo = this.dataService.getUserInfo();
-      this.userinfo = userInfo.claims;
-      console.log('UserInfo Loaded:', userInfo);
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo;
+      console.log('DefaultHeader UserInfo:', userInfo);
     });
-
+  
     this.setData();
   }
 

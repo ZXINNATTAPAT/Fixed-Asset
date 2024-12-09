@@ -172,11 +172,10 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   // Load user information and handle it
   private initializeUserInfo(): void {
-    this.dataService.loadUserInfo().then(() => {
-      const userInfo = this.dataService.getUserInfo();
-      this.userinfo = userInfo.claims;
-      // console.log('UserInfo Loaded:', userInfo);
-    });
+      this.dataService.userInfo$.subscribe((userInfo) => {
+        this.userinfo = userInfo;
+        console.log('DefaultHeader UserInfo:', userInfo);
+      });
   }
 
   // Initialize the reactive form
@@ -187,7 +186,7 @@ export class SystemComponent implements OnInit, OnDestroy {
       assetName: ['', Validators.required],
       quantity: [0, [Validators.required, Validators.min(1)]],
       unitId: [0, Validators.required],
-      propertySellerId: [0, Validators.required],
+      propertySellerId: ['', Validators.required],
       typeId: [0, Validators.required],
       categoryId: [0, Validators.required],
       departmentId: ['', Validators.required],
@@ -505,8 +504,6 @@ export class SystemComponent implements OnInit, OnDestroy {
           depreciationRateControl.setValue(matchingAssetType.rate_dep);
         }
       }
-
-      // console.log(this.asset.get('DepreciationRate')?.value);
     }
 
 

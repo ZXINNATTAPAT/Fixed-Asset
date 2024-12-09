@@ -105,14 +105,14 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     super();
   }
 
-   ngOnInit(): void {
-    
-    this.dataService.loadUserInfo().then(() => {
-      const userInfo = this.dataService.getUserInfo();
-      this.userinfo = userInfo.claims;
-      // console.log('UserInfo Loaded:', userInfo);
+  ngOnInit(): void {
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo?.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
+      console.log('DefaultHeader UserInfo:', this.userinfo);
     });
-
+  
+  
+   
     this.colorModeService.localStorageItemName.set(
       'coreui-free-angular-admin-template-theme-default'
     );

@@ -24,6 +24,10 @@ export class DataService {
   private assetCategorySubject: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
   public assetCategory$: Observable<any[]> =this.assetCategorySubject.asObservable();
 
+  private baseUrl = 'https://localhost:7204/api/Users'; // URL หลักของ API
+  private userProfileSubject = new BehaviorSubject<any | null>(null);
+  public userProfile$: Observable<any | null> = this.userProfileSubject.asObservable();
+
   private userInfoSubject = new BehaviorSubject<any | null>(null);
   public userInfo$: Observable<any | null> = this.userInfoSubject.asObservable();
 
@@ -68,6 +72,38 @@ export class DataService {
    */
   clearUserInfo(): void {
     this.userInfoSubject.next(null);
+  }
+
+   /**
+   * ดึงข้อมูลโปรไฟล์ผู้ใช้จาก API
+   * @param userId ID ของผู้ใช้
+   * @returns Observable ที่มีข้อมูลโปรไฟล์ผู้ใช้
+   */
+   getUserProfile(userId: string): Observable<any> {
+    return this.ap.getUserProfile(userId); // ใช้ API Service สำหรับดึงข้อมูล
+  }
+
+  /**
+   * โหลดข้อมูลโปรไฟล์ผู้ใช้และเก็บไว้ใน BehaviorSubject
+   * @param userId ID ของผู้ใช้
+   * @returns Promise<void>
+   */
+  async loadUserProfile(userId: string): Promise<void> {
+    try {
+      const profile = await firstValueFrom(this.getUserProfile(userId));
+      this.userProfileSubject.next(profile); // อัปเดตข้อมูลใน BehaviorSubject
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      this.userProfileSubject.next(null); // ตั้งค่า null ในกรณีเกิดข้อผิดพลาด
+    }
+  }
+
+  /**
+   * คืนค่าข้อมูลโปรไฟล์ผู้ใช้ปัจจุบัน
+   * @returns ข้อมูลโปรไฟล์ผู้ใช้ (หรือ null ถ้าไม่มีข้อมูล)
+   */
+  getUserProfileSnapshot(): any | null {
+    return this.userProfileSubject.value;
   }
 
   setNumberOfAssets(value: number): void {
