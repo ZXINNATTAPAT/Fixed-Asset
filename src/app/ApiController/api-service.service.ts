@@ -14,6 +14,9 @@ export class ApiService {
   private profileUrl = 'https://localhost:7204/auth/profile'; // URL ของ Endpoint
   public apiUrl_link = 'http://localhost:4200/#/';
 
+  private apiUnit = 'https://gdcatalog.go.th/api/3/action/datastore_search';
+
+
   constructor(private http: HttpClient) {}
 
   // Login
@@ -59,6 +62,22 @@ export class ApiService {
   fetchDatahttp25(endpoint: string, queryParams: any): Observable<any> {
     const params = new HttpParams({ fromObject: queryParams });
     return this.http.get<any>(`${this.apiUrl}${endpoint}`, { params });
+  }
+
+
+   /**
+   * ดึงข้อมูลจาก API
+   * @param resourceId Resource ID ที่ใช้สำหรับดึงข้อมูล
+   * @param limit จำนวนข้อมูลที่ต้องการ (ค่าเริ่มต้น: 500)
+   * @returns Observable ที่มีข้อมูลที่ดึงจาก API
+   */
+   getData(resourceId: string, limit: number = 500): Observable<any> {
+    const params = {
+      resource_id: resourceId,
+      limit: limit.toString(),
+    };
+
+    return this.http.get(this.apiUnit, { params });
   }
 
    /**

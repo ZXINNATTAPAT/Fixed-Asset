@@ -7,7 +7,7 @@ import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angula
 import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { CommonModule, NgIf, NgStyle } from '@angular/common';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
-import { HttpClient } from '@angular/common/http';
+// import { HttpClient } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
 import { cilDataTransferUp } from '@coreui/icons';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,8 +22,8 @@ import { BehaviorSubject, Subject, of } from 'rxjs';
 import { catchError, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
-import { DataService } from 'src/app/data-service/data-service.component';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { DataService } from '../../data-service/data-service.component';
+import { ApiService } from '../../ApiController/api-service.service';
 
 import { AssetService } from './Service/asset.service'
 import { FilterService } from './Service/filter.service';
@@ -115,6 +115,7 @@ export class SystemComponent implements OnInit, OnDestroy {
   // Asset-related properties
   userinfo: any = [];  // User info and token management
   asset: FormGroup = new FormGroup({});
+  generatedData: any[] = []; // เก็บชุดข้อมูลที่สร้าง
   asset2: any = {};
   assetDetails: any[] = [];
   assetTypes: any[] = [];
@@ -152,6 +153,9 @@ export class SystemComponent implements OnInit, OnDestroy {
   fixedPrefix: string = '';fixedSuffix: string = '';editablePartLength: number = 15;
 
   icons = { cilDataTransferUp };colors = { color: 'primary', textColor: 'primary' };
+
+  depreciationSchedule: { year: string; bookValue: number; depreciation: number }[] = [];
+
 
   _onDestroy = new Subject<void>();
 
@@ -212,6 +216,25 @@ export class SystemComponent implements OnInit, OnDestroy {
       subAssets: this.formBuilder.array([]),
     });
   }
+  
+  get subAssets(): FormArray { return this.asset.get('subAssets') as FormArray; }
+
+  addSubAsset(subAssetData?: any): void {
+    this.subAssets.push(
+      this.formBuilder.group({
+        subAssetId: [subAssetData?.SubAssetId || 0, Validators.required], // SubAssetId
+        assetId: [subAssetData?.AssetId || 0, Validators.required], // AssetId
+        subAssetCode: [subAssetData?.SubAssetCode || '',Validators.required,], // SubAssetCode
+        subAssetName: [subAssetData?.SubAssetName || '', Validators.required], // SubAssetName
+        unit: [subAssetData?.Unit || '', Validators.required], // Unit
+        assetLocation: [subAssetData?.AssetLocation || '',Validators.required,], // AssetLocation
+        responsibleEmployee: [subAssetData?.ResponsibleEmployee || '',Validators.required,], // ResponsibleEmployee
+        status: [subAssetData?.Status || ''], // Status
+        note: [subAssetData?.Note || ''], // Note
+        assetDetails: [subAssetData?.AssetDetails || ''], // AssetDetails
+      })
+    );
+  }
 
   // Handle reactive form value changes
   private initializeValueChangeHandlers(): void {
@@ -219,6 +242,13 @@ export class SystemComponent implements OnInit, OnDestroy {
       filter((typeId) => !!typeId),
       switchMap((typeId) => this.ap.fetchDatahttpbyId('Assetcategories/by-type', typeId))
     ).subscribe((data) => this.handleAssetCategoryChange(data));
+
+    this.asset.get('typeId')?.valueChanges.pipe(
+      filter((typeId) => !!typeId), // ตรวจสอบว่า typeId ไม่เป็น null หรือ undefined
+      switchMap((typeId) => this.ap.fetchDatahttpbyId('Depreciations/type', typeId)) // เรียก API
+    ).subscribe((depreciations) => {
+      this.updateDepreciationSchedule(depreciations);
+    });
 
     this.asset.get('assetCode')?.valueChanges.subscribe((value) => this.validateAssetCode(value));
 
@@ -229,7 +259,7 @@ export class SystemComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.asset.get('typeId')?.valueChanges.subscribe((value) => this.updateDepreciation(value));
+    this.asset.get('typeId')?.valueChanges.subscribe((value) => this.updateDepreciationSchedule(value));
 
     this.asset.get('purchasePrice')?.valueChanges.subscribe((value) => {
       this.asset.patchValue({ calculatedPrice: value });
@@ -263,6 +293,26 @@ export class SystemComponent implements OnInit, OnDestroy {
     } else {
       console.error('Unexpected data format:', data);
     }
+  }
+
+  // ฟังก์ชันสร้างข้อมูล
+  generateData(): void {
+    const formValue = this.asset.value; // ค่าจากฟอร์มหลัก
+    const quantity = formValue.quantity; // จำนวนชุดที่ต้องการ
+
+    if (quantity <= 0) {
+      console.error('Invalid quantity value');
+      return;
+    }
+
+    // สร้างชุดข้อมูลตามจำนวนที่ระบุ
+    this.generatedData = Array.from({ length: quantity }, (_, index) => ({
+      ...formValue,
+      assetId: formValue.assetId + index + 1, // เพิ่ม ID ตามลำดับ
+      note: `${formValue.note || ''} ชุดที่ ${index + 1}` // เพิ่มหมายเหตุแยกแต่ละชุด
+    }));
+
+    console.log('Generated Data:', this.generatedData);
   }
 
   // Validate asset code uniqueness
@@ -380,16 +430,47 @@ export class SystemComponent implements OnInit, OnDestroy {
     // ); // #########################################################
 
     // Load countingUnits
-    this.ap.fetchDatahttp('Countingunits').pipe(catchError(() => of([]))).subscribe(
-      (countingUnits) => {
-        this.countingUnits = countingUnits;
-        this.filteredUnits.next(this.countingUnits.slice());
-        // console.log('CountingUnits:', this.countingUnits);
+    // this.ap.fetchDatahttp('Countingunits').pipe(catchError(() => of([]))).subscribe(
+    //   (countingUnits) => {
+    //     this.countingUnits = countingUnits;
+    //     this.filteredUnits.next(this.countingUnits.slice());
+    //     // console.log('CountingUnits:', this.countingUnits);
+    //   },
+    //   (error) => {
+    //     console.error('Error fetching countingUnits:', error);
+    //   }
+    // );
+
+    const resourceId = '5b2605ca-cd5c-4034-bc35-3c681c6fedaa';
+
+    this.ap.getData(resourceId).pipe(
+      catchError(() => {
+        console.error('Error fetching countingUnits. Defaulting to empty array.');
+        return of([]);
+      })
+    ).subscribe(
+      (response) => {
+        if (response?.result?.records) {
+          // แปลงชื่อฟิลด์จาก 'คำ' เป็น 'word'
+          this.countingUnits = response.result.records.map((unit: any) => {
+            return {
+              word: unit.ลักษณนาม, // แปลง 'คำ' เป็น 'word'
+              // ลักษณนาม: unit.ลักษณนาม, // คงไว้เหมือนเดิม
+              // ...unit, // เก็บฟิลด์เดิมอื่น ๆ ไว้ (ถ้ามี)
+            };
+          });
+    
+          this.filteredUnits.next(this.countingUnits.slice());
+          console.log('CountingUnits:', this.countingUnits);
+        } else {
+          console.warn('No records found for Countingunits.');
+        }
       },
       (error) => {
         console.error('Error fetching countingUnits:', error);
       }
     );
+    
 
     this.ap.fetchDatahttp('Departments').pipe(
       catchError((error) => {
@@ -409,34 +490,6 @@ export class SystemComponent implements OnInit, OnDestroy {
 
     this.setupFilterListeners();
 
-  }
-
-  get subAssets(): FormArray { return this.asset.get('subAssets') as FormArray; }
-
-  addSubAsset(subAssetData?: any): void {
-    this.subAssets.push(
-      this.formBuilder.group({
-        subAssetId: [subAssetData?.SubAssetId || 0, Validators.required], // SubAssetId
-        assetId: [subAssetData?.AssetId || 0, Validators.required], // AssetId
-        subAssetCode: [
-          subAssetData?.SubAssetCode || '',
-          Validators.required,
-        ], // SubAssetCode
-        subAssetName: [subAssetData?.SubAssetName || '', Validators.required], // SubAssetName
-        unit: [subAssetData?.Unit || '', Validators.required], // Unit
-        assetLocation: [
-          subAssetData?.AssetLocation || '',
-          Validators.required,
-        ], // AssetLocation
-        responsibleEmployee: [
-          subAssetData?.ResponsibleEmployee || '',
-          Validators.required,
-        ], // ResponsibleEmployee
-        status: [subAssetData?.Status || ''], // Status
-        note: [subAssetData?.Note || ''], // Note
-        assetDetails: [subAssetData?.AssetDetails || ''], // AssetDetails
-      })
-    );
   }
 
   toggleHidden(): void { this.hidden = !this.hidden; }// เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
@@ -591,7 +644,7 @@ export class SystemComponent implements OnInit, OnDestroy {
   private filterUnits(): void {
     const searchValue = this.unitFilterCtrl.value?.toLowerCase() || '';
     const filtered = this.countingUnits.filter((unit) =>
-      unit.Unitname.toLowerCase().includes(searchValue)
+      unit.word.toLowerCase().includes(searchValue)
     );
     this.filteredUnits.next(filtered);
   }
@@ -653,6 +706,120 @@ export class SystemComponent implements OnInit, OnDestroy {
     // console.log('MatSelect source:', event.source); 
     this.asset.patchValue({ unit: event.value }); // Update form control value
   }
+
+
+  //########### คำนวณค่าเสื่อม ##################
+  private calculateDepreciationWithPartialYear(
+    purchasePrice: number,
+    depreciationRate: number,
+    receiptDate: string
+  ): { year: string; bookValue: number; depreciation: number; accumulatedDepreciation: number }[] {
+    const results: { 
+      year: string; 
+      bookValue: number; 
+      depreciation: number; 
+      accumulatedDepreciation: number 
+    }[] = [];
+    
+    let bookValue = purchasePrice;
+    let accumulatedDepreciation = 0;
+  
+    const annualDepreciation = purchasePrice * (depreciationRate / 100);
+    const receipt = new Date(receiptDate);
+  
+    // คำนวณค่าเสื่อมราคาสำหรับปีแรก
+    const monthsInYear = 12;
+    const monthsToDepreciate = monthsInYear - receipt.getMonth() - 1; // จำนวนเดือนที่เหลือ
+    const firstYearDepreciation = (annualDepreciation * monthsToDepreciate) / 12;
+  
+    // ปีแรก
+    const fiscalYearFirst = this.getFiscalYear(receipt.toISOString());
+    accumulatedDepreciation += firstYearDepreciation; // เก็บค่าเสื่อมสะสม
+    bookValue -= firstYearDepreciation;
+  
+    results.push({
+      year: fiscalYearFirst,
+      bookValue: parseFloat(bookValue.toFixed(2)),
+      depreciation: parseFloat(firstYearDepreciation.toFixed(2)),
+      accumulatedDepreciation: parseFloat(accumulatedDepreciation.toFixed(2)),
+    });
+  
+    // ปีถัดไป
+    let currentYear = new Date(receipt.getFullYear() + 1, 9, 1); // เริ่มวันที่ 1 ต.ค. ปีถัดไป
+  
+    while (bookValue > 1) {
+      const annualDep = annualDepreciation;
+  
+      accumulatedDepreciation += annualDep; // เพิ่มค่าเสื่อมราคาสะสม
+      bookValue -= annualDep;
+  
+      if (bookValue < 1) {
+        bookValue = 1; // กำหนดให้เหลือขั้นต่ำ 1 บาท
+      }
+  
+      const fiscalYear = this.getFiscalYear(currentYear.toISOString());
+      results.push({
+        year: fiscalYear,
+        bookValue: parseFloat(bookValue.toFixed(2)),
+        depreciation: parseFloat(annualDep.toFixed(2)),
+        accumulatedDepreciation: parseFloat(accumulatedDepreciation.toFixed(2)),
+      });
+  
+      currentYear.setFullYear(currentYear.getFullYear() + 1);
+    }
+  
+    return results;
+  }
+  
+
+  private getFiscalYear(date: string): string {
+    const inputDate = new Date(date);
+    const year = inputDate.getFullYear();
+    const month = inputDate.getMonth();
+  
+    if (month >= 9) {
+      return `${year + 1}`; // ต.ค. เป็นต้นไปถือเป็นปีงบประมาณถัดไป
+    } else {
+      return `${year}`;
+    }
+  }
+
+  private updateDepreciationSchedule(depreciations: any): void {
+    const depreciationRate = depreciations?.[0]?.Rate_dep || null;
+    const assetAge = depreciations?.[0]?.Servicelife || null;
+  
+    this.asset.get('depreciationRate')?.setValue(depreciationRate);
+    this.asset.get('assetAge')?.setValue(assetAge);
+  
+    console.log('Depreciation Rate:', depreciationRate);
+  
+    const purchasePrice = this.asset.get('purchasePrice')?.value || 0;
+    const receiptDate = this.asset.get('receiptDate')?.value || '';
+  
+    if (purchasePrice > 0 && depreciationRate > 0 && receiptDate) {
+      const schedule = this.calculateDepreciationWithPartialYear(
+        purchasePrice,
+        depreciationRate,
+        receiptDate
+      );
+  
+      console.log('Depreciation Schedule:', schedule);
+  
+      // แสดงผลลัพธ์ใน note หรือ UI
+      this.asset.get('note')?.setValue(
+        schedule
+          .map(
+            (entry) =>
+              `ปีงบประมาณ ${entry.year}: ค่าเสื่อม ${entry.depreciation} บาท, สะสม ${entry.accumulatedDepreciation} บาท, คงเหลือ ${entry.bookValue} บาท`
+          )
+          .join('\n')
+      );
+    }
+  }
+  
+  
+  
+  
 
   enableCustomInput(): void { this.isCustomInput = true; this.selectedFaction = null; }
   disableCustomInput(): void { this.isCustomInput = false; this.asset.patchValue({ assetLocation: '' }); }

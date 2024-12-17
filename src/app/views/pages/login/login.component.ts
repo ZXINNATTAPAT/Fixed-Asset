@@ -76,9 +76,11 @@ export class LoginComponent implements OnInit {
   
               // ตรวจสอบว่ามีข้อมูล Page ก่อนนำทาง
               if (response && response.page && response.department && response.affiliation) {
-                this.router.navigate([
-                  `/dashboard/${response.affiliation}/${response.department}/${response.page}`,
-                ]);
+                // this.router.navigate([
+                //   `/dashboard/${response.affiliation}/${response.department}/${response.page}`,
+                // ]);
+                window.location.href = `/dashboard/${response.affiliation}/${response.department}/${response.page}`;
+                
               } else {
                 console.error('Page information is missing in the response.');
                 Swal.fire({
