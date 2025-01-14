@@ -3,7 +3,7 @@
     <div class="border-bottom mb-3" style="display: flex; justify-content: space-between; align-items: center">
       <div style="margin-right: auto">
         <h1>
-          <span class="anuphan-700">รายการครุภัณฑ์</span>
+          <span class="anuphan-700">รายการครุภัณฑ์ล่าสุด</span>
         </h1>
       </div>
       <p>
@@ -60,14 +60,14 @@
         </mat-select>
       </div> -->
 
-      <div class="col">
+      <!-- <div class="col"> -->
 
         <!-- Paginator -->
-        <!-- <mat-paginator [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" [pageSize]="5" showFirstLastButtons
-          class="paginator-style p-3">
-        </mat-paginator> -->
-      </div>
+        
+      <!-- </div> -->
     </div>
+    
+
 
     <div *ngIf="dataSource.data.length === 0" class="alert alert-info text-center">
       ไม่มีข้อมูลในระบบ กรุณาเพิ่มข้อมูลหรือรอการอัปเดต
@@ -165,5 +165,10 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns3"></tr>
       </table>
     </div>
+    <mat-paginator 
+        [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" 
+        [pageSize]="5" showFirstLastButtons
+        class="paginator-style ">
+    </mat-paginator>
   </div>
 </div>

@@ -1,10 +1,40 @@
 // YourComponent.component.scss
 /* Your custom CSS file */
 
+/* สไตล์สำหรับลิงก์ */
+.bt {
+  text-decoration: none;
+  color: #007bff;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.bt:hover {
+  color: #0056b3; /* เปลี่ยนสีเมื่อ Hover */
+  transform: translateX(5px); /* ขยับข้อความและไอคอนไปทางขวา */
+}
+
+.bt:active {
+  transform: scale(0.98); /* ลดขนาดเล็กน้อยเมื่อกด */
+}
+
+/* สไตล์สำหรับ SVG ไอคอน */
+.bt .icon {
+  margin-right: 5px; /* เพิ่มระยะห่างระหว่างไอคอนและข้อความ */
+  transition: transform 0.3s ease; /* เพิ่มเอฟเฟกต์ไอคอน */
+}
+
+.bt:hover .icon {
+  transform: rotate(90deg); /* หมุนไอคอนเมื่อ Hover */
+}
+
+
+
 .icon-excel{
   background-image: url('./Assets/iconexcel.svg');
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   background-size: contain;
   background-repeat: no-repeat;

@@ -2,7 +2,7 @@
     <div class="card-body">
 
       <h1>
-        <span class="anuphan-700">บันทึกรายการโอนย้าย</span>
+        <span class="anuphan-700">บันทึกรายการโอนย้ายภายในส่วนกลาง</span>
       </h1>
 
       <hr />
@@ -12,83 +12,92 @@
         <div class="card-body">
 
           <form [formGroup]="assetTransferForm" (submit)="onSubmit()">
+            <!-- Row 1: รหัสครุภัณฑ์และวันที่โอนย้าย -->
             <div class="row mb-3">
-              
-              <div class="col">
-                <label class="form-label" for="assetCode">รหัสครุภัณฑ์</label>
-                <mat-select
-                  class="form-control p-3"
-                  id="assetCode"
-                  formControlName="AssetId"
-                  placeholder="เลือกครุภัณฑ์"
-                >
-                  <!-- ส่วนค้นหาใน mat-select -->
-                  <mat-option>
-                    <ngx-mat-select-search [formControl]="assetdataFilterCtrl"></ngx-mat-select-search>
-                  </mat-option>
-          
-                  <!-- แสดงรายการตัวเลือกของครุภัณฑ์ -->
-                  <mat-option *ngFor="let asset of filteredAssetData | async" [value]="asset.assetId">
-                    {{ asset.assetCode }} {{ asset.assetName }}
-                  </mat-option>
-                </mat-select>
-              </div>
-
-              <div class="col">
-                <label class="form-label" for="Date">วันที่โอนย้าย</label>
-                <input type="date" id="Date" formControlName="Date" class="form-control p-3" />
+              <!-- รหัสครุภัณฑ์ -->
+              <div class="col-md-6">
+                <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+                <div class="input-group">
+                  <span class="input-group-text" id="basic-addon1">กกต</span>
+                  <input
+                    type="text"
+                    id="assetCode"
+                    formControlName="AssetId"
+                    class="form-control"
+                    placeholder="พิมพ์รหัสครุภัณฑ์"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    style="color: white;"
+                    (click)="onSearch()"
+                  >
+                    ค้นหา
+                  </button>
+                </div>
               </div>
           
-              <div class="col">
-                <label class="form-label" for="ReferenceNumber">Reference Number</label>
-                <input type="text" id="ReferenceNumber" formControlName="ReferenceNumber" class="form-control p-3" />
-              </div>
-
-            </div>
-            
-            <div class="row mb-3">
-              <div class="col">
-                <label class="form-label" for="TransferredFrom">โอนย้ายจาก</label>
-                <input type="text" id="TransferredFrom" formControlName="TransferredFrom" class="form-control p-3" />
-              </div>
-          
-              <div class="col">
-                <label class="form-label" for="TransferredTo">โอนย้ายไปที่</label>
-                <input type="text" id="TransferredTo" formControlName="TransferredTo" class="form-control p-3" />
+              <!-- วันที่โอนย้าย -->
+              <div class="col-md-6">
+                <label for="Date" class="form-label">วันที่โอนย้าย</label>
+                <input
+                  type="date"
+                  id="Date"
+                  formControlName="Date"
+                  class="form-control"
+                />
               </div>
             </div>
           
+            <!-- Row 2: โอนย้ายจาก และ โอนย้ายไปที่ -->
             <div class="row mb-3">
-          
-              <div class="col">
-                
-                <label class="form-label" for="Note">หมายเหตุ</label>
-                <input id="Note" formControlName="Note" class="form-control p-3" />
+              <!-- โอนย้ายจาก -->
+              <div class="col-md-6">
+                <label for="TransferredFrom" class="form-label">โอนย้ายจาก</label>
+                <input
+                  type="text"
+                  id="TransferredFrom"
+                  formControlName="TransferredFrom"
+                  class="form-control"
+                  placeholder="ระบุแหล่งที่มา"
+                />
               </div>
-              
-              <div class="col">
-                <br/>
-                <button type="submit" class="btn btn-primary">Submit</button>
+          
+              <!-- โอนย้ายไปที่ -->
+              <div class="col-md-6">
+                <label for="TransferredTo" class="form-label">โอนย้ายไปที่</label>
+                <input
+                  type="text"
+                  id="TransferredTo"
+                  formControlName="TransferredTo"
+                  class="form-control"
+                  placeholder="ระบุปลายทาง"
+                />
               </div>
-              
-          
-              <!-- <div class="col">
-                <label class="form-label" for="AssetName">Asset Name</label>
-                <input type="text" id="AssetName" formControlName="AssetName" class="form-control p-3" />
-              </div> -->
-          
-              <!-- <div class="col">
-                <label class="form-label" for="Quantity">Quantity</label>
-                <input type="number" id="Quantity" formControlName="Quantity" class="form-control p-3" />
-              </div> -->
             </div>
           
-           
+            <!-- Row 3: หมายเหตุ และปุ่ม Submit -->
+            <div class="row mb-3">
+              <!-- หมายเหตุ -->
+              <div class="col-md-8">
+                <label for="Note" class="form-label">หมายเหตุ</label>
+                <textarea
+                  id="Note"
+                  formControlName="Note"
+                  class="form-control"
+                  rows="3"
+                  placeholder="ระบุหมายเหตุเพิ่มเติม"
+                ></textarea>
+              </div>
           
-            
+              <!-- ปุ่ม Submit -->
+              <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">บันทึก</button>
+              </div>
+            </div>
           </form>
           
-
+          
         </div>
       </div>
 

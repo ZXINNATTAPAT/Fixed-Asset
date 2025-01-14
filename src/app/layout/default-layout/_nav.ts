@@ -7,21 +7,21 @@ export const navItems: INavData[] = [
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
     children: [
-      {
-        name: 'แดชบอร์ดกลาง',
-        url: '/mainpage',
-        icon:'nav-icon-bullet' ,
-      },
+      // {
+      //   name: 'แดชบอร์ดกลาง',
+      //   url: '/mainpage',
+      //   icon:'nav-icon-bullet' ,
+      // },
       {
         name: 'แดชบอร์ดสรุปภาพรวม(ส่วนกลาง)',
         url: '/dashboard/ส่วนกลาง/$param/$param',
         icon:'nav-icon-bullet' ,
       },
-      {
-        name: 'แดชบอร์ดสรุปภาพรวม(ส่วนภูมิภาค)',
-        url: '/dashboard/ส่วนภูมิภาค/$param/$param',
-        icon:'nav-icon-bullet' ,
-      },
+      // {
+      //   name: 'แดชบอร์ดสรุปภาพรวม(ส่วนภูมิภาค)',
+      //   url: '/dashboard/ส่วนภูมิภาค/$param/$param',
+      //   icon:'nav-icon-bullet' ,
+      // },
     ]
   },
   {
@@ -35,7 +35,7 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet'
       },
       {
-        name: 'รายการตรวจนับครุภัณท์',
+        name: 'ตรวจนับครุภัณท์',
         url: '/system/Assetcount',
         icon: 'nav-icon-bullet'
       },
@@ -44,18 +44,18 @@ export const navItems: INavData[] = [
         url: '/system/Repair',
         icon: 'nav-icon-bullet'
       },
+      // {
+      //   name: 'ขายสินทรัพย์',
+      //   url: '/system/sellassets',
+      //   icon: 'nav-icon-bullet'
+      // },
       {
-        name: 'ขายสินทรัพย์',
-        url: '/system/sellassets',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'โอนย้ายสินทรัพย์',
+        name: 'โอนย้ายครุภัณฑ์',
         url: '/system/transferassets',
         icon: 'nav-icon-bullet'
       },
       {
-        name: 'เลิกใช้สินทรัพย์',
+        name: 'ตัดจำหน่ายครุภัณฑ์',
         url: '/system/disassets',
         icon: 'nav-icon-bullet'
       },

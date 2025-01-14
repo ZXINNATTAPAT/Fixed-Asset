@@ -19,7 +19,7 @@ import Swal from 'sweetalert2';
 import 'moment/locale/th.js';
 
 import { BehaviorSubject, Subject, of } from 'rxjs';
-import { catchError, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 import { DataService } from '../../data-service/data-service.component';
@@ -29,6 +29,8 @@ import { AssetService } from './Service/asset.service'
 import { FilterService } from './Service/filter.service';
 
 import { UploadDialogComponent } from './Dialog/upload-dialog/upload-dialog.component';
+import { DepreciationService } from './Service/depreciation.service';
+import moment from 'moment';
 
 const formFieldOptions: MatFormFieldDefaultOptions = {
   hideRequiredMarker: true,
@@ -124,10 +126,14 @@ export class SystemComponent implements OnInit, OnDestroy {
   assetCategory: any[] = [];
   countingUnits: any[] = [];
 
+  numberOfCopies: number = 1;
+  options: number[] = [];
+
   selectedFaction: string | null = null;
 
   isCustomInput: boolean = false;
 
+  displayDate: string = ''; // เก็บวันที่ในรูปแบบ DD/MM/YY เพื่อแสดงผล
   // Controls and filters for dropdowns
   assetCategoryCtrl: FormControl = new FormControl();
   assetCategoryFilterCtrl: FormControl = new FormControl('');
@@ -149,6 +155,8 @@ export class SystemComponent implements OnInit, OnDestroy {
   // Toggle visibility
   hidden: boolean = true;hidden2: boolean = true;
 
+  showForm: boolean = false;
+
   // Fixed settings
   fixedPrefix: string = '';fixedSuffix: string = '';editablePartLength: number = 15;
 
@@ -156,23 +164,43 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   depreciationSchedule: { year: string; bookValue: number; depreciation: number }[] = [];
 
-
   _onDestroy = new Subject<void>();
 
   constructor(
     private formBuilder: FormBuilder,
     private dataService: DataService, private service: AssetService,
     private ap: ApiService, private dialog: MatDialog,
+    private depreciationService: DepreciationService,
     private filterService: FilterService) { }
 
-  ngOnInit(): void {
-    this.initializeUserInfo();
-    this.loadAllData();
-    this.initializeAssetForm();
-    this.initializeValueChangeHandlers();
-    this.loadInitialData();
-    console.log(this.asset.value);
-  }
+    ngOnInit(): void {
+      this.initializeUserInfo();
+      this.loadAllData();
+      this.initializeAssetForm();
+      this.initializeValueChangeHandlers();
+      this.loadInitialData();
+      this.options = Array.from({ length: 25 }, (_, i) => i + 1); 
+      // console.log(this.asset.value);
+    
+      // เรียก updateDepreciationSchedule เมื่อฟอร์มโหลดเสร็จ
+      this.asset.valueChanges.pipe(
+        debounceTime(700), // รอ 700 มิลลิวินาทีก่อนดำเนินการ
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)) // ตรวจสอบค่าที่เปลี่ยนจริง
+      ).subscribe((formValues) => {
+        const typeId = formValues.TypeId;
+        const receiptDate = formValues.ReceiptDate;
+        const purchasePrice = formValues.PurchasePrice;
+    
+        if (typeId && receiptDate && purchasePrice > 0) {
+          // เรียก API เมื่อค่าฟอร์มครบถ้วน
+          this.ap.fetchDatahttpbyId('Depreciations/type', typeId).subscribe((depreciations) => {
+            this.updateDepreciationSchedule(depreciations);
+          });
+        } else {
+          console.log('กำลังรอข้อมูลเพิ่มเติม...');
+        }
+      });
+    }
 
   // Load user information and handle it
   private initializeUserInfo(): void {
@@ -185,39 +213,39 @@ export class SystemComponent implements OnInit, OnDestroy {
   // Initialize the reactive form
   private initializeAssetForm(): void {
     this.asset = this.formBuilder.group({
-      assetId: [0, Validators.required],
-      assetCode: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\s\-]+$/)]],
-      assetName: ['', Validators.required],
-      quantity: [0, [Validators.required, Validators.min(1)]],
-      unitId: [0, Validators.required],
-      propertySellerId: ['', Validators.required],
-      typeId: [0, Validators.required],
-      categoryId: [0, Validators.required],
-      departmentId: ['', Validators.required],
-      factionId: ['', Validators.required],
-      documentNumber: ['', Validators.required],
-      responsibleEmployee: ['', Validators.required],
-      taxInvoiceNumber: ['', Validators.required],
-      purchaseDate: ['', Validators.required],
-      receiptDate: ['', Validators.required],
-      depreciationStartDate: ['', Validators.required],
-      depreciationCalculationStartDate: ['', Validators.required],
-      purchasePrice: [0, [Validators.required, Validators.min(0)]],
-      calculatedPrice: [0, [Validators.required, Validators.min(0)]],
-      scrapPrice: [0, [Validators.required, Validators.min(0)]],
-      depreciationRate: [0, [Validators.required, Validators.min(0)]],
-      assetAge: [0, [Validators.required, Validators.min(0)]],
-      depreciationEndDate: ['', Validators.required],
-      accumulatedDepreciation: [0, [Validators.required, Validators.min(0)]],
-      depreciationValue: [0, [Validators.required, Validators.min(0)]],
-      bookValue: [0, [Validators.required, Validators.min(0)]],
-      note: [''],
-      statusId: [0, Validators.required],
-      subAssets: this.formBuilder.array([]),
+      AssetId: [0, Validators.required],
+      AssetCode: [''],
+      AssetName: ['', Validators.required],
+      Quantity: [1, [Validators.required, Validators.min(1)]],
+      Unit: ['', Validators.required],
+      PropertySeller: ['', Validators.required],
+      TypeId: [0, Validators.required],
+      CategoryId: [0, Validators.required],
+      DepartmentId: [0, Validators.required],
+      FactionId: [0, Validators.required],
+      ResponsibleEmployee: ['', Validators.required],
+      TaxInvoiceNumber: [''],
+      PurchaseDate: ['', Validators.required],
+      ReceiptDate: ['', Validators.required],
+      DepreciationStartDate: ['', Validators.required],
+      DepreciationCalculationStartDate: ['', Validators.required],
+      PurchasePrice: [0, [Validators.required]],
+      CalculatedPrice: [0, [Validators.required, Validators.min(0)]],
+      ScrapPrice: [0, [Validators.required, Validators.min(0)]],
+      DepreciationRate: [0, [Validators.required, Validators.min(0)]],
+      AssetAge: [0, [Validators.required, Validators.min(0)]],
+      DepreciationEndDate: [''],
+      AccumulatedDepreciation: [0, [Validators.required, Validators.min(0)]],
+      DepreciationValue: [0, [Validators.required, Validators.min(0)]],
+      BookValue: [0, [Validators.required, Validators.min(0)]],
+      Note: [''],
+      StatusId: [1],
+      SubAssets: this.formBuilder.array([]),
+      numberOfCopies: [1]
     });
   }
   
-  get subAssets(): FormArray { return this.asset.get('subAssets') as FormArray; }
+  get subAssets(): FormArray { return this.asset.get('SubAssets') as FormArray; }
 
   addSubAsset(subAssetData?: any): void {
     this.subAssets.push(
@@ -238,39 +266,47 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   // Handle reactive form value changes
   private initializeValueChangeHandlers(): void {
-    this.asset.get('typeId')?.valueChanges.pipe(
+
+    this.asset.get('TypeId')?.valueChanges.pipe(
       filter((typeId) => !!typeId),
       switchMap((typeId) => this.ap.fetchDatahttpbyId('Assetcategories/by-type', typeId))
     ).subscribe((data) => this.handleAssetCategoryChange(data));
 
-    this.asset.get('typeId')?.valueChanges.pipe(
+    this.asset.get('TypeId')?.valueChanges.pipe(
       filter((typeId) => !!typeId), // ตรวจสอบว่า typeId ไม่เป็น null หรือ undefined
       switchMap((typeId) => this.ap.fetchDatahttpbyId('Depreciations/type', typeId)) // เรียก API
     ).subscribe((depreciations) => {
       this.updateDepreciationSchedule(depreciations);
     });
+    
+    // this.asset.get('typeId')?.valueChanges.subscribe((value) => this.updateDepreciationSchedule(value));
 
-    this.asset.get('assetCode')?.valueChanges.subscribe((value) => this.validateAssetCode(value));
+    this.asset.get('AssetCode')?.valueChanges.subscribe((value) => this.validateAssetCode(value));
 
-    this.asset.get('receiptDate')?.valueChanges.subscribe((value) => {
-      this.asset.patchValue({
-        depreciationStartDate: value,
-        depreciationCalculationStartDate: value,
-      });
+    this.asset.get('ReceiptDate')?.valueChanges.subscribe((value) => {
+      const isoDate = moment(value.clone().startOf('day').hours(8)).toISOString();
+      if (value) {
+        this.updateDisplayDate(value);
+        this.asset.patchValue(
+          {
+            DepreciationStartDate: isoDate,
+            DepreciationCalculationStartDate: isoDate,
+          })
+      }
     });
-
-    this.asset.get('typeId')?.valueChanges.subscribe((value) => this.updateDepreciationSchedule(value));
-
-    this.asset.get('purchasePrice')?.valueChanges.subscribe((value) => {
-      this.asset.patchValue({ calculatedPrice: value });
+    
+    this.asset.get('PurchasePrice')?.valueChanges.subscribe((value) => {
+      this.asset.patchValue({ CalculatedPrice: value });
+      // this.updateDepreciationSchedule(value);
     });
 
     const updateAssetCode = () => this.generateAssetCode();
-    ['typeId', 'categoryId', 'purchaseDate'].forEach((field) =>
+    ['TypeId', 'CategoryId', 'PurchaseDate'].forEach((field) =>
       this.asset.get(field)?.valueChanges.subscribe(updateAssetCode)
     );
 
-    this.asset.get('departmentId')?.valueChanges.subscribe((value) => this.filterFactionsByDepartment(value));
+
+    this.asset.get('DepartmentId')?.valueChanges.subscribe((value) => this.filterFactionsByDepartment(value));
 
     [this.assetCategoryFilterCtrl, this.factionsFilterCtrl, this.DepartmentFilterCtrl, this.unitFilterCtrl]
       .forEach((ctrl, index) =>
@@ -295,6 +331,36 @@ export class SystemComponent implements OnInit, OnDestroy {
     }
   }
 
+  // เมื่อเลือกวันที่ใน mat-datepicker
+  onDateChange(event: any) {
+    const selectedDate = event.value;
+    // console.log(selectedDate);
+    if (selectedDate) {
+      const isoDate = moment(selectedDate.clone().startOf('day').hours(8)).toISOString(); // แปลงเป็น ISO 8601
+      // console.log(isoDate);
+      // console.log(moment(selectedDate));
+      this.asset.patchValue({ ReceiptDate: isoDate }, { emitEvent: false });
+      this.updateDisplayDate(selectedDate); // อัปเดตค่าแสดงผล
+    }
+  }
+  
+  onDateChange2(event: any) {
+    const selectedDate = event.value;
+    // console.log(selectedDate);
+    if (selectedDate) {
+      const isoDate = moment(selectedDate.clone().startOf('day').hours(8)).toISOString(); // แปลงเป็น ISO 8601
+      // console.log(isoDate);
+      // console.log(moment(selectedDate));
+      this.asset.patchValue({ PurchaseDate: isoDate }, { emitEvent: false });
+  
+    }
+  }
+
+  // อัปเดตวันที่แสดงผลเป็น DD/MM/YY
+  private updateDisplayDate(date: any) {
+    this.displayDate = moment(date).format('DD/MM/YY');
+  }
+
   // ฟังก์ชันสร้างข้อมูล
   generateData(): void {
     const formValue = this.asset.value; // ค่าจากฟอร์มหลัก
@@ -317,7 +383,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   // Validate asset code uniqueness
   private validateAssetCode(value: string): void {
-    const isDuplicate = this.assetDetails.some((asset) => asset.assetCode === value);
+    const isDuplicate = this.assetDetails.some((asset) => asset.AssetCode === value);
     Swal.fire({
       toast: true,
       position: 'top-end',
@@ -330,23 +396,12 @@ export class SystemComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Update depreciation values based on type
-  private updateDepreciation(typeId: number): void {
-    const matchingAssetType = this.assetTypes.find((asset) => asset.assetCode === typeId);
-    if (matchingAssetType) {
-      this.asset.patchValue({
-        depreciationRate: matchingAssetType.rate_dep,
-        assetAge: matchingAssetType.servicelife,
-      });
-    }
-  }
-
   // Generate a unique asset code based on form values
   private generateAssetCode(): void {
     const category = this.assetCategory.find(
-      (type) => type.CategoryId === this.asset.get('categoryId')?.value
+      (type) => type.CategoryId === this.asset.get('CategoryId')?.value
     );
-    const purchaseDate = this.asset.get('purchaseDate')?.value;
+    const purchaseDate = this.asset.get('PurchaseDate')?.value;
     const year = purchaseDate ? new Date(purchaseDate).getFullYear() + 543 : '';
     if (!category || !year) return;
 
@@ -382,17 +437,17 @@ export class SystemComponent implements OnInit, OnDestroy {
   }
 
   private handleGeneratedAssetCode(generatedCode: string, year: string): void {
-    const isDuplicate = this.assetDetails.some((asset) => asset.assetCode === generatedCode);
+    const isDuplicate = this.assetDetails.some((asset) => asset.AssetCode === generatedCode);
     if (isDuplicate) {
       let suffix = 1;
       while (
-        this.assetDetails.some((asset) => asset.assetCode === `${generatedCode.split('-')[0]}-${suffix}-${year}`)
+        this.assetDetails.some((asset) => asset.AssetCode === `${generatedCode.split('-')[0]}-${suffix}-${year}`)
       ) {
         suffix++;
       }
       generatedCode = `${generatedCode.split('-')[0]}-${suffix}-${year}`;
     }
-    this.asset.patchValue({ assetCode: generatedCode });
+    this.asset.patchValue({ AssetCode: generatedCode });
   }
 
   // Filter factions by department
@@ -511,44 +566,66 @@ export class SystemComponent implements OnInit, OnDestroy {
     });
 
   }
-
+  
   async onSubmit(): Promise<void> {
     try {
-      await this.ap.postData('AssetDetails', this.asset.value);
-      // console.log(response);
+      // Validate form data
+      // if (this.asset.invalid) {
+      //   throw new Error('Form is invalid.');
+      // }
+  
+      if (!this.asset.get("numberOfCopies")?.value || this.asset.get("numberOfCopies")?.value <= 0) {
+        throw new Error('Number of copies must be greater than 0.');
+      }
+  
+      // Extract form data
+      const payload: any = { ...this.asset.value };
+
+      const count = this.asset.get("numberOfCopies")?.value;
+  
+      // Generate array of payloads
+      const dataToSend: any[] = [];
+      for (let i = 0; i < count; i++) {
+        dataToSend.push({ ...payload, uniqueKey: `${payload.assetName}-${i + 1}` });
+      }
+  
+      // Post data to the API
+      await this.ap.postData('AssetDetails', dataToSend);
+  
+      // Notify user of success
+      console.log('Data submitted successfully.');
+    
       Swal.fire({
-        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
+        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
         icon: 'success',
         showCancelButton: false,
         confirmButtonText: 'OK',
       }).then((result) => {
-        // หลังจากที่บันทึกข้อมูลเสร็จสิ้น ให้เรียกเมธอดเพื่ออัปเดตข้อมูล
         this.loadAllData();
         this.asset.reset();
         this.assetCategoryCtrl.reset();
       });
+
     } catch (error) {
       console.error(error);
-
       Swal.fire({
-        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
+        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
         icon: 'error',
       });
-
       console.log(this.asset);
     }
   }
 
   autoInput() {
-    this.asset.get('quantity')?.setValue(1); //เซคจำนวน
-    this.asset.get('CalculatedPrice')?.setValue(this.asset.get('purchasePrice')?.value); //เซคราคาคำนวณ
+    this.asset.get('Quantity')?.setValue(1); //เซคจำนวน
+    this.asset.get('CalculatedPrice')?.setValue(this.asset.get('PurchasePrice')?.value); //เซคราคาคำนวณ
     this.asset.get('DepreciationCalculationStartDate')?.setValue(this.asset.get('ReceiptDate')?.value);
     this.asset.get('DepreciationStartDate')?.setValue(this.asset.get('ReceiptDate')?.value);
 
-    const assetTypesControlValue = this.asset.get('assetType')?.value;
+    const assetTypesControlValue = this.asset.get('AssetType')?.value;
     if (assetTypesControlValue) {
 
-      const matchingAssetType = this.assetTypes.find(asset => asset.assetCode === assetTypesControlValue);
+      const matchingAssetType = this.assetTypes.find(asset => asset.AssetCode === assetTypesControlValue);
 
       if (matchingAssetType) {
         const depreciationRateControl = this.asset.get('DepreciationRate');
@@ -561,13 +638,13 @@ export class SystemComponent implements OnInit, OnDestroy {
 
 
     if (this.userinfo.Affiliation === 'ส่วนกลาง') {
-      this.asset.get('departmentId')?.setValue(`${this.userinfo?.DepartmentId}`); //เซตสังกัด หรือ สำนัก
-      this.asset.get('factionId')?.setValue(`${this.userinfo?.FactionId}`); //เซตฝ่าย
+      this.asset.get('DepartmentId')?.setValue(`${this.userinfo?.DepartmentId}`); //เซตสังกัด หรือ สำนัก
+      this.asset.get('FactionId')?.setValue(`${this.userinfo?.FactionId}`); //เซตฝ่าย
     } else {
       // this.asset.get('agen')
     }
 
-    const assetCodeInput = this.asset.get('assetCode');
+    const assetCodeInput = this.asset.get('AssetCode');
 
     // const depreciationStartDateInput = this.asset.get('ReceiptDate');
     // const depreciationStartDateInput = this.asset.get('DepreciationStartDate');
@@ -607,7 +684,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
     // หากค่า input ไม่ตรงกับรูปแบบ ให้ตั้งค่ากลับไปเป็นค่าที่อยู่ในฟอร์มควบคุม
     if (!regex.test(value)) {
-      input.value = this.asset.get('assetCode')!.value;
+      input.value = this.asset.get('AssetCode')!.value;
     } else {
       // ดึงส่วนที่สามารถแก้ไขได้
       const editablePart = value.slice(
@@ -620,7 +697,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
       // อัปเดตค่าใน input และฟอร์มควบคุม
       input.value = newValue;
-      this.asset.get('assetCode')!.setValue(newValue);
+      this.asset.get('AssetCode')!.setValue(newValue);
     }
   }
 
@@ -687,7 +764,7 @@ export class SystemComponent implements OnInit, OnDestroy {
   // Handle faction selection
   onFactionChange(event: MatSelectChange): void {
     console.log('Selected value:', event.value); // e.g., "ฝวส"
-    this.asset.patchValue({ factionId: event.value }); // Update form control value
+    this.asset.patchValue({ FactionId: event.value }); // Update form control value
   }
 
   onDepartmentChange(event: MatSelectChange): void {
@@ -702,126 +779,75 @@ export class SystemComponent implements OnInit, OnDestroy {
   }
 
   onUnitChange(event: MatSelectChange): void {
-    console.log('Selected value:', event.value);
+    // console.log('Selected value:', event.value);
     // console.log('MatSelect source:', event.source); 
-    this.asset.patchValue({ unit: event.value }); // Update form control value
-  }
-
-
-  //########### คำนวณค่าเสื่อม ##################
-  private calculateDepreciationWithPartialYear(
-    purchasePrice: number,
-    depreciationRate: number,
-    receiptDate: string
-  ): { year: string; bookValue: number; depreciation: number; accumulatedDepreciation: number }[] {
-    const results: { 
-      year: string; 
-      bookValue: number; 
-      depreciation: number; 
-      accumulatedDepreciation: number 
-    }[] = [];
-    
-    let bookValue = purchasePrice;
-    let accumulatedDepreciation = 0;
-  
-    const annualDepreciation = purchasePrice * (depreciationRate / 100);
-    const receipt = new Date(receiptDate);
-  
-    // คำนวณค่าเสื่อมราคาสำหรับปีแรก
-    const monthsInYear = 12;
-    const monthsToDepreciate = monthsInYear - receipt.getMonth() - 1; // จำนวนเดือนที่เหลือ
-    const firstYearDepreciation = (annualDepreciation * monthsToDepreciate) / 12;
-  
-    // ปีแรก
-    const fiscalYearFirst = this.getFiscalYear(receipt.toISOString());
-    accumulatedDepreciation += firstYearDepreciation; // เก็บค่าเสื่อมสะสม
-    bookValue -= firstYearDepreciation;
-  
-    results.push({
-      year: fiscalYearFirst,
-      bookValue: parseFloat(bookValue.toFixed(2)),
-      depreciation: parseFloat(firstYearDepreciation.toFixed(2)),
-      accumulatedDepreciation: parseFloat(accumulatedDepreciation.toFixed(2)),
-    });
-  
-    // ปีถัดไป
-    let currentYear = new Date(receipt.getFullYear() + 1, 9, 1); // เริ่มวันที่ 1 ต.ค. ปีถัดไป
-  
-    while (bookValue > 1) {
-      const annualDep = annualDepreciation;
-  
-      accumulatedDepreciation += annualDep; // เพิ่มค่าเสื่อมราคาสะสม
-      bookValue -= annualDep;
-  
-      if (bookValue < 1) {
-        bookValue = 1; // กำหนดให้เหลือขั้นต่ำ 1 บาท
-      }
-  
-      const fiscalYear = this.getFiscalYear(currentYear.toISOString());
-      results.push({
-        year: fiscalYear,
-        bookValue: parseFloat(bookValue.toFixed(2)),
-        depreciation: parseFloat(annualDep.toFixed(2)),
-        accumulatedDepreciation: parseFloat(accumulatedDepreciation.toFixed(2)),
-      });
-  
-      currentYear.setFullYear(currentYear.getFullYear() + 1);
-    }
-  
-    return results;
-  }
-  
-
-  private getFiscalYear(date: string): string {
-    const inputDate = new Date(date);
-    const year = inputDate.getFullYear();
-    const month = inputDate.getMonth();
-  
-    if (month >= 9) {
-      return `${year + 1}`; // ต.ค. เป็นต้นไปถือเป็นปีงบประมาณถัดไป
-    } else {
-      return `${year}`;
-    }
+    this.asset.patchValue({ Unit: event.value }); // Update form control value
   }
 
   private updateDepreciationSchedule(depreciations: any): void {
-    const depreciationRate = depreciations?.[0]?.Rate_dep || null;
-    const assetAge = depreciations?.[0]?.Servicelife || null;
+
+    // console.log('Received Depreciations:', depreciations);
   
-    this.asset.get('depreciationRate')?.setValue(depreciationRate);
-    this.asset.get('assetAge')?.setValue(assetAge);
+    // ตรวจสอบว่า depreciations มีข้อมูลหรือไม่
+    if (!depreciations || depreciations.length === 0) {
+      console.log('ไม่พบข้อมูลค่าเสื่อมราคา');
+      this.asset.get('DepreciationRate')?.setValue('');
+      this.asset.get('AssetAge')?.setValue('');
+      return;
+    }
+  
+    // ดึงข้อมูลค่าเสื่อมราคาและอายุการใช้งาน
+    const depreciationRate = depreciations[0]?.Rate_dep || null;
+    const assetAge = depreciations[0]?.Servicelife || null;
+  
+    // ตั้งค่าฟอร์ม
+    this.asset.get('DepreciationRate')?.setValue(depreciationRate, { emitEvent: false });
+
+    this.asset.get('AssetAge')?.setValue(assetAge, { emitEvent: false });
   
     console.log('Depreciation Rate:', depreciationRate);
+    
+    console.log('Asset Age:', assetAge);
   
-    const purchasePrice = this.asset.get('purchasePrice')?.value || 0;
-    const receiptDate = this.asset.get('receiptDate')?.value || '';
+    // ดึงข้อมูลจากฟอร์ม
+    const purchasePrice = this.asset.get('PurchasePrice')?.value || 0;
+
+    const receiptDate = this.asset.get('ReceiptDate')?.value || '';
   
+    // ตรวจสอบข้อมูลก่อนคำนวณ
     if (purchasePrice > 0 && depreciationRate > 0 && receiptDate) {
-      const schedule = this.calculateDepreciationWithPartialYear(
+      // คำนวณตารางค่าเสื่อมราคา
+      const schedule = this.depreciationService.calculateDepreciationWithPartialYear(
         purchasePrice,
         depreciationRate,
         receiptDate
       );
   
       console.log('Depreciation Schedule:', schedule);
+
+      this.asset.get('AccumulatedDepreciation')?.setValue(schedule[0].accumulatedDepreciation);
+      this.asset.get('BookValue')?.setValue(schedule[0].bookValue);
+      this.asset.get('DepreciationValue')?.setValue(schedule[0].depreciation);
   
-      // แสดงผลลัพธ์ใน note หรือ UI
-      this.asset.get('note')?.setValue(
-        schedule
-          .map(
-            (entry) =>
-              `ปีงบประมาณ ${entry.year}: ค่าเสื่อม ${entry.depreciation} บาท, สะสม ${entry.accumulatedDepreciation} บาท, คงเหลือ ${entry.bookValue} บาท`
-          )
-          .join('\n')
-      );
+      // ตั้งค่าผลลัพธ์ในฟอร์ม (ถ้าต้องการ)
+      // this.asset.get('accumulatedDepreciation')?.setValue(schedule);
+    } else {
+      console.log('ข้อมูลไม่ครบสำหรับการคำนวณ');
     }
+    console.log('Current Values:', {
+      purchasePrice,
+      receiptDate,
+      depreciationRate,
+      assetAge,
+    });
+  }
+
+  toggleForm(): void {
+    this.showForm = !this.showForm;
   }
   
-  
-  
-  
-
   enableCustomInput(): void { this.isCustomInput = true; this.selectedFaction = null; }
+
   disableCustomInput(): void { this.isCustomInput = false; this.asset.patchValue({ assetLocation: '' }); }
 
 }
