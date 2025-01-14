@@ -219,6 +219,52 @@ export class TransferassetsComponent implements OnInit, OnDestroy {
       });
   }
 
+  onSearch(): void {
+    const search = this.assetTransferForm.get('AssetId')?.value?.trim();
+    if (!search) {
+      console.warn('กรุณาระบุรหัสครุภัณฑ์');
+      alert('กรุณาระบุรหัสครุภัณฑ์');
+      return;
+    }
+  
+    // เรียก API เพื่อค้นหาครุภัณฑ์
+    this.ap.fetchDatahttp(`AssetDetails?search=${'กกต ' + search}`).subscribe(
+      (data) => {
+        if (data && data.length > 0) {
+          const assets = data.map((asset: any) => ({
+            assetId: asset.AssetId,
+            assetCode: asset.AssetCode,
+            assetName: asset.AssetName,
+            assetValue: asset.AssetValue, // มูลค่าสินทรัพย์
+            acquisitionDate: asset.AcquisitionDate, // วันที่ได้มา
+            bookValue: asset.BookValue, // Book Value
+          }));
+  
+          console.log('ผลลัพธ์จาก API:', assets);
+  
+          // แสดงผลครุภัณฑ์ที่พบ (แสดงเฉพาะรายการแรกในตัวอย่าง)
+          const foundAsset = assets[0];
+          alert(
+            `พบครุภัณฑ์:\n` +
+              `รหัส: ${foundAsset.assetCode}\n` +
+              `ชื่อ: ${foundAsset.assetName}\n` +
+              `มูลค่า: ${foundAsset.assetValue}\n` +
+              `วันที่ได้มา: ${foundAsset.acquisitionDate}\n` +
+              `Book Value: ${foundAsset.bookValue}`
+          );
+        } else {
+          console.warn('ไม่พบครุภัณฑ์ที่ระบุ');
+          alert('ไม่พบครุภัณฑ์ที่ระบุ');
+        }
+      },
+      (error) => {
+        console.error('เกิดข้อผิดพลาดในการเรียก API:', error);
+        alert('เกิดข้อผิดพลาดในการค้นหา โปรดลองใหม่อีกครั้ง');
+      }
+    );
+  }
+  
+
   ngOnInit(): void {
 
     this.getAssetdata();

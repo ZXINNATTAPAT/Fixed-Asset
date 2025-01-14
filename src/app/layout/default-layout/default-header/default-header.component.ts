@@ -110,9 +110,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
       this.userinfo = userInfo?.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
       console.log('DefaultHeader UserInfo:', this.userinfo);
     });
-  
-  
-   
+
     this.colorModeService.localStorageItemName.set(
       'coreui-free-angular-admin-template-theme-default'
     );

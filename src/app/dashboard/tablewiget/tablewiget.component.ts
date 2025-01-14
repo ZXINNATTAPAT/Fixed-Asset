@@ -83,7 +83,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   private dataSubscription!: Subscription;
 
   constructor(private apiService: ApiService ,private dataService :DataService) {
-    this.myFunctionInstance = new myFunction(apiService);
+    this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
     this.displayedColumns2 = this.myFunctionInstance.displayedColumns2;
@@ -124,7 +124,9 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
       .fetchDatahttp('assetDetails')
       .subscribe((data) => {
         this.processAssetData(data);
+        console.log(data)
       });
+    //ปรับให้ Api ส่งค่ามาเป็น ส่วนๆ  แบบเซตแล้ว
   }
 
   processAssetData(data: any[]): void {

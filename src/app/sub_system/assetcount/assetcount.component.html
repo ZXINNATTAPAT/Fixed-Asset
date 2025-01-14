@@ -8,9 +8,9 @@
       <div class="card-body">
         <form cForm [formGroup]="assetForm" (ngSubmit)="onSubmit()">
 
-          <input class="p-3" cFormControl placeholder="กรอกข้อมูล" type="text" formControlName="date" hidden />
+          <input class="" cFormControl placeholder="กรอกข้อมูล" type="text" formControlName="date" hidden />
 
-          <input class="p-3" cFormControl placeholder="กรอกข้อมูล" type="text" formControlName="serialNumber" hidden />
+          <input class="" cFormControl placeholder="กรอกข้อมูล" type="text" formControlName="serialNumber" hidden />
 
 
           <div class="row mb-3">
@@ -18,7 +18,7 @@
               <label for="departmentCode" cLabel class="form-label">
                 <span class="text-danger">*</span> แผนก
               </label>
-              <input id="departmentCode" class="form-control p-3" cFormControl placeholder="กรอกข้อมูล" type="text"
+              <input id="departmentCode" class="form-control " cFormControl placeholder="กรอกข้อมูล" type="text"
                 formControlName="departmentCode" />
             </div>
 
@@ -26,7 +26,7 @@
               <label for="locationCode" cLabel class="form-label">
                 <span class="text-danger">*</span> ที่ตั้ง
               </label>
-              <input id="locationCode" class="form-control p-3" cFormControl placeholder="กรอกข้อมูล" type="text"
+              <input id="locationCode" class="form-control " cFormControl placeholder="กรอกข้อมูล" type="text"
                 formControlName="locationCode" />
             </div>
           </div>
@@ -36,7 +36,7 @@
               <label for="inspector" cLabel class="form-label">
                 <span class="text-danger">*</span> ผู้ตรวจนับ
               </label>
-              <input id="inspector" class="form-control p-3" cFormControl placeholder="กรอกข้อมูล" type="text"
+              <input id="inspector" class="form-control " cFormControl placeholder="กรอกข้อมูล" type="text"
                 formControlName="inspector" />
             </div>
 
@@ -44,7 +44,7 @@
               <label for="verifier" cLabel class="form-label">
                 <span class="text-danger">*</span> ผู้ตรวจสอบ
               </label>
-              <input id="verifier" class="form-control p-3" cFormControl placeholder="กรอกข้อมูล" type="text"
+              <input id="verifier" class="form-control " cFormControl placeholder="กรอกข้อมูล" type="text"
                 formControlName="verifier" />
             </div>
 
@@ -52,7 +52,7 @@
               <label for="note" cLabel class="form-label">
                 <span class="text-danger">*</span> หมายเหตุ
               </label>
-              <input id="note" class="form-control p-3" cFormControl type="text" formControlName="note"
+              <input id="note" class="form-control " cFormControl type="text" formControlName="note"
                 placeholder="ระบุหมายเหตุ" />
             </div>
           </div>
@@ -60,11 +60,13 @@
 
           <br />
           <div class="row mb-2">
+
             <div class="col d-grid">
               <button type="button" class="btn btn-outline-success anuphan-600  p-3" style="color: green"
                 (click)="addform()">
                 <svg [cIcon]="icons.cibAddthis"></svg> เพิ่มครุภัณฑ์
-              </button>
+              </button> 
+              <!-- ทำตรวจนับเป็น Dialog ตอนเพิ่ม -->
             </div>
 
             <div class="col d-grid">
@@ -77,6 +79,7 @@
                 </svg>
                 QR-code
               </button>
+              
             </div>
           </div> 
           <br />

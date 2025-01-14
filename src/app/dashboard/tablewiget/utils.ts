@@ -1,18 +1,13 @@
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
-import { jwtDecode } from 'jwt-decode';
-import { ApiService } from 'src/app/ApiController/api-service.service';
-
-
 export class myFunction {
 
-  constructor(private authService: ApiService){}
+  constructor(){}
 
   userinfo: any = [];
 
   token: any;
 
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
-
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);
@@ -86,12 +81,12 @@ export class myFunction {
     'วันเดือนปี',
     'รหัสครุภัณฑ์',
     'รายการ',
-    'ราคาต่อหน่วย',
+    // 'ราคาต่อหน่วย',
     // 'วิธีการได้มา',
     // 'เลขที่เอกสาร',
     // 'หน่วยงาน',
     'ฝ่าย',
-    'ที่อยู่',
+    // 'ที่อยู่',
     'ผู้ใช้งาน',
     // 'หมายเหตุ',
     // 'addcol'
