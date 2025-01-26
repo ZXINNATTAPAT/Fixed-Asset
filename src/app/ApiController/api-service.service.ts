@@ -98,9 +98,17 @@ export class ApiService {
 
   // Example method to update data on the API
   async updateData(endpoint: string, data: any): Promise<any> {
-    const response = await axios.put(`${this.apiUrl}${endpoint}`, data);
-    return response.data;
+    try {
+      const response = await axios.put(`${this.apiUrl}${endpoint}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error occurred while updating data:', error);
+  
+      // ขว้างข้อผิดพลาด (throw) เพื่อให้ฟังก์ชันที่เรียกใช้สามารถจัดการได้
+      // throw error.response ? error.response.data : error.message;
+    }
   }
+  
 
   // Example method to delete data from the API
   async deleteData(endpoint: string): Promise<any> {
