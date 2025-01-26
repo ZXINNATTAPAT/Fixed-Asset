@@ -1,106 +1,127 @@
 <div class="card mb-4 shadow-sm" style="border: none">
-    <div class="card-body">
+  <div class="card-body">
 
-      <h1>
-        <span class="anuphan-700">บันทึกรายการโอนย้ายภายในส่วนกลาง</span>
-      </h1>
+    <h1>
+      <span class="anuphan-700">บันทึกรายการโอนย้ายภายในส่วนกลาง</span>
+    </h1>
 
-      <hr />
+    <hr />
 
-      <div class="card" style="border: none">
+    <div class="card" style="border: none">
 
-        <div class="card-body">
+      <div class="card-body">
 
-          <form [formGroup]="assetTransferForm" (submit)="onSubmit()">
-            <!-- Row 1: รหัสครุภัณฑ์และวันที่โอนย้าย -->
-            <div class="row mb-3">
-              <!-- รหัสครุภัณฑ์ -->
-              <div class="col-md-6">
-                <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
-                <div class="input-group">
-                  <span class="input-group-text" id="basic-addon1">กกต</span>
-                  <input
-                    type="text"
-                    id="assetCode"
-                    formControlName="AssetId"
-                    class="form-control"
-                    placeholder="พิมพ์รหัสครุภัณฑ์"
-                  />
-                  <button
-                    type="button"
-                    class="btn btn-success"
-                    style="color: white;"
-                    (click)="onSearch()"
-                  >
-                    ค้นหา
-                  </button>
+        <!-- Row 2: โอนย้ายจาก และ โอนย้ายไปที่ -->
+        <form [formGroup]="assetTransferForm" (ngSubmit)="onUpdateDepartmentAndFaction()">
+          <!-- Row 1: รหัสครุภัณฑ์ และวันที่โอนย้าย -->
+          <div class="row mb-3">
+            <!-- รหัสครุภัณฑ์ -->
+            <div class="col-md-4">
+              <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+              <div class="input-group">
+                <input type="text" id="assetCode" formControlName="AssetCode" class="form-control"
+                  placeholder="พิมพ์รหัสครุภัณฑ์" />
+                <button type="button" class="btn btn-success" style="color: white;" (click)="onSearch()">
+                  ค้นหา
+                </button>
+              </div>
+            </div>
+
+            <!-- วันที่โอนย้าย -->
+            <!-- <div class="col-md-3">
+              <label for="Date" class="form-label">วันที่โอนย้าย</label>
+              <input type="date" id="Date" formControlName="Date" class="form-control" />
+            </div> -->
+
+          </div>
+
+          <!-- Row 2: โอนย้ายจาก และโอนย้ายไปที่ -->
+          <div class="row mb-3">
+            <!-- โอนย้ายจาก -->
+            <div class="col-md-6">
+              <label for="TransferredFrom" class="form-label">โอนย้ายจาก</label>
+
+              <div class="row">
+                <!-- เลือกแผนก -->
+                <div class="col-md-6">
+
+                  <input type="text" id="TransferredFrom" formControlName="DepartmentFrom" class="form-control" placeholder=""
+                    readonly />
+                </div>
+
+                <div class="col-md-6">
+
+                  <input type="text" id="TransferredFrom" formControlName="FactionNameFrom" class="form-control" placeholder=""
+                    readonly />
                 </div>
               </div>
-          
-              <!-- วันที่โอนย้าย -->
-              <div class="col-md-6">
-                <label for="Date" class="form-label">วันที่โอนย้าย</label>
-                <input
-                  type="date"
-                  id="Date"
-                  formControlName="Date"
-                  class="form-control"
-                />
+            </div>
+
+            <!-- โอนย้ายไปที่ -->
+            <div class="col-md-6">
+              <label for="TransferredToDept" class="form-label">โอนย้ายไปที่</label>
+              <div class="row">
+                <!-- เลือกแผนก -->
+                <div class="col-md-6">
+
+                  <div class="form-control"> 
+
+                    <mat-select  formControlName="DepartmentTf" placeholder="เลือกแผนก"
+                      (selectionChange)="onDepartmentChange($event)">
+                      <mat-option>
+                        <ngx-mat-select-search placeholderLabel="ค้นหาแผนก" noEntriesFoundLabel="ไม่พบข้อมูล"
+                          [formControl]="departmentFilterCtrl"></ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option *ngFor="let department of (filteredDepartments | async)" [value]="department.DeptId">
+                        {{ department.Name }}
+                      </mat-option>
+                    </mat-select>
+
+                  </div>
+
+                </div>
+
+                <!-- เลือกฝ่าย -->
+                <div class="col-md-6">
+
+                  <div class="form-control"> 
+
+                    <mat-select formControlName="FactionNameTf" placeholder="เลือกฝ่าย">
+                      <mat-option>
+                        <ngx-mat-select-search placeholderLabel="ค้นหาฝ่าย" noEntriesFoundLabel="ไม่พบข้อมูล"
+                          [formControl]="factionFilterCtrl"></ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option *ngFor="let faction of (filteredFactions | async)" [value]="faction.FactId">
+                        {{ faction.Name }}
+                      </mat-option>
+                    </mat-select>
+                
+                  </div>
+
+                </div>
               </div>
             </div>
-          
-            <!-- Row 2: โอนย้ายจาก และ โอนย้ายไปที่ -->
-            <div class="row mb-3">
-              <!-- โอนย้ายจาก -->
-              <div class="col-md-6">
-                <label for="TransferredFrom" class="form-label">โอนย้ายจาก</label>
-                <input
-                  type="text"
-                  id="TransferredFrom"
-                  formControlName="TransferredFrom"
-                  class="form-control"
-                  placeholder="ระบุแหล่งที่มา"
-                />
-              </div>
-          
-              <!-- โอนย้ายไปที่ -->
-              <div class="col-md-6">
-                <label for="TransferredTo" class="form-label">โอนย้ายไปที่</label>
-                <input
-                  type="text"
-                  id="TransferredTo"
-                  formControlName="TransferredTo"
-                  class="form-control"
-                  placeholder="ระบุปลายทาง"
-                />
-              </div>
+          </div>
+
+          <!-- Row 3: หมายเหตุ และปุ่ม Submit -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="Note" class="form-label">หมายเหตุ</label>
+              <input id="Note" formControlName="Note" class="form-control" rows="3"
+                placeholder="ระบุหมายเหตุเพิ่มเติม"/>
             </div>
-          
-            <!-- Row 3: หมายเหตุ และปุ่ม Submit -->
-            <div class="row mb-3">
-              <!-- หมายเหตุ -->
-              <div class="col-md-8">
-                <label for="Note" class="form-label">หมายเหตุ</label>
-                <textarea
-                  id="Note"
-                  formControlName="Note"
-                  class="form-control"
-                  rows="3"
-                  placeholder="ระบุหมายเหตุเพิ่มเติม"
-                ></textarea>
-              </div>
-          
-              <!-- ปุ่ม Submit -->
-              <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">บันทึก</button>
-              </div>
+
+
+            <div class="col-md-4 d-flex align-items-end">
+              <button type="submit" class="btn btn-success">บันทึก</button>
             </div>
-          </form>
-          
-          
-        </div>
+          </div>
+        </form>
+
       </div>
+    </div>
 
-      
 
+
+  </div>
 </div>

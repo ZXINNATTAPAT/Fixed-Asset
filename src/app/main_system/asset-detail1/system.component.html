@@ -463,8 +463,18 @@
                   </span>
                 </a>
               </h3>
-            
-            
+
+              <h3>
+                <a class="bt2" (click)="addSubAsset()">
+                  <span class="anuphan-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill icon" viewBox="0 0 16 16">
+                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                    </svg>
+                    เพิ่มครุภัณฑ์ย่อย
+                  </span>
+                </a>
+              </h3>
+
               <div *ngIf="showForm" class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-3">
               
               
@@ -878,13 +888,7 @@
 
               <div class="text-end d-grid gap-2 d-md-flex justify-content-md-end">
 
-                <button  
-                  class="btn btn-warning anuphan-600" 
-                  type="button" 
-                  style="color: white" 
-                  (click)="addSubAsset()">เพิ่มครุภัณฑ์ย่อย
-                </button>
-
+          
                 <button 
                   cButton 
                   class="anuphan-600" 
