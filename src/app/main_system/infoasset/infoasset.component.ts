@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import QRCode from 'qrcode';
 import { MatTabsModule } from '@angular/material/tabs';
 import {HistoryComponent} from '../history/history.component'
 import { CommonModule } from '@angular/common';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 interface AssetDetails {
   assetId: any;
@@ -42,36 +43,49 @@ interface AssetDetails {
 export class InfoassetComponent {
 
   // assetDetails: AssetDetails[] = [];
+  // assets: any = {};
+  // qrCodeUrl: string = '';
 
-  assets: any = {};
+  assetId!: number;
+  assets: any;
+  qrCodeUrl!: string;
 
-  qrCodeUrl: string = '';
-  
-
-  constructor(private http: HttpClient, private route: ActivatedRoute) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any, // อนุญาตให้รับค่าได้ทั้ง object หรือ undefined
+    private http: HttpClient,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.route.params.subscribe((params) => {
-      const assetId = params['assetId'];
-      if (assetId) {
-        // เรียกข้อมูล AssetDetails จาก API
-        this.http
-          .get<any>('https://localhost:7204/api/AssetDetails/' + assetId)
-          .subscribe((data: any) => {
-            this.assets = data;
-            // console.log(this.assets);
-            // สร้าง QR code จาก path ที่เป็น URL ของ asset details
-            const path = 'http://localhost:4200/#/system/infoasset/' + assetId;
-            QRCode.toDataURL(path, (err, url) => {
-              if (err) throw err;
-              // นำ URL ของ QR code ไปใช้งานต่อ
-              // console.log('QR code URL:', url);
-              this.qrCodeUrl = url;
-              // ในที่นี้คุณสามารถส่ง URL ไปยัง HTML template เพื่อแสดงผลได้
-            });
+    console.log('ค่าที่ได้รับจาก Dialog:', this.data);
+
+    // ตรวจสอบว่ามีค่า id มาจาก Dialog หรือไม่
+    if (this.data?.id) {
+      this.assetId = this.data.id; // ใช้ค่า id จาก Dialog
+    } else {
+      // ถ้าไม่มีค่า id จาก Dialog ให้ดึงจาก URL params แทน
+      this.route.params.subscribe((params) => {
+        if (params['assetId']) {
+          this.assetId = params['assetId'];
+        }
+      });
+    }
+
+    if (this.assetId) {
+      // เรียกข้อมูล AssetDetails จาก API
+      this.http.get<any>(`https://localhost:7204/api/AssetDetails/infoasset/${this.assetId}`)
+        .subscribe((data: any) => {
+          this.assets = data;
+          console.log('Asset Details:', this.assets);
+
+          // สร้าง QR code จาก URL ของ asset details
+          const path = `http://localhost:4200/#/system/infoasset/${this.assetId}`;
+          QRCode.toDataURL(path, (err, url) => {
+            if (err) throw err;
+            this.qrCodeUrl = url; // เก็บ URL ของ QR Code
           });
-      }
-    });
+        });
+    }
   }
 
   convertDate(dateString: string): string {
@@ -86,10 +100,12 @@ export class InfoassetComponent {
 
   annualDepreciationRate = 0.25; // อัตราค่าเสื่อมต่อปี
 
+
+  //ปิดการใช้งานไว้ก่อน
   calculateDepreciation(): number {
-    const purchasePrice = this.assets.purchasePrice;
-    const purchaseDate = new Date(this.assets.purchaseDate);
-    const assetAge = this.assets.assetAge;
+    const purchasePrice = this.assets.PurchasePrice;
+    const purchaseDate = new Date(this.assets.PurchaseDate);
+    const assetAge = this.assets.AssetAge;
 
     const purchaseDay = purchaseDate.getDate();
     const purchaseMonth = purchaseDate.getMonth();

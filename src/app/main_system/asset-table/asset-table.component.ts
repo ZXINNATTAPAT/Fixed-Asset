@@ -22,6 +22,9 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
 import { DataService } from '@services/data-service.component';
+import { MatDialog } from '@angular/material/dialog';
+import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
+import { InfoassetComponent } from '../infoasset/infoasset.component';
 
 interface AssetDetails {
   AssetId: any;
@@ -57,12 +60,14 @@ interface AssetDetails {
     MatFormFieldModule,
     MatSelectModule,
     ButtonDirective,
+    // MatDialog,
     // ResizedDirective,
     NgStyle,
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
 })
+
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -84,7 +89,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private dataSubscription!: Subscription;
   
-  constructor(private apiService: ApiService ,private dataService :DataService) {
+  constructor(private apiService: ApiService ,private dataService :DataService,public dialog: MatDialog) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -92,12 +97,12 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
-    
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
+  ngAfterViewInit() {this.dataSource.paginator = this.paginator;} 
+  
+  // เรียกเมื่อประเภท Asset เปลี่ยน
+  onAssetTypeChange(): void {this.filterAssets();}
 
   ngOnDestroy(): void {
     if (this.dataSubscription) {
@@ -109,6 +114,32 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initializeUserInfo();
     this.loadAssetTypes();
     this.getAssetDetails();
+  }
+
+  editDialog(): void {
+    const dialogRef = this.dialog.open(EditAssetDialog, {
+      width: '700px',
+      data: { status: 'donation' } // ส่งค่าไปให้ Dialog
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('ผลลัพธ์จาก Dialog:', result);
+      }
+    });
+  }
+
+  assetDialog(assetId: number): void {
+    const dialogRef = this.dialog.open(InfoassetComponent, {
+      width: '1200px',
+      data: { id: assetId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('ผลลัพธ์จาก Dialog:', result);
+      }
+    });
   }
   
   // โหลดข้อมูล UserInfo
@@ -189,11 +220,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       : this.assetDetails;
   }
   
-  // เรียกเมื่อประเภท Asset เปลี่ยน
-  onAssetTypeChange(): void {
-    this.filterAssets();
-  }
-  
   // สลับคอลัมน์ที่แสดง
   toggleColumn(event: MatSelectChange): void {
     const selectedColumns = event.value;
@@ -204,7 +230,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
           ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด'),
         ];
   }
-  
 
   setupFilter(column: string) {
     // const isPriceColumn = column === 'ราคาต่อหน่วย';
@@ -327,6 +352,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       a.click();
     });
   }
+
 }
 
 //   async searchAsset(): Promise<void> {

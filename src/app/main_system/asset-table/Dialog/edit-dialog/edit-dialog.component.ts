@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ReactiveFormsModule,FormsModule,FormControl, Validators, FormGroup, FormBuilder,} from '@angular/forms';
 import { MatPaginator ,MatPaginatorModule } from '@angular/material/paginator';
@@ -9,11 +8,10 @@ import {TextColorDirective,TableModule,UtilitiesModule,FormDirective,FormLabelDi
 import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
-import Swal from 'sweetalert2';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../../src/app/ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/api-service.service';
 
 interface AssetDetails {
   repairAssetId: any;
@@ -24,35 +22,34 @@ interface AssetDetails {
   Description: string;
   Amount: string;
 }
-
 @Component({
-  selector: 'app-disassets',
-  standalone: true,
-  imports: [TextColorDirective,
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    TableModule,
-    NgxMatSelectSearchModule,
-    MatSelect,
-    MatOption,
-    MatPaginatorModule,
-    MatTableModule,
-    MatSortModule,
-    MatButtonModule, // Example: Add any other required Angular Material modules here
-    UtilitiesModule,
-    ButtonDirective,
-    NgStyle,
-    IconDirective,
-    FormDirective,
-    FormLabelDirective,
-    FormControlDirective,],
-  templateUrl: './disassets.component.html',
-  styleUrl: './disassets.component.scss'
-})
+    selector: 'app-edit-dialog',
+    standalone: true,
+    imports: [TextColorDirective,
+      CommonModule,
+      ReactiveFormsModule,
+      FormsModule,
+      TableModule,
+      NgxMatSelectSearchModule,
+      MatSelect,
+      MatOption,
+      MatPaginatorModule,
+      MatTableModule,
+      MatSortModule,
+      MatButtonModule, // Example: Add any other required Angular Material modules here
+      UtilitiesModule,
+      ButtonDirective,
+      NgStyle,
+      IconDirective,
+      FormDirective,
+      FormLabelDirective,
+      FormControlDirective,],
+    templateUrl: './edit-dialog.component.html',
+    styleUrl: './edit-dialog.component.scss'
+  })
+export class EditAssetDialog implements OnInit, OnDestroy, AfterViewInit {
 
-export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
-
+  
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
@@ -74,8 +71,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   displayedColumns2: string[] = ['รหัสครุภัณฑ์', 'รายการครุภัณฑ์', 'รายละเอียด', 'จำนวนเงิน'];
 
-  asset: any = {
-    amount: null, // ค่าเริ่มต้น
+  asset: any = {amount: null, // ค่าเริ่มต้น
     assetId: null,
     assetCode: '',
     assetName: '',
@@ -130,63 +126,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mainForm.get('assetSalesForm.bookValue')?.valueChanges.subscribe(() => this.calculateProfit());
     this.mainForm.get('assetSalesForm.sellingprice')?.valueChanges.subscribe(() => this.calculateProfit());
   }
-  
-  onSubmit() {
-    if (this.mainForm.invalid) {
-      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-      return;
-    }
-  
-    const selectedStatus = this.mainForm.value.status;
-    let payload: any = { statusId: selectedStatus };
-    let apiEndpoint = '';
-  
-    switch (selectedStatus) {
-      case 'donation':
-        if (!this.mainForm.get('donationForm')?.valid) {
-          alert("กรุณากรอกข้อมูลการบริจาคให้ครบถ้วน");
-          return;
-        }
-        payload = { ...payload, ...this.mainForm.value.donationForm };
-        apiEndpoint = 'AssetSharing';
-        break;
-  
-      case 'decommission':
-        if (!this.mainForm.get('decommissionForm')?.valid) {
-          alert("กรุณากรอกข้อมูลการเลิกใช้ให้ครบถ้วน");
-          return;
-        }
-        payload = { ...payload, ...this.mainForm.value.decommissionForm };
-        apiEndpoint = 'AssetDisposal';
-        break;
-  
-      case 'sale':
-        if (!this.mainForm.get('assetSalesForm')?.valid) {
-          alert("กรุณากรอกข้อมูลการขายให้ครบถ้วน");
-          return;
-        }
-        payload = { ...payload, ...this.mainForm.value.assetSalesForm };
-        apiEndpoint = 'AssetSales';
-        break;
-  
-      default:
-        alert("กรุณาเลือกสถานะที่ถูกต้อง");
-        return;
-    }
-  
-    // 📌 เรียก API เฉพาะตามสถานะที่เลือก
-    this.ap.postData(apiEndpoint, payload)
-      .then((response) => {
-        alert("ข้อมูลถูกบันทึกเรียบร้อย!");
-        console.log(response);
-        this.mainForm.reset();
-      })
-      .catch((error) => {
-        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-        console.error(error);
-      });
-  }
-  
+
   // ฟังก์ชันคำนวณกำไร
   calculateProfit(): void {
     const bookValue = this.mainForm.get('assetSalesForm.bookValue')?.value || 0;
@@ -195,6 +135,15 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mainForm.get('assetSalesForm.profit')?.setValue(profit);
   }
 
+  // ฟังก์ชันส่งฟอร์ม
+  submitForm(): void {
+    if (this.mainForm.valid) {
+      console.log('Form Data:', this.mainForm.value);
+      alert('บันทึกข้อมูลสำเร็จ!');
+    } else {
+      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    }
+  }
   
   onStatusChange(statusId: string): void {
     if (this.selectedStatusId !== +statusId) {
@@ -253,8 +202,6 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,
         assetName: asset.AssetName, //เพิ่มมูลค่าสินทรัพย์ วันที่ ได้มา bookvalue 
-        purchaseDate:asset.PurchaseDate,
-        
       }));
   
       // อัปเดตตัวเลือกที่กรองแล้ว
@@ -272,6 +219,10 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this._onDestroy.next();
     this._onDestroy.complete();
+  }
+
+  onSubmit() {
+   
   }
 
   translateToThai(asset: any): any {
@@ -292,6 +243,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     return translatedAsset;
   }
 
+ 
   editAsset(_t35: any) {
     throw new Error('Method not implemented.');
   }

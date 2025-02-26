@@ -7,7 +7,6 @@ import axios from 'axios';
   providedIn: 'root'
 })
 export class ApiService {
-  
   private baseUrl = 'https://localhost:7204/api/Users'; // URL หลักของ API
   private apiUrl     = 'https://localhost:7204/api/';
   private apiUrlauth = 'https://localhost:7204/auth/';
@@ -15,7 +14,6 @@ export class ApiService {
   public apiUrl_link = 'http://localhost:4200/#/';
 
   private apiUnit = 'https://gdcatalog.go.th/api/3/action/datastore_search';
-
 
   constructor(private http: HttpClient) {}
 
@@ -63,7 +61,6 @@ export class ApiService {
     const params = new HttpParams({ fromObject: queryParams });
     return this.http.get<any>(`${this.apiUrl}${endpoint}`, { params });
   }
-
 
    /**
    * ดึงข้อมูลจาก API

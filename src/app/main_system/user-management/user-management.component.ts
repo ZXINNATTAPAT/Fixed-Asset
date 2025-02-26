@@ -69,7 +69,7 @@ export class UserManagementComponent implements OnInit {
 
   displayedColumns: string[] = [
     "actions",
-    "รหัสผู้ใช้",
+    // "รหัสผู้ใช้",
     "ชื่อผู้ใช้",
     "ชื่อ",
     "นามสกุล",
@@ -81,9 +81,7 @@ export class UserManagementComponent implements OnInit {
   
   constructor(private http: HttpClient,private dialog: MatDialog) { }
 
-  ngOnInit(): void {
-    this.getUsers();
-  }
+  ngOnInit(): void {this.getUsers();}
 
   editUser(user: any): void {
     const dialogRef = this.dialog.open(UserEditDialogComponent, {
@@ -116,13 +114,13 @@ export class UserManagementComponent implements OnInit {
     });
   }
   
-  
   getUsers(): void {
     this.http.get<any[]>('https://localhost:7204/api/users').subscribe(data => {
       this.userDetails = data;
       this.dataSource = new MatTableDataSource<any>(this.userDetails);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      console.log(this.userDetails);
     });
   }
   searchValue: string = '';
@@ -142,7 +140,6 @@ export class UserManagementComponent implements OnInit {
     this.getUsers(); // โหลดข้อมูลใหม่
   }
 
-  
   // Function to update the user role with confirmation
   updateUserRole(userId: number, role: string): void {
     Swal.fire({
@@ -250,5 +247,7 @@ export class UserManagementComponent implements OnInit {
         return 'btn-outline-secondary'; // สีเทา
     }
   }
+
+  
   
 }

@@ -1,36 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormControl,
-} from '@angular/forms';
+import {ReactiveFormsModule,FormsModule,FormControl,} from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import {
-  TextColorDirective,
-  TableModule,
-  UtilitiesModule,
-} from '@coreui/angular';
-import {
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
-import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
+import {TextColorDirective,TableModule,UtilitiesModule,} from '@coreui/angular';
+import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
-import { debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, ReplaySubject} from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ApiService } from '../../../../src/app/ApiController/api-service.service';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 interface AssetDetails {
@@ -169,15 +154,12 @@ export class TransferassetsComponent implements OnInit {
   
   }
   
-  
   onSearch(): void {
+
     const assetCode = this.assetTransferForm.get('AssetCode')?.value?.trim();
 
-    if (!assetCode) {
-      alert('กรุณาระบุรหัสครุภัณฑ์');
-      return;
-    }
-  
+    if (!assetCode) {alert('กรุณาระบุรหัสครุภัณฑ์'); return;}
+
     // เรียก API ใหม่ GetTransferDetails
     this.ap.fetchDatahttp(`AssetDetails/GetTransferDetails?search=${assetCode}`).subscribe({
       next: (data: any) => {
@@ -204,8 +186,6 @@ export class TransferassetsComponent implements OnInit {
       this.filteredDepartments.next(this.departments.slice());
     });
   }
-
-  
 
   onDepartmentChange(event: any): void {
     const deptId = event.value;

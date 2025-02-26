@@ -1,0 +1,289 @@
+<div class="card mb-4 " style="border: none">
+
+    <div class="card-body">
+  
+      <h1><span class="anuphan-700">แก้ไข และ บันทึกการตัดจำหน่าย</span></h1>
+      <hr />
+  
+      <div class="p-3">
+  
+        <form [formGroup]="mainForm" (ngSubmit)="onSubmit()">
+  
+          <!-- เลือกสถานะ -->
+          <div class="row mb-2 align-items-center">
+  
+            <div class="col-md-1">
+              <label for="status" class="form-label">สถานะ:</label>
+            </div>
+  
+            <div class="col-md-3">
+              <select 
+                id="status" 
+                class="form-select" 
+                formControlName="status" 
+                [(ngModel)]="selectedStatusId"
+                (ngModelChange)="onStatusChange($event)">
+                <option value="" disabled>เลือกสถานะ </option>
+                <option *ngFor="let status of statuses" [value]="status.id">
+                  {{ status.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+  
+          <br />
+  
+          <!-- ฟอร์มเฉพาะสถานะ "ขาย" -->
+          <div *ngIf="selectedStatusId === 1" formGroupName="assetSalesForm">
+  
+            <!-- ฟิลด์ข้อมูล -->
+            <div class="row mb-3">
+  
+              <div class="col-md-6">
+  
+                <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+  
+                <!-- Input Field for Search -->
+              <!-- <div class="d-flex align-items-center mb-2"> -->
+                <div class="input-group ">
+                  <!-- Label กกต -->
+                  <span class="input-group-text" id="inputGroup-sizing-default">กกต</span>
+                
+                  <!-- Input สำหรับคำค้นหา -->
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="พิมพ์คำค้นหา"
+                    [(ngModel)]="searchTerm"
+                    [ngModelOptions]="{ standalone: true }"
+                    style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                    aria-label="Search"
+                    aria-describedby="inputGroup-sizing-default"
+                  />
+                
+                  <!-- ปุ่มค้นหา -->
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    (click)="onSearch()"
+                    style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white"
+                  >
+                    ค้นหา
+                  </button>
+                </div>
+                
+              </div>
+  
+              <div class="col-md-6">
+                <label for="purchaseDate" class="form-label">วันที่ซื้อ:</label>
+                <input type="date" id="purchaseDate" class="form-control" formControlName="purchaseDate" readonly />
+              </div>
+  
+            </div>
+  
+            <div class="row mb-3">
+  
+              <div class="col-md-6">
+                <label for="saleDate" class="form-label">วันที่ขาย:</label>
+                <input type="date" id="saleDate" class="form-control" formControlName="saleDate" />
+              </div>
+              
+              <div class="col-md-6">
+                <label for="bookValue" class="form-label">มูลค่าทางบัญชี:</label>
+                <input type="number" id="bookValue" class="form-control" formControlName="bookValue"
+                  placeholder="ระบุมูลค่าทางบัญชี" />
+              </div>
+  
+            </div>
+  
+            <div class="row mb-3">
+              
+              <div class="col-md-6">
+                <label for="sellingprice" class="form-label">ราคาขาย:</label>
+                <input type="number" id="sellingprice" class="form-control" formControlName="sellingprice" placeholder="ระบุราคาขาย" />
+              </div>
+  
+              <div class="col-md-4">
+                <label for="profit" class="form-label">กำไร:</label>
+                <input type="number" id="profit" class="form-control" formControlName="profit" placeholder="ระบุกำไร" />
+              </div>
+  
+              <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-success " style="color: white;">
+                  ดำเนินการ
+                </button>
+              </div>
+              
+            </div>
+  
+          </div>
+  
+          <!-- ฟอร์มเฉพาะสถานะ "บริจาค" -->
+          <div *ngIf="selectedStatusId === 2" formGroupName="donationForm">
+  
+            <!-- ชื่อผู้รับ -->
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label for="recipientName" class="form-label">ชื่อผู้รับ:</label>
+              </div>
+              <div class="col-md-9">
+                <input type="text" id="recipientName" class="form-control" formControlName="recipientName"
+                  placeholder="ระบุชื่อผู้รับ" />
+              </div>
+            </div>
+  
+            <!-- เบอร์ติดต่อ -->
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label for="contactNumber" class="form-label">เบอร์ติดต่อ:</label>
+              </div>
+              <div class="col-md-9">
+                <input type="tel" id="contactNumber" class="form-control" formControlName="contactNumber"
+                  placeholder="ระบุเบอร์ติดต่อ" />
+              </div>
+            </div>
+  
+            <!-- ที่อยู่ -->
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label for="address" class="form-label">ที่อยู่:</label>
+              </div>
+              <div class="col-md-9">
+                <textarea id="address" class="form-control" rows="3" formControlName="address"
+                  placeholder="ระบุที่อยู่ผู้รับ"></textarea>
+              </div>
+            </div>
+  
+            <!-- รายละเอียดครุภัณฑ์ -->
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label for="assetDetails" class="form-label">รายละเอียดครุภัณฑ์:</label>
+              </div>
+              <div class="col-md-9">
+                <input type="text" id="assetDetails" class="form-control" formControlName="assetDetails"
+                  placeholder="ระบุรายละเอียดสิ่งที่บริจาค" />
+              </div>
+            </div>
+  
+            <!-- วันที่บริจาค -->
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label for="donationDate" class="form-label">วันที่บริจาค:</label>
+              </div>
+              <div class="col-md-9">
+                <input type="date" id="donationDate" class="form-control" formControlName="donationDate" />
+              </div>
+            </div>
+  
+            <!-- หมายเหตุ -->
+            <div class="row mb-3">
+  
+              <div class="col-md-3">
+                <label for="notes" class="form-label">หมายเหตุ:</label>
+              </div>
+  
+              <div class="col-md-9">
+                <input id="notes" class="form-control" rows="3" formControlName="notes"
+                  placeholder="หมายเหตุเพิ่มเติม" />
+              </div>
+            </div>
+            
+          </div>
+  
+          <!-- ฟอร์มเฉพาะสถานะ "เลิกใช้" -->
+          <div *ngIf="selectedStatusId === 3" formGroupName="decommissionForm">
+  
+            <!-- รหัสครุภัณฑ์ -->
+            <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+  
+            <!-- Input Field for Search -->
+            <div class="col-md-6 mb-3">
+              <div class="input-group ">
+                <!-- Label กกต -->
+                <span class="input-group-text" id="inputGroup-sizing-default">กกต</span>
+              
+                <!-- Input สำหรับคำค้นหา -->
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="พิมพ์คำค้นหา"
+                  [(ngModel)]="searchTerm"
+                  [ngModelOptions]="{ standalone: true }"
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                  aria-label="Search"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+              
+                <!-- ปุ่มค้นหา -->
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  (click)="onSearch()"
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white"
+                >
+                  ค้นหา
+                </button>
+              </div>
+            </div>
+  
+            <!-- วันที่ยกเลิก -->
+            <div class="col-md-6 mb-3">
+              <label for="saleDate" class="form-label">วันที่ยกเลิก:</label>
+              <input type="date" id="saleDate" class="form-control" formControlName="saleDate" />
+            </div>
+            
+  
+            <div class="row mb-3">
+              <!-- รายละเอียด -->
+              <div class="col-md-6 ">
+                <label for="description" class="form-label">รายละเอียด:</label>
+                <input id="description" class="form-control" rows="3" formControlName="description"
+                  placeholder="ระบุรายละเอียดเพิ่มเติม" />
+              </div> 
+  
+              
+              <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-success " type="button" style="color: white;">
+                  ดำเนินการ
+                </button>
+              </div>
+  
+            </div>
+            
+            
+          
+  
+            
+  
+          </div>
+  
+          <!-- <div class="row mb-3">
+            <div class="col">
+              <label for="description" class="form-label">รายละเอียด:</label>
+              <textarea
+                id="description"
+                class="form-control"
+                rows="3"
+                formControlName="description"
+                placeholder="ระบุรายละเอียด"
+              ></textarea>
+            </div>
+          </div> -->
+  
+          <!-- ปุ่มบันทึก -->
+          <!-- <div class="row">
+            <div class="col text-end">
+              <button class="btn btn-primary" type="submit" [disabled]="assetSalesForm.invalid">
+                บันทึก
+              </button>
+            </div>
+          </div> -->
+        </form>
+  
+      </div>
+  
+      
+  
+    </div>
+  
+  </div>

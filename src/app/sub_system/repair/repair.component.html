@@ -1,49 +1,63 @@
 <div class="card mb-4 shadow-sm" style="border: none">
+
   <div class="card-body">
-    <h1>
-      <span class="anuphan-700">รายการบันทึกการซ่อมแซมและบำรุงรักษา</span>
-    </h1>
+
+    <h1><span class="anuphan-700">รายการบันทึกการซ่อมแซมและบำรุงรักษา</span></h1>
+
     <hr />
+
     <div class="card" style="border: none">
+
       <div class="card-body">
+
         <form cForm (submit)="onSubmit()">
 
           <div class="row mb-3">
           
-            <div class="col">
-              <label cLabel for="assetCode">รหัสครุภัณฑ์</label>
-              <mat-select
-                class="form-control p-3"
-                id="assetCode"
-                [(ngModel)]="asset.assetId"
-                name="assetCode"
-                placeholder="เลือกครุภัณฑ์"
-                #singleSelect
-                (selectionChange)="updateAssetName($event.value)"
-              >
-                <mat-option>
-                  <ngx-mat-select-search [formControl]="assetdataFilterCtrl">
-                  </ngx-mat-select-search>
-                </mat-option>
-                <mat-option
-                  *ngFor="let asset of filteredAssetData | async"
-                  [value]="asset.assetId"
+            <div class="col-4">
+              
+              <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+
+              <!-- Input Field for Search -->
+
+              <div class="input-group ">
+                <!-- Label กกต -->
+                <span class="input-group-text" id="inputGroup-sizing-default">กกต</span>
+              
+                <!-- Input สำหรับคำค้นหา -->
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="พิมพ์คำค้นหา"
+                  [(ngModel)]="searchTerm"
+                  [ngModelOptions]="{ standalone: true }"
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                  aria-label="Search"
+                  aria-describedby="inputGroup-sizing-default"
+                />
+              
+                <!-- ปุ่มค้นหา -->
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  (click)="onSearch()"
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white"
                 >
-                  {{ asset.assetCode }}
-                </mat-option>
-              </mat-select>
+                  ค้นหา
+                </button>
+              </div>
             </div>
             
-            <div class="col">
+            <div class="col-4">
               <label cLabel for="assetName">ชื่อครุภัณฑ์</label>
               <input
                 cFormControl
                 type="text"
                 id="assetName"
                 placeholder="ชื่อครุภัณฑ์จะปรากฏที่นี่"
-                [value]="asset.assetName"
+                [value]="asset.AssetName"
                 disabled
-                class="form-control p-3"
+                class="form-control "
               />
             </div>
 
@@ -53,20 +67,19 @@
               </button>
             </div> -->
 
-            <!-- <div class="col"> -->
-              <label cLabel for="assetCodeInput" style="display: none;">เลขที่เอกสาร</label>
+            <div class="col-4">
+              <label cLabel for="assetCodeInput" >เลขที่ใบสั่งซ่อม</label>
               <input
                 cFormControl
                 name="SerialNumber"
                 id="assetCodeInput"
-                placeholder="เลขที่เอกสาร"
-                class="form-control p-3"
+                placeholder="เลขที่ใบสั่งซ่อม"
+                class="form-control"
                 type="text"
                 [(ngModel)]="asset.SerialNumber"
-                style="display: none;"
               />
             </div>
-          <!-- </div> -->
+          </div>
 
           <div class="row mb-3">
             <div class="col">
@@ -76,7 +89,7 @@
                 name="Description"
                 id="assetCodeInput"
                 placeholder="ระบุรายละเอียด"
-                class="form-control p-3"
+                class="form-control"
                 type="text"
                 [(ngModel)]="asset.Description"
                 required
@@ -90,7 +103,7 @@
                 name="Amount"
                 id="assetCodeInput"
                 placeholder="ระบุจำนวนเงิน"
-                class="form-control p-3"
+                class="form-control "
                 type="text"
                 [(ngModel)]="asset.Amount"
                 required
@@ -125,6 +138,7 @@
         <ng-container matColumnDef="actions">
           <th class="border" mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
           <td mat-cell *matCellDef="let asset">
+
             <button
               class="btn btn-sm btn-warning m-1"
               (click)="editAsset(asset)"
@@ -146,6 +160,7 @@
                 style="color: white; width: 100%; height: 100%"
               ></svg>
             </button>
+
           </td>
         </ng-container>
 
@@ -163,7 +178,13 @@
           >
             {{ column }}
           </th>
-          <td mat-cell class="border" *matCellDef="let asset">{{ asset[column] }}</td>
+
+          <td 
+            mat-cell class="border" 
+            *matCellDef="let asset">
+            {{ asset[column] }}
+          </td>
+
         </ng-container>
 
         <!-- Header Row -->
@@ -192,8 +213,8 @@
               'รายละเอียด',
               'จำนวนเงิน'
             ]
-          "
-        ></tr>
+          ">
+        </tr>
       </table>
 
       <!-- Paginator -->
@@ -202,6 +223,7 @@
         [pageSize]="15"
         showFirstLastButtons
       ></mat-paginator>
+
     </div>
     
   </div>

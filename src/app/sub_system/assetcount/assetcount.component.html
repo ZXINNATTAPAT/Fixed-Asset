@@ -112,7 +112,9 @@
                       <ng-container *ngIf="column !== 'ลำดับ'">
                         <!-- Column for Asset Code (รหัสครุภัณฑ์) with dropdown -->
                         <td *ngIf="column === 'รหัสครุภัณฑ์'" class="align-middle">
-                          <mat-select 
+
+                           <!-- ยกเลิกการหาแบบนี้ -->
+                          <!-- <mat-select 
                             [formControl]="$any(formGroup.get(column)!)" 
                             placeholder="เลือกครุภัณฑ์" 
                             class="w-100">
@@ -122,13 +124,49 @@
                             <mat-option *ngFor="let assetData of filteredAssetData | async" [value]="assetData.assetId">
                               {{ assetData.assetCode }} 
                             </mat-option>
-                          </mat-select>
-                        </td>
-            
-                        <!-- Column for displaying Asset Name based on selected Asset Code -->
-                        <td *ngIf="column === 'รายการ' && formGroup.get('รหัสครุภัณฑ์')!.value" class="align-middle">
-                          <input type="text" class="form-control" [value]="getAssetName(formGroup.get('รหัสครุภัณฑ์')!.value)" disabled />
-                        </td>
+                          </mat-select> -->
+
+                        
+                          <!-- Input Field for Search -->
+                          <div class="input-group ">
+
+                            <!-- Input สำหรับพิมพ์ค้นหา -->
+                                <input
+                                type="text"
+                                class="form-control"
+                                placeholder="พิมพ์คำค้นหา"
+                                [(ngModel)]="searchTerm"
+                                [ngModelOptions]="{ standalone: true }"
+                                (keyup.enter)="onSearch()"
+                                autocomplete="off"
+                                style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                                aria-label="Search"
+                                aria-describedby="inputGroup-sizing-default"
+                              />
+                              
+                              <!-- ปุ่มค้นหา -->
+                              <button
+                                type="button"
+                                class="btn btn-success"
+                                (click)="onSearch()"
+                                style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: white;"
+                              >
+                                ค้นหา
+                              </button>
+
+                            </div>
+                            </td>
+
+                            <!-- Column for displaying Asset Name based on selected Asset Code -->
+                            <td *ngIf="column === 'รายการ' && form.get('รหัสครุภัณฑ์')?.value" class="align-middle">
+                            <input 
+                              type="text" 
+                              class="form-control" 
+                              [value]="getAssetName(form.get('รหัสครุภัณฑ์')?.value)" 
+                              disabled 
+                            />
+                            </td>
+
                       </ng-container>
                     </ng-container>
                   </tr>

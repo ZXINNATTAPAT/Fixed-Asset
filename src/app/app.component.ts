@@ -4,7 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
 import { VERSION } from '@angular/material/core';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../src/app/data-service/data-service.component';
 
 @Component({
   selector: 'app-root',

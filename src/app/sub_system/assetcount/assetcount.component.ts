@@ -9,11 +9,7 @@ import Swal from 'sweetalert2';
 
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angular/material/datepicker';
-import {
-  MatFormField,
-  MatFormFieldModule,
-  MatLabel,
-} from '@angular/material/form-field';
+import {MatFormField,MatFormFieldModule,MatLabel,} from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import * as XLSX from 'xlsx';
 
@@ -36,7 +32,7 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 
 import { MatDialog } from '@angular/material/dialog';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../data-service/data-service.component';
 
 
 interface AssetDetails {
@@ -133,12 +129,11 @@ export class AssetcountComponent implements OnInit {
   startScanner = false;
 
   allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
-
   availableDevices: MediaDeviceInfo[] = [];
-
   selectedDevice: MediaDeviceInfo | undefined;
 
   // displayedColumns3: string[] = ["รหัสครุภัณฑ์","รายการ","ยอดตามบัญชี","ยอดตรวจนับ","ผลต่าง","หมายเหตุ"];
+
   displayedColumns3: string[] = ['รหัสครุภัณฑ์', 'รายการ'];
 
   userinfo: any = [];
@@ -167,28 +162,34 @@ export class AssetcountComponent implements OnInit {
 
   _onDestroy = new Subject<void>();
 
-  constructor(private apiService: ApiService, private formBuilder: FormBuilder ,private dataService :DataService) { this.getAssetDetails(); }
+  constructor(
+    private apiService: ApiService, 
+    private formBuilder: FormBuilder ,
+    private dataService :DataService) 
+  { 
+    // this.getAssetDetails(); 
+  }
 
   assetForm!: FormGroup;
-
   form!: FormGroup;
+  searchTerm: string = '';
 
-  getAssetDetails(): void {
-    this.dataSubscription = this.apiService
-      .fetchDatahttp('assetDetails')
-      .subscribe((data) => {
-        this.assetData = data.map((asset: any) => {
-          asset.purchaseDate = this.convertDate(asset.purchaseDate);
-          // asset = this.translateToThai(asset);
-          return asset;
-        });
+  // getAssetDetails(): void {
+  //   this.dataSubscription = this.apiService
+  //     .fetchDatahttp('assetDetails')
+  //     .subscribe((data) => {
+  //       this.assetData = data.map((asset: any) => {
+  //         asset.purchaseDate = this.convertDate(asset.purchaseDate);
+  //         // asset = this.translateToThai(asset);
+  //         return asset;
+  //       });
 
-        // console.log(this.assetData);
+  //       // console.log(this.assetData);
 
-        // this.dataSource = new MatTableDataSource<AssetDetails>(this.assetData); 
-        // Initialize dataSource here
-      });
-  }
+  //       // this.dataSource = new MatTableDataSource<AssetDetails>(this.assetData); 
+  //       // Initialize dataSource here
+  //     });
+  // }
 
   // Handle successful QR scan
   onScanSuccess(data: string) {
@@ -233,20 +234,12 @@ export class AssetcountComponent implements OnInit {
     });
   }
 
-
   isFormControl(control: any): boolean {
     return control instanceof FormControl;
   }
 
   inputform: any[] = [];
-
   formArray!: FormArray; // No changes
-
-  getAssetName(assetId: number): string {
-    // หาชื่อของครุภัณฑ์จาก ID ของครุภัณฑ์
-    const asset = this.assetData.find(data => data.assetId === assetId);
-    return asset ? asset.assetName : '';
-  }
 
   filterAsset(): void {
     let search = this.assetdataFilterCtrl.value;
@@ -276,10 +269,9 @@ export class AssetcountComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.userInfo$.subscribe((userInfo) => {
       this.userinfo = userInfo;
-      console.log('DefaultHeader UserInfo:', userInfo);
+      // console.log('DefaultHeader UserInfo:', userInfo);
     });
   
-
     this.getAvailableDevices();
 
     this.assetdataFilterCtrl.valueChanges
@@ -326,7 +318,49 @@ export class AssetcountComponent implements OnInit {
       // หมายเหตุ: [''],
     });
   }
+  
+  onSearch(): void {
+    const search = this.searchTerm.trim();
+  
+    if (!search) {
+      console.warn('กรุณากรอกคำค้นหา');
+      this.filteredAssetData.next([]);
+      return;
+    }
+  
+    this.apiService.fetchDatahttp(`AssetDetails?search=${encodeURIComponent('กกต ' + search)}`)
+      .subscribe({
+        next: (data) => {
+          const assets = data.map((asset: any) => ({
+            assetId: asset.AssetId,
+            assetCode: asset.AssetCode,
+            assetName: asset.AssetName,
+            purchaseDate: asset.PurchaseDate,
+            bookValue: asset.BookValue,
+          }));
+  
+          this.filteredAssetData.next(assets);
+          this.assetData = assets;
+  
+          if (assets.length > 0) {
+            // อัปเดตค่า รหัสครุภัณฑ์ ใน form ให้เป็น assetId ตัวแรก
+            this.form.get('รหัสครุภัณฑ์')?.setValue(assets[0].assetId);
 
+          } else {
+            console.warn('ไม่พบข้อมูลที่ตรงกับคำค้นหา');
+          }
+        },
+        error: (err) => {
+          console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', err);
+          this.filteredAssetData.next([]);
+        }
+      });
+  }
+  
+  getAssetName(assetId: number): string {
+    return this.assetData?.find(data => data.assetId === assetId)?.assetName ?? 'ไม่พบข้อมูล';
+  }
+  
   addform() {
 
     const newFormItem = this.createItem(); // Create a new form control
@@ -385,9 +419,7 @@ export class AssetcountComponent implements OnInit {
     }
   }
 
-  getSequence(index: number): number {
-    return index + 1;
-  }
+  getSequence(index: number): number {return index + 1;}
 
   ngOnDestroy(): void {
     if (this.dataSubscription) {

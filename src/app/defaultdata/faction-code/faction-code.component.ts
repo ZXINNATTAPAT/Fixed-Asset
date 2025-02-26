@@ -58,10 +58,7 @@ export class FactionCodeComponent implements OnInit {
 
   constructor(private http: HttpClient) { }
 
-  displayedColumns2: string[] = [
-    "รหัสฝ่าย",
-    "ชื่อฝ่าย",
-  ];
+  displayedColumns2: string[] = ["รหัสฝ่าย","ชื่อฝ่าย",];
 
   asset: any = {};
 
@@ -80,7 +77,7 @@ export class FactionCodeComponent implements OnInit {
 
       this.dataSource.sort = this.sort;
 
-      console.log(this.assetDetails);
+      console.log(this.dataSource);
 
     });
   }
@@ -110,8 +107,8 @@ export class FactionCodeComponent implements OnInit {
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "factionCode": "รหัสฝ่าย",
-      "factionName": "ชื่อฝ่าย"
+      "Code": "รหัสฝ่าย",
+      "Name": "ชื่อฝ่าย"
     };
     
     const translatedAsset: { [key: string]: any } = {};

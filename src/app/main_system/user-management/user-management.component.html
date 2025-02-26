@@ -71,45 +71,45 @@
                   </ng-container>
 
                   <!-- User Code Column -->
-                  <ng-container matColumnDef="รหัสผู้ใช้" style="width: fit-content;">
+                  <!-- <ng-container matColumnDef="รหัสผู้ใช้" style="width: fit-content;">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;width: fit-content;">รหัสผู้ใช้</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user" style="width: fit-content;">{{ user.codeId }}</td>
-                  </ng-container>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" style="width: fit-content;">{{ user.CodeId }}</td>
+                  </ng-container> -->
 
                   <!-- Username Column -->
                   <ng-container matColumnDef="ชื่อผู้ใช้">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;width: 10%;">ชื่อผู้ใช้</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.username }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Username }}</td>
                   </ng-container>
 
                   <!-- First Name Column -->
                   <ng-container matColumnDef="ชื่อ">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">ชื่อ</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.sname }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Sname }}</td>
                   </ng-container>
 
                   <!-- Last Name Column -->
                   <ng-container matColumnDef="นามสกุล">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">นามสกุล</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.lname }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Lname }}</td>
                   </ng-container>
 
                   <!-- Position Column -->
                   <ng-container matColumnDef="ตำแหน่ง">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">ตำแหน่ง</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.position }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Position }}</td>
                   </ng-container>
 
                   <!-- Subposition Column -->
                   <ng-container matColumnDef="ตำแหน่งย่อย">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">ตำแหน่งย่อย</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.subposition }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Subposition }}</td>
                   </ng-container>
 
                   <!-- Workgroup Column -->
                   <ng-container matColumnDef="กลุ่มงาน">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">กลุ่มงาน</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.workgroup }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Affiliation }}</td>
                   </ng-container>
 
                   <!-- <ng-container matColumnDef="บทบาท">

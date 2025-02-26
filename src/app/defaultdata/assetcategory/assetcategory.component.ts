@@ -113,15 +113,13 @@ export class AssetcategoryComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.getAssetType();
-  }
+  ngOnInit(): void {this.getAssetType();}
   
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "asc_Code": "รหัสหมวดสินทรัพย์",
-      "asc_Name": "ชื่อหมวดสินทรัพย์",
-      "assetCode": "รหัสประเภทสินทรัพย์"
+      "CategoryCode": "รหัสหมวดสินทรัพย์",
+      "CategoryName": "ชื่อหมวดสินทรัพย์",
+      "TypeName": "รหัสประเภทสินทรัพย์"
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {

@@ -105,19 +105,17 @@ export interface asc { asc_Code: string; asc_Name: string; }
 export class SystemComponent implements OnInit, OnDestroy {
 
   // References for elements using @ViewChild
-
   @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
-
   @ViewChild('assetCategorySelect') assetCategorySelect!: ElementRef;
-
   @ViewChild('factions') factionsElementRef!: ElementRef;
 
-  // @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
-
   // Asset-related properties
-  userinfo: any = [];  // User info and token management
+  // User info and token management
+  userinfo: any = [];  
   asset: FormGroup = new FormGroup({});
-  generatedData: any[] = []; // เก็บชุดข้อมูลที่สร้าง
+
+  // เก็บชุดข้อมูลที่สร้าง
+  generatedData: any[] = []; 
   asset2: any = {};
   assetDetails: any[] = [];
   assetTypes: any[] = [];
@@ -126,19 +124,21 @@ export class SystemComponent implements OnInit, OnDestroy {
   assetCategory: any[] = [];
   countingUnits: any[] = [];
 
+  //เชตจำนวนข้อมูลที่จะเพิ่ม
   numberOfCopies: number = 1;
   options: number[] = [];
 
   selectedFaction: string | null = null;
-
   isCustomInput: boolean = false;
 
-  displayDate: string = ''; // เก็บวันที่ในรูปแบบ DD/MM/YY เพื่อแสดงผล
+  // เก็บวันที่ในรูปแบบ DD/MM/YY เพื่อแสดงผล
+  displayDate: string = ''; 
+
   // Controls and filters for dropdowns
   assetCategoryCtrl: FormControl = new FormControl();
   assetCategoryFilterCtrl: FormControl = new FormControl('');
 
-  unitCtrl: FormControl = new FormControl();
+  unitCtrl      : FormControl = new FormControl();
   unitFilterCtrl: FormControl = new FormControl('');
 
   factionsCtrl: FormControl = new FormControl();
@@ -148,32 +148,42 @@ export class SystemComponent implements OnInit, OnDestroy {
   DepartmentFilterCtrl: FormControl = new FormControl('');
 
   filteredAssetCategories: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+
   filteredUnits: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+
   filteredFactions: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+
   filteredDepartment: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-
+  
   // Toggle visibility
-  hidden: boolean = true;hidden2: boolean = true;
-
+  hidden: boolean = true; 
+  hidden2: boolean = true; 
   showForm: boolean = false;
-
+  
   // Fixed settings
-  fixedPrefix: string = '';fixedSuffix: string = '';editablePartLength: number = 15;
+  fixedPrefix: string = ''; 
+  fixedSuffix: string = ''; 
+  editablePartLength: number = 15; 
 
-  icons = { cilDataTransferUp };colors = { color: 'primary', textColor: 'primary' };
+  //เซต Icon 
+  icons = { cilDataTransferUp };
+  colors = { color: 'primary', textColor: 'primary' };
 
+  //เซต types บนตารางค่าเสื่อม
   depreciationSchedule: { year: string; bookValue: number; depreciation: number }[] = [];
 
   _onDestroy = new Subject<void>();
 
   constructor(
-    private formBuilder: FormBuilder,
-    private dataService: DataService, private service: AssetService,
-    private ap: ApiService, private dialog: MatDialog,
+    private formBuilder: FormBuilder, 
+    private dataService: DataService, 
+    private service: AssetService,
+    private ap: ApiService, 
+    private dialog: MatDialog,
     private depreciationService: DepreciationService,
     private filterService: FilterService) { }
 
-    ngOnInit(): void {
+  ngOnInit(): void {
       this.initializeUserInfo();
       this.loadAllData();
       this.initializeAssetForm();
@@ -200,7 +210,7 @@ export class SystemComponent implements OnInit, OnDestroy {
           console.log('กำลังรอข้อมูลเพิ่มเติม...');
         }
       });
-    }
+  }
 
   // Load user information and handle it
   private initializeUserInfo(): void {
@@ -464,7 +474,6 @@ export class SystemComponent implements OnInit, OnDestroy {
     filters[index].call(this);
   }
 
-
   private loadAllData(): void {
     //############# เปลี่ยนไปใช้ Backend หา ข้อมูลล่าสุดแต่ละปีแล้วส่งมา /AssetDetails/generate-code
     // Load assetDetails
@@ -546,18 +555,6 @@ export class SystemComponent implements OnInit, OnDestroy {
     this.setupFilterListeners();
 
   }
-
-  toggleHidden(): void { this.hidden = !this.hidden; }// เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
-
-  removeSubAsset(index: number): void { this.subAssets.removeAt(index); }
-
-  ngOnDestroy(): void { this._onDestroy.next(); this._onDestroy.complete(); }
-
-  translateToEnglish(asset: any): any { this.service.translateToEnglish(asset); }
-
-  convertToDate(dateString: string): Date { return this.service.convertToDate(dateString); }
-
-  showAlert(): void { this.service.showAlert(); }
 
   openUploadDialog(): void {
     this.dialog.open(UploadDialogComponent, {
@@ -841,10 +838,20 @@ export class SystemComponent implements OnInit, OnDestroy {
       assetAge,
     });
   }
+  
+  toggleHidden(): void { this.hidden = !this.hidden; }// เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
 
-  toggleForm(): void {
-    this.showForm = !this.showForm;
-  }
+  removeSubAsset(index: number): void { this.subAssets.removeAt(index); }
+
+  ngOnDestroy(): void { this._onDestroy.next(); this._onDestroy.complete(); }
+
+  translateToEnglish(asset: any): any { this.service.translateToEnglish(asset); }
+
+  convertToDate(dateString: string): Date { return this.service.convertToDate(dateString); }
+
+  showAlert(): void { this.service.showAlert(); }
+
+  toggleForm(): void {this.showForm = !this.showForm;}
   
   enableCustomInput(): void { this.isCustomInput = true; this.selectedFaction = null; }
 

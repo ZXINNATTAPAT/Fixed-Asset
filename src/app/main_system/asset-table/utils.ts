@@ -1,4 +1,4 @@
-import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash } from '@coreui/icons';
+import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash,cilSearch } from '@coreui/icons';
 
 
 
@@ -11,7 +11,7 @@ export class myFunction {
 
   token: any;
 
-  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
+  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo ,cilSearch };
 
 
   convertDate(dateString: string): string {
