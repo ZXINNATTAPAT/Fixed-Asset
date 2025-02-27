@@ -362,11 +362,8 @@ export class AssetcountComponent implements OnInit {
   }
   
   addform() {
-
     const newFormItem = this.createItem(); // Create a new form control
-
     this.formArray.push(newFormItem); // Add the new form control to the formArray
-
     this.inputform.push(newFormItem); // Add the new form control to the inputform array
   }
 
@@ -427,16 +424,8 @@ export class AssetcountComponent implements OnInit {
     }
     this._onDestroy.next();
     this._onDestroy.complete();
-  }
-
-  editAsset(_t115: any) {
-    throw new Error('Method not implemented.');
-  }
-
-  deleteAsset(_t115: any) {
-    throw new Error('Method not implemented.');
-  }
-
+  } 
+  
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
       purchaseDate: 'วันเดือนปี',
@@ -467,5 +456,15 @@ export class AssetcountComponent implements OnInit {
     });
     return formattedDate ?? '';
   }
+
+  editAsset(_t115: any) {
+    throw new Error('Method not implemented.');
+  }
+
+  deleteAsset(_t115: any) {
+    throw new Error('Method not implemented.');
+  }
+
+ 
 }
 
