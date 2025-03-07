@@ -1,41 +1,24 @@
 <!--<c-header class="mb-4 d-print-none" position="sticky">-->
 <ng-container>
-  <c-container
-    [fluid]="true"
-    class=""
-    style="border: none;background-color: #30906a"
-  >
+
+  <c-container [fluid]="true" class="" style="border: none;background-color: #30906a">
+
     <c-header-nav class="d-none d-md-flex" style="width: fit-content">
-      <button
-        [cSidebarToggle]="sidebarId"
-        cHeaderToggler
-        toggle="visible"
-        style="margin-inline-start: -14px"
-      >
-        <svg
-          cIcon
-          name="cilMenu"
-          size="lg"
-          style="color: rgb(255, 255, 255)"
-        ></svg>
+
+      <button [cSidebarToggle]="sidebarId" cHeaderToggler toggle="visible" style="margin-inline-start: -14px">
+        <svg cIcon name="cilMenu" size="lg" style="color: rgb(255, 255, 255)"></svg>
       </button>
 
       <c-nav-item *ngIf="userinfo.Affiliation === 'ส่วนกลาง'">
-        <a
-          cNavLink
-          class="anuphan-700"
-          style="font-size: large; color: rgb(255, 255, 255)"
-        >
-          สำนักงานคณะกรรมการการเลือกตั้งส่วนกลาง ({{ userinfo.Faction }})
+
+        <a cNavLink class="anuphan-700" style="font-size: medium; color: rgb(255, 255, 255)">
+          สำนักงานคณะกรรมการการเลือกตั้งส่วนกลาง ({{ userinfo.Department }})
         </a>
+        
       </c-nav-item>
 
       <c-nav-item *ngIf="userinfo.Affiliation !== 'ส่วนกลาง'">
-        <a
-          cNavLink
-          class="anuphan-700"
-          style="font-size: large; color: rgb(255, 255, 255)"
-        >
+        <a cNavLink class="anuphan-700" style="font-size: medium; color: rgb(255, 255, 255)">
           สำนักงานคณะกรรมการการเลือกตั้งส่วนภูมิภาค {{ this.showCounty }} ({{
             this.userinfo.Faction
           }})
@@ -49,20 +32,36 @@
       <c-nav-item>
         <a cNavLink routerLink="/settings" routerLinkActive="active">Settings</a>
       </c-nav-item> -->
+      
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto d-flex align-items-center">
+      
       <!-- <a cNavLink class="m-1 text-white" style="text-decoration: none;">
         <svg [cIcon]="icons.cilUser"></svg>
         <span style="font-size: 14px;">
             คุณ {{userinfo.Sname}} {{userinfo.Lname}}  
             {{ userinfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] }}
         </span>
-      </a> -->
+      </a> --> 
+      
 
-      <button class="btn btn-danger btn-sm shadow-sm m-0" (click)="Logout()">
-        <svg [cIcon]="icons.cilAccountLogout" style="color: white"></svg>
-      </button>
+      <div class="dropdown">
+        <button 
+          class="btn btn-sm btn-outline-light dropdown-toggle m-1 anuphan-600" 
+          type="button" 
+          id="menuDropdown" 
+          data-bs-toggle="dropdown" 
+          aria-expanded="false">
+          รายการผู้ใช้งาน
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+          <li><a class="dropdown-item" routerLink="/users">ประวัติผู้ใช้งาน</a></li>
+          <li><a class="dropdown-item" routerLink="/settings">ตั้งค่า</a></li>
+          <li><a class="dropdown-item" routerLink="/settings">ออกจากระบบ</a></li>
+        </ul>
+      </div>
+
     </c-header-nav>
 
     <!-- <c-header-nav class="ms-auto ms-md-0">

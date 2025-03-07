@@ -22,7 +22,7 @@ import {
   DropdownItemDirective,
   DropdownDividerDirective,
 } from '@coreui/angular';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import {
   cibAddthis,
   cilArrowCircleRight,
@@ -38,7 +38,7 @@ import {
 } from '@coreui/icons';
 import { NgIf } from '@angular/common';
 import { DataService } from '../../../data-service/data-service.component';
-import { catchError, forkJoin, map, of, tap } from 'rxjs';
+import { catchError, filter, forkJoin, map, of, tap } from 'rxjs';
 
 @Component({
   selector: 'app-widgets-dropdown',
@@ -88,7 +88,7 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
     this.loadData();
   }
 
-  userinfo: any = [];
+userinfo: any = [];
 token: any;
 assetTypes: any[] = [];
 assetCategory: any[] = [];
@@ -99,33 +99,28 @@ assetoffice!: number;
 assetcar!: number;
 assetcom!: number;
 
-linkadd(): void {
-  window.location.href = "http://localhost:4200/#/system/AssetDetails";
+ngOnInit(): void {
+  this.dataService.userInfo$
+    .pipe(
+      filter(userInfo => !!userInfo?.claims), // ตรวจสอบว่ามี claims
+      tap(userInfo => {
+        this.userinfo = userInfo.claims || {}; // กำหนดค่า userinfo จาก claims
+        // console.log('DefaultHeader UserInfo:', this.userinfo);
+      })
+    )
+    .subscribe(() => {
+      this.setData();
+      this.loadAssetCounts(); // เรียกใช้ loadAssetCounts() หลังจาก userinfo มีค่า
+    });
 }
 
-linkdisasc(): void {
-  window.location.href = "http://localhost:4200/#/system/disassets";
-}
-
-linkcount(): void {
-  window.location.href = "http://localhost:4200/#/system/Assetcount";
-}
-
-linkassetall(): void {
-  window.location.href = "http://localhost:4200/#/assettable";
-}
-
-linkrepair(): void {
-  window.location.href = "http://localhost:4200/#/system/Repair";
-}
-
-linktranfer(): void {
-  window.location.href = "http://localhost:4200/#/system/transferassets";
-}
-
-linkassetcom(): void {
-  window.location.href = "http://localhost:4200/#/assettable";
-}
+linkadd(): void {window.location.href = "http://localhost:4200/system/assetDetails";}
+linkdisasc(): void {window.location.href = "http://localhost:4200/system/disassets";}
+linkcount(): void {window.location.href = "http://localhost:4200/system/assetcount";}
+linkassetall(): void {window.location.href = "http://localhost:4200/table/assettable";}
+linkrepair(): void {window.location.href = "http://localhost:4200/system/repair";}
+linktranfer(): void {window.location.href = "http://localhost:4200/system/transferassets";}
+linkassetcom(): void {window.location.href = "http://localhost:4200/assettable";}
 
 loadData(): void {
   forkJoin({
@@ -137,11 +132,14 @@ loadData(): void {
       tap(({ users, assetTypes, assetCategories }) => {
         // Assign the fetched data
         this.numberOfUsers = users.length;
+
         this.assetTypes = assetTypes;
+
         this.assetCategory = assetCategories;
 
         // Store the data in the service
         this.dataService.setAssetTypes(this.assetTypes);
+
         this.dataService.setAssetCategory(this.assetCategory);
 
         // Fetch asset counts
@@ -156,12 +154,19 @@ loadData(): void {
 }
 
 loadAssetCounts(): void {
+  // ตรวจสอบก่อนว่า userinfo และ DeptId มีค่าหรือไม่
+  if (!this.userinfo || !this.userinfo.DeptId) {
+    // console.error('Error: DeptId is undefined. UserInfo:', this.userinfo);
+    return;
+  }
+
+  const url = `Assettype/AssetCountsByTypeCode?deptId=${this.userinfo.DeptId}`;
+
   this.apiService
-    .fetchDatahttp('Assettype/AssetCountsByTypeCode')
+    .fetchDatahttp(url)
     .pipe(
-      map((response: any) => {
-        console.log(response);
-        return response;
+      tap((response: any) => {
+        // console.log('Asset counts response:', response);
       }),
       tap((counts: any[]) => {
         this.processAssetCounts(counts);
@@ -174,7 +179,6 @@ loadAssetCounts(): void {
     .subscribe();
 }
 
-
 processAssetCounts(counts: any[]): void {
 
   if (!Array.isArray(counts)) {
@@ -184,14 +188,16 @@ processAssetCounts(counts: any[]): void {
 
   // Map counts to specific typeCodes
   this.assetinter = this.getCountByTypeCode(counts, '001'); // Electrical and Radio
+
   this.assetoffice = this.getCountByTypeCode(counts, '003'); // Office Equipment
+
   this.assetcom = this.getCountByTypeCode(counts, '004'); // Computer Equipment
+
   this.assetcar = this.getCountByTypeCode(counts, '006'); // Vehicles
 
   // Sum the total number of assets
   this.numberOfAssets = counts.reduce((total, count) => total + count.Count, 0);
 }
-
 
 getCountByTypeCode(counts: any[], typeCode: string): number {
   const count = counts.find((item: any) => item.TypeCode === typeCode)?.Count;
@@ -308,15 +314,6 @@ getCountByTypeCode(counts: any[], typeCode: string): number {
       },
     },
   };
-
-  ngOnInit(): void {
-    this.dataService.userInfo$.subscribe((userInfo) => {
-      this.userinfo = userInfo;
-      console.log('DefaultHeader UserInfo:', userInfo);
-    });
-  
-    this.setData();
-  }
 
   ngAfterContentInit(): void {
     this.changeDetectorRef.detectChanges();

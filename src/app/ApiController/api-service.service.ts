@@ -3,14 +3,26 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable } from 'rxjs';
 import axios from 'axios';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface AssetInventorySession {
+  SessionId: number;
+  Date: string;
+  SessionName: string;
+  DepartmentId?: number;
+  FactionId?: number;
+  VerifierId?: number;
+  Note?: string;
+}
+
+@Injectable({providedIn: 'root'})
 export class ApiService {
   private baseUrl = 'https://localhost:7204/api/Users'; // URL หลักของ API
+
   private apiUrl     = 'https://localhost:7204/api/';
+
   private apiUrlauth = 'https://localhost:7204/auth/';
+
   private profileUrl = 'https://localhost:7204/auth/profile'; // URL ของ Endpoint
+
   public apiUrl_link = 'http://localhost:4200/#/';
 
   private apiUnit = 'https://gdcatalog.go.th/api/3/action/datastore_search';
@@ -28,17 +40,29 @@ export class ApiService {
   }
 
   getUserProfile(userId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${userId}`, { withCredentials: true });
+    return this.http.get(
+      `${this.baseUrl}/${userId}`, 
+      { withCredentials: true });
   }
 
+  getUserRole(): Observable<{ username: string, roles: string[] }> {
+    return this.http.get<{ username: string, roles: string[] }>
+    (`${this.apiUrlauth}userrole`, 
+      { withCredentials: true });
+  }
+  
+
   getUserInfos(): Observable<any> {
-    return this.http.get<any>(this.profileUrl, { withCredentials: true });
+    return this.http.get<any>(
+      this.profileUrl, 
+      { withCredentials: true });
   } 
 
   // ตรวจสอบสถานะการล็อกอิน
   isLoggedIn(): Observable<boolean> {
-    return this.http.get(`${this.apiUrlauth}isLoggedIn`, { withCredentials: true }).pipe(
-      map(() => true), // หาก API ตอบกลับ 200 แปลว่าล็อกอิน
+    return this.http.get(
+      `${this.apiUrlauth}isLoggedIn`, { withCredentials: true })
+      .pipe(map(() => true), // หาก API ตอบกลับ 200 แปลว่าล็อกอิน
       catchError(async () => (false)) // หากเกิดข้อผิดพลาด แปลว่ายังไม่ได้ล็อกอิน
     );
   }
@@ -106,7 +130,6 @@ export class ApiService {
     }
   }
   
-
   // Example method to delete data from the API
   async deleteData(endpoint: string): Promise<any> {
     const response = await axios.delete(`${this.apiUrl}${endpoint}`);
@@ -116,6 +139,12 @@ export class ApiService {
   getStatusCounts(): Observable<any> {
     return this.http.get<any>('https://localhost:7204/api/AssetDetails/statuscount');
   }
+
+  getSessions(endpoint:string): Observable<AssetInventorySession[]> {
+    return this.http.get<AssetInventorySession[]>(`${this.apiUrl}${endpoint}`);
+  }
+
+  
   
 }
 

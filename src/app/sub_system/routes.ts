@@ -1,54 +1,56 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  {
-    path: '',
-    data: {
-      title: ''
+    {
+        path: 'inventorysession', // เปลี่ยนเป็นตัวพิมพ์เล็กทั้งหมด
+        loadComponent: () => import('./assetcount/asset-inventory-session/asset-inventory-session.component')
+        .then(m => m.AssetInventorySessionComponent),
+        data: { title: 'inventorysession' }
     },
+  {
+    
+    path: '',
+    data: {title: ''},
     children: [
       {
-        path: 'Assetcount',
-        loadComponent: () => import('./assetcount/assetcount.component').then(m => m.AssetcountComponent),
-        data: {
-          title: 'Assetcount'
-        }
+        path: 'assetcount',
+        loadComponent: () => import('./assetcount/assetcount.component')
+        .then(m => m.AssetcountComponent),
+        data: {title: 'Assetcount'}
       },
       {
-        path: 'recordAssetcount',
-        loadComponent: () => import('./recordascount/recordascount.component').then(m => m.RecordascountComponent),
-        data: {
-          title: 'Assetcount'
-        }
-      },
-      {
-        path: 'Repair',
-        loadComponent: () => import('./repair/repair.component').then(m => m.RepairComponent),
-        data: {
-          title: 'AssetDetails'
-        }
+        path: 'repair',
+        loadComponent: () => import('./repair/repair.component')
+        .then(m => m.RepairComponent),
+        data: {title: 'AssetDetails'}
       },
       {
         path: 'sellassets',
-        loadComponent: () => import('./sellassets/sellassets.component').then(m => m.SellassetsComponent),
-        data: {
-          title: 'AssetDetails'
-        }
+        loadComponent: () => import('./sellassets/sellassets.component')
+        .then(m => m.SellassetsComponent),
+        data: {title: 'AssetDetails'}
       },
       {
         path: 'disassets',
-        loadComponent: () => import('./disassets/disassets.component').then(m => m.DisassetsComponent),
-        data: {
-          title: 'AssetDetails'
-        }
+        loadComponent: () => import('./disassets/disassets.component')
+        .then(m => m.DisassetsComponent),
+        data: {title: 'AssetDetails'}
       },
       {
         path: 'transferassets',
-        loadComponent: () => import('./transferassets/transferassets.component').then(m => m.TransferassetsComponent),
-        data: {
-          title: 'AssetDetails'
-        }
+        loadComponent: () => import('./transferassets/transferassets.component')
+        .then(m => m.TransferassetsComponent),
+        data: {title: 'AssetDetails'}
       },  
+      
+      // {
+      //   path: 'recordAssetcount',
+      //   loadComponent: () => import('./recordascount/recordascount.component')
+      //  .then(m => m.RecordascountComponent),
+      //   data: {
+      //     title: 'Assetcount'
+      //   }
+      // },
      
     ]
   }

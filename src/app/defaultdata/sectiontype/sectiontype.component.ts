@@ -55,19 +55,13 @@ export class SectiontypeComponent {
 
   constructor(private http: HttpClient, private router: Router) { }
 
-  displayedColumns2: string[] = [
-    "รหัสแผนก",
-    "ชื่อแผนก"
-  ];
-
+  displayedColumns2: string[] = ["รหัสแผนก","ชื่อแผนก"];
   assetDetailsset: any[] = [];
 
-  ngOnInit(): void {
-    this.getAssetType();
-  }
+  ngOnInit(): void {this.getAssetType();}
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/SectionTypeCodes').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/Departments').subscribe(data => {
       this.assetDetails = data.map(asset => {
         asset = this.translateToThai(asset);
         return asset;
@@ -81,8 +75,8 @@ export class SectiontypeComponent {
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "sectioncode": "รหัสแผนก",
-      "sectionName": "ชื่อแผนก"
+      "Code": "รหัสแผนก",
+      "Name": "ชื่อแผนก"
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {

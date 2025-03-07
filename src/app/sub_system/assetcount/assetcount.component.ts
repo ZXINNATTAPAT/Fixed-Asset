@@ -1,26 +1,17 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TextColorDirective, InputGroupComponent, BorderDirective, } from '@coreui/angular';
+import { TextColorDirective, InputGroupComponent, BorderDirective, RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, Validators, AbstractControl, } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { ApiService } from '../../ApiController/api-service.service';
 import Swal from 'sweetalert2';
-
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angular/material/datepicker';
-import {MatFormField,MatFormFieldModule,MatLabel,} from '@angular/material/form-field';
+import { MatFormField, MatFormFieldModule, MatLabel, } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import * as XLSX from 'xlsx';
-
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator';
-
-import { FormArray } from '@angular/forms';
-// import 'moment/locale/th';
-// import 'date-fns/locale/th';
 import 'moment/locale/th.js';
 import { IconDirective } from '@coreui/icons-angular';
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash, } from '@coreui/icons';
@@ -29,11 +20,10 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
-
 import { MatDialog } from '@angular/material/dialog';
 import { DataService } from '../../data-service/data-service.component';
 import { HttpClient } from '@angular/common/http';
-
+import { QrScannerDialogComponent } from './Dialog/qr-scanner-dialog.component';
 
 interface AssetDetails {
   assetId: any;
@@ -104,14 +94,13 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   displayedColumns3: string[] = ['รหัสครุภัณฑ์', 'รายการ'];
 
   userinfo: any = {};
-
   assetData: any[] = [];
 
-  // 🟢 ฟิลด์ตัวกรองสำหรับ ngx-mat-select-search
+  // ฟิลด์ตัวกรองสำหรับ ngx-mat-select-search
   factionsFilterCtrl = new FormControl();
   DepartmentFilterCtrl = new FormControl();
 
-  // 🟢 รายการที่กรองแล้ว (ใช้กับ ngx-mat-select-search)
+  // รายการที่กรองแล้ว (ใช้กับ ngx-mat-select-search)
   filteredFactions = new BehaviorSubject<any[]>([]);
   filteredDepartment = new BehaviorSubject<any[]>([]);
 
@@ -127,41 +116,37 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   formArray!: FormArray;
   searchTerm: string = '';
 
-  // 🟢 ตั้งค่าการสแกน QR Code
-  startScanner = false;
-  allowedFormats: BarcodeFormat[] = [BarcodeFormat.QR_CODE]; // รองรับเฉพาะ QR Code
-  availableDevices: MediaDeviceInfo[] = [];
-  selectedDevice: MediaDeviceInfo | undefined;
+  searchTerms: string[] = [];  // 🔍 ใช้เก็บค่าค้นหาแต่ละแถว
+  assetNames: string[] = [];   // 📋 ใช้เก็บชื่อครุภัณฑ์แต่ละแถว
 
   verifiers: any[] = []; // ✅ เพิ่มตัวแปร verifiers
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  availableDevices: MediaDeviceInfo[] = [];
+  selectedDevice: MediaDeviceInfo | undefined;
 
-  
   constructor(
-    private fb: FormBuilder, 
-    private http: HttpClient ,
-    private ap : ApiService,
-    private cdr : ChangeDetectorRef) 
-  {}
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private ap: ApiService,
+    private dialog: MatDialog,) { }
 
   ngOnInit(): void {
     this.initForm();
-    this.loadUserInfo();
+    // this.loadUserInfo();
     this.loadDepartments();
     this.loadInspectors();
-    this.loadAssets();
-    this.getAvailableDevices();
+    // this.loadAssets();
   }
 
-  /** 🟢 ตั้งค่า Form */
+  /** ตั้งค่า Form */
   private initForm() {
     this.assetForm = this.fb.group({
       sessionName: ['', Validators.required], // ชื่อรอบตรวจนับ
       date: [new Date().toISOString()], // วันที่ตรวจนับ
-      departmentId: ['', Validators.required], // สำนัก
-      factionId: ['', Validators.required], // สำนัก
+      DepartmentId: ['', Validators.required], // สำนัก
+      FactionId: ['', Validators.required], // สำนัก
       verifierId: ['', Validators.required], // ผู้ตรวจสอบหลัก
       inspectors: this.fb.array([]), // รายชื่อผู้ตรวจสอบ
       formArray: this.fb.array([]), // รายละเอียดครุภัณฑ์
@@ -173,7 +158,7 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   }
 
   /** โหลดข้อมูลผู้ใช้ */
-  private loadUserInfo() {this.userinfo = { affiliation: 'กกต' };}
+  // private loadUserInfo() { this.userinfo = { affiliation: 'กกต' }; }
 
   /** โหลดข้อมูลผู้ตรวจสอบ */
   private async loadInspectors() {
@@ -195,7 +180,7 @@ export class AssetcountComponent implements OnInit, OnDestroy {
       console.error('Error loading assets:', error);
     }
   }
-  
+
   /** โหลดข้อมูลสำนัก */
   private async loadDepartments() {
     try {
@@ -203,7 +188,7 @@ export class AssetcountComponent implements OnInit, OnDestroy {
         // 🔹 แยกฝ่าย (Factions) ออกจาก Departments
         this.departments = departments.map((dept: any) => ({
           DeptId: dept.DeptId,
-          Semin:dept.Semin,
+          Semin: dept.Semin,
           Name: dept.Name,
           factions: dept.Factions || [] // ถ้าไม่มี ให้เป็น array ว่าง
         }));
@@ -229,27 +214,24 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   onFactionChange(event: any) {
     this.assetForm.patchValue({ FactionId: event.value });
   }
-  getAssetName(assetId: number): string {
-    return this.assetData?.find(data => data.assetId === assetId)?.assetName ?? 'ไม่พบข้อมูล';
-  }
 
   getDepartmentName(departmentId: number): string {
     const department = this.departments.find(dept => dept.DeptId === departmentId);
     return department ? department.Name : '-';
   }
-  
+
   getFactionName(factionId: number): string {
     const faction = this.factions.find(fact => fact.FactId === factionId);
     return faction ? faction.Name : '-';
   }
 
-  
-  /** 🆕 เพิ่มรายการใหม่ใน FormArray */
+  /** เพิ่มรายการใหม่ใน FormArray */
   addForm() {
     this.formArray.push(
       this.fb.group({
         search: [''],
         assetId: ['', Validators.required],
+        assetName: [''], // ✅ เพิ่ม assetName
         systemQuantity: [1, Validators.required],
         countedQuantity: [1, Validators.required],
         note: [''],
@@ -264,121 +246,224 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   get inspectorsArray(): FormArray {
     return this.assetForm.get('inspectors') as FormArray;
   }
-  
+
+  getFormControl(index: number, controlName: string): FormControl {
+    const control = this.formArray.at(index)?.get(controlName) as FormControl;
+
+    if (!control) {
+      console.warn(`⚠️ ไม่พบฟอร์มคอนโทรลสำหรับ ${controlName} ที่ index ${index}`);
+    }
+
+    return control ?? new FormControl('');
+  }
+
   addInspector() {
     this.inspectorsArray.push(
       this.fb.group({
-        inspectorId: ['', Validators.required],
+        inspectorId: [0, Validators.required],
       })
     );
   }
-  
+
   removeInspector(index: number) {
     if (this.inspectorsArray.length > 0) {
       this.inspectorsArray.removeAt(index);
     }
   }
-  
-  /** 🔍 ค้นหาครุภัณฑ์ */
-  async onSearch() {
-    const search = this.searchTerm.trim();
+
+  /** 🔍 ค้นหาครุภัณฑ์ของแถวที่กำหนด */
+  async onSearch(rowIndex: number) {
+    const search = this.searchTerms[rowIndex]?.trim();
     if (!search) {
-      console.warn('กรุณากรอกคำค้นหา');
-      this.filteredAssetData.next([]);
+      console.warn(`กรุณากรอกคำค้นหา (แถวที่ ${rowIndex + 1})`);
       return;
     }
 
     try {
-      const data = await firstValueFrom(this.ap.fetchDatahttp(`/api/AssetDetails?search=${encodeURIComponent(search)}`));
-      this.filteredAssetData.next(data ?? []);
-      this.assetData = data || [];
-
+      const data = await firstValueFrom(this.ap.fetchDatahttp(`AssetDetails?search=${encodeURIComponent(search)}`));
       if (data && data.length > 0) {
-        this.formArray.at(0).patchValue({ assetId: data[0].assetId });
+        const asset = data[0];
+
+        // ✅ อัปเดตข้อมูลใน FormArray
+        this.formArray.at(rowIndex).patchValue({
+          assetId: asset.AssetId,
+          assetName: asset.AssetName,
+        });
+
+        // ✅ อัปเดตชื่อครุภัณฑ์ของแถวนั้น
+        this.assetNames[rowIndex] = asset.AssetName;
+        console.log(`✅ ค้นหาสำเร็จ (แถว ${rowIndex + 1}):`, asset);
       } else {
-        console.warn('ไม่พบข้อมูลที่ตรงกับคำค้นหา');
+        this.assetNames[rowIndex] = 'ไม่พบข้อมูล';
+        console.warn(`❌ ไม่พบข้อมูลที่ตรงกับคำค้นหา (แถวที่ ${rowIndex + 1})`);
       }
     } catch (error) {
-      console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
-      this.filteredAssetData.next([]);
+      console.error(`❌ เกิดข้อผิดพลาดในการค้นหา (แถวที่ ${rowIndex + 1}):`, error);
+      this.assetNames[rowIndex] = 'เกิดข้อผิดพลาด';
     }
   }
 
-  
-  
+  private _assetName: string = '';
 
-  /** 📷 ดึงข้อมูลกล้องที่สามารถใช้งานได้ */
-  getAvailableDevices() {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      this.availableDevices = devices.filter(device => device.kind === 'videoinput');
-      if (this.availableDevices.length > 0) {
-        this.selectedDevice = this.availableDevices[0]; // เลือกกล้องตัวแรกโดยอัตโนมัติ
+  get assetName(): string {
+    return this._assetName;
+  }
+
+  set assetName(value: string) {
+    this._assetName = value;
+    if (this.formArray.length > 0) {
+      this.formArray.at(0).patchValue({ assetName: value });
+    }
+  }
+
+  /** 🔍 ดึงชื่อครุภัณฑ์จาก assetId */
+  getAssetName(assetId: string | number | null | undefined): string {
+    if (!assetId) return 'ไม่พบข้อมูล';
+
+    // ✅ แปลงทั้ง assetId และ assetData.assetId เป็น string เพื่อให้ค้นหาเจอ
+    const foundAsset = this.assetData?.find((data) => String(data.AssetId) === String(assetId));
+
+    // console.log('✅ พบข้อมูล:', foundAsset);
+    return foundAsset?.AssetName ?? 'ไม่พบข้อมูล';
+  }
+
+  currentScanIndex: number = 0; // ติดตามแถวที่กำลังสแกน
+
+  /** 📷 เปิด QR Scanner ใน Dialog */
+  openQrScanner() {
+    const dialogRef = this.dialog.open(QrScannerDialogComponent, {
+      width: '500px',
+      data: { // 🔹 ส่งค่า availableDevices และ selectedDevice ไปที่ Dialog
+        availableDevices: this.availableDevices,
+        selectedDevice: this.selectedDevice
       }
-    }).catch(error => console.error('Error accessing media devices:', error));
-  }
+    });
 
-  /** 📷 เมื่อสแกน QR Code สำเร็จ */
-  onScanSuccess(data: string) {
-    this.startScanner = false; // ปิดสแกนเนอร์หลังจากสแกนสำเร็จ
-    console.log('QR Code Data:', data);
+    console.log('this.availableDevices', this.availableDevices);
+    console.log('this.selectedDevice', this.selectedDevice);
 
-    const id = this.extractAssetIdFromUrl(data);
-    if (id) {
-      this.fetchAssetById(id);
-    } else {
-      console.warn('Invalid QR Code format');
-    }
-  }
-
-  /** 🔍 ดึงข้อมูลครุภัณฑ์จาก QR Code */
-  fetchAssetById(id: string) {
-    this.http.get<any>(`/api/AssetDetails/${id}`).subscribe({
-      next: (assetData) => {
-        console.log('Asset Data:', assetData);
-        this.formArray.at(0).patchValue({ assetId: assetData.AssetId });
-      },
-      error: (error) => {
-        console.error('Error fetching asset data:', error);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.onScanSuccess(result, this.currentScanIndex);
       }
     });
   }
 
-  /** 🆔 Extract Asset ID from URL */
-  private extractAssetIdFromUrl(url: string): string | null {
-    const regex = /\/(\d+)$/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+ /** 📷 เมื่อสแกน QR Code สำเร็จ */
+ onScanSuccess(data: string, rowIndex: number) {
+  console.log(`✅ QR Code Data (Row ${rowIndex}):`, data);
+
+  const id = this.extractAssetIdFromUrl(data);
+  if (id) {
+    this.currentScanIndex = rowIndex; // ระบุแถวที่กำลังจะอัปเดต
+    this.fetchAssetById(id);
+  } else {
+    console.warn('⚠️ Invalid QR Code format');
   }
+}
+
+
+/** 🔍 ฟังก์ชันแยก ID จาก URL */
+extractAssetIdFromUrl(url: string): string | null {
+  const match = url.match(/\/infoasset\/(\d+)$/); // ✅ ใช้ Regex เพื่อดึง ID
+  return match ? match[1] : null;
+}
+
+/** 🔍 ดึงข้อมูลครุภัณฑ์จาก QR Code */
+fetchAssetById(id: string) {
+  this.ap.fetchDatahttpbyId(`AssetDetails`,id).subscribe({
+    next: (assetData) => {
+      console.log('✅ Asset Data:', assetData);
+      
+      if (assetData) {
+        // ✅ อัปเดตข้อมูลในแถวที่ถูกต้อง
+        this.formArray.at(this.currentScanIndex).patchValue({
+          assetId: assetData.AssetId,
+          assetName: assetData.AssetName
+        });
+
+        // ✅ อัปเดตค่าที่ใช้แสดงใน Input (ตรงกับแถวที่สแกน)
+        this.assetNames[this.currentScanIndex] = assetData.AssetName;
+        this.searchTerms[this.currentScanIndex] = assetData.AssetCode;
+
+        this.currentScanIndex ++;
+      } else {
+        console.warn('⚠️ Asset not found');
+      }
+    },
+    error: (error) => {
+      console.error('❌ Error fetching asset data:', error);
+    }
+  });
+}
 
   /** 🔄 ส่งข้อมูลไปยัง API */
   async onSubmit() {
+
     if (this.assetForm.invalid) {
-      console.error('Form is invalid.');
+      console.error('❌ Form is invalid.');
       return;
     }
   
+    // ตรวจสอบว่า Inspectors มีค่าหรือไม่
+    const inspectors = this.assetForm.get('inspectors')?.value.map((item: any) => ({
+      Id: 0, // ✅ ใส่ค่าเริ่มต้นเป็น 0 ถ้าเป็นการสร้างใหม่
+      SessionId: 0, // ✅ กำหนดให้ API อัปเดต SessionId อัตโนมัติ
+      // AssetInventorySession: null, // ✅ API อาจไม่ต้องการ Object ซ้อน
+      InspectorId: Number(item.inspectorId),
+    })) || [];
+  
+    //  ตรวจสอบค่า `InventoryDetails`
+    const inventoryDetails = this.formArray.value ? this.formArray.value.map((item: any) => ({
+      InventoryDetailId: 0, 
+      SessionId: 0, 
+      // AssetInventorySession: null,
+      AssetId: Number(item.assetId),
+      // AssetDetails: null, 
+      SystemQuantity: Number(item.systemQuantity),
+      CountedQuantity: Number(item.countedQuantity),
+      Note: item.note || "",
+    })) : [];
+  
+    // ✅ ตรวจสอบค่า `session`
     const sessionRequest = {
-      sessionName: this.assetForm.get('sessionName')?.value,
-      date: this.assetForm.get('date')?.value,
-      departmentId: this.assetForm.get('departmentId')?.value,
-      factionId: this.assetForm.get('factionId')?.value, // ✅ ส่ง FactionId ด้วย
-      verifierId: this.assetForm.get('verifierId')?.value,
-      inspectors: this.assetForm.get('inspectors')?.value.map((inspectorId: number) => ({ inspectorId })),
-      inventoryDetails: this.formArray.value.map((item: any) => ({
-        assetId: item.assetId,
-        systemQuantity: item.systemQuantity,
-        countedQuantity: item.countedQuantity,
-        note: item.note,
-      })),
+      SessionId: 0, // ✅ ใช้ 0 สำหรับการสร้างใหม่
+      Date: this.assetForm.get('date')?.value ,
+      SessionName: this.assetForm.get('sessionName')?.value || "ไม่ระบุ",
+      DepartmentId: this.assetForm.get('DepartmentId')?.value ? Number(this.assetForm.get('DepartmentId')?.value) : null,
+      // Department: null,
+      FactionId: this.assetForm.get('FactionId')?.value ? Number(this.assetForm.get('FactionId')?.value) : null,
+      // Faction: null,
+      VerifierId: this.assetForm.get('verifierId')?.value ? Number(this.assetForm.get('verifierId')?.value) : null,
+      // Verifier: null,
+      Note: this.assetForm.get('note')?.value || null,
+      InventoryDetails: inventoryDetails,
+      Inspectors: inspectors
     };
   
+    console.log('📤 ส่งข้อมูลไปที่ API:', sessionRequest);
+  
     try {
-      await firstValueFrom(this.http.post('/api/AssetInventorySession', sessionRequest));
-      alert('บันทึกข้อมูลสำเร็จ!');
-      this.assetForm.reset();
+      await this.ap.postData('AssetInventorySession', sessionRequest);
+
+      Swal.fire({
+        icon: 'success',
+        title: '✅ บันทึกข้อมูลสำเร็จ!',
+        text: 'ข้อมูลถูกบันทึกลงฐานข้อมูลเรียบร้อยแล้ว',
+        confirmButtonText: 'ตกลง'
+      }).then(() => {
+        this.assetForm.reset();
+      });
+
     } catch (error) {
-      console.error('Error submitting data:', error);
-      alert('เกิดข้อผิดพลาดในการบันทึก');
+      console.error('❌ เกิดข้อผิดพลาดในการบันทึก:', error);
+
+      Swal.fire({
+        icon: 'error',
+        title: '❌ เกิดข้อผิดพลาด!',
+        text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง',
+        confirmButtonText: 'ตกลง'
+      });
     }
   }
   
@@ -388,6 +473,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     this._onDestroy.complete();
   }
 
- 
+
 }
 

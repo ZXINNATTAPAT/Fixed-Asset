@@ -1,19 +1,12 @@
-import {AfterViewInit,Component,OnDestroy,OnInit,ViewChild,} from '@angular/core';
-import { TextColorDirective } from '@coreui/angular';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+import { TextColorDirective ,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective} from '@coreui/angular';
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ApiService } from '../../ApiController/api-service.service';
-
-import Swal from 'sweetalert2';
-import * as ExcelJS from 'exceljs';
-
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator';
-
 import 'moment/locale/th.js';
 // import moment from 'moment';
 import { Subscription } from 'rxjs';
@@ -25,6 +18,8 @@ import { DataService } from '@services/data-service.component';
 import { MatDialog } from '@angular/material/dialog';
 import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
 import { InfoassetComponent } from '../infoasset/infoasset.component';
+import Swal from 'sweetalert2';
+import * as ExcelJS from 'exceljs';
 
 interface AssetDetails {
   AssetId: any;
@@ -98,18 +93,9 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
   }
-
   ngAfterViewInit() {this.dataSource.paginator = this.paginator;} 
-  
-  // เรียกเมื่อประเภท Asset เปลี่ยน
-  onAssetTypeChange(): void {this.filterAssets();}
-
-  ngOnDestroy(): void {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
-  }
-
+  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
+  ngOnDestroy(): void {if (this.dataSubscription) this.dataSubscription.unsubscribe();}
   ngOnInit(): void {
     this.initializeUserInfo();
     this.loadAssetTypes();
@@ -161,10 +147,10 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       error: (err) => console.error('Error loading Asset Types:', err),
     });
   }
-  
+
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
-    this.apiService.fetchDatahttp('AssetDetails').subscribe({
+    this.apiService.fetchDatahttp('AssetDetails/GetForTable').subscribe({
       next: (data) => this.handleAssetDetails(data),
       error: (err) => console.error('Error loading Asset Details:', err),
     });
@@ -196,23 +182,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     return new Date(b.PurchaseDate).getTime() - new Date(a.PurchaseDate).getTime();
   }
   
-  // แปลงข้อมูล Asset และสร้าง QR Code
-  private transformAsset(asset: any): any {
-    asset.PurchaseDate = this.myFunctionInstance?.convertDate(asset.PurchaseDate);
-    asset = this.myFunctionInstance?.translateToThai(asset);
-  
-    const path = `http://localhost:4200/system/infoasset/${asset.AssetId}`;
-    QRCode.toDataURL(path, (err, url) => {
-      if (err) {
-        console.error('QR Code generation error:', err);
-      } else {
-        asset.qrCodeUrl = url;
-      }
-    });
-  
-    return asset;
-  }
-  
   // ฟิลเตอร์ Asset ตามประเภท
   filterAssets(): void {
     this.dataSource.data = this.selectedAssetType
@@ -232,27 +201,44 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   setupFilter(column: string) {
-    // const isPriceColumn = column === 'ราคาต่อหน่วย';
+    const isPriceColumn = column === 'ราคาต่อหน่วย';
 
-    // this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
-    //   const textToSearch = d[column];
-    //   if (typeof textToSearch === 'string') {
-    //     return isPriceColumn
-    //       ? textToSearch.includes(filter)
-    //       : textToSearch.toLowerCase().includes(filter);
-    //   } else if (typeof textToSearch === 'number') {
-    //     return textToSearch.toString().includes(filter);
-    //   } else {
-    //     return false; // or some other default behavior
-    //   }
-    // };
+    this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
+      const textToSearch = d[column];
+      if (typeof textToSearch === 'string') {
+        return isPriceColumn
+          ? textToSearch.includes(filter)
+          : textToSearch.toLowerCase().includes(filter);
+      } else if (typeof textToSearch === 'number') {
+        return textToSearch.toString().includes(filter);
+      } else {
+        return false; // or some other default behavior
+      }
+    };
   }
 
   applyFilter(event: Event) {
-    // const filterValue = (event.target as HTMLInputElement).value
-    //   .trim()
-    //   .toLowerCase();
-    // this.dataSource.filter = filterValue;
+    const filterValue = (event.target as HTMLInputElement).value
+      .trim()
+      .toLowerCase();
+    this.dataSource.filter = filterValue;
+  }
+
+  // แปลงข้อมูล Asset และสร้าง QR Code
+  private transformAsset(asset: any): any {
+    asset.PurchaseDate = this.myFunctionInstance?.convertDate(asset.PurchaseDate);
+    asset = this.myFunctionInstance?.translateToThai(asset);
+  
+    const path = `http://localhost:4200/system/infoasset/${asset.AssetId}`;
+    QRCode.toDataURL(path, (err, url) => {
+      if (err) {
+        console.error('QR Code generation error:', err);
+      } else {
+        asset.qrCodeUrl = url;
+      }
+    });
+  
+    return asset;
   }
 
   showQrAsset(asset: any): void {
@@ -273,6 +259,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
+  //ลบสินทรัพย์
   async deleteAsset(asset: any): Promise<void> {
     const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',

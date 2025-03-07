@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
-
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ContainerComponent,
@@ -61,9 +60,7 @@ export class DefaultLayoutComponent implements OnInit {
     this.updateNavItems();
   }
 
-  ngOnInit(): void {
-    this.initializeUserData();
-  }
+  ngOnInit(): void {this.initializeUserData();}
   
   private async initializeUserData(): Promise<void> {
     try {
@@ -72,23 +69,19 @@ export class DefaultLayoutComponent implements OnInit {
         if (userInfo) {
           this.userinfo = userInfo.claims;
           this.userId = userInfo.userId;
-
-  
-          console.log('UserInfo Loaded:', this.userinfo);
+          // console.log('UserInfo Loaded:', this.userinfo);
   
           // โหลด UserProfile เมื่อ userId พร้อม
           if (this.userId) {
             const userId = this.userId ;
             this.loadUserProfile(userId);
           } else {
-            console.warn('UserId not found in UserInfo');
+            // console.warn('UserId not found in UserInfo');
           }
         } else {
-          console.warn('UserInfo is not available.');
+          // console.warn('UserInfo is not available.');
         }
       });
-  
-      
     } catch (error) {
       console.error('Error initializing user data:', error);
     }
@@ -103,7 +96,7 @@ export class DefaultLayoutComponent implements OnInit {
       this.userProfile = this.dataService.getUserProfileSnapshot();
   
       if (this.userProfile) {
-        console.log('User Profile Loaded:', this.userProfile);
+        // console.log('User Profile Loaded:', this.userProfile);
       } else {
         console.warn('User Profile is not available.');
       }
@@ -133,9 +126,10 @@ export class DefaultLayoutComponent implements OnInit {
       return item;
     });
   }
-  
 
   onScrollbarUpdate($event: any) {
     // โค้ดสำหรับ Scrollbar (ตามต้องการ)
   }
+
+  
 }

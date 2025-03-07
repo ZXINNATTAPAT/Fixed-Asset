@@ -79,7 +79,8 @@ export class LoginComponent implements OnInit {
                 // this.router.navigate([
                 //   `/dashboard/${response.affiliation}/${response.department}/${response.page}`,
                 // ]);
-                window.location.href = `/dashboard/${response.affiliation}/${response.department}/${response.page}`;
+                // window.location.href = `/dashboard/${response.affiliation}/${response.department}/${response.page}`;
+                window.location.href = `/dashboard/${response.affiliation}`;
                 
               } else {
                 console.error('Page information is missing in the response.');

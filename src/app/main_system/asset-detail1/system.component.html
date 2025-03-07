@@ -108,11 +108,16 @@
 
                   </mat-select>
 
-                  <mat-select *ngIf="!asset.get('TypeId')?.value" placeholder="เลือกหมวดหมู่ครุภัณฑ์"
-                    panelClass="mat-select-panel" #singleSelect disabled="true" (click)="showAlert()"
-                    (keydown)="handleKeyDown($event)" style="font-family:Anuphan,sans-serif;
-                        font-optical-sizing:auto;font-weight:500;
-                        font-style:normal">
+                  <mat-select 
+                    *ngIf="!asset.get('TypeId')?.value" 
+                    placeholder="เลือกหมวดหมู่ครุภัณฑ์"
+                    panelClass="mat-select-panel" 
+                    #singleSelect disabled="true" 
+                    (click)="showAlert()"
+                    (keydown)="handleKeyDown($event)" 
+                    style="font-family:Anuphan,sans-serif;
+                    font-optical-sizing:auto;font-weight:500;
+                    font-style:normal">
                   </mat-select>
 
                 </div>
@@ -486,10 +491,9 @@
 
           </div>
 
-
           <h3><span class="anuphan-700">ตารางแสดงค่าเสื่อม</span></h3>
-          <div class="table-responsive mb-4 p-2">
 
+          <div class="table-responsive mb-4 p-2">
 
             <table class="table table-bordered ">
               <tbody>

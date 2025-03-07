@@ -195,7 +195,9 @@ export class SystemComponent implements OnInit, OnDestroy {
       // เรียก updateDepreciationSchedule เมื่อฟอร์มโหลดเสร็จ
       this.asset.valueChanges.pipe(
         debounceTime(700), // รอ 700 มิลลิวินาทีก่อนดำเนินการ
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)) // ตรวจสอบค่าที่เปลี่ยนจริง
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+        ) // ตรวจสอบค่าที่เปลี่ยนจริง
       ).subscribe((formValues) => {
         const typeId = formValues.TypeId;
         const receiptDate = formValues.ReceiptDate;
@@ -203,7 +205,8 @@ export class SystemComponent implements OnInit, OnDestroy {
     
         if (typeId && receiptDate && purchasePrice > 0) {
           // เรียก API เมื่อค่าฟอร์มครบถ้วน
-          this.ap.fetchDatahttpbyId('Depreciations/type', typeId).subscribe((depreciations) => {
+          this.ap.fetchDatahttpbyId('Depreciations/type', typeId)
+          .subscribe((depreciations) => {
             this.updateDepreciationSchedule(depreciations);
           });
         } else {
@@ -214,10 +217,10 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   // Load user information and handle it
   private initializeUserInfo(): void {
-      this.dataService.userInfo$.subscribe((userInfo) => {
-        this.userinfo = userInfo;
-        console.log('DefaultHeader UserInfo:', userInfo);
-      });
+      // this.dataService.userInfo$.subscribe((userInfo) => {
+      //   this.userinfo = userInfo;
+      //   console.log('DefaultHeader UserInfo:', userInfo);
+      // });
   }
 
   // Initialize the reactive form

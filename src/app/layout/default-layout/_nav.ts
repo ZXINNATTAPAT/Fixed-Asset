@@ -1,4 +1,8 @@
-import { INavData } from '@coreui/angular';
+import { INavData as CoreUINavData } from '@coreui/angular';
+
+interface INavData extends CoreUINavData {
+  roles?: string[];
+}
 
 export const navItems: INavData[] = [
 
@@ -6,16 +10,23 @@ export const navItems: INavData[] = [
     name: 'แดชบอร์ด',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
+    // roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
     children: [
       // {
       //   name: 'แดชบอร์ดกลาง',
       //   url: '/mainpage',
       //   icon:'nav-icon-bullet' ,
       // },
+      // {
+      //   name: 'แดชบอร์ดสรุปภาพรวม(ส่วนกลาง)',
+      //   url: '/dashboard/ส่วนกลาง/$param/$param',
+      //   icon:'nav-icon-bullet' ,
+      // },
       {
         name: 'แดชบอร์ดสรุปภาพรวม(ส่วนกลาง)',
-        url: '/dashboard/ส่วนกลาง/$param/$param',
+        url: '/dashboard/ส่วนกลาง/',
         icon:'nav-icon-bullet' ,
+        
       },
       // {
       //   name: 'แดชบอร์ดสรุปภาพรวม(ส่วนภูมิภาค)',
@@ -31,17 +42,17 @@ export const navItems: INavData[] = [
     children: [
       {
         name: 'เพิ่มรายการครุภัณฑ์',
-        url: '/system/AssetDetails',
+        url: '/system/assetDetails',
         icon: 'nav-icon-bullet'
       },
       {
         name: 'ตรวจนับครุภัณท์',
-        url: '/system/Assetcount',
+        url: '/system/assetcount',
         icon: 'nav-icon-bullet'
       },
       {
         name: 'บันทึกซ่อมแซม',
-        url: '/system/Repair',
+        url: '/system/repair',
         icon: 'nav-icon-bullet'
       },
       // {
@@ -62,18 +73,26 @@ export const navItems: INavData[] = [
     ]
   },
   {
-    name: 'รายการครุภัณฑ์',
-    url: '/assettable',
-    // icon: 'nav-cil-folder',
-    iconComponent: { name: 'cil-pencil' }
-  
+    name: 'รายการบันทึก',
+    url: '/table', //ใช้ตรวจสอบPath หน้าตาราง Dropdown
+    iconComponent: { name: 'cil-pencil' },
+      children: [
+      {
+        name: 'รายการครุภัณฑ์',
+        url: '/table/assettable',
+        icon: 'nav-icon-bullet'
+      },
+      {
+        name: 'รายการการตรวจนับ',
+        url: '/table/inventorysession',
+        icon: 'nav-icon-bullet'
+      }],
   },
   {
     name: 'ทะเบียนผู้ใช้งาน',
     url: '/usersmanagement',
     // icon: 'nav-cil-folder',
     iconComponent: { name: 'cil-pencil' }
-  
   },
   // {
   //   name: 'บันทึกการตรวจนับ',
@@ -101,7 +120,7 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet'
       },
       {
-        name: 'กำหนดรหัสส่วนงาน',
+        name: 'กำหนดรหัสสำนักงาน',
         url: '/defaultdata/sectiontype',
         icon: 'nav-icon-bullet'
       },
@@ -120,17 +139,16 @@ export const navItems: INavData[] = [
         url: '/defaultdata/ps',
         icon: 'nav-icon-bullet'
       },
-      {
-        name: 'กำหนดผู้รับผิดชอบ',
-        url: '/defaultdata/rp',
-        icon: 'nav-icon-bullet'
-      },
-      
-      {
-        name: 'กำหนดผังบัญชี ',
-        url: '/defaultdata/acc',
-        icon: 'nav-icon-bullet'
-      },
+      // {
+      //   name: 'กำหนดผู้รับผิดชอบ',
+      //   url: '/defaultdata/rp',
+      //   icon: 'nav-icon-bullet'
+      // },
+      // {
+      //   name: 'กำหนดผังบัญชี ',
+      //   url: '/defaultdata/acc',
+      //   icon: 'nav-icon-bullet'
+      // },
     ]
   },
   // {
@@ -419,3 +437,5 @@ export const navItems: INavData[] = [
   //   attributes: { target: '_blank' }
   // }
 ];
+export { INavData };
+

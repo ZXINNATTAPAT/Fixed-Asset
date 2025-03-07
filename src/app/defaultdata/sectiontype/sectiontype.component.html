@@ -44,33 +44,33 @@
           <table  mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover ">
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef style="font-weight: bold;">#</th>
-              <td mat-cell *matCellDef="let asset">
+              <th mat-header-cell *matHeaderCellDef class="border" style="font-weight: bold;">#</th>
+              <td mat-cell *matCellDef="let asset" class="border">
 
                 <button class="btn btn-sm btn-warning m-1" 
-                            (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
+                  (click)="editAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
+                  <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
                 </button>
 
                 <button class="btn btn-sm btn-danger m-1" 
-                            (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
-                            <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
+                  (click)="deleteAsset(asset)" style="width: 28px;height: 28px; padding: 4px;">
+                  <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
                 </button>
               </td>
             </ng-container>
           
             <!-- Dynamic Columns -->
             <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">{{ column }}</th>
-              <td mat-cell *matCellDef="let asset">{{ asset[column] }}</td>
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="border" style="font-weight: bold;">{{ column }}</th>
+              <td mat-cell *matCellDef="let asset" class="border">{{ asset[column] }}</td>
             </ng-container>
           
-            <!-- Header Row -->
             <!-- Header Row -->
             <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสแผนก', 'ชื่อแผนก']"></tr>
         
             <!-- Data Rows -->
             <tr mat-row *matRowDef="let row; columns: ['actions', 'รหัสแผนก', 'ชื่อแผนก'];"></tr>
+
           </table>
           
           <!-- Paginator -->

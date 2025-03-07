@@ -11,6 +11,8 @@ import {
   BreadcrumbRouterComponent,
   ColorModeService,
   ContainerComponent,
+  DropdownModule,
+  DropdownComponent,
   DropdownDividerDirective,
   DropdownHeaderDirective,
   DropdownItemDirective,
@@ -36,8 +38,9 @@ import { cilAccountLogout, cilUser } from '@coreui/icons';
 import CountyData from './County.json';
 import { HttpClient } from '@angular/common/http';
 import { json } from 'stream/consumers';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { DataService } from '@services/data-service.component';
+import { navItems, INavData } from '../_nav';
 
 interface povice {
   id: number;
@@ -47,6 +50,7 @@ interface povice {
 @Injectable({
   providedIn: 'root',
 })
+
 @Component({
   selector: 'app-default-header',
   templateUrl: './default-header.component.html',
@@ -65,6 +69,8 @@ interface povice {
     NgTemplateOutlet,
     BreadcrumbRouterComponent,
     ThemeDirective,
+    DropdownModule,
+    DropdownComponent,
     DropdownToggleDirective,
     TextColorDirective,
     AvatarComponent,
@@ -78,20 +84,18 @@ interface povice {
     NgStyle,
   ],
 })
+
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
+
   icons = { cilAccountLogout, cilUser };
 
+  navItemsFiltered: INavData[] = [];
   userinfo: any = [];
   token: any;
-
   province: povice[] = [];
-
   provinceset: any[] = [];
-
   showCounty: any = {};
-
   coutcounty: any[] = [];
-
   colorMode: any;
 
   constructor(
@@ -101,14 +105,13 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     private destroyRef: DestroyRef,
     private authService:ApiService ,
     private dataService :DataService
-  ) {
-    super();
-  }
+  ) { super(); }
 
   ngOnInit(): void {
-    this.dataService.userInfo$.subscribe((userInfo) => {
+    this.dataService.userInfo$.subscribe((
+      userInfo: { claims: {}; }) => {
       this.userinfo = userInfo?.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
-      console.log('DefaultHeader UserInfo:', this.userinfo);
+      // console.log('DefaultHeader UserInfo:', this.userinfo);
     });
 
     this.colorModeService.localStorageItemName.set(
@@ -130,6 +133,12 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
     this.setshow();
   }
+
+  // userRole: string = '';
+
+  // filterNavItems() {
+  //   this.navItemsFiltered = navItems.filter(item => item.roles?.includes(this.userRole));
+  // }
 
  
   setshow() {

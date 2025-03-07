@@ -115,7 +115,7 @@ export class UserManagementComponent implements OnInit {
   }
   
   getUsers(): void {
-    this.http.get<any[]>('https://localhost:7204/api/users').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/users/GetUserFull').subscribe(data => {
       this.userDetails = data;
       this.dataSource = new MatTableDataSource<any>(this.userDetails);
       this.dataSource.paginator = this.paginator;

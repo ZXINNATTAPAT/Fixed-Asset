@@ -178,32 +178,32 @@ export class Tablewiget4Component implements OnInit, OnDestroy {
   }
 
   getAssetType(): void {
-    this.http
-      .get<any[]>('https://localhost:7204/api/RepairAsset')
-      .subscribe((data) => {
-        this.assetDetails = data.map((asset) => {
-          const foundAsset = this.assetDetails2.find(
-            (asset2) => asset2.assetId === asset.assetId
+    // this.http
+    //   .get<any[]>('https://localhost:7204/api/RepairAsset')
+    //   .subscribe((data) => {
+    //     this.assetDetails = data.map((asset) => {
+    //       const foundAsset = this.assetDetails2.find(
+    //         (asset2) => asset2.assetId === asset.assetId
             
-          );
-          if (foundAsset) {
-            asset.assetCode = foundAsset.assetCode; // เพิ่ม property assetCode เข้าไปในข้อมูล asset
-            asset.assetName = foundAsset.assetName;
-          } else {
-            console.log('Asset code not found for assetId:', asset.assetId);
-          }
-          asset = this.translateToThai(asset); // แปลงข้อมูลเป็นภาษาไทย
-          return asset;
-        });
+    //       );
+    //       if (foundAsset) {
+    //         asset.assetCode = foundAsset.assetCode; // เพิ่ม property assetCode เข้าไปในข้อมูล asset
+    //         asset.assetName = foundAsset.assetName;
+    //       } else {
+    //         console.log('Asset code not found for assetId:', asset.assetId);
+    //       }
+    //       asset = this.translateToThai(asset); // แปลงข้อมูลเป็นภาษาไทย
+    //       return asset;
+    //     });
 
-        this.assetDetailsset = this.assetDetails;
+    //     this.assetDetailsset = this.assetDetails;
 
-        this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
+    //     this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
 
-        this.dataSource.paginator = this.paginator;
+    //     this.dataSource.paginator = this.paginator;
 
-        this.dataSource.sort = this.sort;
-      });
+    //     this.dataSource.sort = this.sort;
+    //   });
   }
 
   getAssetdata(): void {

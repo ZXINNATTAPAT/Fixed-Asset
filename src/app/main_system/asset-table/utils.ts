@@ -1,16 +1,9 @@
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash,cilSearch } from '@coreui/icons';
 
-
-
-
 export class myFunction {
 
-
-
   userinfo: any = [];
-
   token: any;
-
   icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo ,cilSearch };
 
 
@@ -24,13 +17,9 @@ export class myFunction {
     return formattedDate ?? '';
   }
 
-  addasset(): void {
-    window.location.href = '#/system/AssetDetails';
-  }
+  addasset(): void {window.location.href = '#/system/AssetDetails';}
 
-  infoasset(asset: any): void {
-    window.location.href = `#/system/infoasset/${asset.assetId}`;
-  }
+  infoasset(asset: any): void {window.location.href = `#/system/infoasset/${asset.assetId}`;}
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
@@ -38,14 +27,13 @@ export class myFunction {
       AssetCode: 'รหัสครุภัณฑ์',
       AssetName: 'รายการ',
       PurchasePrice: 'ราคาต่อหน่วย',
-      PurchasedFrom: 'วิธีการได้มา',
-      DocumentNumber: 'เลขที่เอกสาร',
-      AssetLocation: 'ที่อยู่',
-      Department: 'สำนัก',
-      Faction: 'ฝ่าย',
+      Department: 'สำนัก',// qurery Id จากฐานข้อมูล
+      Faction: 'ฝ่าย', //qurery Id จากฐานข้อมูล
       ResponsibleEmployee: 'ผู้ใช้งาน',
       Status: 'สถานะ',
-      Note: 'หมายเหตุ',
+      Note: 'หมายเหตุ',// PurchasedFrom: 'วิธีการได้มา', ไม่่แสดงในหน้านี้
+      // DocumentNumber: 'เลขที่เอกสาร', ไม่มีในฐานข้อมูลแล้ว
+      // AssetLocation: 'ที่อยู่', ไม่มีในฐานข้อมูลแล้ว
     };
 
     const translatedAsset: { [key: string]: any } = {};
@@ -87,12 +75,11 @@ export class myFunction {
     'รหัสครุภัณฑ์',
     'รายการ',
     'ราคาต่อหน่วย',
-    'วิธีการได้มา',
+    // 'วิธีการได้มา',
     // 'เลขที่เอกสาร',
-    // 'หน่วยงาน',
-    
+    'สำนัก',
     'ฝ่าย',
-    'ที่อยู่',
+    // 'ที่อยู่',
     'ผู้ใช้งาน',
     // 'หมายเหตุ',
     // 'addcol'
@@ -107,11 +94,11 @@ export class myFunction {
     'รหัสครุภัณฑ์',
     'รายการ',
     'ราคาต่อหน่วย',
-    'วิธีการได้มา',
-    'เลขที่เอกสาร',
-    'หน่วยงาน',
+    // 'วิธีการได้มา',
+    // 'เลขที่เอกสาร',
+    'สำนัก',
     'ฝ่าย',
-    'ที่อยู่',
+    // 'ที่อยู่',
     'ผู้ใช้งาน',
     'หมายเหตุ',
     // 'addcol'
@@ -124,11 +111,11 @@ export class myFunction {
     'รหัสครุภัณฑ์',
     'รายการ',
     'ราคาต่อหน่วย',
-    'วิธีการได้มา',
+    // 'วิธีการได้มา',
     'เลขที่เอกสาร',
-    'หน่วยงาน',
+    'สำนัก',
     'ฝ่าย',
-    'ที่อยู่',
+    // 'ที่อยู่',
     'ผู้ใช้งาน',
     'หมายเหตุ',
   ];
