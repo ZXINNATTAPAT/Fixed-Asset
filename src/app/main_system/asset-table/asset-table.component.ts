@@ -65,19 +65,14 @@ interface AssetDetails {
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  
   @ViewChild(MatSort) sort!: MatSort;
 
   assets: AssetDetails[] = []; // แก้จาก any = {} เป็น array
   qrCodeUrl: string = '';
   selectedAssetType: string = '';
-
   displayedColumns: string[];  //Eng
-  
   displayedColumns1: string[]; //ทั้งหมด
-  
   displayedColumns2: string[]; //ไว้เรียงข้อมูลในตาราง
-  
   displayedColumns3!: string[]; //ไว้จัด Header row & col
   
   icons = {};
@@ -302,41 +297,35 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
-
     const worksheet = workbook.addWorksheet('Assets');
-
-    // Add headers
-    const headers = [
-      'วันเดือนปี',
-      'รหัสครุภัณฑ์',
-      'รายการ',
-      'ราคาต่อหน่วย',
-      'วิธีการได้มา',
-      'เลขที่เอกสาร',
-      'หน่วยงาน',
-      'ฝ่าย',
-      'ผู้ใช้งาน',
-      'หมายเหตุ',
-    ];
-    worksheet.addRow(headers);
-
-    // Add data
+  
+    // Remove 'Aactions', 'Qrcode', and 'สถานะ' before creating headers
+    const exportColumns = this.displayedColumns3.filter(column => 
+      column !== 'Aactions' && column !== 'Qrcode' && column !== 'สถานะ'
+    );
+  
+    // Set Title Row (Merged and Centered)
+    const title = 'ทะเบียนคุมครุภัณฑ์'; // Excel title
+    const titleRow = worksheet.addRow([title]);
+  
+    // Merge Title Row across all columns
+    worksheet.mergeCells(`A1:${String.fromCharCode(65 + exportColumns.length - 1)}1`);
+    titleRow.getCell(1).alignment = { horizontal: 'center' }; // Center align title
+    titleRow.getCell(1).font = { bold: true, size: 14 }; // Bold and larger font for title
+  
+    // Add headers dynamically (in row 2)
+    worksheet.addRow(exportColumns);
+  
+    // Add data rows (starting from row 3)
     this.assetDetails.forEach((asset: any) => {
-      // ใช้ any หรือ interface ที่ไม่ได้ระบุก็ได้
-      const row = [];
-      row.push(asset.วันเดือนปี);
-      row.push(asset.รหัสครุภัณฑ์);
-      row.push(asset.รายการ);
-      row.push(this.myFunctionInstance!.formatCurrency(asset.ราคาต่อหน่วย));
-      row.push(asset.วิธีการได้มา);
-      row.push(asset.เลขที่เอกสาร);
-      row.push(asset.หน่วยงาน);
-      row.push(asset.ฝ่าย);
-      row.push(asset.ผู้ใช้งาน);
-      row.push(asset.หมายเหตุ);
+      const row = exportColumns.map(column => 
+        column === 'ราคาต่อหน่วย' 
+          ? this.myFunctionInstance!.formatCurrency(asset[column]) 
+          : asset[column]
+      );
       worksheet.addRow(row);
     });
-
+  
     // Generate Excel file
     workbook.xlsx.writeBuffer().then((data: any) => {
       const blob = new Blob([data], {
@@ -345,12 +334,12 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'assets.xlsx';
+      a.download = 'ทะเบียนคุมครุภัณฑ์.xlsx';
       a.click();
     });
   }
-
-}
+}  
+  
 
 //   async searchAsset(): Promise<void> {
 //     const AssetCode = this.AssetCodeInput;
