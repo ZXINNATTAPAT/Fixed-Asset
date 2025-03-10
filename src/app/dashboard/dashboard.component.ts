@@ -47,10 +47,18 @@ export class DashboardComponent implements OnInit {
 
   
   ngOnInit(): void {
-    // this.dataService.userInfo$.subscribe((userInfo) => {
-    //   this.userinfo = userInfo;
-    //   console.log('DefaultHeader UserInfo:', userInfo);
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      this.userinfo = userInfo;
+      console.log('DefaultHeader UserInfo:', userInfo);
+    });
+    // this.authService.getAuthStatus().subscribe(auth => {
+    //   if (auth.isAuthenticated) {
+    //     console.log(`User: ${auth.username}, Role: ${auth.roleName} (ID: ${auth.roleId})`);
+    //   } else {
+    //     console.log("User is not logged in");
+    //   }
     // });
+    
   }
   
   // ฟังก์ชันจัดการพารามิเตอร์

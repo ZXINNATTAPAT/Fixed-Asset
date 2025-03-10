@@ -24,6 +24,14 @@ export const routes: Routes = [
         data: {title: 'เพิ่มรายการครุภัณท์'},
       },
       {
+        path: 'assettable',
+        loadComponent: () =>
+          import('./asset-table/asset-table.component').then(
+            (m) => m.AssetTableComponent
+          ),
+        data: {title: 'ตารางสินทรัพย์ทั้งหมด'},
+      },
+      {
         path: 'assetDetails2',
         loadComponent: () =>
           import('./asset-details2/asset-details2.component').then(

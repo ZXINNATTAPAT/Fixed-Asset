@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, map, Observable } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import axios from 'axios';
 
 export interface AssetInventorySession {
@@ -13,8 +13,19 @@ export interface AssetInventorySession {
   Note?: string;
 }
 
+export interface AssetInventoryDetails {
+  inventoryDetailId: number;
+  sessionId: number;
+  assetId: number;
+  assetName: string;
+  systemQuantity: number;
+  countedQuantity: number;
+  note?: string;
+}
+
 @Injectable({providedIn: 'root'})
 export class ApiService {
+
   private baseUrl = 'https://localhost:7204/api/Users'; // URL หลักของ API
 
   private apiUrl     = 'https://localhost:7204/api/';
@@ -45,13 +56,31 @@ export class ApiService {
       { withCredentials: true });
   }
 
-  getUserRole(): Observable<{ username: string, roles: string[] }> {
-    return this.http.get<{ username: string, roles: string[] }>
-    (`${this.apiUrlauth}userrole`, 
+  // getUserRole(): Observable<{ username: string, roles: string[] }> {
+  //   return this.http.get<{ username: string, roles: string[] }>(
+  //     `${this.apiUrlauth}userrole`, 
+  //     { withCredentials: true });
+  // }
+
+  getUserRole(): Observable<{ username: string, userId: number, roles: string[] }> {
+    return this.http.get<{ username: string, userId: number, roles: string[] }>(
+      `${this.apiUrlauth}userrole`, 
       { withCredentials: true });
   }
-  
 
+  getAuthStatus(): Observable<{ isAuthenticated: boolean, username: string, userId: number, roles: string[] }> {
+    return this.http.get<{ isAuthenticated: boolean, username: string, userId: number, roles: string[] }>(
+      `${this.apiUrlauth}isauthenticated`,
+      { withCredentials: true } // ✅ ต้องมีเพื่อให้ Cookies `HttpOnly` ถูกส่งไป
+    ).pipe(
+      tap(response => console.log("🔍 API Auth Response:", response)),
+      catchError(error => {
+        console.error("❌ Error fetching auth status:", error);
+        return of({ isAuthenticated: false, username: '', userId: 0, roles: [] }); // ✅ Fix return type
+      })
+    );
+  }
+  
   getUserInfos(): Observable<any> {
     return this.http.get<any>(
       this.profileUrl, 
@@ -107,7 +136,8 @@ export class ApiService {
    * @returns Observable ที่ส่งคืนข้อมูล assetCode
    */
    generateAssetCode(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}AssetDetails/generate-code`, payload, { withCredentials: true });
+    return this.http.post<any>(`${this.apiUrl}AssetDetails/generate-code`, 
+      payload, { withCredentials: true });
   }
   
   // Example method to post data to the API
@@ -142,6 +172,16 @@ export class ApiService {
 
   getSessions(endpoint:string): Observable<AssetInventorySession[]> {
     return this.http.get<AssetInventorySession[]>(`${this.apiUrl}${endpoint}`);
+  }
+
+  // 📌 ดึงข้อมูลสินทรัพย์ทั้งหมด
+  getAssetInventory(): Observable<AssetInventoryDetails[]> {
+    return this.http.get<AssetInventoryDetails[]>(`${this.apiUrl}AssetInventoryDetails`);
+  }
+
+  // 📌 ดึงข้อมูลสินทรัพย์ตาม ID
+  getAssetById(id: number): Observable<AssetInventoryDetails> {
+    return this.http.get<AssetInventoryDetails>(`${this.apiUrl}AssetInventoryDetails/${id}`);
   }
 
   

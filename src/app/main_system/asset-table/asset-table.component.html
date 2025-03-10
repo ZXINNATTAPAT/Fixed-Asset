@@ -97,31 +97,28 @@
             # <input cFormControl sizing="sm" disabled />
           </th>
 
-          <td class="border" mat-cell *matCellDef="let asset" style="width: fit-content">
+          <td class="border" mat-cell *matCellDef="let asset" style="width: 12%">
             
-            <button class="btn btn-sm btn-primary m-1" (click)="assetDialog(asset.AssetId)"
-              style="width: 28px; height: 28px; padding: 4px">
+            <button class="btn btn-sm  btn-primary m-1" (click)="assetDialog(asset.AssetId)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilSearch"
-                style="color: white; width: 100%; height: 100%"></svg>
+              style="color: white; width: 16px; height: 16px;"></svg>
             </button>
             
-            <button class="btn btn-sm btn-warning m-1" (click)="editDialog()"
-              style="width: 28px; height: 28px; padding: 4px">
+            <button class="btn btn-sm  btn-warning m-1" (click)="editDialog()">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
-                style="color: white; width: 100%; height: 100%"></svg>
+                style="color: white; width: 16px; height: 16px;"></svg>
             </button>
 
-            <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)"
-              style="width: 28px; height: 28px; padding: 4px">
+            <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilTrash"
-                style="color: white; width: 100%; height: 100%"></svg>
+                style="color: white; width: 16px; height: 16px;"></svg>
             </button>
           </td>
 
         </ng-container>
 
         <ng-container matColumnDef="Qrcode">
-          <th class="text-center border" mat-header-cell *matHeaderCellDef style="color: black; font-weight: bold">
+          <th class="text-center border" mat-header-cell *matHeaderCellDef style="color: black; font-weight: bold;width: 5%;">
             Qrcode
             <input cFormControl sizing="sm" disabled />
           </th>
@@ -143,7 +140,10 @@
 
         <!-- Dynamic Columns -->
         <ng-container *ngFor="let column of displayedColumns2; let i = index" [matColumnDef]="column">
-          <th class="mat-header-cell anuphan-600 border" mat-header-cell *matHeaderCellDef mat-sort-header>
+          <th class="mat-header-cell anuphan-600 border" 
+              mat-header-cell *matHeaderCellDef 
+              mat-sort-header
+              [style.width]="column === 'สถานะ' ? '2%' : (column === 'รายการ' ? '20%' : 'auto')">
             <div style="color: black; font-weight: bold">
               <label cLabel>{{ column }}</label>
               <input 
@@ -153,31 +153,35 @@
                 (focus)="setupFilter(column)" />
             </div>
           </th>
-
+        
           <td class="anuphan-500 border" mat-cell *matCellDef="let asset">
-            <div *ngIf="column !== 'ราคาต่อหน่วย'; else currencyFormat">
-              <div *ngIf="column !== 'สถานะ'; else status">
-                {{ asset[column] }}
-              </div>
-            </div>
-
-            <ng-template #currencyFormat>
+            <!-- Handle currency formatting -->
+            <ng-container *ngIf="column === 'ราคาต่อหน่วย'; else defaultFormat">
               {{ asset[column] | currency : "" : "" : "1.2-2" }}
-            </ng-template>
-
-            <ng-template #status>
-              <span class="badge text-light"  [ngClass]="{
-                  'text-bg-success': asset[column] !== 'โอนย้าย' && asset[column] !== 'ซ่อมแซม' && asset[column] !== '',
-                  'text-bg-warning': asset[column] === 'โอนย้าย',
-                  'text-bg-danger': asset[column] === 'ซ่อมแซม'
-                }" style="color: black; font-size: 16px;">
-                {{ asset[column] || 'ปกติ' }}
-              </span>
+            </ng-container>
+        
+            <!-- Handle status badge formatting -->
+            <ng-template #defaultFormat>
+              <ng-container *ngIf="column === 'สถานะ'; else normalText">
+                <span class="badge text-light"
+                  [ngClass]="{
+                    'text-bg-success': asset[column] !== 'โอนย้าย' && asset[column] !== 'ซ่อมแซม' && asset[column] !== '',
+                    'text-bg-warning': asset[column] === 'โอนย้าย',
+                    'text-bg-danger': asset[column] === 'ซ่อมแซม'
+                  }"
+                  style="color: black; font-size: 16px;">
+                  {{ asset[column] || 'ปกติ' }}
+                </span>
+              </ng-container>
+        
+              <!-- Default text display -->
+              <ng-template #normalText>
+                {{ asset[column] }}
+              </ng-template>
             </ng-template>
           </td>
-
-
         </ng-container>
+        
 
         <!-- Header Row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>

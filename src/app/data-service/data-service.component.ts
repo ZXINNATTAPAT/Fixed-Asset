@@ -1,19 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom, Observable } from 'rxjs';
 import { ApiService } from '../ApiController/api-service.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService {
 
-  private numberOfAssets!: number;
-  // private assetDetails!: any[];
-  // private assetTypes!: any[];
-  // private assetCategory!: any[];
-  // private userinfo: any = [];
-  constructor(private ap: ApiService) {}
+  private numberOfAssets!: number;// private assetDetails!: any[];// private assetTypes!: any[];// private assetCategory!: any[];// private userinfo: any = [];
+  constructor(private ap: ApiService ,private router : Router) {}
 
   private assetDetailsSubject: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
   public assetDetails$: Observable<any[]> = this.assetDetailsSubject.asObservable();
@@ -25,22 +22,42 @@ export class DataService {
   public assetCategory$: Observable<any[]> =this.assetCategorySubject.asObservable();
 
   private baseUrl = 'https://localhost:7204/api/Users'; // URL หลักของ API
+  // private userProfileSubject = new BehaviorSubject<any | null>(null);
+  // public userProfile$: Observable<any | null> = this.userProfileSubject.asObservable();
+
+  // private userInfoSubject = new BehaviorSubject<any | null>(null);
+  // public userInfo$: Observable<any | null> = this.userInfoSubject.asObservable();
+
   private userProfileSubject = new BehaviorSubject<any | null>(null);
-  public userProfile$: Observable<any | null> = this.userProfileSubject.asObservable();
+  public userProfile$: Observable<any | null> = this.userProfileSubject.asObservable().pipe(
+    filter(profile => profile !== null) // ✅ ป้องกันค่าที่เป็น null
+  );
 
   private userInfoSubject = new BehaviorSubject<any | null>(null);
-  public userInfo$: Observable<any | null> = this.userInfoSubject.asObservable();
+  public userInfo$: Observable<any | null> = this.userInfoSubject.asObservable().pipe(
+    filter(userInfo => userInfo !== null) // ✅ ป้องกันค่าที่เป็น null
+  );
 
   /**
    * โหลดข้อมูล UserInfo จากเซิร์ฟเวอร์
    */
   async loadUserInfo(): Promise<void> {
     try {
-      const data = await firstValueFrom(this.ap.getUserInfos()); // ใช้ firstValueFrom เพื่อรอ Observable
-      this.userInfoSubject.next(data); // ส่งข้อมูลไปยัง Subject
+      console.log("🔍 Fetching user info...");
+      const data = await firstValueFrom(this.ap.getUserInfos());
+      console.log("✅ API Response (User Info):", data);
+  
+      if (data && data.isAuthenticated) {
+        this.userInfoSubject.next(data);
+      } else {
+        console.warn('⚠️ User is not authenticated!');
+        this.userInfoSubject.next(null);
+        this.router.navigate(['/login']);
+      }
     } catch (error) {
-      console.error('Error loading user info:', error);
-      this.userInfoSubject.next(null); // กรณีเกิดข้อผิดพลาด
+      console.error('❌ Error loading user info:', error);
+      this.userInfoSubject.next(null);
+      this.router.navigate(['/login']);
     }
   }
 
@@ -90,11 +107,19 @@ export class DataService {
    */
   async loadUserProfile(userId: string): Promise<void> {
     try {
+      console.log(`🔍 Fetching profile for userId: ${userId}`);
       const profile = await firstValueFrom(this.getUserProfile(userId));
-      this.userProfileSubject.next(profile); // อัปเดตข้อมูลใน BehaviorSubject
+      console.log("✅ API Response (User Profile):", profile);
+  
+      if (profile) {
+        this.userProfileSubject.next(profile);
+      } else {
+        console.warn("⚠️ Empty profile data received!");
+        this.userProfileSubject.next(null);
+      }
     } catch (error) {
-      console.error('Error loading user profile:', error);
-      this.userProfileSubject.next(null); // ตั้งค่า null ในกรณีเกิดข้อผิดพลาด
+      console.error('❌ Error loading User Profile:', error);
+      this.userProfileSubject.next(null);
     }
   }
 

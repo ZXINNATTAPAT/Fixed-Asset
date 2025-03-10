@@ -43,14 +43,14 @@ export const routes: Routes = [
         data: {title: 'AssetDetails'}
       },  
       
-      // {
-      //   path: 'recordAssetcount',
-      //   loadComponent: () => import('./recordascount/recordascount.component')
-      //  .then(m => m.RecordascountComponent),
-      //   data: {
-      //     title: 'Assetcount'
-      //   }
-      // },
+      {
+        path: 'recordAssetcount',
+        loadComponent: () => import('./recordascount/recordascount.component')
+       .then(m => m.RecordascountComponent),
+        data: {
+          title: 'Assetcount'
+        }
+      },
      
     ]
   }

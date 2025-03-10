@@ -24,6 +24,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataService } from '../../data-service/data-service.component';
 import { HttpClient } from '@angular/common/http';
 import { QrScannerDialogComponent } from './Dialog/qr-scanner-dialog.component';
+import { AssetInventoryComponent } from './asset-inventory/asset-inventory.component'
 
 interface AssetDetails {
   assetId: any;
@@ -38,7 +39,6 @@ interface AssetDetails {
   Note: string;
   [key: string]: string | number; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
 }
-
 @Component({
   selector: 'app-assetcount',
   standalone: true,
@@ -122,8 +122,11 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   verifiers: any[] = []; // ✅ เพิ่มตัวแปร verifiers
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  
   @ViewChild(MatSort) sort!: MatSort;
+
   availableDevices: MediaDeviceInfo[] = [];
+  
   selectedDevice: MediaDeviceInfo | undefined;
 
   constructor(
@@ -472,6 +475,8 @@ fetchAssetById(id: string) {
     this._onDestroy.next();
     this._onDestroy.complete();
   }
+
+  
 
 
 }

@@ -68,43 +68,27 @@ export class LoginComponent implements OnInit {
           timer: 1000,
           showConfirmButton: false,
         }).then(() => {
-          // โหลดข้อมูล UserInfo หลังจากล็อกอินสำเร็จ
-          this.authService.getUserInfos().subscribe(
-            (userinfo) => {
-              this.userinfo = userinfo;
-              this.isLoading = false; // หยุด Loading
-  
-              // ตรวจสอบว่ามีข้อมูล Page ก่อนนำทาง
-              if (response && response.page && response.department && response.affiliation) {
-                // this.router.navigate([
-                //   `/dashboard/${response.affiliation}/${response.department}/${response.page}`,
-                // ]);
-                // window.location.href = `/dashboard/${response.affiliation}/${response.department}/${response.page}`;
-                window.location.href = `/dashboard/${response.affiliation}`;
-                
-              } else {
-                console.error('Page information is missing in the response.');
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Navigation Error',
-                  text: 'Unable to navigate to the Dashboard. Please try again.',
-                });
-              }
-            },
-            (error) => {
-              this.isLoading = false; // หยุด Loading
-              console.error('Error loading user info:', error);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Unable to load user information. Please try again.',
-              });
-            }
-          );
+          this.isLoading = false; // ✅ หยุด Loading
+    
+          if (response && response.affiliation) {
+            const dashboardUrl = `/dashboard/${response.affiliation}`;
+            console.log(`🔍 Navigating to: ${dashboardUrl}`);
+            
+            window.location.href = dashboardUrl; // ✅ ใช้ Router แทน window.location.href
+          } else {
+            console.error('❌ Affiliation information is missing in the response.', response);
+            Swal.fire({
+              icon: 'error',
+              title: 'Navigation Error',
+              text: 'Unable to navigate to the Dashboard. Please try again.',
+            });
+          }
         });
       },
       (error) => {
-        this.isLoading = false; // หยุด Loading
+        this.isLoading = false;
+        console.error('❌ Login Failed:', error);
+    
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',

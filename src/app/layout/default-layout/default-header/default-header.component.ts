@@ -1,10 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  Injectable,
-  Input,
-  OnInit,
-} from '@angular/core';
+import {Component,DestroyRef,Injectable,Input,OnInit,} from '@angular/core';
 import {
   AvatarComponent,
   BadgeComponent,
@@ -39,7 +33,7 @@ import CountyData from './County.json';
 import { HttpClient } from '@angular/common/http';
 import { json } from 'stream/consumers';
 import { ApiService } from '../../../ApiController/api-service.service';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 import { navItems, INavData } from '../_nav';
 
 interface povice {
@@ -103,14 +97,15 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private colorModeService: ColorModeService,
     private destroyRef: DestroyRef,
-    private authService:ApiService ,
-    private dataService :DataService
+    private authService: ApiService ,
+    private dataService : DataService
   ) { super(); }
 
   ngOnInit(): void {
     this.dataService.userInfo$.subscribe((
       userInfo: { claims: {}; }) => {
-      this.userinfo = userInfo?.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
+      this.userinfo = userInfo?.claims || {}; 
+      // กำหนดค่าเริ่มต้นเป็นว่าง
       // console.log('DefaultHeader UserInfo:', this.userinfo);
     });
 
@@ -119,8 +114,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     );
     this.colorModeService.eventName.set('ColorSchemeChange');
 
-    this.activatedRoute.queryParams
-      .pipe(
+    this.activatedRoute.queryParams.pipe(
         delay(1),
         map((params) => <string>params['theme']?.match(/^[A-Za-z0-9\s]+/)?.[0]),
         filter((theme) => ['dark', 'light', 'auto'].includes(theme)),
@@ -128,19 +122,19 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
           this.colorModeService.colorMode.set(theme);
         }),
         takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe();
+      ).subscribe();
 
     this.setshow();
+    
+    this.filterNavItems();
   }
 
-  // userRole: string = '';
+  userRole: string = '';
 
-  // filterNavItems() {
-  //   this.navItemsFiltered = navItems.filter(item => item.roles?.includes(this.userRole));
-  // }
+  filterNavItems() {
+    this.navItemsFiltered = navItems.filter(item => item.roles?.includes(this.userRole));
+  }
 
- 
   setshow() {
     this.http
       .get<any>(

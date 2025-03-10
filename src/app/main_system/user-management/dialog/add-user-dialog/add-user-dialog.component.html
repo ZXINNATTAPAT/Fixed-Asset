@@ -1,0 +1,89 @@
+<h2 mat-dialog-title style="font-family:Anuphan,sans-serif;font-optical-sizing:auto;font-weight:600;font-style:normal">เพิ่มผู้ใช้ใหม่</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="userForm">
+    <div class="row g-2 m-1">
+      <div class="col-md-3">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="userid">รหัสพนักงาน</label>
+              <input type="text" class="form-control" id="userid" formControlName="userid" />
+          </div>
+      </div>
+
+      <div class="col-md-3">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="username">Email</label>
+              <input type="email" class="form-control" id="username" formControlName="username" />
+          </div>
+      </div>
+ 
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="prefix">คำนำหน้า</label>
+              <input type="text" class="form-control" id="prefix" formControlName="prefix" />
+          </div>
+      </div>
+
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="sname">ชื่อ</label>
+              <input type="text" class="form-control" id="sname" formControlName="sname" />
+          </div>
+      </div>
+  
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="lname">นามสกุล</label>
+              <input type="text" class="form-control" id="lname" formControlName="lname" />
+          </div>
+      </div>
+
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="position">ตำแหน่ง</label>
+              <input type="text" class="form-control" id="position" formControlName="position" />
+          </div>
+      </div>
+
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="subposition">ตำแหน่งย่อย</label>
+              <input type="text" class="form-control" id="subposition" formControlName="subposition" />
+          </div>
+      </div>
+
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="workgroup">กลุ่มงาน</label>
+              <input type="text" class="form-control" id="workgroup" formControlName="workgroup" required />
+          </div>
+      </div>
+ 
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="affiliation">สังกัด</label>
+              <input type="text" class="form-control" id="affiliation" formControlName="affiliation" required />
+          </div>
+      </div>
+
+      <div class="col-md-6">
+          <div class="form-group">
+              <label class="form-label anuphan-600" for="positiontype">ประเภทตำแหน่ง</label>
+              <input type="text" class="form-control" id="positiontype" formControlName="positiontype" required />
+          </div>
+      </div>
+
+      <div class="col-md-6">
+          <label class="form-label anuphan-600" for="roles">บทบาท</label>
+          <select class="form-control" id="roles" formControlName="roles">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          </select>
+      </div>
+  </div>
+  </form>
+
+  <div class="d-flex justify-content-end gap-2">
+    <button class="btn btn-secondary" (click)="closeDialog()">ยกเลิก</button>
+    <button class="btn btn-primary" (click)="submitForm()" [disabled]="userForm.invalid">บันทึก</button>
+  </div>
+</mat-dialog-content>

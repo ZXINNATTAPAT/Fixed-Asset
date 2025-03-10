@@ -8,13 +8,12 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import 'moment/locale/th.js';
-// import moment from 'moment';
 import { Subscription } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../../app/data-service/data-service.component';
 import { MatDialog } from '@angular/material/dialog';
 import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
 import { InfoassetComponent } from '../infoasset/infoasset.component';
@@ -66,20 +65,31 @@ interface AssetDetails {
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  
   @ViewChild(MatSort) sort!: MatSort;
 
   assets: AssetDetails[] = []; // แก้จาก any = {} เป็น array
   qrCodeUrl: string = '';
   selectedAssetType: string = '';
+
   displayedColumns: string[];  //Eng
+  
   displayedColumns1: string[]; //ทั้งหมด
+  
   displayedColumns2: string[]; //ไว้เรียงข้อมูลในตาราง
+  
   displayedColumns3!: string[]; //ไว้จัด Header row & col
+  
   icons = {};
+  
   userinfo: any = [];
+
   assetTypes: any[] = [];
+
   myFunctionInstance: myFunction | undefined;
+
   assetDetails: AssetDetails[] = [];
+
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   private dataSubscription!: Subscription;
@@ -93,14 +103,14 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
   }
+
   ngAfterViewInit() {this.dataSource.paginator = this.paginator;} 
+
   onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
+
   ngOnDestroy(): void {if (this.dataSubscription) this.dataSubscription.unsubscribe();}
-  ngOnInit(): void {
-    this.initializeUserInfo();
-    this.loadAssetTypes();
-    this.getAssetDetails();
-  }
+
+  ngOnInit(): void {this.initializeUserInfo();this.loadAssetTypes();this.getAssetDetails();}
 
   editDialog(): void {
     const dialogRef = this.dialog.open(EditAssetDialog, {

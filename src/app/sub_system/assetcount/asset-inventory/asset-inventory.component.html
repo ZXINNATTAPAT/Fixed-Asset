@@ -1,0 +1,40 @@
+<div class="table-responsive" *ngIf="!loading; else loadingTemplate">
+    <table class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th class="text-center">ลำดับ</th>
+          <th class="text-center">รหัสครุภัณฑ์</th>
+          <th class="text-center">ชื่อครุภัณฑ์</th>
+          <th class="text-center">จำนวนในระบบ</th>
+          <th class="text-center">จำนวนที่ตรวจนับ</th>
+          <th class="text-center">หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of assetInventoryList; let i = index">
+          <td class="text-center">{{ i + 1 }}</td>
+          <td class="text-center">{{ item.assetId }}</td>
+          <td>{{ item.assetName || 'ไม่พบข้อมูล' }}</td>
+          <td class="text-center">
+            <span [class.text-danger]="item.systemQuantity === 0"> 
+              {{ item.systemQuantity === 0 ? 'สูญหาย' : 'มีอยู่' }}
+            </span>
+          </td>
+          <td class="text-center">
+            <span [class.text-danger]="item.countedQuantity === 0"> 
+              {{ item.countedQuantity === 0 ? 'สูญหาย' : 'มีอยู่' }}
+            </span>
+          </td>
+          <td>{{ item.note || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <ng-template #loadingTemplate>
+    <div class="text-center">
+      <span class="spinner-border text-primary"></span>
+      <p>กำลังโหลดข้อมูล...</p>
+    </div>
+  </ng-template>
+  

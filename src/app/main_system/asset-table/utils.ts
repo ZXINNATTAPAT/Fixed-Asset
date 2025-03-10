@@ -3,9 +3,10 @@ import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash,cilSearch
 export class myFunction {
 
   userinfo: any = [];
-  token: any;
-  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo ,cilSearch };
 
+  token: any;
+
+  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo ,cilSearch };
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);

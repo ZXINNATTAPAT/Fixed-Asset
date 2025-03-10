@@ -6,96 +6,77 @@ import { NgModule } from '@angular/core';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  },
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./views/pages/login/login.component').then(
-        (m) => m.LoginComponent
-      ),
-    data: {
-      title: 'Login Page',
-    },
-  },
-  {
-    path: 'mainpage',
-    loadComponent: () =>
-      import('./views/pages/mainpage/mainpage.component').then(
-        (m) => m.MainpageComponent
-      ),
-  },
-  {
-    path: '',
     component: DefaultLayoutComponent,
-    canActivate: [AuthGuard], // ใช้ AuthGuard เพื่อตรวจสอบ Token
-    data: {title: 'Home',},
+    canActivate: [AuthGuard], // ✅ ใช้ AuthGuard ที่ Main Layout
+    data: { title: 'Home' },
     children: [
-      // {
-      //   path: 'dashboard/ส่วนกลาง/:fid/:sid',
-      //   loadChildren: () =>
-      //     import('./dashboard/routes').then((m) => m.routes),
-      // },
-      // {
-      //   path: 'dashboard/ส่วนภูมิภาค/:fid/:sid',
-      //   loadChildren: () =>
-      //     import('./dashboard/routes').then((m) => m.routes),
-      // },
       {
         path: 'dashboard/ส่วนกลาง',
         loadChildren: () =>
           import('./dashboard/routes').then((m) => m.routes),
-          data: { roles: ['Admin', 'AssetOfficer'] } // เฉพาะ Admin & เจ้าหน้าที่พัสดุ
+        canActivate: [AuthGuard], // ✅ ป้องกันเฉพาะ Role
+        data: { roles: ['Admin', 'AssetOfficer'] }
       },
       {
         path: 'dashboard/ส่วนภูมิภาค',
         loadChildren: () =>
           import('./dashboard/routes').then((m) => m.routes),
+        canActivate: [AuthGuard], // ✅ ป้องกันเฉพาะ Role
+        data: { roles: ['Admin', 'RegionalOfficer'] }
       },
       {
-        path: 'table',
-        loadChildren: () =>
-          import('./main_system/routes').then((m1) =>
-            import('./sub_system/routes').then(
-              (m2) => [...m1.routes, ...m2.routes])
-          ),
-      },      
+        path: 'usersmanagement',
+        loadComponent: () =>
+          import('./main_system/user-management/user-management.component')
+          .then((m) => m.UserManagementComponent),
+        canActivate: [AuthGuard], // ✅ ป้องกันเฉพาะ Role
+        data: { title: 'usersmanagement', roles: ['Admin'] }
+      },
       {
         path: 'defaultdata',
         loadChildren: () =>
           import('./defaultdata/routes').then((m) => m.routes),
+        canActivate: [AuthGuard], // ✅ ป้องกันเฉพาะ Role
+        data: { roles: ['Admin', 'DataManager'] }
       },
       {
-        path: 'usersmanagement',
-        loadComponent: () => import('./main_system/user-management/user-management.component')
-        .then((m) => m.UserManagementComponent),
-        data: {title: 'usersmanagement'}
-      },
-      {
-        path: 'theme',
+        path: 'system/main',
         loadChildren: () =>
-          import('./views/theme/routes').then((m) => m.routes),
+          import('./main_system/routes').then((m) => m.routes),
+        canActivate: [AuthGuard], // ✅ เพิ่ม AuthGuard
+        data: { roles: ['Admin', 'SystemManager'] }
       },
       {
-        path: 'system',
-        loadChildren: () =>
-          import('./main_system/routes').then((m) => m.routes), 
-        //เวลาเรียกใช้งานจะเรียกใช้งานจาก main_system
-        // system/ . . . หน้า Loadchildren
-      },
-      {
-        path: 'system',
+        path: 'system/sub',
         loadChildren: () =>
           import('./sub_system/routes').then((m) => m.routes),
+        canActivate: [AuthGuard], // ✅ เพิ่ม AuthGuard
+        data: { roles: ['Admin', 'SubSystemManager'] }
       },
+      {
+        path: 'table',
+        loadChildren: () =>
+          Promise.all([
+            import('./main_system/routes'),
+            import('./sub_system/routes')
+          ]).then(([m1, m2]) => [...m1.routes, ...m2.routes]), // ✅ รวม routes
+        canActivate: [AuthGuard], // ✅ ป้องกันหน้าด้วย AuthGuard
+        data: { roles: ['Admin', 'SubSystemManager'] }
+      },
+      
       {
         path: 'pages',
         loadChildren: () =>
           import('./views/pages/routes').then((m) => m.routes),
-      },
-      
-    ],
+      }
+    ]
+  },  
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./views/pages/login/login.component')
+      .then((m) => m.LoginComponent),
+    data: {title: 'Login'},
   },
   {
     path: '404',
@@ -121,4 +102,6 @@ export const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule {
+  
+}

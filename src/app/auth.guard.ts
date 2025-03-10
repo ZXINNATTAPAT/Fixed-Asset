@@ -12,49 +12,21 @@ export class AuthGuard implements CanActivate {
     private router: Router, 
     private authService: ApiService) {}
   
-  canActivate(): Observable<boolean> {
-    return this.authService.isLoggedIn().pipe(
-      map((isLoggedIn) => {
-        if (isLoggedIn) { return true;} // ผู้ใช้ล็อกอินอยู่
-        else {
-          Swal.fire({ title: 'โปรดทำการ Login',icon: 'error',});// ผู้ใช้ไม่ได้ล็อกอิน
-          this.router.navigate(['/login']);
-          return false;
-        }
-      }),
-      catchError((error) => {
-        // กรณีเกิดข้อผิดพลาด เช่น เซิร์ฟเวอร์ไม่ตอบสนอง
-        Swal.fire({
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถตรวจสอบสถานะการล็อกอินได้',
-          icon: 'error',
-        });
-        this.router.navigate(['/login']);
-        return [false];
-      })
-    );
-  }
-
-  // canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
-  //   return this.authService.getUserRole().pipe(
-  //     map((userRole) => {
-  //       const allowedRoles = route.data['roles'] as Array<string>;
-  //       if (userRole.roles.some(role => allowedRoles.includes(role))) {
-  //         return true;
-  //       } else {
-  //         Swal.fire({
-  //           title: 'ไม่มีสิทธิ์เข้าถึง',
-  //           text: 'คุณไม่ได้รับอนุญาตให้เข้าถึงหน้านี้',
-  //           icon: 'error',
-  //         });
-  //         this.router.navigate(['/dashboard']); // รีไดเรกไปหน้าหลัก
+  // canActivate(): Observable<boolean> {
+  //   return this.authService.isLoggedIn().pipe(
+  //     map((isLoggedIn) => {
+  //       if (isLoggedIn) { return true; } // ผู้ใช้ล็อกอินอยู่
+  //       else {
+  //         Swal.fire({ title: 'โปรดทำการ Login', icon: 'error',});// ผู้ใช้ไม่ได้ล็อกอิน
+  //         this.router.navigate(['/login']);
   //         return false;
   //       }
   //     }),
-  //     catchError(() => {
+  //     catchError((error) => {
+  //       // กรณีเกิดข้อผิดพลาด เช่น เซิร์ฟเวอร์ไม่ตอบสนอง
   //       Swal.fire({
   //         title: 'เกิดข้อผิดพลาด',
-  //         text: 'ไม่สามารถตรวจสอบสิทธิ์ได้',
+  //         text: 'ไม่สามารถตรวจสอบสถานะการล็อกอินได้',
   //         icon: 'error',
   //       });
   //       this.router.navigate(['/login']);
@@ -62,4 +34,46 @@ export class AuthGuard implements CanActivate {
   //     })
   //   );
   // }
+
+  canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
+    return this.authService.getAuthStatus().pipe(
+      map(response => {
+        console.log("🔍 Auth Status:", response);
+  
+        // ✅ ป้องกันกรณี `route.data.roles` เป็น undefined
+        const allowedRoles = (route.data?.['roles'] as string[]) || [];
+        console.log("🔍 Allowed Roles:", allowedRoles);
+  
+        if (allowedRoles.length === 0) {
+          console.warn("⚠️ No roles defined for this route! Access granted by default.");
+          // window.location.href = '/login'
+          return true;
+        }
+  
+        // ✅ แปลง Role เป็น lowercase เพื่อป้องกัน Case-Sensitive ปัญหา
+        const userRoles = (Array.isArray(response.roles) ? response.roles : [response.roles])
+        .map((role: string) => role.toLowerCase());
+      const requiredRoles = allowedRoles.map(role => role.toLowerCase());
+  
+        if (response.isAuthenticated && userRoles.some(role => requiredRoles.includes(role))) {
+          console.log("✅ Access Granted!");
+          return true;
+        } else {
+          console.warn("❌ Access Denied! Redirecting to login...");
+          this.router.navigate(['/login']);
+          return false;
+        }
+      }),
+      catchError(error => {
+        console.error("❌ Auth Error:", error);
+        this.router.navigate(['/login']);
+        return [false];
+      })
+    );
+  }
+  
+  
+  
+  
+  
 }

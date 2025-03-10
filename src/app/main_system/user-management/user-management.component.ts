@@ -31,6 +31,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RoleDialogComponent } from './dialog/role-dialog.component';
 import { UserEditDialogComponent } from './dialog/user-edit-dialog/user-edit-dialog.component'
 import { MatIcon } from '@angular/material/icon';
+import { AddUserDialogComponent } from './dialog/add-user-dialog/add-user-dialog.component';
 
 
 @Component({
@@ -66,6 +67,7 @@ export class UserManagementComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(AddUserDialogComponent) addUserDialog!: AddUserDialogComponent;
 
   displayedColumns: string[] = [
     "actions",
@@ -110,6 +112,19 @@ export class UserManagementComponent implements OnInit {
             });
           }
         );
+      }
+    });
+  }
+
+  openAddUserDialog() {
+    const dialogRef = this.dialog.open(AddUserDialogComponent, {
+      width: '1000px',
+      height: '600px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('✅ ผู้ใช้ถูกเพิ่ม:', result);
       }
     });
   }

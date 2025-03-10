@@ -1,441 +1,66 @@
-import { INavData as CoreUINavData } from '@coreui/angular';
+import { INavData } from '@coreui/angular';
 
-interface INavData extends CoreUINavData {
-  roles?: string[];
+// ✅ ขยาย INavData เพื่อรองรับ roles[]
+export interface ICustomNavData extends INavData {
+  roles?: string[]; // ✅ เพิ่ม roles
 }
 
-export const navItems: INavData[] = [
-
+export const navItems: ICustomNavData[] = [
   {
     name: 'แดชบอร์ด',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
-    // roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
     children: [
-      // {
-      //   name: 'แดชบอร์ดกลาง',
-      //   url: '/mainpage',
-      //   icon:'nav-icon-bullet' ,
-      // },
-      // {
-      //   name: 'แดชบอร์ดสรุปภาพรวม(ส่วนกลาง)',
-      //   url: '/dashboard/ส่วนกลาง/$param/$param',
-      //   icon:'nav-icon-bullet' ,
-      // },
       {
-        name: 'แดชบอร์ดสรุปภาพรวม(ส่วนกลาง)',
+        name: 'แดชบอร์ดสรุปภาพรวม (ส่วนกลาง)',
         url: '/dashboard/ส่วนกลาง/',
-        icon:'nav-icon-bullet' ,
-        
-      },
-      // {
-      //   name: 'แดชบอร์ดสรุปภาพรวม(ส่วนภูมิภาค)',
-      //   url: '/dashboard/ส่วนภูมิภาค/$param/$param',
-      //   icon:'nav-icon-bullet' ,
-      // },
+        icon: 'nav-icon-bullet',
+      }
     ]
   },
   {
     name: 'บันทึกรายการรายวัน',
     url: '/system',
     iconComponent: { name: 'cil-pencil' },
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
     children: [
-      {
-        name: 'เพิ่มรายการครุภัณฑ์',
-        url: '/system/assetDetails',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'ตรวจนับครุภัณท์',
-        url: '/system/assetcount',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'บันทึกซ่อมแซม',
-        url: '/system/repair',
-        icon: 'nav-icon-bullet'
-      },
-      // {
-      //   name: 'ขายสินทรัพย์',
-      //   url: '/system/sellassets',
-      //   icon: 'nav-icon-bullet'
-      // },
-      {
-        name: 'โอนย้ายครุภัณฑ์',
-        url: '/system/transferassets',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'ตัดจำหน่ายครุภัณฑ์',
-        url: '/system/disassets',
-        icon: 'nav-icon-bullet'
-      },
+      { name: 'เพิ่มรายการครุภัณฑ์', url: '/system/main/assetDetails', icon: 'nav-icon-bullet' },
+      { name: 'ตรวจนับครุภัณท์', url: '/system/sub/assetcount', icon: 'nav-icon-bullet' },
+      { name: 'บันทึกซ่อมแซม', url: '/system/sub/repair', icon: 'nav-icon-bullet' },
+      { name: 'โอนย้ายครุภัณฑ์', url: '/system/sub/transferassets', icon: 'nav-icon-bullet' },
+      { name: 'ตัดจำหน่ายครุภัณฑ์', url: '/system/sub/disassets', icon: 'nav-icon-bullet' }
     ]
   },
   {
     name: 'รายการบันทึก',
-    url: '/table', //ใช้ตรวจสอบPath หน้าตาราง Dropdown
+    url: '/table',
     iconComponent: { name: 'cil-pencil' },
-      children: [
-      {
-        name: 'รายการครุภัณฑ์',
-        url: '/table/assettable',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'รายการการตรวจนับ',
-        url: '/table/inventorysession',
-        icon: 'nav-icon-bullet'
-      }],
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
+    children: [
+      { name: 'รายการครุภัณฑ์', url: '/table/assettable', icon: 'nav-icon-bullet' },
+      { name: 'รายการการตรวจนับ', url: '/table/inventorysession', icon: 'nav-icon-bullet' }
+    ]
   },
   {
     name: 'ทะเบียนผู้ใช้งาน',
     url: '/usersmanagement',
-    // icon: 'nav-cil-folder',
-    iconComponent: { name: 'cil-pencil' }
+    iconComponent: { name: 'cil-pencil' },
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff']
   },
-  // {
-  //   name: 'บันทึกการตรวจนับ',
-  //   url: 'system/recordAssetcount',
-  //   // icon: 'nav-cil-folder',
-  //   iconComponent: { name: 'cil-pencil' }
-  // },
-  // {
-  //   title: true,
-  //   name: 'แก้ไขข้อมูลในระบบ'
-  // },
   {
     name: 'เพิ่มข้อมูลตั้งต้น',
     url: '/defaultdata',
     iconComponent: { name: 'cil-pencil' },
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
     children: [
-      {
-        name: 'กำหนดรหัสประเภทสินทรัพย์',
-        url: '/defaultdata/Assettypecode',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'กำหนดหมวดสินทรัพย์ ',
-        url: '/defaultdata/asc',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'กำหนดรหัสสำนักงาน',
-        url: '/defaultdata/sectiontype',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'กำหนดรหัสฝ่าย',
-        url: '/defaultdata/faction',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'กำหนดหน่วยนับ',
-        url: '/defaultdata/coutingunit',
-        icon: 'nav-icon-bullet'
-      },
-      {
-        name: 'กำหนดผู้ขายทรัพย์สิน',
-        url: '/defaultdata/ps',
-        icon: 'nav-icon-bullet'
-      },
-      // {
-      //   name: 'กำหนดผู้รับผิดชอบ',
-      //   url: '/defaultdata/rp',
-      //   icon: 'nav-icon-bullet'
-      // },
-      // {
-      //   name: 'กำหนดผังบัญชี ',
-      //   url: '/defaultdata/acc',
-      //   icon: 'nav-icon-bullet'
-      // },
+      { name: 'กำหนดรหัสประเภทสินทรัพย์', url: '/defaultdata/Assettypecode', icon: 'nav-icon-bullet' },
+      { name: 'กำหนดหมวดสินทรัพย์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },
+      { name: 'กำหนดรหัสสำนักงาน', url: '/defaultdata/sectiontype', icon: 'nav-icon-bullet' },
+      { name: 'กำหนดรหัสฝ่าย', url: '/defaultdata/faction', icon: 'nav-icon-bullet' },
+      { name: 'กำหนดหน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
+      { name: 'กำหนดผู้ขายทรัพย์สิน', url: '/defaultdata/ps', icon: 'nav-icon-bullet' }
     ]
-  },
-  // {
-  //   title: true,
-  //   name: 'Theme'
-  // },
-  // {
-  //   name: 'Colors',
-  //   url: '/theme/colors',
-  //   iconComponent: { name: 'cil-drop' }
-  // },
-  // // {
-  // //   name: 'Colorsxzzxz',
-  // //   url: 'https://localhost:7204/swagger/index.html',
-  // //   iconComponent: { name: 'cil-pencil' }
-  // // },
-  // {
-  //   name: 'Typography',
-  //   url: '/theme/typography',
-  //   linkProps: { fragment: 'headings' },
-  //   iconComponent: { name: 'cil-pencil' }
-  // },
-
-  // {
-  //   name: 'Components',
-  //   title: true
-  // },
-  // {
-  //   name: 'Base',
-  //   url: '/base',
-  //   iconComponent: { name: 'cil-puzzle' },
-  //   children: [
-  //     {
-  //       name: 'Accordion',
-  //       url: '/base/accordion',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Breadcrumbs',
-  //       url: '/base/breadcrumbs',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Cards',
-  //       url: '/base/cards',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Carousel',
-  //       url: '/base/carousel',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Collapse',
-  //       url: '/base/collapse',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'List Group',
-  //       url: '/base/list-group',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Navs & Tabs',
-  //       url: '/base/navs',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Pagination',
-  //       url: '/base/pagination',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Placeholder',
-  //       url: '/base/placeholder',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Popovers',
-  //       url: '/base/popovers',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Progress',
-  //       url: '/base/progress',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Spinners',
-  //       url: '/base/spinners',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Tables',
-  //       url: '/base/tables',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Tabs',
-  //       url: '/base/tabs',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Tooltips',
-  //       url: '/base/tooltips',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
-  // {
-  //   name: 'Buttons',
-  //   url: '/buttons',
-  //   iconComponent: { name: 'cil-cursor' },
-  //   children: [
-  //     {
-  //       name: 'Buttons',
-  //       url: '/buttons/buttons',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Button groups',
-  //       url: '/buttons/button-groups',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Dropdowns',
-  //       url: '/buttons/dropdowns',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
-  // {
-  //   name: 'Forms',
-  //   url: '/forms',
-  //   iconComponent: { name: 'cil-notes' },
-  //   children: [
-  //     {
-  //       name: 'Form Control',
-  //       url: '/forms/form-control',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Select',
-  //       url: '/forms/select',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Checks & Radios',
-  //       url: '/forms/checks-radios',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Range',
-  //       url: '/forms/range',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Input Group',
-  //       url: '/forms/input-group',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Floating Labels',
-  //       url: '/forms/floating-labels',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Layout',
-  //       url: '/forms/layout',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Validation',
-  //       url: '/forms/validation',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
-  // {
-  //   name: 'Charts',
-  //   iconComponent: { name: 'cil-chart-pie' },
-  //   url: '/charts'
-  // },
-  // {
-  //   name: 'Icons',
-  //   iconComponent: { name: 'cil-star' },
-  //   url: '/icons',
-  //   children: [
-  //     {
-  //       name: 'CoreUI Free',
-  //       url: '/icons/coreui-icons',
-  //       icon: 'nav-icon-bullet',
-  //       badge: {
-  //         color: 'success',
-  //         text: 'FREE'
-  //       }
-  //     },
-  //     {
-  //       name: 'CoreUI Flags',
-  //       url: '/icons/flags',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'CoreUI Brands',
-  //       url: '/icons/brands',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
-  // {
-  //   name: 'Notifications',
-  //   url: '/notifications',
-  //   iconComponent: { name: 'cil-bell' },
-  //   children: [
-  //     {
-  //       name: 'Alerts',
-  //       url: '/notifications/alerts',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Badges',
-  //       url: '/notifications/badges',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Modal',
-  //       url: '/notifications/modal',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Toast',
-  //       url: '/notifications/toasts',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
-  // {
-  //   name: 'Widgets',
-  //   url: '/widgets',
-  //   iconComponent: { name: 'cil-calculator' },
-  //   badge: {
-  //     color: 'info',
-  //     text: 'NEW'
-  //   }
-  // },
-  // {
-  //   title: true,
-  //   name: 'Extras'
-  // },
-  // {
-  //   name: 'Pages',
-  //   url: '/login',
-  //   iconComponent: { name: 'cil-star' },
-  //   children: [
-  //     {
-  //       name: 'Login',
-  //       url: '/login',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Register',
-  //       url: '/register',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Error 404',
-  //       url: '/404',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Error 500',
-  //       url: '/500',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
-  // {
-  //   title: true,
-  //   name: 'Links',
-  //   class: 'mt-auto'
-  // },
-  // {
-  //   name: 'Docs',
-  //   url: 'https://coreui.io/angular/docs/5.x/',
-  //   iconComponent: { name: 'cil-description' },
-  //   attributes: { target: '_blank' }
-  // }
+  }
 ];
 export { INavData };
-
