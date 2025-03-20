@@ -6,6 +6,7 @@ import {
   BadgeModule,
   BreadcrumbModule,
   ButtonGroupModule,
+  DropdownComponent,
   DropdownModule,
   GridModule,
   HeaderModule,
@@ -24,7 +25,9 @@ describe('DefaultHeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [GridModule, HeaderModule, IconModule, NavModule, BadgeModule, AvatarModule, DropdownModule, BreadcrumbModule, RouterTestingModule, SidebarModule, ProgressModule, ButtonGroupModule, ReactiveFormsModule, DefaultHeaderComponent],
+    imports: [GridModule, HeaderModule, IconModule, NavModule, BadgeModule, AvatarModule, DropdownModule, BreadcrumbModule, RouterTestingModule, SidebarModule, ProgressModule, ButtonGroupModule, ReactiveFormsModule, DefaultHeaderComponent
+      ,DropdownComponent
+    ],
     providers: [IconSetService]
 })
       .compileComponents();

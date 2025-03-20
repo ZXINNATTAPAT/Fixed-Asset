@@ -14,8 +14,6 @@ import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Sub
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ApiService } from '../../../../src/app/ApiController/api-service.service';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { BarcodeFormat } from '@zxing/library';
 
 interface AssetDetails {
   repairAssetId: any;
@@ -35,7 +33,6 @@ interface AssetDetails {
     ReactiveFormsModule,
     FormsModule,
     TableModule,
-
     NgxMatSelectSearchModule,
     MatSelect,
     MatOption,
@@ -56,12 +53,11 @@ interface AssetDetails {
 
 export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  assetSalesForm!: FormGroup;
-  statuses = [
-    { id: 1, name: 'ขาย' },
-    { id: 2, name: 'บริจาค' },
-    { id: 3, name: 'เลิกใช้' },
-  ]; // ตัวอย่างสถานะ
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
+
+  statuses = [{ id: 1, name: 'ขาย' },{ id: 2, name: 'บริจาค' },{ id: 3, name: 'เลิกใช้' } ]; // ตัวอย่างสถานะ
   showForm = false;
   selectedStatusId: number = 0;
 
@@ -70,12 +66,10 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
   assetdataFilterCtrl: FormControl = new FormControl('');
   searchTerm: string = '';
   private _onDestroy = new Subject<void>();
+  mainForm!: FormGroup;
+  // assetdataFilterCtrl = { valueChanges: new Subject<string>() };
 
   icons = { cilPencil, cilTrash, cilMagnifyingGlass };
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   displayedColumns2: string[] = ['รหัสครุภัณฑ์', 'รายการครุภัณฑ์', 'รายละเอียด', 'จำนวนเงิน'];
@@ -87,37 +81,125 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     assetName: '',
   }; 
   
-  constructor(private ap: ApiService,private http : HttpClient ,private fb : FormBuilder) {}
-
-  initializeForm(): void {
-    this.assetSalesForm = this.fb.group({
-      statusId: ['', Validators.required],
-      assetId: ['', Validators.required],
-      purchaseDate: ['', Validators.required],
-      saleDate: ['', Validators.required],
-      sellingprice: ['', [Validators.required, Validators.min(0)]],
-      bookValue: ['', [Validators.required, Validators.min(0)]],
-      profit: ['', [Validators.required, Validators.min(0)]],
-      description: ['', [Validators.maxLength(255)]],
-    });
-  }
-
-  onStatusChange(statusId: string): void {
-    if (this.selectedStatusId !== +statusId) {
-      this.selectedStatusId = +statusId;
-    }
-  }
+  constructor(private ap: ApiService,private fb : FormBuilder) {}
 
   ngOnInit(): void {
-
     this.initializeForm();
-    // Load initial data
-    // this.getAssetdata();
 
     // Listen for search changes with debounce
     this.assetdataFilterCtrl.valueChanges
       .pipe(debounceTime(550), distinctUntilChanged(), takeUntil(this._onDestroy))
       .subscribe((search) => this.filterAsset(search));
+  }
+
+  // ✅ ฟังก์ชันกำหนดค่าเริ่มต้นของฟอร์มหลัก
+  initializeForm(): void {
+    this.mainForm = this.fb.group({
+      status: [this.selectedStatusId, Validators.required], // สถานะปัจจุบัน
+
+      // 📌 ฟอร์มสำหรับ "บริจาค"
+      donationForm: this.fb.group({
+        recipientName: ['', Validators.required],
+        contactNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]], // ต้องเป็นเบอร์โทร 10 หลัก
+        address: ['', Validators.required],
+        assetDetails: ['', Validators.required],
+        donationDate: ['', Validators.required],
+        notes: ['']
+      }),
+
+      // 📌 ฟอร์มสำหรับ "เลิกใช้"
+      decommissionForm: this.fb.group({
+        assetId: ['', Validators.required],
+        saleDate: ['', Validators.required],
+        description: ['', Validators.required]
+      }),
+
+      // 📌 ฟอร์มสำหรับ "ขาย"
+      assetSalesForm: this.fb.group({
+        assetId: ['', Validators.required],
+        purchaseDate: [{ value: '', disabled: true }],
+        saleDate: ['', Validators.required],
+        sellingprice: ['', [Validators.required, Validators.min(0)]],
+        bookValue: [{ value: '', disabled: true }],
+        profit: [{ value: '', disabled: true }], // คำนวณอัตโนมัติ
+        description: ['', [Validators.maxLength(255)]]
+      })
+    });
+
+    // คำนวณกำไรอัตโนมัติเมื่อค่าราคาเปลี่ยนแปลง
+    this.mainForm.get('assetSalesForm.bookValue')?.valueChanges.subscribe(() => this.calculateProfit());
+    this.mainForm.get('assetSalesForm.sellingprice')?.valueChanges.subscribe(() => this.calculateProfit());
+  }
+  
+  onSubmit() {
+    if (this.mainForm.invalid) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+  
+    const selectedStatus = this.mainForm.value.status;
+    let payload: any = { statusId: selectedStatus };
+    let apiEndpoint = '';
+  
+    switch (selectedStatus) {
+      case 'donation':
+        if (!this.mainForm.get('donationForm')?.valid) {
+          alert("กรุณากรอกข้อมูลการบริจาคให้ครบถ้วน");
+          return;
+        }
+        payload = { ...payload, ...this.mainForm.value.donationForm };
+        apiEndpoint = 'AssetSharing';
+        break;
+  
+      case 'decommission':
+        if (!this.mainForm.get('decommissionForm')?.valid) {
+          alert("กรุณากรอกข้อมูลการเลิกใช้ให้ครบถ้วน");
+          return;
+        }
+        payload = { ...payload, ...this.mainForm.value.decommissionForm };
+        apiEndpoint = 'AssetDisposal';
+        break;
+  
+      case 'sale':
+        if (!this.mainForm.get('assetSalesForm')?.valid) {
+          alert("กรุณากรอกข้อมูลการขายให้ครบถ้วน");
+          return;
+        }
+        payload = { ...payload, ...this.mainForm.value.assetSalesForm };
+        apiEndpoint = 'AssetSales';
+        break;
+  
+      default:
+        alert("กรุณาเลือกสถานะที่ถูกต้อง");
+        return;
+    }
+  
+    // 📌 เรียก API เฉพาะตามสถานะที่เลือก
+    this.ap.postData(apiEndpoint, payload)
+      .then((response) => {
+        alert("ข้อมูลถูกบันทึกเรียบร้อย!");
+        console.log(response);
+        this.mainForm.reset();
+      })
+      .catch((error) => {
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        console.error(error);
+      });
+  }
+  
+  // ฟังก์ชันคำนวณกำไร
+  calculateProfit(): void {
+    const bookValue = this.mainForm.get('assetSalesForm.bookValue')?.value || 0;
+    const sellingPrice = this.mainForm.get('assetSalesForm.sellingprice')?.value || 0;
+    const profit = sellingPrice - bookValue;
+    this.mainForm.get('assetSalesForm.profit')?.setValue(profit);
+  }
+
+  
+  onStatusChange(statusId: string): void {
+    if (this.selectedStatusId !== +statusId) {
+      this.selectedStatusId = +statusId;
+    }
   }
 
   ngAfterViewInit(): void {
@@ -150,6 +232,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,
         assetName: asset.AssetName,
+        purchaseDate:asset.PurchaseDate
       }));
       this.filteredAssetData.next(assets);
     });
@@ -170,6 +253,8 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,
         assetName: asset.AssetName, //เพิ่มมูลค่าสินทรัพย์ วันที่ ได้มา bookvalue 
+        purchaseDate:asset.PurchaseDate,
+        
       }));
   
       // อัปเดตตัวเลือกที่กรองแล้ว
@@ -184,20 +269,11 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   
-
   ngOnDestroy(): void {
     this._onDestroy.next();
     this._onDestroy.complete();
   }
-  
 
-  onSubmit() {
-   
-  }
-
- 
-
-  
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
       assetId: 'assetId',
@@ -216,7 +292,6 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     return translatedAsset;
   }
 
- 
   editAsset(_t35: any) {
     throw new Error('Method not implemented.');
   }

@@ -2,16 +2,12 @@
 
   <div class="card-body">
 
-    <h1>
-      <span class="anuphan-700">
-        บันทึกการตัดจำหน่ายครุภัณฑ์
-      </span>
-    </h1>
-
+    <h1><span class="anuphan-700">บันทึกการตัดจำหน่ายครุภัณฑ์</span></h1>
     <hr />
 
     <div class="p-3">
-      <form [formGroup]="assetSalesForm" (ngSubmit)="onSubmit()">
+
+      <form [formGroup]="mainForm" (ngSubmit)="onSubmit()">
 
         <!-- เลือกสถานะ -->
         <div class="row mb-2 align-items-center">
@@ -24,7 +20,7 @@
             <select 
               id="status" 
               class="form-select" 
-              formControlName="statusId" 
+              formControlName="status" 
               [(ngModel)]="selectedStatusId"
               (ngModelChange)="onStatusChange($event)">
               <option value="" disabled>เลือกสถานะ </option>
@@ -38,10 +34,13 @@
         <br />
 
         <!-- ฟอร์มเฉพาะสถานะ "ขาย" -->
-        <div *ngIf="selectedStatusId === 1">
+        <div *ngIf="selectedStatusId === 1" formGroupName="assetSalesForm">
+
           <!-- ฟิลด์ข้อมูล -->
           <div class="row mb-3">
+
             <div class="col-md-6">
+
               <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
 
               <!-- Input Field for Search -->
@@ -73,27 +72,6 @@
                 </button>
               </div>
               
-              
-              <!-- ตัวเลือกครุภัณฑ์ -->
-              <!-- <div class="form-control">
-                <mat-select id="assetCode" formControlName="assetId" placeholder="เลือกครุภัณฑ์"
-                  style="font-family: 'Anuphan', sans-serif; font-weight: 600;">
-                  
-                  <mat-option>
-                    <ngx-mat-select-search [formControl]="assetdataFilterCtrl"></ngx-mat-select-search>
-                  </mat-option>
-
-                  <mat-option *ngFor="let asset of (filteredAssetData | async)" [value]="asset.assetId"
-                    style="font-family: 'Anuphan', sans-serif; font-weight: 600;">
-                    <span>{{ asset.assetCode }}</span> : {{ asset.assetName }}
-                  </mat-option>
-
-                  <mat-option *ngIf="(filteredAssetData | async)?.length === 0" disabled>
-                    ไม่พบข้อมูล
-                  </mat-option>
-                </mat-select>
-
-              </div> -->
             </div>
 
             <div class="col-md-6">
@@ -104,33 +82,44 @@
           </div>
 
           <div class="row mb-3">
+
             <div class="col-md-6">
               <label for="saleDate" class="form-label">วันที่ขาย:</label>
               <input type="date" id="saleDate" class="form-control" formControlName="saleDate" />
             </div>
-            <div class="col-md-6">
-              <label for="sellingprice" class="form-label">ราคาขาย:</label>
-              <input type="number" id="sellingprice" class="form-control" formControlName="sellingprice"
-                placeholder="ระบุราคาขาย" />
-            </div>
-          </div>
-
-          <div class="row mb-3">
+            
             <div class="col-md-6">
               <label for="bookValue" class="form-label">มูลค่าทางบัญชี:</label>
               <input type="number" id="bookValue" class="form-control" formControlName="bookValue"
                 placeholder="ระบุมูลค่าทางบัญชี" />
             </div>
+
+          </div>
+
+          <div class="row mb-3">
+            
             <div class="col-md-6">
+              <label for="sellingprice" class="form-label">ราคาขาย:</label>
+              <input type="number" id="sellingprice" class="form-control" formControlName="sellingprice" placeholder="ระบุราคาขาย" />
+            </div>
+
+            <div class="col-md-4">
               <label for="profit" class="form-label">กำไร:</label>
               <input type="number" id="profit" class="form-control" formControlName="profit" placeholder="ระบุกำไร" />
             </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-success " style="color: white;" type="button" (click)="onSubmit()">
+                ดำเนินการ
+              </button>
+            </div>
+            
           </div>
+
         </div>
 
         <!-- ฟอร์มเฉพาะสถานะ "บริจาค" -->
-        <div *ngIf="selectedStatusId === 2">
-
+        <div *ngIf="selectedStatusId === 2" formGroupName="donationForm">
 
           <!-- ชื่อผู้รับ -->
           <div class="row mb-3">
@@ -188,23 +177,53 @@
 
           <!-- หมายเหตุ -->
           <div class="row mb-3">
+
             <div class="col-md-3">
               <label for="notes" class="form-label">หมายเหตุ:</label>
             </div>
+
             <div class="col-md-9">
-              <textarea id="notes" class="form-control" rows="3" formControlName="notes"
-                placeholder="หมายเหตุเพิ่มเติม"></textarea>
+              <input id="notes" class="form-control" rows="3" formControlName="notes"
+                placeholder="หมายเหตุเพิ่มเติม" />
             </div>
           </div>
+          
         </div>
 
         <!-- ฟอร์มเฉพาะสถานะ "เลิกใช้" -->
-        <div *ngIf="selectedStatusId === 3">
+        <div *ngIf="selectedStatusId === 3" formGroupName="decommissionForm">
+
           <!-- รหัสครุภัณฑ์ -->
+          <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+
+          <!-- Input Field for Search -->
           <div class="col-md-6 mb-3">
-            <label for="assetId" class="form-label">รหัสครุภัณฑ์:</label>
-            <input type="text" id="assetId" class="form-control" formControlName="assetId"
-              placeholder="กรอกรหัสครุภัณฑ์" />
+            <div class="input-group ">
+              <!-- Label กกต -->
+              <span class="input-group-text" id="inputGroup-sizing-default">กกต</span>
+            
+              <!-- Input สำหรับคำค้นหา -->
+              <input
+                type="text"
+                class="form-control"
+                placeholder="พิมพ์คำค้นหา"
+                [(ngModel)]="searchTerm"
+                [ngModelOptions]="{ standalone: true }"
+                style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                aria-label="Search"
+                aria-describedby="inputGroup-sizing-default"
+              />
+            
+              <!-- ปุ่มค้นหา -->
+              <button
+                type="button"
+                class="btn btn-success"
+                (click)="onSearch()"
+                style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white"
+              >
+                ค้นหา
+              </button>
+            </div>
           </div>
 
           <!-- วันที่ยกเลิก -->
@@ -212,12 +231,23 @@
             <label for="saleDate" class="form-label">วันที่ยกเลิก:</label>
             <input type="date" id="saleDate" class="form-control" formControlName="saleDate" />
           </div>
+          
 
-          <!-- รายละเอียด -->
-          <div class="col-md-12 mb-3">
-            <label for="description" class="form-label">รายละเอียด:</label>
-            <textarea id="description" class="form-control" rows="3" formControlName="description"
-              placeholder="ระบุรายละเอียดเพิ่มเติม"></textarea>
+          <div class="row mb-3">
+            <!-- รายละเอียด -->
+            <div class="col-md-6 ">
+              <label for="description" class="form-label">รายละเอียด:</label>
+              <input id="description" class="form-control" rows="3" formControlName="description"
+                placeholder="ระบุรายละเอียดเพิ่มเติม" />
+            </div> 
+
+            
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-success " type="submit" style="color: white;" (click)="onSubmit()">
+                ดำเนินการ
+              </button>
+            </div>
+
           </div>
         </div>
 
@@ -243,71 +273,10 @@
           </div>
         </div> -->
       </form>
+
     </div>
 
-    <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover border">
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th class="border" mat-header-cell *matHeaderCellDef style="font-weight: bold">#</th>
-          <td mat-cell *matCellDef="let asset">
-            <!-- <button
-                class="btn btn-sm btn-warning m-1"
-                (click)="editAsset(asset)"
-                style="width: 28px; height: 28px; padding: 4px"
-              >
-                <svg
-                  [cIcon]="icons.cilPencil"
-                  style="color: white; width: 100%; height: 100%"
-                ></svg>
-              </button>
-  
-              <button
-                class="btn btn-sm btn-danger m-1"
-                (click)="deleteAsset(asset)"
-                style="width: 28px; height: 28px; padding: 4px"
-              >
-                <svg
-                  [cIcon]="icons.cilTrash"
-                  style="color: white; width: 100%; height: 100%"
-                ></svg>
-              </button> -->
-          </td>
-        </ng-container>
-
-        <!-- Dynamic Columns -->
-        <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header class="border anuphan-600" style="font-weight: bold">
-            {{ column }}
-          </th>
-          <td mat-cell class="border" *matCellDef="let asset">{{ asset[column] }}</td>
-        </ng-container>
-
-        <!-- Header Row -->
-        <tr mat-header-row *matHeaderRowDef="[
-              'actions',
-              'รหัสครุภัณฑ์',
-              'รายการครุภัณฑ์',
-              'รายละเอียด',
-              'จำนวนเงิน'
-            ]"></tr>
-
-        <!-- Data Rows -->
-        <tr mat-row *matRowDef="
-              let row;
-              columns: [
-                'actions',
-                'รหัสครุภัณฑ์',
-                'รายการครุภัณฑ์',
-                'รายละเอียด',
-                'จำนวนเงิน'
-              ]
-            "></tr>
-      </table>
-
-      <!-- Paginator -->
-      <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" [pageSize]="15" showFirstLastButtons></mat-paginator>
-    </div>
+    
 
   </div>
 

@@ -6,13 +6,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import {
-  TextColorDirective,
-  CardComponent,
-  CardHeaderComponent,
-  CardBodyComponent,
-  UtilitiesModule,
-} from '@coreui/angular';
+import {TextColorDirective,CardComponent,CardHeaderComponent,CardBodyComponent,UtilitiesModule,} from '@coreui/angular';
 import {
   RowComponent,
   ColComponent,
@@ -25,7 +19,7 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../../app/ApiController/api-service.service';
 
 interface AssetDetails {
   assetCode: string;
@@ -59,7 +53,6 @@ interface AssetDetails {
     FormLabelDirective,
     FormControlDirective,
   ],
-
   templateUrl: './defaultdata.component.html',
   styleUrl: './defaultdata.component.scss',
 })
@@ -113,40 +106,57 @@ export class DefaultdataComponent implements OnInit {
   assetDetailsset: any[] = [];
 
   getAssetType(): void {
-    this.apiService.fetchDatahttp('Assettypecodes').subscribe((data) => {
-      this.assetDetails = data.map((asset: any) => {
-        asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
-        return asset;
-      });
-      // console.log(this.assetDetails);
-      this.assetDetailsset = this.assetDetails;
+    this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
+      this.assetDetails = data.map((asset: any) => this.translateToThai(asset)); // Apply translation
+  
+      this.assetDetailsset = [...this.assetDetails]; // Clone the array for immutability
       this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-      // console.log(this.dataSource)
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
+  
+      // Ensure paginator and sort exist before assigning them
+      if (this.paginator) this.dataSource.paginator = this.paginator;
+      if (this.sort) this.dataSource.sort = this.sort;
     });
   }
-
+  
   ngOnInit(): void {
     this.getAssetType();
   }
-
+  
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      assetCode: 'รหัสประเภทสินทรัพย์',
-      assetName: 'ชื่อประเภทสินทรัพย์',
-      rate_dep: 'อัตราค่าเสื่อม',
-      servicelife: 'อายุการใช้งาน',
+      TypeCode: 'รหัสประเภทสินทรัพย์',
+      TypeName: 'ชื่อประเภทสินทรัพย์',
     };
-    const translatedAsset: { [key: string]: any } = {};
+  
+    // Clone object for immutability
+    let translatedAsset: any = { ...asset };
+  
     for (const key in asset) {
-      if (asset.hasOwnProperty(key)) {
-        translatedAsset[translationMap[key] || key] = asset[key];
+      if (!asset.hasOwnProperty(key)) continue;
+  
+      if (translationMap[key]) {
+        translatedAsset[translationMap[key]] = asset[key];
+        delete translatedAsset[key]; // Remove old key
+      }
+  
+      // Handle Depreciations separately - Extract first depreciation entry
+      if (key === 'Depreciations' && Array.isArray(asset[key]) && asset[key].length > 0) {
+        const depreciation = asset[key][0]; // Take the first entry (if exists)
+        translatedAsset['อัตราค่าเสื่อม'] = depreciation.Rate_dep ?? '-';
+        translatedAsset['อายุการใช้งาน'] = depreciation.Servicelife ?? '-';
+        delete translatedAsset[key]; // Remove original array
+      } else if (key === 'Depreciations') {
+        // If no depreciation data, set empty values
+        translatedAsset['อัตราค่าเสื่อม'] = '-';
+        translatedAsset['อายุการใช้งาน'] = '-';
+        delete translatedAsset[key];
       }
     }
+  
     return translatedAsset;
   }
-
+  
+  
   deleteAsset(asset: any): void {
     Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
@@ -186,7 +196,6 @@ export class DefaultdataComponent implements OnInit {
       }
     });
   }
-  editAsset(_t35: any) {
-    throw new Error('Method not implemented.');
-  }
+  editAsset(_t35: any) {throw new Error('Method not implemented.');}
+
 }

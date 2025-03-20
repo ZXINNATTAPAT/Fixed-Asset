@@ -1,21 +1,30 @@
 import { InjectionToken, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-// import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ResizableModule } from 'angular-resizable-element';
-import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
-import { appConfig } from './app.config'; // import appConfig จากไฟล์ app.config.ts
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { BaseChartDirective } from 'ng2-charts';
-import { MatDialog, MatDialogActions, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { AssetcountComponent } from './views/sub_system/assetcount/assetcount.component';
-import { DemoMaterialModule } from './views/sub_system/assetcount/material-module';
-import { RoleDialogComponent } from './main_system/user-management/dialog/role-dialog.component';
-import { MatSelect } from '@angular/material/select';
-import { UserEditDialogComponent } from './main_system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
 import { ReactiveFormsModule } from '@angular/forms';
-// import { AssetManagementModule } from './views/main_system/asset-detail1/system.module.ts';
+
+// CoreUI
+import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, DropdownModule } from '@coreui/angular';
+
+// ZXing Scanner
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+
+// Charts
+import { BaseChartDirective } from 'ng2-charts';
+
+// Angular Material
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+
+// Components
+import { AssetcountComponent } from './views/sub_system/assetcount/assetcount.component';
+import { RoleDialogComponent } from './main_system/user-management/dialog/role-dialog.component';
+import { UserEditDialogComponent } from './main_system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
+
+// Config
+import { appConfig } from './app.config';
 
 // สร้าง InjectionToken เพื่อใช้ในการให้ค่า appConfig
 export const APP_CONFIG = new InjectionToken<any>('app.config');
@@ -28,21 +37,27 @@ export const APP_CONFIG = new InjectionToken<any>('app.config');
   ],
   imports: [
     BrowserModule,
-    ResizableModule,
     HttpClientModule,
+    ResizableModule,
+    ReactiveFormsModule,
+
+    // CoreUI
+    DropdownModule,
     FormDirective,
     FormLabelDirective,
     FormControlDirective,
-    ReactiveFormsModule,
     ButtonDirective,
+
+    // ZXing Scanner
     ZXingScannerModule,
-    BaseChartDirective,
-    DemoMaterialModule,
+
+    // Charts
+    BaseChartDirective, // ✅ ใช้ NgChartsModule แทน BaseChartDirective
+
+    // Angular Material
     MatDialogModule,
     MatButtonModule,
-    MatSelect, 
-    MatDialogActions,
-    // AssetManagementModule
+    MatSelectModule, // ✅ ใช้ MatSelectModule แทน MatSelect
   ],
   providers: [
     { 
@@ -50,6 +65,6 @@ export const APP_CONFIG = new InjectionToken<any>('app.config');
       useValue: appConfig 
     }
   ],
-  bootstrap: []
+  bootstrap: [] // ✅ ควรเพิ่ม AppComponent ถ้าเป็น root module
 })
 export class AppModule { }

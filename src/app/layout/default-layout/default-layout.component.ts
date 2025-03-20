@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
-
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ContainerComponent,
@@ -15,10 +14,9 @@ import {
   SidebarToggleDirective,
   SidebarTogglerDirective
 } from '@coreui/angular';
-
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
-import { navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
-import { DataService } from '@services/data-service.component';
+import { ICustomNavData, navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
+import { DataService } from '../../data-service/data-service.component';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -51,91 +49,86 @@ function isOverflown(element: HTMLElement) {
   ]
 })
 export class DefaultLayoutComponent implements OnInit {
-  userinfo: any = [];
-  userId:any = '';
-  userProfile: any = [];
 
-  public navItems: INavData[] = [];
+  userinfo: any = {};
+  userId: string = '' ;
+  userProfile: any = {};
+  userRole: string[] = [];
 
-  constructor(private dataService : DataService) {
-    this.updateNavItems();
-  }
+  public navItems: ICustomNavData[] = []; // ✅ ใช้ Custom Interface
+  public navItemsFiltered: ICustomNavData[] = [];
+
+  constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
+    this.navItems = staticNavItems; // ✅ โหลดค่า navItems ก่อน
+    // console.log("✅ Nav Items Loaded:", this.navItems); // ตรวจสอบว่ามีค่า
     this.initializeUserData();
   }
   
   private async initializeUserData(): Promise<void> {
     try {
-      // Subscribe to userInfo$ to get real-time updates
-      this.dataService.userInfo$.subscribe((userInfo) => {
+      this.dataService.userInfo$.subscribe(userInfo => {
         if (userInfo) {
           this.userinfo = userInfo.claims;
-          this.userId = userInfo.userId;
-
   
-          console.log('UserInfo Loaded:', this.userinfo);
+          this.userId = userInfo.userId ?? ''; // ✅ Prevent `undefined`
   
-          // โหลด UserProfile เมื่อ userId พร้อม
+          this.userRole = userInfo.claims.Role ? [userInfo.claims.Role] : []; // ✅ Correct role extraction
+  
+          // console.log(`🔍 Debug: User ID: ${this.userId}, Roles: ${this.userRole}`);
+  
           if (this.userId) {
-            const userId = this.userId ;
-            this.loadUserProfile(userId);
-          } else {
-            console.warn('UserId not found in UserInfo');
+            this.loadUserProfile(this.userId);
           }
+  
+          this.updateNavItems();
         } else {
-          console.warn('UserInfo is not available.');
+          console.warn("⚠️ User info is empty!");
         }
       });
-  
-      
     } catch (error) {
-      console.error('Error initializing user data:', error);
-    }
-  }
-  
-  private async loadUserProfile(userId: string): Promise<void> {
-    try {
-      // เรียกใช้ `DataService` เพื่อโหลดข้อมูลโปรไฟล์
-      await this.dataService.loadUserProfile(userId);
-  
-      // ดึงข้อมูลจาก BehaviorSubject
-      this.userProfile = this.dataService.getUserProfileSnapshot();
-  
-      if (this.userProfile) {
-        console.log('User Profile Loaded:', this.userProfile);
-      } else {
-        console.warn('User Profile is not available.');
-      }
-    } catch (error) {
-      console.error('Error loading User Profile:', error);
+      console.error('❌ Error initializing user data:', error);
     }
   }
   
   private updateNavItems() {
-    // กำหนดค่าพารามิเตอร์จาก userinfo
-    const workgroup = this.userinfo?.workgroup ;
+    // console.log("🔍 Debug: Checking navItems...", this.navItems);
   
-    // สร้าง navItems ใหม่โดยแทนที่ dynamic parameter
-    this.navItems = staticNavItems.map((item) => {
-      if (item.children) {
-        // อัปเดต URL ใน children
-        item.children = item.children.map((child) => {
-          if (typeof child.url === 'string' && child.url.includes('$param')) {
-            return {
-              ...child,
-              url: child.url.replace('$param', workgroup),
-            };
-          }
-          return child;
-        });
+    if (!this.navItems || this.navItems.length === 0) {
+      console.error("❌ navItems is empty! Check if it's properly initialized.");
+      return;
+    }
+  
+    this.navItemsFiltered = this.navItems.filter(item => {
+      if (!item.roles || item.roles.length === 0) {
+        return true;
       }
-      return item;
+      return item.roles.some(role => this.userRole.includes(role));
     });
+  
+    // console.log(`🔍 Debug: Filtered Nav Items`, this.navItemsFiltered);
   }
+  
+  private async loadUserProfile(userId: string): Promise<void> {
+    try {
+      await this.dataService.userService.loadUserProfile(userId); // ✅ แปลง `userId` เป็น `number`
+      this.userProfile = this.dataService.userService.getUserProfileSnapshot();
+  
+      // console.log(`✅ User Profile Loaded:`, this.userProfile);
+    } catch (error) {
+      console.error('❌ Error loading User Profile:', error);
+    }
+  }
+  
+  onScrollbarUpdate(event: any): void {
+    // console.log("🖱️ Scrollbar updated:", event);
+  }
+
+  
   
 
-  onScrollbarUpdate($event: any) {
-    // โค้ดสำหรับ Scrollbar (ตามต้องการ)
-  }
+  
+
+  
 }

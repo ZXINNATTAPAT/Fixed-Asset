@@ -4,22 +4,19 @@ import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
 import { ApiService } from '../../ApiController/api-service.service';
-
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
-
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-
 import 'moment/locale/th.js';
 // import moment from 'moment';
-import { Subscription } from 'rxjs';
+import { filter, of, Subscription, switchMap, tap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../data-service/data-service.component';
 
 interface AssetDetails {
   assetId: any;
@@ -59,7 +56,6 @@ interface AssetDetails {
   templateUrl: './tablewiget.component.html',
   styleUrl: './tablewiget.component.scss',
 })
-
 export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -91,55 +87,56 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
   }
+  ngAfterViewInit() {this.dataSource.paginator = this.paginator;}
+  ngOnDestroy(): void {if (this.dataSubscription) {this.dataSubscription.unsubscribe();}}
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
-
-  ngOnDestroy(): void {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
-  }
-
-   ngOnInit(): void {
-    
-     this.dataService.userInfo$.subscribe((userinfo) => {
-      if (userinfo) {
-        this.userinfo = userinfo;
-        // console.log('Userinfo loaded:', this.userinfo);
-      } else {
-        console.warn('Userinfo is not available. Skipping data load.');
-      }
-    });
-
-    this.getAssetDetails();
+  ngOnInit(): void {
+    this.dataService.userInfo$
+      .pipe(
+        filter((userInfo: any) => !!userInfo && !!userInfo.claims), // ตรวจสอบว่ามีค่า userInfo
+        tap((userInfo: any) => {
+          this.userinfo = userInfo.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
+          // console.log('DefaultHeader UserInfo:', this.userinfo);
+        }),
+        switchMap((userInfo: any) => {
+          if (userInfo.claims.DeptId) {
+            return this.apiService.fetchDatahttp(`AssetDetails?deptId=${userInfo.claims.DeptId}&page=1&pageSize=20`);
+          }
+          return of([]); // ถ้าไม่มี DeptId ให้ return ค่าว่างแทน
+        })
+      )
+      .subscribe(data => {
+        this.processAssetData(data);
+      });
+  
     this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
       this.assetTypes = data;
     });
   }
-
-  getAssetDetails(): void {
-    this.dataSubscription = this.apiService
-      .fetchDatahttp('assetDetails')
-      .subscribe((data) => {
-        this.processAssetData(data);
-        console.log(data)
-      });
-    //ปรับให้ Api ส่งค่ามาเป็น ส่วนๆ  แบบเซตแล้ว
+  
+  // 📌 API จะโหลดข้อมูลเป็นเซ็ต (หน้าแรก 20 รายการ)
+  getAssetDetails(page: number = 1, pageSize: number = 20): void {
+    if (this.userinfo?.DeptId) {
+      this.dataSubscription = this.apiService
+        .fetchDatahttp(`AssetDetails?deptId=${this.userinfo.DeptId}&page=${page}&pageSize=${pageSize}`)
+        .subscribe((data) => {
+          this.processAssetData(data);
+        });
+    }
   }
-
+  
   processAssetData(data: any[]): void {
     try {
       // ตรวจสอบ Affiliation
       const userAffiliation = this.userinfo?.Affiliation || 'ส่วนกลาง';
-
+      // console.log('User Affiliation:', userAffiliation);
       // กรองข้อมูลตามเงื่อนไขของผู้ใช้
       const filteredAssets = data.filter((asset: any) => {
         const assetCode = asset.AssetCode || '';
         if (userAffiliation === 'ส่วนกลาง') {
           return assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.');
-        } else {
+        } 
+        else {
           return assetCode.startsWith('กกต');
         }
       });
@@ -196,6 +193,15 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   onAssetTypeChange(): void {
     this.filterAssets();
   }
+
+  columnWidths: { [key: string]: string } = {
+    'สถานะ': '5%', 
+    'วันเดือนปี': '7%', 
+    'รหัสครุภัณฑ์': '8%', 
+    'รายการ': '15%', 
+    'ผู้ใช้งาน': '10%'
+  };
+  
 
   // toggleColumn(event: MatSelectChange) {
   //   const selectedColumns = event.value;

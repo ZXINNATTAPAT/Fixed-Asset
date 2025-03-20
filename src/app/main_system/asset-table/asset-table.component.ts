@@ -1,27 +1,24 @@
-import {AfterViewInit,Component,OnDestroy,OnInit,ViewChild,} from '@angular/core';
-import { TextColorDirective } from '@coreui/angular';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+import { TextColorDirective ,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective} from '@coreui/angular';
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ApiService } from '../../ApiController/api-service.service';
-
-import Swal from 'sweetalert2';
-import * as ExcelJS from 'exceljs';
-
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator';
-
 import 'moment/locale/th.js';
-// import moment from 'moment';
 import { Subscription } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../../app/data-service/data-service.component';
+import { MatDialog } from '@angular/material/dialog';
+import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
+import { InfoassetComponent } from '../infoasset/infoasset.component';
+import Swal from 'sweetalert2';
+import * as ExcelJS from 'exceljs';
 
 interface AssetDetails {
   AssetId: any;
@@ -57,12 +54,14 @@ interface AssetDetails {
     MatFormFieldModule,
     MatSelectModule,
     ButtonDirective,
+    // MatDialog,
     // ResizedDirective,
     NgStyle,
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
 })
+
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -75,16 +74,22 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   displayedColumns1: string[]; //ทั้งหมด
   displayedColumns2: string[]; //ไว้เรียงข้อมูลในตาราง
   displayedColumns3!: string[]; //ไว้จัด Header row & col
+  
   icons = {};
+  
   userinfo: any = [];
+
   assetTypes: any[] = [];
+
   myFunctionInstance: myFunction | undefined;
+
   assetDetails: AssetDetails[] = [];
+
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   private dataSubscription!: Subscription;
   
-  constructor(private apiService: ApiService ,private dataService :DataService) {
+  constructor(private apiService: ApiService ,private dataService :DataService,public dialog: MatDialog) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -92,35 +97,53 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
     this.getAssetDetails();
-    
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
+  ngAfterViewInit() {this.dataSource.paginator = this.paginator;} 
+
+  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
+
+  ngOnDestroy(): void {if (this.dataSubscription) this.dataSubscription.unsubscribe();}
+
+  ngOnInit(): void {this.initializeUserInfo();this.loadAssetTypes();this.getAssetDetails();}
+
+  editDialog(): void {
+    const dialogRef = this.dialog.open(EditAssetDialog, {
+      width: '700px',
+      data: { status: 'donation' } // ส่งค่าไปให้ Dialog
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('ผลลัพธ์จาก Dialog:', result);
+      }
+    });
   }
 
-  ngOnDestroy(): void {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
-  }
+  assetDialog(assetId: number): void {
+    const dialogRef = this.dialog.open(InfoassetComponent, {
+      width: '1200px',
+      data: { id: assetId }
+    });
 
-  ngOnInit(): void {
-    this.initializeUserInfo();
-    this.loadAssetTypes();
-    this.getAssetDetails();
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('ผลลัพธ์จาก Dialog:', result);
+      }
+    });
   }
   
   // โหลดข้อมูล UserInfo
   private async initializeUserInfo(): Promise<void> {
     // await this.dataService.loadUserInfo();
-    const userInfo = this.dataService.getUserInfo();
-    if (userInfo) {
-      this.userinfo = userInfo.claims;
-      console.log('UserInfo Loaded:', userInfo);
-    } else {
-      console.warn('UserInfo not available');
-    }
+    this.dataService.userInfo$.subscribe(userInfo => {
+      if (userInfo) {
+        this.userinfo = userInfo.claims;
+        console.log("✅ UserInfo Loaded:", userInfo);
+      } else {
+        console.warn("⚠️ UserInfo not available");
+      }
+    });    
   }
   
   // โหลดข้อมูล Asset Types
@@ -130,10 +153,10 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       error: (err) => console.error('Error loading Asset Types:', err),
     });
   }
-  
+
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
-    this.apiService.fetchDatahttp('AssetDetails').subscribe({
+    this.apiService.fetchDatahttp('AssetDetails/GetForTable').subscribe({
       next: (data) => this.handleAssetDetails(data),
       error: (err) => console.error('Error loading Asset Details:', err),
     });
@@ -165,6 +188,48 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     return new Date(b.PurchaseDate).getTime() - new Date(a.PurchaseDate).getTime();
   }
   
+  // ฟิลเตอร์ Asset ตามประเภท
+  filterAssets(): void {
+    this.dataSource.data = this.selectedAssetType
+      ? this.assetDetails.filter((asset) => asset.TypeId.toString() === this.selectedAssetType)
+      : this.assetDetails;
+  }
+  
+  // สลับคอลัมน์ที่แสดง
+  toggleColumn(event: MatSelectChange): void {
+    const selectedColumns = event.value;
+    this.displayedColumns3 = selectedColumns.includes('เซตค่าคืนทั้งหมด')
+      ? ['Aactions', ...this.displayedColumns2]
+      : [
+          'Aactions',
+          ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด'),
+        ];
+  }
+
+  setupFilter(column: string) {
+    const isPriceColumn = column === 'ราคาต่อหน่วย';
+
+    this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
+      const textToSearch = d[column];
+      if (typeof textToSearch === 'string') {
+        return isPriceColumn
+          ? textToSearch.includes(filter)
+          : textToSearch.toLowerCase().includes(filter);
+      } else if (typeof textToSearch === 'number') {
+        return textToSearch.toString().includes(filter);
+      } else {
+        return false; // or some other default behavior
+      }
+    };
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value
+      .trim()
+      .toLowerCase();
+    this.dataSource.filter = filterValue;
+  }
+
   // แปลงข้อมูล Asset และสร้าง QR Code
   private transformAsset(asset: any): any {
     asset.PurchaseDate = this.myFunctionInstance?.convertDate(asset.PurchaseDate);
@@ -180,54 +245,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   
     return asset;
-  }
-  
-  // ฟิลเตอร์ Asset ตามประเภท
-  filterAssets(): void {
-    this.dataSource.data = this.selectedAssetType
-      ? this.assetDetails.filter((asset) => asset.TypeId.toString() === this.selectedAssetType)
-      : this.assetDetails;
-  }
-  
-  // เรียกเมื่อประเภท Asset เปลี่ยน
-  onAssetTypeChange(): void {
-    this.filterAssets();
-  }
-  
-  // สลับคอลัมน์ที่แสดง
-  toggleColumn(event: MatSelectChange): void {
-    const selectedColumns = event.value;
-    this.displayedColumns3 = selectedColumns.includes('เซตค่าคืนทั้งหมด')
-      ? ['Aactions', ...this.displayedColumns2]
-      : [
-          'Aactions',
-          ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด'),
-        ];
-  }
-  
-
-  setupFilter(column: string) {
-    // const isPriceColumn = column === 'ราคาต่อหน่วย';
-
-    // this.dataSource.filterPredicate = (d: AssetDetails, filter: string) => {
-    //   const textToSearch = d[column];
-    //   if (typeof textToSearch === 'string') {
-    //     return isPriceColumn
-    //       ? textToSearch.includes(filter)
-    //       : textToSearch.toLowerCase().includes(filter);
-    //   } else if (typeof textToSearch === 'number') {
-    //     return textToSearch.toString().includes(filter);
-    //   } else {
-    //     return false; // or some other default behavior
-    //   }
-    // };
-  }
-
-  applyFilter(event: Event) {
-    // const filterValue = (event.target as HTMLInputElement).value
-    //   .trim()
-    //   .toLowerCase();
-    // this.dataSource.filter = filterValue;
   }
 
   showQrAsset(asset: any): void {
@@ -248,6 +265,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
+  //ลบสินทรัพย์
   async deleteAsset(asset: any): Promise<void> {
     const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
@@ -280,41 +298,35 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
-
     const worksheet = workbook.addWorksheet('Assets');
-
-    // Add headers
-    const headers = [
-      'วันเดือนปี',
-      'รหัสครุภัณฑ์',
-      'รายการ',
-      'ราคาต่อหน่วย',
-      'วิธีการได้มา',
-      'เลขที่เอกสาร',
-      'หน่วยงาน',
-      'ฝ่าย',
-      'ผู้ใช้งาน',
-      'หมายเหตุ',
-    ];
-    worksheet.addRow(headers);
-
-    // Add data
+  
+    // Remove 'Aactions', 'Qrcode', and 'สถานะ' before creating headers
+    const exportColumns = this.displayedColumns3.filter(column => 
+      column !== 'Aactions' && column !== 'Qrcode' && column !== 'สถานะ'
+    );
+  
+    // Set Title Row (Merged and Centered)
+    const title = 'ทะเบียนคุมครุภัณฑ์'; // Excel title
+    const titleRow = worksheet.addRow([title]);
+  
+    // Merge Title Row across all columns
+    worksheet.mergeCells(`A1:${String.fromCharCode(65 + exportColumns.length - 1)}1`);
+    titleRow.getCell(1).alignment = { horizontal: 'center' }; // Center align title
+    titleRow.getCell(1).font = { bold: true, size: 14 }; // Bold and larger font for title
+  
+    // Add headers dynamically (in row 2)
+    worksheet.addRow(exportColumns);
+  
+    // Add data rows (starting from row 3)
     this.assetDetails.forEach((asset: any) => {
-      // ใช้ any หรือ interface ที่ไม่ได้ระบุก็ได้
-      const row = [];
-      row.push(asset.วันเดือนปี);
-      row.push(asset.รหัสครุภัณฑ์);
-      row.push(asset.รายการ);
-      row.push(this.myFunctionInstance!.formatCurrency(asset.ราคาต่อหน่วย));
-      row.push(asset.วิธีการได้มา);
-      row.push(asset.เลขที่เอกสาร);
-      row.push(asset.หน่วยงาน);
-      row.push(asset.ฝ่าย);
-      row.push(asset.ผู้ใช้งาน);
-      row.push(asset.หมายเหตุ);
+      const row = exportColumns.map(column => 
+        column === 'ราคาต่อหน่วย' 
+          ? this.myFunctionInstance!.formatCurrency(asset[column]) 
+          : asset[column]
+      );
       worksheet.addRow(row);
     });
-
+  
     // Generate Excel file
     workbook.xlsx.writeBuffer().then((data: any) => {
       const blob = new Blob([data], {
@@ -323,11 +335,12 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'assets.xlsx';
+      a.download = 'ทะเบียนคุมครุภัณฑ์.xlsx';
       a.click();
     });
   }
-}
+}  
+  
 
 //   async searchAsset(): Promise<void> {
 //     const AssetCode = this.AssetCodeInput;

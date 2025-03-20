@@ -1,0 +1,121 @@
+<div class="card shadow-sm" style="border: none">
+  <div class="card-body">
+
+    <div class="border-bottom mb-3 d-flex justify-content-between align-items-center">
+
+      <h1 style="font-family: 'Anuphan', sans-serif; font-weight: 700">
+        {{ selectedSessionId ? 'รายละเอียดการตรวจนับครุภัณฑ์' : 'รายการการตรวจนับครุภัณฑ์' }}
+      </h1>
+
+      <button 
+        *ngIf="selectedSessionId" 
+        class="btn btn-sm btn-secondary" 
+        (click)="backToSessions()">
+        ย้อนกลับ
+      </button>
+
+    </div>
+
+    <!-- 🔹 ตารางแสดงรายละเอียดสินทรัพย์ (Inventory Details) -->
+    <div *ngIf="selectedSessionId; else sessionList">
+
+      <h2 style="font-family: 'Anuphan', sans-serif; font-weight: 700">{{ selectedSessionName }}</h2>
+
+      <table class="table table-striped table-hover">
+        <thead >
+          <tr class="border">
+            <th class="anuphan-700 border" >#</th>
+            <th class="anuphan-700 border" >รหัสครุภัณฑ์</th>
+            <th class="anuphan-700 border">ชื่อครุภัณฑ์</th>
+            <th class="anuphan-700 border">จำนวนในระบบ</th>
+            <th class="anuphan-700 border">จำนวนที่ตรวจนับ</th>
+            <th class="anuphan-700 border">หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border" *ngFor="let item of inventoryDetails">
+            <td class="border" style="width: fit-content;">
+              <button class="btn btn-sm btn-primary" >
+                🔍 
+              </button>
+            </td>
+            <td class="anuphan-500 border">{{ item.AssetCode }}</td>
+            <td class="anuphan-500 border">{{ item.AssetName }}</td>
+            <td class="anuphan-500 border">{{ item.SystemQuantity === 1 ? 'มีอยู่' : 'สูญหาย' }}</td>
+            <td class="anuphan-500 border">{{ item.CountedQuantity === 1 ? 'มีอยู่' : 'สูญหาย' }}</td>
+            <td class="anuphan-500 border">{{ item.Note || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 🔹 ตารางแสดงรอบการตรวจนับ (Session List) -->
+    <ng-template #sessionList>
+
+      <table class="table table-striped table-hover" >
+
+        <thead class="border">
+
+          <tr >
+
+            <th class="border anuphan-700" 
+              style="color: black; font-weight: bold ">
+              <label class="form-label" for="operation">
+                ดำเนินการ
+              </label>
+              <input id="operation" cFormControl sizing="sm"  disabled />
+            </th>
+         
+            <th class="border anuphan-700" 
+              style="color: black; font-weight: bold ;">
+              <label class="form-label" for="sessionName">
+                ชื่อรอบการตรวจนับ
+              </label>  
+              <input id="sessionName" cFormControl sizing="sm" />
+            </th>
+
+            <th class="border anuphan-700" 
+              style="color: black; font-weight: bold">
+              <label class="form-label" for="date">
+                วันที่
+              </label>  
+              <input id="date" cFormControl sizing="sm"   />
+            </th>
+            
+          </tr>
+
+        </thead>
+        <tbody class="border">
+
+          <tr class="border" *ngFor="let session of dataSource.data">
+
+            <td class="border" style="width: 15%;">
+
+              <button class="btn btn-sm btn-primary m-1" (click)="viewSession(session.SessionId)">
+                <svg [cIcon]="instan.icons.cilSearch" style="color: white; width: 16px; height: 16px;" />
+                <!-- ดูรายละเอียด -->
+              </button>
+            
+              <button class="btn btn-sm btn-warning m-1" (click)="editSession(session.SessionId)">
+                <svg [cIcon]="instan.icons.cilPencil" style="color: white; width: 16px; height: 16px;" />
+                <!-- แก้ไข -->
+              </button>
+            
+              <button class="btn btn-sm btn-danger m-1" (click)="deleteSession(session)">
+                <svg [cIcon]="instan.icons.cilTrash" style="color: white; width: 16px; height: 16px;" /> 
+                <!-- ลบ -->
+              </button>
+
+            </td>
+      
+            <td class="border anuphan-500" style="font-size: 16px;">{{ session.SessionName }}</td>
+
+            <td class="border anuphan-500" style="font-size: 16px;">{{ session.Date }}</td>
+            
+          </tr>
+        </tbody>
+      </table>
+    </ng-template>
+
+  </div>
+</div>

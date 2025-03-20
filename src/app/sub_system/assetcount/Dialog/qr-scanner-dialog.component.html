@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>สแกน QR Code</h2>
+<mat-dialog-content>
+  <div *ngIf="availableDevices.length === 0">
+    <p class="text-danger">ไม่พบอุปกรณ์กล้อง</p>
+  </div>
+
+  <div *ngIf="availableDevices.length > 0">
+    <!-- <label>เลือกกล้อง:</label> -->
+    <!-- <mat-select [(value)]="selectedDevice">
+      <mat-option *ngFor="let device of availableDevices" [value]="device">
+        {{ device.label || 'กล้องไม่มีชื่อ' }}
+      </mat-option>
+    </mat-select> -->
+
+    <zxing-scanner 
+      class="qr-scanner-container" 
+      [device]="selectedDevice" 
+      (scanSuccess)="onScanSuccess($event)" 
+      [formats]="allowedFormats" 
+      [autostart]="true">
+    </zxing-scanner>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="closeDialog()">ยกเลิก</button>
+</mat-dialog-actions>

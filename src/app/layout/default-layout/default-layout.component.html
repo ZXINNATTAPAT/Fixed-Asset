@@ -31,6 +31,7 @@
       color: white;">
       
     <div class="row">
+      
       <div class="col-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -40,17 +41,16 @@
           class="bi bi-person-fill"
           viewBox="0 0 16 16"
         >
-          <path
-            d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"
-          />
+          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
         </svg>
       </div>
+
       <div class="col-10">
         <span style="font-size: 15.5px">
-          {{ userProfile }}</span
+          {{ userProfile.Position }}</span
         ><br />
         <span style="font-size: 11.5px"
-          >คุณ {{ userProfile }} {{ userProfile }}
+          >คุณ {{ userProfile.Sname }} {{ userProfile.Lname }}
         </span>
         <br />
         <!-- <span style="font-size: 10px;">{{userinfo.position}}/{{userinfo.positiontype}}</span> -->
@@ -67,7 +67,7 @@
   >
     <c-sidebar-nav
       #overflow
-      [navItems]="navItems"
+      [navItems]="navItemsFiltered"
       dropdownMode="close"
       compact
     />

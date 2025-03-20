@@ -1,0 +1,48 @@
+<div class="card">
+    <div class="card-body">
+
+        <h2 ><span class="anuphan-700">แก้ไขรอบการตรวจนับ</span></h2>
+        <hr />
+
+        <div mat-dialog-content>
+            <form [formGroup]="editForm"> 
+                
+                <div appearance="outline" class="mb-3">
+                    <label class="form-label" for="sessionName">ชื่อรอบการตรวจนับ</label>
+                    <input id="sessionName" matInput class="form-control" formControlName="SessionName" required />
+                </div>
+
+                <div appearance="outline" class="mb-3">
+                    <label class="form-label" for="date">วันที่</label>
+                    <input id="date" matInput class="form-control" type="date" formControlName="Date" required />
+                </div>
+
+                <div appearance="outline" class="mb-3">
+                    <label class="form-label" for="verifier">ผู้ตรวจสอบ</label>
+                    <input id="verifier" matInput class="form-control" formControlName="VerifierId" required />
+                </div>
+
+                <!-- 🔹 รายการ Inspectors -->
+                <div formArrayName="Inspectors">
+                    <div *ngFor="let inspector of inspectorsArray.controls; let i = index" [formGroupName]="i">
+                        <div appearance="outline" class="mb-3">
+                            <label class="form-label" for="inspectorId-{{i}}">รหัสผู้ตรวจสอบ</label>
+                            <input id="inspectorId-{{i}}" matInput class="form-control" formControlName="InspectorId"
+                                required />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div mat-dialog-actions class="d-flex justify-content-end">
+            <button mat-button (click)="close()">ยกเลิก</button>
+            <button mat-raised-button color="primary" (click)="save()" [disabled]="editForm.invalid">
+                บันทึก
+            </button>
+        </div>
+
+
+
+    </div>
+</div>

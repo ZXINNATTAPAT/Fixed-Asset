@@ -105,19 +105,17 @@ export interface asc { asc_Code: string; asc_Name: string; }
 export class SystemComponent implements OnInit, OnDestroy {
 
   // References for elements using @ViewChild
-
   @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
-
   @ViewChild('assetCategorySelect') assetCategorySelect!: ElementRef;
-
   @ViewChild('factions') factionsElementRef!: ElementRef;
 
-  // @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
-
   // Asset-related properties
-  userinfo: any = [];  // User info and token management
+  // User info and token management
+  userinfo: any = [];  
   asset: FormGroup = new FormGroup({});
-  generatedData: any[] = []; // เก็บชุดข้อมูลที่สร้าง
+
+  // เก็บชุดข้อมูลที่สร้าง
+  generatedData: any[] = []; 
   asset2: any = {};
   assetDetails: any[] = [];
   assetTypes: any[] = [];
@@ -126,19 +124,21 @@ export class SystemComponent implements OnInit, OnDestroy {
   assetCategory: any[] = [];
   countingUnits: any[] = [];
 
+  //เชตจำนวนข้อมูลที่จะเพิ่ม
   numberOfCopies: number = 1;
   options: number[] = [];
 
   selectedFaction: string | null = null;
-
   isCustomInput: boolean = false;
 
-  displayDate: string = ''; // เก็บวันที่ในรูปแบบ DD/MM/YY เพื่อแสดงผล
+  // เก็บวันที่ในรูปแบบ DD/MM/YY เพื่อแสดงผล
+  displayDate: string = ''; 
+
   // Controls and filters for dropdowns
   assetCategoryCtrl: FormControl = new FormControl();
   assetCategoryFilterCtrl: FormControl = new FormControl('');
 
-  unitCtrl: FormControl = new FormControl();
+  unitCtrl      : FormControl = new FormControl();
   unitFilterCtrl: FormControl = new FormControl('');
 
   factionsCtrl: FormControl = new FormControl();
@@ -148,32 +148,42 @@ export class SystemComponent implements OnInit, OnDestroy {
   DepartmentFilterCtrl: FormControl = new FormControl('');
 
   filteredAssetCategories: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+
   filteredUnits: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+
   filteredFactions: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+
   filteredDepartment: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-
+  
   // Toggle visibility
-  hidden: boolean = true;hidden2: boolean = true;
-
+  hidden: boolean = true; 
+  hidden2: boolean = true; 
   showForm: boolean = false;
-
+  
   // Fixed settings
-  fixedPrefix: string = '';fixedSuffix: string = '';editablePartLength: number = 15;
+  fixedPrefix: string = ''; 
+  fixedSuffix: string = ''; 
+  editablePartLength: number = 15; 
 
-  icons = { cilDataTransferUp };colors = { color: 'primary', textColor: 'primary' };
+  //เซต Icon 
+  icons = { cilDataTransferUp };
+  colors = { color: 'primary', textColor: 'primary' };
 
+  //เซต types บนตารางค่าเสื่อม
   depreciationSchedule: { year: string; bookValue: number; depreciation: number }[] = [];
 
   _onDestroy = new Subject<void>();
 
   constructor(
-    private formBuilder: FormBuilder,
-    private dataService: DataService, private service: AssetService,
-    private ap: ApiService, private dialog: MatDialog,
+    private formBuilder: FormBuilder, 
+    private dataService: DataService, 
+    private service: AssetService,
+    private ap: ApiService, 
+    private dialog: MatDialog,
     private depreciationService: DepreciationService,
     private filterService: FilterService) { }
 
-    ngOnInit(): void {
+  ngOnInit(): void {
       this.initializeUserInfo();
       this.loadAllData();
       this.initializeAssetForm();
@@ -185,7 +195,9 @@ export class SystemComponent implements OnInit, OnDestroy {
       // เรียก updateDepreciationSchedule เมื่อฟอร์มโหลดเสร็จ
       this.asset.valueChanges.pipe(
         debounceTime(700), // รอ 700 มิลลิวินาทีก่อนดำเนินการ
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)) // ตรวจสอบค่าที่เปลี่ยนจริง
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+        ) // ตรวจสอบค่าที่เปลี่ยนจริง
       ).subscribe((formValues) => {
         const typeId = formValues.TypeId;
         const receiptDate = formValues.ReceiptDate;
@@ -193,14 +205,15 @@ export class SystemComponent implements OnInit, OnDestroy {
     
         if (typeId && receiptDate && purchasePrice > 0) {
           // เรียก API เมื่อค่าฟอร์มครบถ้วน
-          this.ap.fetchDatahttpbyId('Depreciations/type', typeId).subscribe((depreciations) => {
+          this.ap.fetchDatahttpbyId('Depreciations/type', typeId)
+          .subscribe((depreciations) => {
             this.updateDepreciationSchedule(depreciations);
           });
         } else {
           console.log('กำลังรอข้อมูลเพิ่มเติม...');
         }
       });
-    }
+  }
 
   // Load user information and handle it
   private initializeUserInfo(): void {
@@ -239,7 +252,8 @@ export class SystemComponent implements OnInit, OnDestroy {
       DepreciationValue: [0, [Validators.required, Validators.min(0)]],
       BookValue: [0, [Validators.required, Validators.min(0)]],
       Note: [''],
-      StatusId: [1],
+      StatusId: [4], //4:ส่งมอบ 1:ใข้งาน 
+      CreatedBy:[this.userinfo.userId],
       SubAssets: this.formBuilder.array([]),
       numberOfCopies: [1]
     });
@@ -248,21 +262,39 @@ export class SystemComponent implements OnInit, OnDestroy {
   get subAssets(): FormArray { return this.asset.get('SubAssets') as FormArray; }
 
   addSubAsset(subAssetData?: any): void {
+    const assetCode = this.asset.get('AssetCode')?.value || '';
+    const existingSubAssets = this.subAssets.controls.map(sub => sub.get('subAssetCode')?.value);
+    
+    let nextSequence = 1; // เริ่มที่ (1)
+  
+    if (existingSubAssets.length > 0) {
+      // หาเลขลำดับสูงสุดที่มีอยู่แล้ว
+      const maxSequence = existingSubAssets
+        .map(code => {
+          const match = code.match(/\((\d+)\)$/); // ค้นหา (1), (2), (3), ...
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .reduce((max, num) => Math.max(max, num), 0);
+  
+      nextSequence = maxSequence + 1; // เพิ่มลำดับต่อไป
+    }
+  
     this.subAssets.push(
       this.formBuilder.group({
-        subAssetId: [subAssetData?.SubAssetId || 0, Validators.required], // SubAssetId
-        assetId: [subAssetData?.AssetId || 0, Validators.required], // AssetId
-        subAssetCode: [subAssetData?.SubAssetCode || '',Validators.required,], // SubAssetCode
-        subAssetName: [subAssetData?.SubAssetName || '', Validators.required], // SubAssetName
+        subAssetId: [subAssetData?.SubAssetId || 0], // SubAssetId
+        assetId: [subAssetData?.AssetId || 0], // AssetId
+        subAssetCode: [`${assetCode}(${nextSequence})`], // SubAssetCode อัปเดตให้เป็น (1), (2), (3)
+        subAssetName: [subAssetData?.SubAssetName || ''], // SubAssetName
         unit: [subAssetData?.Unit || '', Validators.required], // Unit
-        assetLocation: [subAssetData?.AssetLocation || '',Validators.required,], // AssetLocation
-        responsibleEmployee: [subAssetData?.ResponsibleEmployee || '',Validators.required,], // ResponsibleEmployee
+        assetLocation: [subAssetData?.AssetLocation || ''], // AssetLocation
+        ResponsibleEmployee: [this.asset.get('ResponsibleEmployee')?.value || '', Validators.required], // ResponsibleEmployee
         status: [subAssetData?.Status || ''], // Status
         note: [subAssetData?.Note || ''], // Note
-        assetDetails: [subAssetData?.AssetDetails || ''], // AssetDetails
+        assetDetails: [], // AssetDetails
       })
     );
   }
+  
 
   // Handle reactive form value changes
   private initializeValueChangeHandlers(): void {
@@ -464,37 +496,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     filters[index].call(this);
   }
 
-
   private loadAllData(): void {
-    //############# เปลี่ยนไปใช้ Backend หา ข้อมูลล่าสุดแต่ละปีแล้วส่งมา /AssetDetails/generate-code
-    // Load assetDetails
-    // this.ap.fetchDatahttp('AssetDetails').pipe(catchError(() => of([]))).subscribe(
-    //   (assetDetails) => {
-    //     this.assetDetails = assetDetails.filter((asset: { AssetCode: string }) => {
-    //       // console.log(assetDetails);
-    //       const affiliation = this.userinfo?.Affiliation;
-    //       return affiliation !== 'ส่วนกลาง'
-    //         ? asset.AssetCode.startsWith('กกต') && !asset.AssetCode.includes(`${affiliation}.`)
-    //         : !asset.AssetCode.startsWith('กกต.');
-    //     });
-    //     // console.log('AssetDetails:', this.assetDetails);
-    //   },
-    //   (error) => {
-    //     console.error('Error fetching assetDetails:', error);
-    //   }
-    // ); // #########################################################
-
-    // Load countingUnits
-    // this.ap.fetchDatahttp('Countingunits').pipe(catchError(() => of([]))).subscribe(
-    //   (countingUnits) => {
-    //     this.countingUnits = countingUnits;
-    //     this.filteredUnits.next(this.countingUnits.slice());
-    //     // console.log('CountingUnits:', this.countingUnits);
-    //   },
-    //   (error) => {
-    //     console.error('Error fetching countingUnits:', error);
-    //   }
-    // );
 
     const resourceId = '5b2605ca-cd5c-4034-bc35-3c681c6fedaa';
 
@@ -547,18 +549,6 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   }
 
-  toggleHidden(): void { this.hidden = !this.hidden; }// เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
-
-  removeSubAsset(index: number): void { this.subAssets.removeAt(index); }
-
-  ngOnDestroy(): void { this._onDestroy.next(); this._onDestroy.complete(); }
-
-  translateToEnglish(asset: any): any { this.service.translateToEnglish(asset); }
-
-  convertToDate(dateString: string): Date { return this.service.convertToDate(dateString); }
-
-  showAlert(): void { this.service.showAlert(); }
-
   openUploadDialog(): void {
     this.dialog.open(UploadDialogComponent, {
       width: '600px',
@@ -569,32 +559,37 @@ export class SystemComponent implements OnInit, OnDestroy {
   
   async onSubmit(): Promise<void> {
     try {
-      // Validate form data
-      // if (this.asset.invalid) {
-      //   throw new Error('Form is invalid.');
-      // }
+      // ✅ ตรวจสอบว่า `userinfo.userId` มีค่าหรือไม่
+      if (!this.userinfo || !this.userinfo.userId) {
+        throw new Error('ไม่พบข้อมูลผู้ใช้งาน (CreatedBy)');
+      }
   
+      // ✅ ตรวจสอบค่าในฟอร์ม
       if (!this.asset.get("numberOfCopies")?.value || this.asset.get("numberOfCopies")?.value <= 0) {
         throw new Error('Number of copies must be greater than 0.');
       }
   
-      // Extract form data
+      // ✅ ดึงค่าฟอร์ม
       const payload: any = { ...this.asset.value };
-
+  
+      // ✅ ตรวจสอบว่ามี `CreatedBy` หรือไม่ ถ้าไม่มีให้กำหนดค่า
+      payload.CreatedBy = this.asset.get("CreatedBy")?.value ?? this.userinfo.userId;
+  
       const count = this.asset.get("numberOfCopies")?.value;
   
-      // Generate array of payloads
+      // ✅ สร้าง Array ของ Payload ที่จะส่ง
       const dataToSend: any[] = [];
       for (let i = 0; i < count; i++) {
-        dataToSend.push({ ...payload, uniqueKey: `${payload.assetName}-${i + 1}` });
+        dataToSend.push({
+          ...payload,
+          uniqueKey: `${payload.assetName}-${i + 1}`
+        });
       }
   
-      // Post data to the API
+      // ✅ ส่งข้อมูลไปยัง API
       await this.ap.postData('AssetDetails', dataToSend);
   
-      // Notify user of success
-      console.log('Data submitted successfully.');
-    
+      // ✅ แจ้งเตือนเมื่อสำเร็จ
       Swal.fire({
         html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
         icon: 'success',
@@ -605,17 +600,16 @@ export class SystemComponent implements OnInit, OnDestroy {
         this.asset.reset();
         this.assetCategoryCtrl.reset();
       });
-
+  
     } catch (error) {
       console.error(error);
       Swal.fire({
         html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
         icon: 'error',
       });
-      console.log(this.asset);
     }
   }
-
+  
   autoInput() {
     this.asset.get('Quantity')?.setValue(1); //เซคจำนวน
     this.asset.get('CalculatedPrice')?.setValue(this.asset.get('PurchasePrice')?.value); //เซคราคาคำนวณ
@@ -779,7 +773,7 @@ export class SystemComponent implements OnInit, OnDestroy {
   }
 
   onUnitChange(event: MatSelectChange): void {
-    // console.log('Selected value:', event.value);
+    console.log('Selected value:', event.value);
     // console.log('MatSelect source:', event.source); 
     this.asset.patchValue({ Unit: event.value }); // Update form control value
   }
@@ -841,10 +835,20 @@ export class SystemComponent implements OnInit, OnDestroy {
       assetAge,
     });
   }
+  
+  toggleHidden(): void { this.hidden = !this.hidden; }// เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
 
-  toggleForm(): void {
-    this.showForm = !this.showForm;
-  }
+  removeSubAsset(index: number): void { this.subAssets.removeAt(index); }
+
+  ngOnDestroy(): void { this._onDestroy.next(); this._onDestroy.complete(); }
+
+  translateToEnglish(asset: any): any { this.service.translateToEnglish(asset); }
+
+  convertToDate(dateString: string): Date { return this.service.convertToDate(dateString); }
+
+  showAlert(): void { this.service.showAlert(); }
+
+  toggleForm(): void {this.showForm = !this.showForm;}
   
   enableCustomInput(): void { this.isCustomInput = true; this.selectedFaction = null; }
 

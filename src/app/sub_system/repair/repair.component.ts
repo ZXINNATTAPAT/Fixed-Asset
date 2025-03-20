@@ -1,37 +1,22 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormsModule,
-  FormControl,
-} from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
+import {ReactiveFormsModule,FormsModule,FormControl,} from '@angular/forms';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import {
-  TextColorDirective,
-  TableModule,
-  UtilitiesModule,
-} from '@coreui/angular';
-import {
-  FormDirective,
-  FormLabelDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
+import { MatPaginatorModule,MatPaginator } from '@angular/material/paginator';
+import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,TextColorDirective,TableModule,UtilitiesModule} from '@coreui/angular';
 import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
-import { ReplaySubject, Subject, take, takeUntil } from 'rxjs';
+import { filter, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../ApiController/api-service.service';
 
 interface AssetDetails {
-  repairAssetId: any;
+  RepairAssetId: any;
   assetCode: string;
   assetName: string;
   assetId: string;
@@ -80,10 +65,9 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   assetDetailsset: any[] = [];
   
-  asset: any = {assetName:""};
+  asset: any = {AssetName:""};
 
-  dataSource: MatTableDataSource<AssetDetails> =
-    new MatTableDataSource<AssetDetails>(this.assetDetails);
+  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -91,7 +75,8 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
-  
+  searchTerm: string = '';
+
   icons = { cilPencil, cilTrash, cilMagnifyingGlass };
 
   displayedColumns2: string[] = [
@@ -109,6 +94,53 @@ export class RepairComponent implements OnInit, OnDestroy {
   filteredAssetData: ReplaySubject<any[]> = new ReplaySubject<any[]>(1);
 
   _onDestroy = new Subject<void>();
+
+  ngOnInit(): void {
+
+    this.getAssetdata();
+    // Listen for search field value changes
+    this.assetdataFilterCtrl.valueChanges
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterAsset();
+      });
+      
+    this.setInitialValue();
+    // console.log(this.asset);
+  }
+  
+  onSearch(): void {
+
+    // ใช้ searchTerm เก็บค่าจาก input
+    const search = this.searchTerm.trim(); 
+    
+    if (!search) {
+      // ถ้าไม่มีคำค้นหา แสดงข้อมูลทั้งหมด
+      this.filteredAssetData.next(this.assetDetails2.slice());
+      return;
+    }
+  
+    // เรียก API พร้อมส่งคำค้นหา
+    this.ap.fetchDatahttp(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
+      const assets = data.map((asset: any) => ({
+        AssetId: asset.AssetId,
+        AssetCode: asset.AssetCode,
+        AssetName: asset.AssetName, //เพิ่มมูลค่าสินทรัพย์ วันที่ ได้มา bookvalue 
+      }));
+  
+      // อัปเดตตัวเลือกที่กรองแล้ว
+      this.filteredAssetData.next(assets);
+
+      this.asset = assets[0];//เซตค่าที่ได้ไว้ก่อน
+      
+      console.log(assets);
+
+      // กรณีไม่พบข้อมูล
+      if (assets.length === 0) {
+        console.warn('ไม่พบข้อมูลที่ตรงกับคำค้นหา');
+      }
+    });
+  }
 
   filterAsset(): void {
     let search = this.assetdataFilterCtrl.value;
@@ -132,31 +164,19 @@ export class RepairComponent implements OnInit, OnDestroy {
       this.asset.assetName = selectedAsset ? selectedAsset.assetName : '';
     });
   }
-  
 
   setInitialValue(): void {
     this.filteredAssetData
-      .pipe(take(1), takeUntil(this._onDestroy))
+      .pipe(
+        take(1),
+        takeUntil(this._onDestroy),
+        filter(() => !!this.singleSelect) // ตรวจสอบว่า singleSelect มีค่าก่อน
+      )
       .subscribe(() => {
-        // console.log(this.singleSelect);
+        console.log("Setting compareWith", this.singleSelect); // Debug ดูค่า singleSelect
         this.singleSelect.compareWith = (a: any, b: any) =>
           a && b && a.assetCode === b.assetCode;
       });
-  }
-
-  ngOnInit(): void {
-
-    this.getAssetdata();
-
-    // Listen for search field value changes
-    this.assetdataFilterCtrl.valueChanges
-      .pipe(takeUntil(this._onDestroy))
-      .subscribe(() => {
-        this.filterAsset();
-      });
-
-    this.setInitialValue();
-    // console.log(this.asset);
   }
 
   ngOnDestroy(): void {
@@ -165,18 +185,21 @@ export class RepairComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    this.generateDocumentNumber().then(() => {
       this.http
         .post<any>('https://localhost:7204/api/RepairAsset/', this.asset)
         .subscribe(
           (response) => {
+
             const newAsset = response;
+
             this.assetDetails.push(this.translateToThai(newAsset));
+
             this.dataSource.data = this.assetDetails;
+
             this.getAssetType();
-  
+
             // อัปเดตสถานะเป็น "ซ่อมแซม" หลังจากบันทึกสำเร็จ
-            this.updateAssetStatus(newAsset.assetId, 'ซ่อมแซม');
+            // this.updateAssetStatus(newAsset.assetId, 'ซ่อมแซม');
   
             Swal.fire({
               title: 'บันทึกเสร็จสิ้น',
@@ -191,84 +214,21 @@ export class RepairComponent implements OnInit, OnDestroy {
             });
           }
         );
-    });
   }
-  
-  generateDocumentNumber(): Promise<void> {
-    return new Promise((resolve) => {
-      this.http.get('https://localhost:7204/api/RepairAsset/latestSerialNumber', { responseType: 'text' }).subscribe(
-        (response: string) => {
-          // ดึง orderNumber จาก Serial Number ที่ได้จาก API เช่น "กกต-02-0001-67"
-          const match = response.match(/กกต-02-(\d+)-\d{2}/);
-          let lastOrderNumber = match ? parseInt(match[1], 10) : 0;
-
-          const currentYear = new Date().getFullYear() + 543 - 2500;
-          const documentPrefix = 'กกต-02';
-
-          const checkAndGenerateUniqueSerial = async () => {
-            let isUnique = false;
-
-            while (!isUnique) {
-              lastOrderNumber += 1;
-              const newOrderNumber = lastOrderNumber.toString().padStart(4, '0');
-              const serialNumber = `${documentPrefix}-${newOrderNumber}-${currentYear}`;
-
-              console.log("Checking Serial Number:", serialNumber); // ตรวจสอบในคอนโซล
-
-              const exists = await this.checkIfSerialExists(serialNumber);
-              if (!exists) {
-                isUnique = true;
-                this.asset.SerialNumber = serialNumber; // ใช้ SerialNumber ที่ไม่ซ้ำ
-                console.log("Unique Serial Number Found:", serialNumber);
-                resolve();
-              } else {
-                console.log("Duplicate found, trying next number");
-              }
-            }
-          };
-
-          checkAndGenerateUniqueSerial();
-        },
-        (error) => {
-          console.warn("ไม่พบ Serial Number ล่าสุดในระบบ, สร้าง Serial Number ใหม่");
-
-          const newOrderNumber = '0001';
-          const currentYear = new Date().getFullYear() + 543 - 2500;
-          const documentPrefix = 'กกต-02';
-          const serialNumber = `${documentPrefix}-${newOrderNumber}-${currentYear}`;
-          
-          this.asset.SerialNumber = serialNumber;
-          resolve();
-        }
-      );
-    });
-  }
-
-  // ฟังก์ชันตรวจสอบ SerialNumber ที่มีอยู่แล้ว
-  checkIfSerialExists(serialNumber: string): Promise<boolean> {
-    return this.http
-      .get<boolean>(`https://localhost:7204/api/RepairAsset/existsSerialNumber/${serialNumber}`)
-      .toPromise()
-      .then(result => result ?? false);
-  }
-
-  
-
-
 
   // ฟังก์ชันสำหรับอัปเดตสถานะของสินทรัพย์
-  updateAssetStatus(assetId: number, status: string) {
-    const url = `https://localhost:7204/api/AssetTransferLog/${assetId}/status`;
-    this.http.patch(url, JSON.stringify(status), { headers: { 'Content-Type': 'application/json' } })
-      .subscribe(
-        () => {
-          console.log('Status updated successfully');
-        },
-        (error) => {
-          console.error('Error updating status', error);
-        }
-      );
-  }
+  // updateAssetStatus(assetId: number, status: string) {
+  //   const url = `https://localhost:7204/api/AssetTransferLog/${assetId}/status`;
+  //   this.http.patch(url, JSON.stringify(status), { headers: { 'Content-Type': 'application/json' } })
+  //     .subscribe(
+  //       () => {
+  //         console.log('Status updated successfully');
+  //       },
+  //       (error) => {
+  //         console.error('Error updating status', error);
+  //       }
+  //     );
+  // }
 
   getAssetType(): void {
     this.http
@@ -322,12 +282,12 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      assetId: 'assetId',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการครุภัณฑ์',
-      serialNumber: 'เลขที่เอกสาร',
-      description: 'รายละเอียด',
-      amount: 'จำนวนเงิน',
+      AssetId: 'assetId',
+      AssetCode: 'รหัสครุภัณฑ์',
+      AssetName: 'รายการครุภัณฑ์',
+      SerialNumber: 'เลขที่เอกสาร',
+      Description: 'รายละเอียด',
+      Amount: 'จำนวนเงิน',
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {
@@ -338,47 +298,39 @@ export class RepairComponent implements OnInit, OnDestroy {
     return translatedAsset;
   }
 
-  deleteAsset(asset: any): void {
-    Swal.fire({
+  async deleteAsset(asset: any): Promise<void> {
+    if (!asset || !asset.RepairAssetId) {
+      await Swal.fire('ข้อผิดพลาด!', 'ไม่พบสินทรัพย์ที่ต้องการลบ', 'error');
+      return;
+    }
+  
+    const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
       text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'ใช่',
+      confirmButtonText: 'ใช่, ลบเลย!',
       cancelButtonText: 'ไม่',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http
-          .delete(
-            `https://localhost:7204/api/RepairAsset/${asset.repairAssetId}`
-          )
-          .subscribe(
-            () => {
-              const index = this.assetDetails.findIndex(
-                (a) => a.repairAssetId === asset.repairAssetId
-              );
-              if (index !== -1) {
-                this.assetDetails.splice(index, 1);
-                // Update the data source after deletion
-                this.dataSource.data = this.assetDetails;
-              }
-              Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
-            },
-            (error) => {
-              console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-              Swal.fire(
-                'ข้อผิดพลาด!',
-                'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
-                'error'
-              );
-            }
-          );
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
-        Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
-      }
     });
+  
+    if (!result.isConfirmed) {
+      await Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
+      return;
+    }
+  
+    try {
+      // ใช้ lastValueFrom() เพื่อแปลง Observable เป็น Promise
+      await this.ap.deleteData(`RepairAsset/${asset.RepairAssetId}`);
+  
+      // ลบข้อมูลออกจาก array และอัปเดต dataSource
+      this.assetDetails = this.assetDetails.filter(a => a.RepairAssetId !== asset.RepairAssetId);
+      this.dataSource.data = [...this.assetDetails]; // Refresh dataSource
+  
+      await Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+      await Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์', 'error');
+    }
   }
 
   editAsset(_t35: any) {

@@ -31,6 +31,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RoleDialogComponent } from './dialog/role-dialog.component';
 import { UserEditDialogComponent } from './dialog/user-edit-dialog/user-edit-dialog.component'
 import { MatIcon } from '@angular/material/icon';
+import { AddUserDialogComponent } from './dialog/add-user-dialog/add-user-dialog.component';
 
 
 @Component({
@@ -66,10 +67,11 @@ export class UserManagementComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(AddUserDialogComponent) addUserDialog!: AddUserDialogComponent;
 
   displayedColumns: string[] = [
     "actions",
-    "รหัสผู้ใช้",
+    // "รหัสผู้ใช้",
     "ชื่อผู้ใช้",
     "ชื่อ",
     "นามสกุล",
@@ -81,9 +83,7 @@ export class UserManagementComponent implements OnInit {
   
   constructor(private http: HttpClient,private dialog: MatDialog) { }
 
-  ngOnInit(): void {
-    this.getUsers();
-  }
+  ngOnInit(): void {this.getUsers();}
 
   editUser(user: any): void {
     const dialogRef = this.dialog.open(UserEditDialogComponent, {
@@ -115,14 +115,27 @@ export class UserManagementComponent implements OnInit {
       }
     });
   }
-  
+
+  openAddUserDialog() {
+    const dialogRef = this.dialog.open(AddUserDialogComponent, {
+      width: '1000px',
+      height: '600px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('✅ ผู้ใช้ถูกเพิ่ม:', result);
+      }
+    });
+  }
   
   getUsers(): void {
-    this.http.get<any[]>('https://localhost:7204/api/users').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/users/GetUserFull').subscribe(data => {
       this.userDetails = data;
       this.dataSource = new MatTableDataSource<any>(this.userDetails);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      console.log(this.userDetails);
     });
   }
   searchValue: string = '';
@@ -142,7 +155,6 @@ export class UserManagementComponent implements OnInit {
     this.getUsers(); // โหลดข้อมูลใหม่
   }
 
-  
   // Function to update the user role with confirmation
   updateUserRole(userId: number, role: string): void {
     Swal.fire({
@@ -250,5 +262,7 @@ export class UserManagementComponent implements OnInit {
         return 'btn-outline-secondary'; // สีเทา
     }
   }
+
+  
   
 }

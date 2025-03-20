@@ -1,7 +1,7 @@
 import { NgStyle } from '@angular/common';
 import {Component,OnInit,} from '@angular/core';
-import { WidgetsBrandComponent } from '@widgets/widgets-brand/widgets-brand.component';
-import { WidgetsDropdownComponent } from '@widgets/widgets-dropdown/widgets-dropdown.component';
+import { WidgetsBrandComponent } from '../views/widgets/widgets-brand/widgets-brand.component';
+import { WidgetsDropdownComponent } from '../views/widgets/widgets-dropdown/widgets-dropdown.component';
 
 import { TablewigetComponent } from './tablewiget/tablewiget.component';
 import { Tablewiget2Component } from './tablewiget2/tablewiget2.component';
@@ -11,6 +11,7 @@ import { Tablewidget5Component } from './tablewiget5/tablewidget5.component';
 import { DataService } from '../data-service/data-service.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../ApiController/api-service.service';
+import { NotificationComponent } from '../notification/notification.component';
 
 @Component({
   templateUrl: 'dashboard.component.html',
@@ -25,6 +26,7 @@ import { ApiService } from '../ApiController/api-service.service';
     Tablewiget3Component,
     Tablewiget4Component,
     Tablewidget5Component,
+    NotificationComponent
   ],
 })
 
@@ -38,17 +40,27 @@ export class DashboardComponent implements OnInit {
   param2: string | null = '';
   param3: string | null = '';
 
-  constructor(private dataService: DataService, private route: ActivatedRoute, private router: Router ,private authService :ApiService) 
-  { 
-    
-  }
+  constructor(
+    private dataService: DataService, 
+    private route: ActivatedRoute,
+     private router: Router ,
+     private authService :ApiService) 
+  {}
 
   
   ngOnInit(): void {
     this.dataService.userInfo$.subscribe((userInfo) => {
       this.userinfo = userInfo;
-      console.log('DefaultHeader UserInfo:', userInfo);
+      // console.log('DefaultHeader UserInfo:', userInfo);
     });
+    // this.authService.getAuthStatus().subscribe(auth => {
+    //   if (auth.isAuthenticated) {
+    //     console.log(`User: ${auth.username}, Role: ${auth.roleName} (ID: ${auth.roleId})`);
+    //   } else {
+    //     console.log("User is not logged in");
+    //   }
+    // });
+    
   }
   
   // ฟังก์ชันจัดการพารามิเตอร์
@@ -57,31 +69,31 @@ export class DashboardComponent implements OnInit {
     // this.param = this.route.snapshot.paramMap.get('angency');
     // console.log('URL Parameter:', this.param);
   
-    if (!this.param) {
-      // ถ้าไม่มีพารามิเตอร์ใน URL
-      if (this.userinfo?.Faction) {
-        // ถ้ามี Faction ใน userinfo
-        this.param = this.userinfo.Faction;
-        this.param2 = this.userinfo.Affiliation;
-        this.param3 = this.userinfo.Department;
-        console.log('Setting param from userinfo:', this.param);
+    // if (!this.param) {
+    //   // ถ้าไม่มีพารามิเตอร์ใน URL
+    //   if (this.userinfo?.Faction) {
+    //     // ถ้ามี Faction ใน userinfo
+    //     this.param = this.userinfo.Faction;
+    //     this.param2 = this.userinfo.Affiliation;
+    //     this.param3 = this.userinfo.Department;
+    //     console.log('Setting param from userinfo:', this.param);
   
-        // เปลี่ยนเส้นทางโดยใช้ Angular Router
-        this.router.navigate([`/dashboard/${this.param2}/${this.param3}/${this.param}`]).then(() => {
-          console.log('Navigation successful to:', `/dashboard/${this.param}`);
-        }).catch((err) => {
-          console.error('Navigation error:', err);
-        });
+    //     // เปลี่ยนเส้นทางโดยใช้ Angular Router
+    //     this.router.navigate([`/dashboard/${this.param2}/${this.param3}/${this.param}`]).then(() => {
+    //       console.log('Navigation successful to:', `/dashboard/${this.param}`);
+    //     }).catch((err) => {
+    //       console.error('Navigation error:', err);
+    //     });
   
-        return; // หยุดการทำงานใน handleParam หลังเปลี่ยนเส้นทาง
-      } else {
-        console.error('No URL parameter or Faction found in userinfo!');
-        return; // หยุดการทำงานหากไม่มีพารามิเตอร์หรือ Faction
-      }
-    }
+    //     return; // หยุดการทำงานใน handleParam หลังเปลี่ยนเส้นทาง
+    //   } else {
+    //     console.error('No URL parameter or Faction found in userinfo!');
+    //     return; // หยุดการทำงานหากไม่มีพารามิเตอร์หรือ Faction
+    //   }
+    // }
   
-    // ถ้ามีพารามิเตอร์ใน URL
-    console.log('Received parameter from URL:', this.param);
+    // // ถ้ามีพารามิเตอร์ใน URL
+    // console.log('Received parameter from URL:', this.param);
   
     // เรียกใช้งาน DataService เพื่อดึงจำนวน assets
     // this.numberOfAssets = this.dataService.getNumberOfAssets();
