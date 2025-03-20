@@ -1,7 +1,7 @@
 import { NgStyle } from '@angular/common';
 import {Component,OnInit,} from '@angular/core';
-import { WidgetsBrandComponent } from '@widgets/widgets-brand/widgets-brand.component';
-import { WidgetsDropdownComponent } from '@widgets/widgets-dropdown/widgets-dropdown.component';
+import { WidgetsBrandComponent } from '../views/widgets/widgets-brand/widgets-brand.component';
+import { WidgetsDropdownComponent } from '../views/widgets/widgets-dropdown/widgets-dropdown.component';
 
 import { TablewigetComponent } from './tablewiget/tablewiget.component';
 import { Tablewiget2Component } from './tablewiget2/tablewiget2.component';
@@ -11,6 +11,7 @@ import { Tablewidget5Component } from './tablewiget5/tablewidget5.component';
 import { DataService } from '../data-service/data-service.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../ApiController/api-service.service';
+import { NotificationComponent } from '../notification/notification.component';
 
 @Component({
   templateUrl: 'dashboard.component.html',
@@ -25,6 +26,7 @@ import { ApiService } from '../ApiController/api-service.service';
     Tablewiget3Component,
     Tablewiget4Component,
     Tablewidget5Component,
+    NotificationComponent
   ],
 })
 
@@ -49,7 +51,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.userInfo$.subscribe((userInfo) => {
       this.userinfo = userInfo;
-      console.log('DefaultHeader UserInfo:', userInfo);
+      // console.log('DefaultHeader UserInfo:', userInfo);
     });
     // this.authService.getAuthStatus().subscribe(auth => {
     //   if (auth.isAuthenticated) {

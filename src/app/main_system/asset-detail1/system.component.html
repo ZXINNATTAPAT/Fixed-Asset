@@ -267,24 +267,35 @@
 
               <div class="col">
 
-                <label class="form-label" for="Unitsinput" style="font-weight: bold">
+                <label 
+                  class="form-label" 
+                  for="Unitsinput" 
+                  style="font-weight: bold">
                   หน่วยนับ
                 </label>
 
                 <div class="form-control">
 
-                  <mat-select placeholder="เลือกหน่วยนับ" id="Unitsinput" [formControl]="unitCtrl"
-                    (selectionChange)="onUnitChange($event)" panelClass="mat-select-panel" #singleSelect>
+                  <mat-select 
+                    placeholder="เลือกหน่วยนับ" 
+                    id="Unitsinput" 
+                    [formControl]="unitCtrl"
+                    (selectionChange)="onUnitChange($event)" 
+                    panelClass="mat-select-panel" #singleSelect>
 
                     <!-- Search Input for Filtering -->
                     <mat-option>
-                      <ngx-mat-select-search placeholderLabel="ค้นหาหน่วยนับ" noEntriesFoundLabel="ไม่พบข้อมูล"
+                      <ngx-mat-select-search 
+                        placeholderLabel="ค้นหาหน่วยนับ" 
+                        noEntriesFoundLabel="ไม่พบข้อมูล"
                         [formControl]="unitFilterCtrl">
                       </ngx-mat-select-search>
                     </mat-option>
 
                     <!-- Display Filtered Units -->
-                    <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit.word">
+                    <mat-option 
+                      *ngFor="let unit of filteredUnits | async" 
+                      [value]="unit.word">
                       {{ unit.word }}
                     </mat-option>
                   </mat-select>
@@ -422,13 +433,17 @@
             </div>
 
             <div formArrayName="SubAssets">
-
-              <div *ngFor="let subAsset of subAssets.controls; let i = index" [formGroupName]="i"
-                class="card shadow-sm border mb-3">
+              <div 
+                *ngFor="let subAsset of subAssets.controls; let i = index" 
+                [formGroupName]="i"
+                class="card shadow-sm mb-3" 
+                style="border: none;">
 
                 <div class="card-body">
 
-                  <div class="anuphan-600 mb-3" style="font-size: large;font-weight: bold;">
+                  <div 
+                    class="anuphan-600 mb-3" 
+                    style="font-size: large;font-weight: bold;">
                     ครุภัณฑ์ย่อย
                   </div>
 
@@ -446,79 +461,89 @@
                       </div> -->
 
                     <div class="col-4">
-                      <label class="form-label" for="SubAsset Name">ชื่อครุภัณฑ์ย่อย</label>
-                      <input class="form-control" id="SubAsset Name" formControlName="ชื่อครุภัณฑ์ย่อย"
+
+                      <label 
+                        class="form-label" 
+                        for="SubAsset Name">
+                        ชื่อครุภัณฑ์ย่อย
+                      </label>
+
+                      <input 
+                        class="form-control" 
+                        id="SubAsset Name" 
+                        formControlName="subAssetName"
                         placeholder="SubAsset Name" />
                     </div>
 
                     <div class="col-2">
-                      <label class="form-label" for="Unit">หน่วยนับ</label>
+                      
+                      <label 
+                        class="form-label" 
+                        for="Unit">
+                        หน่วยนับ
+                      </label>
 
-                      <input class="form-control" id="Unit" formControlName="Unit" placeholder="หน่วยนับ" />
-
+                      <input 
+                        class="form-control" 
+                        id="Unit" 
+                        formControlName="unit" 
+                        placeholder="หน่วยนับ" />
                     </div>
 
                     <div class="col-5">
 
-                      <label class="form-label" for="note">
+                      <label 
+                        class="form-label" 
+                        for="note">
                         หมายเหตุ
                       </label>
 
-                      <input class="form-control" id="note" formControlName="ระบุหมายเหตุ" placeholder="Note" />
+                      <input class="form-control" id="note" 
+                      formControlName="note" 
+                      placeholder="Note" />
 
                     </div>
-
 
                     <div class="col">
 
                       <br />
-
                       <button type="button" class="btn btn-danger mt-2" style="color: white;"
                         (click)="removeSubAsset(i)">ลบ
                       </button>
 
                     </div>
-
-
-
                   </div>
 
                 </div>
               </div>
             </div>
 
-            <hr />
+            <!-- <hr /> -->
 
           </div>
 
-          <h3><span class="anuphan-700">ตารางแสดงค่าเสื่อม</span></h3>
 
-          <div class="table-responsive mb-4 p-2">
-
-            <table class="table table-bordered ">
+          <div class="table-responsive  mb-4  ">
+            <h3><span class="anuphan-700">ตารางแสดงค่าเสื่อม</span></h3>
+            <table class="table table-bordered table-striped shadow-sm">
               <tbody>
                 <tr>
-
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="depreciationStartDateInput">
                       วันที่เริ่มคิดค่าเสื่อม
                     </label>
                   </th>
-
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="depreciationCalculationStartDateInput">
                       วันที่เริ่มคำนวณค่าเสื่อม
                     </label>
-
                   </th>
-
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="calculatedPriceInput">
                       ราคาคำนวณ
                     </label>
                   </th>
-
-                  <!-- <th class="table-secondary" id="#" colspan="4">
+                  <!-- <th class="" id="#" colspan="4">
                       <label 
                         class="form-label" 
                         style="font-weight: bold " 
@@ -527,13 +552,13 @@
                       </label>
                     </th> -->
 
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="depreciationRateInput">
                       อัตราการคิดค่าเสื่อม(%)
                     </label>
                   </th>
 
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="assetAgeInput">
                       อายุของครุภัณฑ์
                     </label>
@@ -542,24 +567,20 @@
                 </tr>
 
                 <tr>
-
                   <td colspan="4">
                     <input class="form-control  p-1" cFormControl id="depreciationStartDateInput"
                       formControlName="DepreciationStartDate" [value]="displayDate" readonly style="border: none;" />
                   </td>
-
                   <td colspan="4">
                     <input class="form-control  p-1" cFormControl id="depreciationCalculationStartDateInput"
                       formControlName="DepreciationCalculationStartDate" [value]="displayDate" readonly
                       style="border: none;" />
                   </td>
-
                   <td colspan="4">
                     <input class="form-control  p-1" cFormControl id="calculatedPriceInput"
                       formControlName="CalculatedPrice" placeholder="ระบุราคาคำนวณ" type="number" readonly
                       style="border: none;" />
                   </td>
-
                   <!-- <td colspan="4">
                       <input class="form-control  p-1" 
                         cFormControl id="scrapPriceInput"
@@ -568,7 +589,6 @@
                         readonly 
                         style="border: none;" />
                     </td> -->
-
                   <td colspan="4">
                     <input class="form-control  p-1" cFormControl id="depreciationRateInput"
                       placeholder="ระบุอัตราการคิดค่าเสื่อม" type="number" formControlName="DepreciationRate" readonly
@@ -584,21 +604,21 @@
 
                 <tr>
 
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="accumulatedDepreciationInput">
                       ค่าเสื่อมสะสม
                     </label>
                   </th>
 
-                  <th class="table-secondary" id="#" colspan="4">
+                  <th class="" id="#" colspan="4">
                     <label class="form-label" style="font-weight: bold " for="depreciationValueInput">
                       มูลค่าค่าเสื่อม
                     </label>
                   </th>
 
-                  <th class="table-secondary" id="#" colspan="4"></th>
-                  <th class="table-secondary" id="#" colspan="4"></th>
-                  <th class="table-secondary" id="#" colspan="4"></th>
+                  <th class="" id="#" colspan="4"></th>
+                  <th class="" id="#" colspan="4"></th>
+                  <th class="" id="#" colspan="4"></th>
 
                 </tr>
 
@@ -658,8 +678,8 @@
 
                 </tr>
               </tbody>
-            </table>
 
+            </table>
 
             <div class="text-end d-grid gap-2 d-md-flex justify-content-md-end">
 

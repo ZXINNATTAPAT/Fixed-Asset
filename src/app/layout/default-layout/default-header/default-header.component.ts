@@ -23,18 +23,20 @@ import {
   TextColorDirective,
   ThemeDirective,
 } from '@coreui/angular';
-import { NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
-import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule, NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, filter, map, tap } from 'rxjs/operators';
 import { cilAccountLogout, cilUser } from '@coreui/icons';
 import CountyData from './County.json';
 import { HttpClient } from '@angular/common/http';
-import { json } from 'stream/consumers';
+// import { json } from 'stream/consumers';
 import { ApiService } from '../../../ApiController/api-service.service';
 import { DataService } from '../../../data-service/data-service.component';
 import { navItems, INavData } from '../_nav';
+import { NotificationService } from '../../../services/notification.service';
+import { firstValueFrom } from 'rxjs';
 
 interface povice {
   id: number;
@@ -44,7 +46,6 @@ interface povice {
 @Injectable({
   providedIn: 'root',
 })
-
 @Component({
   selector: 'app-default-header',
   templateUrl: './default-header.component.html',
@@ -53,7 +54,7 @@ interface povice {
     ContainerComponent,
     HeaderTogglerDirective,
     SidebarToggleDirective,
-    NgIf,
+    NgIf,NgStyle,
     IconDirective,
     HeaderNavComponent,
     NavItemComponent,
@@ -75,38 +76,61 @@ interface povice {
     DropdownDividerDirective,
     ProgressBarDirective,
     ProgressComponent,
-    NgStyle,
+    CommonModule
   ],
 })
 
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
+  @Input() sidebarId: string = 'sidebar1';
 
   icons = { cilAccountLogout, cilUser };
-
   navItemsFiltered: INavData[] = [];
-  userinfo: any = [];
-  token: any;
-  province: povice[] = [];
+  userinfo: any = {};
+  userRoles: string[] = []; // ✅ เก็บ Roles ของผู้ใช้
+  province: any[] = [];
   provinceset: any[] = [];
   showCounty: any = {};
-  coutcounty: any[] = [];
   colorMode: any;
+
+  notifications: any[] = []; // ✅ ตัวแปรเก็บรายการแจ้งเตือน
+  unreadCount: number = 0; // ✅ จำนวนแจ้งเตือนที่ยังไม่ได้อ่าน
+  dropdownOpen: boolean = false; // ✅ เปิด/ปิด Dropdown แจ้งเตือน
+  userId: string = ''; // ✅ เก็บ User ID
 
   constructor(
     private http: HttpClient,
     private activatedRoute: ActivatedRoute,
     private colorModeService: ColorModeService,
     private destroyRef: DestroyRef,
-    private authService: ApiService ,
-    private dataService : DataService
-  ) { super(); }
+    // private authService: ApiService,
+    // private cookieService: CookieService, // ✅ Inject CookieService
+    private dataService: DataService,
+    private notificationService: NotificationService, // ✅ Inject Notification Service
+    private router : Router,
+    private apiService :ApiService
+  ) { 
+    super();
+  }
 
   ngOnInit(): void {
-    this.dataService.userInfo$.subscribe((
-      userInfo: { claims: {}; }) => {
-      this.userinfo = userInfo?.claims || {}; 
-      // กำหนดค่าเริ่มต้นเป็นว่าง
-      // console.log('DefaultHeader UserInfo:', this.userinfo);
+    // ✅ รอให้ userInfo โหลดเสร็จ ก่อนจะโหลดแจ้งเตือน
+    this.dataService.userInfo$.subscribe((userInfo) => {
+      if (userInfo?.claims) {
+        this.userinfo = userInfo.claims;
+        this.userRoles = Array.isArray(userInfo.claims.Role) ? userInfo.claims.Role : [userInfo.claims.Role]; // ✅ เก็บ roles ของ user
+        this.userId = userInfo?.userId || '';
+
+
+        // ✅ โหลดแจ้งเตือนหลังจากที่ userId ได้รับค่าแล้ว
+        if (this.userId) {
+          console.log(`✅ User ID Loaded: ${this.userId} ${this.userRoles}`);
+          this.loadNotifications();
+        } else {
+          console.warn('⚠️ User ID is empty, skipping notification load.');
+        }
+
+        this.filterNavItems();
+      }
     });
 
     this.colorModeService.localStorageItemName.set(
@@ -115,31 +139,77 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     this.colorModeService.eventName.set('ColorSchemeChange');
 
     this.activatedRoute.queryParams.pipe(
-        delay(1),
-        map((params) => <string>params['theme']?.match(/^[A-Za-z0-9\s]+/)?.[0]),
-        filter((theme) => ['dark', 'light', 'auto'].includes(theme)),
-        tap((theme) => {
-          this.colorModeService.colorMode.set(theme);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
+      delay(1),
+      map((params) => <string>params['theme']?.match(/^[A-Za-z0-9\s]+/)?.[0]),
+      filter((theme) => ['dark', 'light', 'auto'].includes(theme)),
+      tap((theme) => {
+        this.colorModeService.colorMode.set(theme);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
 
     this.setshow();
+  }
+
+  // ✅ โหลดแจ้งเตือนของผู้ใช้
+  loadNotifications(): void {
+    if (!this.userId) return; // ✅ ป้องกัน Error กรณีไม่มี User ID
+
+    this.notificationService.getNotifications(Number(this.userId)).subscribe({
+      next: (data) => {
+        this.notifications = data;
+        this.unreadCount = data.filter(n => !n.IsRead).length; // ✅ ใช้ IsRead แทน Status === 'new'
+      },
+      error: (err) => {
+        console.error('❌ Error loading notifications:', err);
+      }
+    });
+  }
+
+  // ✅ อัปเดตสถานะเป็น "อ่านแล้ว"
+  markAsRead(notificationId: number): void {
+    if (!this.userId) return; // ✅ ป้องกัน Error กรณีไม่มี User ID
+
+    this.notificationService.markAsRead(notificationId, Number(this.userId)).subscribe({
+      next: () => {
+        this.notifications = this.notifications.map(notification =>
+          notification.NotificationId === notificationId ? { ...notification, IsRead: true } : notification
+        );
+        this.unreadCount = this.notifications.filter(n => !n.IsRead).length; // ✅ อัปเดต unreadCount
+      },
+      error: (err) => {
+        console.error('❌ Error marking notification as read:', err);
+      }
+    });
+  }
+
+  // ✅ เปิด/ปิด dropdown แจ้งเตือน
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+    // ✅ ฟังก์ชันกรองเมนูตามสิทธิ์ของผู้ใช้
+    filterNavItems() {
+      // console.log("🔍 User Roles:", this.userRoles);
+      
+      if (!this.userRoles || this.userRoles.length === 0) {
+        this.navItemsFiltered = []; // ❌ ถ้าไม่มี roles เลย ให้ซ่อนเมนูทั้งหมด
+        return;
+      }
     
-    this.filterNavItems();
-  }
-
-  userRole: string = '';
-
-  filterNavItems() {
-    this.navItemsFiltered = navItems.filter(item => item.roles?.includes(this.userRole));
-  }
+      this.navItemsFiltered = navItems.filter(menu => {
+        // console.log(`🔎 Checking Menu: ${menu.name} | Roles: ${menu.roles}`);
+    
+        return menu.roles?.some(role => this.userRoles.includes(role));
+      });
+    
+      console.log("✅ Filtered Nav Items:", this.navItemsFiltered);
+    }
+    
 
   setshow() {
     this.http
-      .get<any>(
-        'https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json'
-      )
+      .get<any>('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json')
       .subscribe(
         (response) => {
           this.province = response;
@@ -147,25 +217,14 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
             id: item.id,
             name_th: item.name_th,
           }));
-          // console.log(this.provinceset);
-          // console.log(CountyData.codecounty);
 
           for (const county of CountyData.codecounty) {
             if (this.userinfo.Affiliation !== 'ส่วนกลาง') {
-              // ตรวจสอบเงื่อนไขของการเปรียบเทียบชื่อ
               if (this.userinfo.Affiliation === county.name_th) {
-                console.log('Found matching affiliation:', county);
-                // หาข้อมูลจังหวัดที่มีการจับคู่กับเขตปัจจุบัน
                 const matchedProvinces = this.provinceset.filter(
                   (province) => county.id === province.id
                 );
-                if (matchedProvinces.length > 0) {
-                  // หากพบข้อมูลจังหวัดที่มีการจับคู่กับเขตปัจจุบัน กำหนดค่า showCounty เป็นชื่อจังหวัดแรกที่ match ได้
-                  this.showCounty = matchedProvinces[0].name_th;
-                } else {
-                  // หากไม่พบข้อมูลจังหวัดที่มีการจับคู่กับเขตปัจจุบัน กำหนดค่าเริ่มต้น
-                  this.showCounty = 'Error';
-                }
+                this.showCounty = matchedProvinces.length > 0 ? matchedProvinces[0].name_th : 'Error';
                 return;
               }
             } else {
@@ -179,123 +238,29 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
       );
   }
 
+  // ✅ ฟังก์ชัน Logout
   Logout(): void {
-    // localStorage.clear();
-    // window.location.reload();
+    this.apiService.logout().subscribe({
+      next: () => {
+        console.log('✅ Logged out from server.');
+  
+        // ✅ ลบคุกกี้ที่สามารถลบได้ (แต่ `HttpOnly` ต้องให้ Backend ลบ)
+        document.cookie.split(";").forEach((cookie) => {
+          const [name] = cookie.split("=");
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        });
+  
+        // ✅ รีเฟรชหน้าไปที่ `/login` เพื่อล้าง session
+        this.router.navigate(['/login']).then(() => {
+          window.location.reload();
+        });
+      },
+      error: (err) => {
+        console.error('❌ Logout API failed:', err);
+      }
+    });
   }
-
-  @Input() sidebarId: string = 'sidebar1';
-
-  // public newMessages = [
-  //   {
-  //     id: 0,
-  //     from: 'Jessica Williams',
-  //     avatar: '7.jpg',
-  //     status: 'success',
-  //     title: 'Urgent: System Maintenance Tonight',
-  //     time: 'Just now',
-  //     link: 'apps/email/inbox/message',
-  //     message:
-  //       "Attention team, we'll be conducting critical system maintenance tonight from 10 PM to 2 AM. Plan accordingly...",
-  //   },
-  //   {
-  //     id: 1,
-  //     from: 'Richard Johnson',
-  //     avatar: '6.jpg',
-  //     status: 'warning',
-  //     title: 'Project Update: Milestone Achieved',
-  //     time: '5 minutes ago',
-  //     link: 'apps/email/inbox/message',
-  //     message:
-  //       "Kudos on hitting sales targets last quarter! Let's keep the momentum. New goals, new victories ahead...",
-  //   },
-  //   {
-  //     id: 2,
-  //     from: 'Angela Rodriguez',
-  //     avatar: '5.jpg',
-  //     status: 'danger',
-  //     title: 'Social Media Campaign Launch',
-  //     time: '1:52 PM',
-  //     link: 'apps/email/inbox/message',
-  //     message:
-  //       'Exciting news! Our new social media campaign goes live tomorrow. Brace yourselves for engagement...',
-  //   },
-  //   {
-  //     id: 3,
-  //     from: 'Jane Lewis',
-  //     avatar: '4.jpg',
-  //     status: 'info',
-  //     title: 'Inventory Checkpoint',
-  //     time: '4:03 AM',
-  //     link: 'apps/email/inbox/message',
-  //     message:
-  //       "Team, it's time for our monthly inventory check. Accurate counts ensure smooth operations. Let's nail it...",
-  //   },
-  //   {
-  //     id: 3,
-  //     from: 'Ryan Miller',
-  //     avatar: '4.jpg',
-  //     status: 'info',
-  //     title: 'Customer Feedback Results',
-  //     time: '3 days ago',
-  //     link: 'apps/email/inbox/message',
-  //     message:
-  //       "Our latest customer feedback is in. Let's analyze and discuss improvements for an even better service...",
-  //   },
-  // ];
-
-  // public newNotifications = [
-  //   {
-  //     id: 0,
-  //     title: 'New user registered',
-  //     icon: 'cilUserFollow',
-  //     color: 'success',
-  //   },
-  //   { id: 1, title: 'User deleted', icon: 'cilUserUnfollow', color: 'danger' },
-  //   {
-  //     id: 2,
-  //     title: 'Sales report is ready',
-  //     icon: 'cilChartPie',
-  //     color: 'info',
-  //   },
-  //   { id: 3, title: 'New client', icon: 'cilBasket', color: 'primary' },
-  //   {
-  //     id: 4,
-  //     title: 'Server overloaded',
-  //     icon: 'cilSpeedometer',
-  //     color: 'warning',
-  //   },
-  // ];
-
-  // public newStatus = [
-  //   {
-  //     id: 0,
-  //     title: 'CPU Usage',
-  //     value: 25,
-  //     color: 'info',
-  //     details: '348 Processes. 1/4 Cores.',
-  //   },
-  //   {
-  //     id: 1,
-  //     title: 'Memory Usage',
-  //     value: 70,
-  //     color: 'warning',
-  //     details: '11444GB/16384MB',
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'SSD 1 Usage',
-  //     value: 90,
-  //     color: 'danger',
-  //     details: '243GB/256GB',
-  //   },
-  // ];
-
-  // public newTasks = [
-  //   { id: 0, title: 'Upgrade NPM', value: 0, color: 'info' },
-  //   { id: 1, title: 'ReactJS Version', value: 25, color: 'danger' },
-  //   { id: 2, title: 'VueJS Version', value: 50, color: 'warning' },
-  //   { id: 3, title: 'Add new layouts', value: 75, color: 'info' },
-  //   { id: 4, title: 'Angular Version', value: 100, color: 'success' },
-  // ];
+  
+  
 }
+

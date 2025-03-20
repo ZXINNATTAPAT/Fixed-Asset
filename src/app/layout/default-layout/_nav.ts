@@ -10,7 +10,7 @@ export const navItems: ICustomNavData[] = [
     name: 'แดชบอร์ด',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
-    roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff','เจ้าหน้าที่ฝ่ายอำนวยการ'],
     children: [
       {
         name: 'แดชบอร์ดสรุปภาพรวม (ส่วนกลาง)',
@@ -36,8 +36,9 @@ export const navItems: ICustomNavData[] = [
     name: 'รายการบันทึก',
     url: '/table',
     iconComponent: { name: 'cil-pencil' },
-    roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
+    roles: ['Admin', 'AssetOfficer', 'GeneralStaff','เจ้าหน้าที่ฝ่ายอำนวยการ'],
     children: [
+      { name: 'รายการที่ต้องรับมอบ', url: '/table/receive', icon: 'nav-icon-bullet' },
       { name: 'รายการครุภัณฑ์', url: '/table/assettable', icon: 'nav-icon-bullet' },
       { name: 'รายการการตรวจนับ', url: '/table/inventorysession', icon: 'nav-icon-bullet' }
     ]

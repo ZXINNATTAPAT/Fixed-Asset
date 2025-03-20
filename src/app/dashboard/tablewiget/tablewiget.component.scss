@@ -1,14 +1,14 @@
-.table-container {
-    width: 100%;
-    overflow-x: auto; /* ✅ ทำให้สามารถเลื่อนซ้าย-ขวาได้ */
-    white-space: nowrap; /* ✅ ป้องกันข้อความขึ้นบรรทัดใหม่ */
-  }
+// .table-container {
+//     width: 100%;
+//     overflow-x: auto; /* ✅ ทำให้สามารถเลื่อนซ้าย-ขวาได้ */
+//     white-space: nowrap; /* ✅ ป้องกันข้อความขึ้นบรรทัดใหม่ */
+//   }
   
-.table-responsive {
-    display: block;
-    min-width: 600px; /* ✅ ป้องกันไม่ให้ตารางหดเล็กเกินไป */
-    overflow-x: auto; /* ✅ ทำให้เลื่อนซ้าย-ขวาได้ */
-  }
+// .table-responsive {
+//     display: block;
+//     min-width: 600px; /* ✅ ป้องกันไม่ให้ตารางหดเล็กเกินไป */
+//     overflow-x: auto; /* ✅ ทำให้เลื่อนซ้าย-ขวาได้ */
+//   }
   
   table {
     width: 100%;

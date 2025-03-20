@@ -135,7 +135,8 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
         const assetCode = asset.AssetCode || '';
         if (userAffiliation === 'ส่วนกลาง') {
           return assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.');
-        } else {
+        } 
+        else {
           return assetCode.startsWith('กกต');
         }
       });
@@ -192,6 +193,15 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   onAssetTypeChange(): void {
     this.filterAssets();
   }
+
+  columnWidths: { [key: string]: string } = {
+    'สถานะ': '5%', 
+    'วันเดือนปี': '7%', 
+    'รหัสครุภัณฑ์': '8%', 
+    'รายการ': '15%', 
+    'ผู้ใช้งาน': '10%'
+  };
+  
 
   // toggleColumn(event: MatSelectChange) {
   //   const selectedColumns = event.value;

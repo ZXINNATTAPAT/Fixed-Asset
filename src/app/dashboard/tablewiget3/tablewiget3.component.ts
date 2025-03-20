@@ -1,5 +1,5 @@
 import { AfterViewInit,Component,Injectable,OnDestroy,OnInit,ViewChild,} from '@angular/core';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../ApiController/api-service.service';
 import { NgIf, NgStyle } from '@angular/common';
 import { cilPencil,cilTrash,cibAddthis,cilDataTransferDown,cilInfo,} from '@coreui/icons';
 import { MatFooterRow,MatRowDef,MatTableDataSource,MatTableModule,} from '@angular/material/table';
@@ -7,7 +7,7 @@ import { MatPaginator,MatPaginatorIntl,MatPaginatorModule,} from '@angular/mater
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import 'moment/locale/th.js';
 import { Subject, Subscription } from 'rxjs';
-import { DataService } from 'src/app/data-service/data-service.component';
+import { DataService } from '../../data-service/data-service.component';
 import { ChartDataset, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective  } from 'ng2-charts';
 
@@ -82,79 +82,34 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
 })
 
 export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
-
-  displayedColumns: string[] = ['category', 'assetType', 'assetCount'];
-
-  totalAssetsByCategory: { [category: string]: number } = {};
-
-  totalAssetsByType: { [type: string]: number } = {};
-
-  assetDetails: any[] = [];
-
-  // assetTypes:any[]=[];
   
-  assetCategories:any[]=[];
+  displayedColumns: string[] = ['AssetType', 'CategoryName', 'AssetCount'];
+  dataSource = new MatTableDataSource<any>([]);
+  
+  assets: any[] = [];
+  assetTypes: string[] = [];
+  selectedCategory: string | null = null; // ✅ เพิ่มตัวแปรนี้
+  selectedType: string | null = null;
 
-  dataSource = new MatTableDataSource<any>(this.assetDetails);
-
-  // ข้อมูลครุภัณฑ์
-  assets = [
-    { category: 'คอมพิวเตอร์', assetType: 'โน้ตบุ๊ก', assetCount: 10 },
-    { category: 'คอมพิวเตอร์', assetType: 'พีซี', assetCount: 20 },
-    { category: 'เครื่องใช้สำนักงาน', assetType: 'โต๊ะทำงาน', assetCount: 15 },
-    { category: 'เครื่องใช้สำนักงาน', assetType: 'เก้าอี้', assetCount: 25 }
-  ];
-
-  // หาประเภทครุภัณฑ์หลัก
-  assetTypes = [...new Set(this.assets.map(item => item.category))];
-
-  // Pie Chart
-  public pieChartLabels = this.assetTypes;
-  public pieChartData: ChartDataset[] = [
-    { data: this.assetTypes.map(type => this.assets.filter(item => item.category === type).reduce((sum, item) => sum + item.assetCount, 0)) }
-  ];
+  public pieChartLabels: string[] = [];
+  public pieChartData: ChartDataset[] = [{ data: [] }];
   public pieChartType: ChartType = 'pie';
   public pieChartOptions: ChartOptions = { responsive: true };
 
-  // แสดงหมวดหมู่ย่อยเมื่อกด
-  selectedCategory: string | null = null;
-  public onChartClick(event: any) {
-    if (event.active && event.active.length > 0) {
-      const index = event.active[0].index;
-      this.showDetails(this.pieChartLabels[index]);
-    }
-  }
-
-  // ฟังก์ชันดูหมวดหมู่ย่อย
-  public showDetails(category: string) {
-    this.selectedCategory = category;
-    const filteredAssets = this.assets.filter(item => item.category === category);
-    
-    this.pieChartLabels = filteredAssets.map(item => item.assetType);
-    this.pieChartData = [{ data: filteredAssets.map(item => item.assetCount) }];
-  }
-
-  // ฟังก์ชันย้อนกลับไปดูประเภทหลัก
-  public goBack() {
-    this.selectedCategory = null;
-    this.pieChartLabels = this.assetTypes;
-    this.pieChartData = [
-      { data: this.assetTypes.map(type => this.assets.filter(item => item.category === type).reduce((sum, item) => sum + item.assetCount, 0)) }
-    ];
-  }
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
-
-  icons = { cilPencil, cilTrash, cibAddthis, cilDataTransferDown, cilInfo };
-
   private dataSubscription!: Subscription;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(private apiService: ApiService, private dataService: DataService) {}
+
   ngOnInit(): void {
-    // this.getAssetDetails();
+    this.loadAssetData();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngOnDestroy(): void {
@@ -163,131 +118,59 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  constructor( private ap :ApiService ,private dataService :DataService) {
-    // this.getAssetDetails();
-    // this.getAssetType();
+  // ✅ โหลดข้อมูลจาก API
+  loadAssetData(): void {
+    this.dataSubscription = this.apiService.fetchDatahttp('AssetDetails/AssetCountsByCategory').subscribe({
+      next: (data) => {
+        this.assets = data;
+        this.dataSource.data = this.assets;
+        this.updateMainChart();
+      },
+      error: (error) => {
+        console.error('❌ Error loading asset data:', error);
+      }
+    });
   }
 
-  @ViewChild(MatSort) sort!: MatSort;
+  // ✅ อัปเดต Pie Chart ให้แสดง AssetType เป็นหลัก
+  updateMainChart(): void {
+    this.selectedCategory = null; // ✅ รีเซ็ตเมื่อกลับไปมุมมองหลัก
+    this.selectedType = null;
+    this.assetTypes = [...new Set(this.assets.map(item => item.AssetType))];
 
-  // getAssetDetails(): void {
+    this.pieChartLabels = this.assetTypes;
+    this.pieChartData = [
+      { 
+        data: this.assetTypes.map(type => 
+          this.assets
+            .filter(item => item.AssetType === type)
+            .reduce((sum, item) => sum + item.AssetCount, 0)
+        ) 
+      }
+    ];
+  }
 
-  //   if(this.dataService){
-  //     this.dataService.getAssetDetails()
-  //       .subscribe((data) => {
-  //         this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
-  //         this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
-  //       });
-  //   }
-  //   else{
-  //     this.ap.fetchData('assetDetails')
-  //     .catch((data) => {
-  //       this.assetDetails = data; // เก็บข้อมูลสินทรัพย์ไว้ในตัวแปร assetDetails
-  //       this.countAssetsByCategory(); // เรียกใช้งานเมื่อข้อมูลถูกโหลดเสร็จ
-  //     });
-  //   }
-    
-  // }
+  // ✅ แสดงหมวดหมู่ย่อยเมื่อกด
+  onChartClick(event: any): void {
+    if (event.active && event.active.length > 0) {
+      const index = event.active[0].index;
+      this.showDetails(this.pieChartLabels[index]);
+    }
+  }
 
-  // getAssetType(): void {
-  //   if (this.dataService.getAssetTypes() && this.dataService.getAssetCategory()) {
-  //     this.dataService.getAssetTypes().subscribe(assetTypes => {
-  //       this.assetTypes = assetTypes;
-  //     });
-      
-  //     this.dataService.getAssetCategory().subscribe(assetCategories => {
-  //       this.assetCategories = assetCategories;
-  //     });
-  //   }
-  //   else{
-  //     this.ap.fetchData('Assettype').catch((data) => {
-  //       this.assetTypes = data;
-  //       // console.log(this.assetTypes);
-  //     });
-    
-  //     this.ap.fetchData('Assetcategories').catch((data) => {
-  //       this.assetCategories = data;
-  //       // console.log(this.assetCategories);
-  //     });
-  //   }
-  // }
-  
-  // countAssetsByCategory(): void {
-  //   const assetCountByCategory: { [category: string]: number } = {};
-    
-  //   console.log(assetCountByCategory);
-  
-  //   this.assetDetails.forEach((asset) => {
-  //     let categoryCode = asset.assetCategory || 'Unknown'; // Set a default value if asset category is null
-  //     const assetTypeCode = asset.assetType;
-  
-  //     // Create a combined key with asset type and category
-  //     const combinedKey = `${assetTypeCode}-${categoryCode}`;
-  //     assetCountByCategory[combinedKey] = (assetCountByCategory[combinedKey] || 0) + 1;
-  //   });
-  
-  //   // Prepare data to show in the table
-  //   const dataToShowInTable = Object.entries(assetCountByCategory).map(([combinedKey, count]) => {
-  //     const [assetTypeCode, categoryCode] = combinedKey.split('-');
-      
-  //     // Find asset type name
-  //     const assetType = this.assetTypes.find(type => type.assetCode === assetTypeCode);
-  //     const assetTypeName = assetType ? assetType.assetName : 'Unknown';
-  
-  //     // Find asset category name
-  //     const assetCategory = this.assetCategories.find(category => category.asc_Code === categoryCode);
-  //     const assetCategoryName = assetCategory ? assetCategory.asc_Name : 'Unknown';
-  
-  //     // Check if asset category code is null or undefined and assign a default value if so
-  //     const formattedCategoryCode = categoryCode || 'Unknown';
-  //     console.log(formattedCategoryCode);
-  
-  //     return {
-  //         category: assetCategoryName,
-  //         assetType: assetTypeName,
-  //         assetCount: count,
-  //     };
-  // });
-  // console.log(dataToShowInTable);
-  // this.dataSource.data = dataToShowInTable;
-  // }
+  // ✅ แสดงหมวดหมู่ย่อยของประเภทครุภัณฑ์
+  showDetails(assetType: string): void {
+    this.selectedType = assetType;
+    const filteredAssets = this.assets.filter(item => item.AssetType === assetType);
 
-  // translateToThai(asset: any): any {
-  //   const translationMap: { [key: string]: string } = {
-  //     purchaseDate: 'วันเดือนปี',
-  //     assetCode: 'รหัสครุภัณฑ์',
-  //     assetName: 'รายการ',
-  //     purchasePrice: 'ราคาต่อหน่วย',
-  //     purchasedFrom: 'วิธีการได้มา',
-  //     documentNumber: 'เลขที่เอกสาร',
-  //     department: 'ฝ่าย',
-  //     responsibleEmployee: 'ผู้ใช้งาน',
-  //     note: 'หมายเหตุ',
-  //   };
+    this.selectedCategory = assetType; // ✅ ตั้งค่า `selectedCategory`
+    this.pieChartLabels = filteredAssets.map(item => item.CategoryName);
+    this.pieChartData = [{ data: filteredAssets.map(item => item.AssetCount) }];
+  }
 
-  //   const translatedAsset: { [key: string]: any } = {};
-  //   for (const key in asset) {
-  //     if (asset.hasOwnProperty(key)) {
-  //       translatedAsset[translationMap[key] || key] = asset[key];
-  //     }
-  //   }
-  //   return translatedAsset;
-  // }
-
-  // convertDate(dateString: string): string {
-  //   const date = new Date(dateString);
-  //   const formattedDate = date.toLocaleDateString('th', {
-  //     year: 'numeric',
-  //     month: 'short',
-  //     day: 'numeric',
-  //   });
-  //   return formattedDate ?? '';
-  // }
-
-  // formatCurrency(price: number): string {
-  //   return price.toLocaleString('en-US', {
-  //     maximumFractionDigits: 2,
-  //     minimumFractionDigits: 2,
-  //   });
-  // }
+  // ✅ กลับไปดู AssetType หลัก
+  goBack(): void {
+    this.updateMainChart();
+  }
 }
+

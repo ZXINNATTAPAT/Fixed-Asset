@@ -15,8 +15,8 @@ import QRCode from 'qrcode';
 import { myFunction } from './utils';
 import { DataService } from '../../../app/data-service/data-service.component';
 import { MatDialog } from '@angular/material/dialog';
-import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
-import { InfoassetComponent } from '../infoasset/infoasset.component';
+// import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
+// import { InfoassetComponent } from '../infoasset/infoasset.component';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 
@@ -37,7 +37,7 @@ interface AssetDetails {
 }
 
 @Component({
-  selector: 'app-asset-table',
+  selector: 'app-receive',
   providers: [DatePipe],
   standalone: true,
   imports: [
@@ -58,11 +58,10 @@ interface AssetDetails {
     // ResizedDirective,
     NgStyle,
   ],
-  templateUrl: './asset-table.component.html',
-  styleUrl: './asset-table.component.scss',
+  templateUrl: './receive.component.html',
+  styleUrl: './receive.component.scss'
 })
-
-export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ReceiveComponent {
   
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -74,22 +73,18 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   displayedColumns1: string[]; //ทั้งหมด
   displayedColumns2: string[]; //ไว้เรียงข้อมูลในตาราง
   displayedColumns3!: string[]; //ไว้จัด Header row & col
-  
   icons = {};
-  
   userinfo: any = [];
-
   assetTypes: any[] = [];
-
   myFunctionInstance: myFunction | undefined;
-
   assetDetails: AssetDetails[] = [];
-
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
-
   private dataSubscription!: Subscription;
   
-  constructor(private apiService: ApiService ,private dataService :DataService,public dialog: MatDialog) {
+  constructor(
+    private apiService: ApiService ,
+    private dataService :DataService,
+    public dialog: MatDialog) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -99,38 +94,90 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getAssetDetails();
   }
 
-  ngAfterViewInit() {this.dataSource.paginator = this.paginator;} 
-
-  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
-
-  ngOnDestroy(): void {if (this.dataSubscription) this.dataSubscription.unsubscribe();}
-
-  ngOnInit(): void {this.initializeUserInfo();this.loadAssetTypes();this.getAssetDetails();}
-
-  editDialog(): void {
-    const dialogRef = this.dialog.open(EditAssetDialog, {
-      width: '700px',
-      data: { status: 'donation' } // ส่งค่าไปให้ Dialog
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('ผลลัพธ์จาก Dialog:', result);
+  ngAfterViewInit() {
+    setTimeout(() => {
+      if (this.paginator && this.sort) {
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
       }
     });
   }
+  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
+  ngOnDestroy(): void {if (this.dataSubscription) this.dataSubscription.unsubscribe();}
+  ngOnInit(): void {this.initializeUserInfo();this.loadAssetTypes();this.getAssetDetails();}
+
+ // โหลดข้อมูล Asset Details
+ private getAssetDetails(): void {
+  this.apiService.fetchDatahttp('AssetDetails/Receive').subscribe({
+    next: (data) => {
+      this.dataSource.data = data || []; // ✅ ถ้าไม่มีข้อมูลให้กำหนดเป็น []
+      // console.log("📌 Asset data loaded:", this.dataSource.data);
+    },
+    error: (err) => console.error('Error loading Asset Details:', err),
+  });
+}
+
+
+  updateAllStatuses(): void {
+    
+    if (!this.dataSource || this.dataSource.data.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ไม่มีครุภัณฑ์',
+        text: 'ขณะนี้ยังไม่มีการส่งมอบครุภัณฑ์มา',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+  
+    const assetIds = this.dataSource.data.map((asset: AssetDetails) => asset.AssetId);
+    const updatePayload = { AssetIds: assetIds, StatusId: 2 };
+  
+    this.apiService.updateData('AssetDetails/UpdateStatusAll', updatePayload)
+      .then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ!',
+          text: 'อัปเดตสถานะทั้งหมดเรียบร้อยแล้ว!',
+          confirmButtonText: 'ตกลง'
+        });
+        this.getAssetDetails(); // รีโหลดข้อมูลใหม่
+      })
+      .catch((err) => {
+        console.error('❌ Error updating status:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด!',
+          text: `❌ ${err}`,
+          confirmButtonText: 'ตกลง'
+        });
+      });
+  }
+
+  // editDialog(): void {
+  //   const dialogRef = this.dialog.open(EditAssetDialog, {
+  //     width: '700px',
+  //     data: { status: 'donation' } // ส่งค่าไปให้ Dialog
+  //   });
+
+  //   dialogRef.afterClosed().subscribe(result => {
+  //     if (result) {
+  //       console.log('ผลลัพธ์จาก Dialog:', result);
+  //     }
+  //   });
+  // }
 
   assetDialog(assetId: number): void {
-    const dialogRef = this.dialog.open(InfoassetComponent, {
-      width: '1200px',
-      data: { id: assetId }
-    });
+    // const dialogRef = this.dialog.open(InfoassetComponent, {
+    //   width: '1200px',
+    //   data: { id: assetId }
+    // });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('ผลลัพธ์จาก Dialog:', result);
-      }
-    });
+    // dialogRef.afterClosed().subscribe(result => {
+    //   if (result) {
+    //     console.log('ผลลัพธ์จาก Dialog:', result);
+    //   }
+    // });
   }
   
   // โหลดข้อมูล UserInfo
@@ -154,13 +201,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // โหลดข้อมูล Asset Details
-  private getAssetDetails(): void {
-    this.apiService.fetchDatahttp('AssetDetails/GetForTable').subscribe({
-      next: (data) => this.handleAssetDetails(data),
-      error: (err) => console.error('Error loading Asset Details:', err),
-    });
-  }
+ 
   
   // จัดการข้อมูล Asset Details
   private handleAssetDetails(data: any[]): void {
@@ -339,27 +380,5 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       a.click();
     });
   }
-}  
-  
 
-//   async searchAsset(): Promise<void> {
-//     const AssetCode = this.AssetCodeInput;
-
-//     // ใช้เงื่อนไขการเปรียบเทียบค่าที่ต้องการ (เช่น >=, <=, === เป็นต้น) กับค่าที่มีอยู่ในรายการ
-//     const foundAsset = this.assetDetailsset.find(asset => {
-//         // เช็คว่ารหัสครุภัณฑ์ในรายการเป็นค่าที่คล้ายค่าที่ผู้ใช้ป้อนเข้ามาหรือไม่
-//         return asset.รหัสครุภัณฑ์.startsWith(AssetCode) || asset.รหัสครุภัณฑ์.startsWith(AssetCode + "-");
-//     });
-
-//     if (foundAsset) {
-//         // พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Found asset:', foundAsset);
-//         this.dataSource = new MatTableDataSource<any>([foundAsset]); // แปลงเป็นอาร์เรย์เดี่ยวแล้วสร้าง MatTableDataSource
-
-//         // ทำอย่างไรก็ได้ตามที่ต้องการกับข้อมูลที่พบ
-//     } else {
-//         // ไม่พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Asset with code', AssetCode, 'not found.');
-//         // จัดการกรณีที่ไม่พบรหัสครุภัณฑ์ที่ต้องการ
-//     }
-// }
+}

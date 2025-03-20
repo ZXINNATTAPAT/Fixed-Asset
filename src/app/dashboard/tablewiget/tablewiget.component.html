@@ -80,135 +80,99 @@
     </div>
     
     <div class="table-container">
-
       <div class="table-responsive" *ngIf="dataSource.data.length > 0">
-        
-      <table 
-        class="table table-striped table-hover" 
-        mat-table matSort
-        [dataSource]="dataSource" >
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="Aactions">
-
-          <th class="text-center border" 
-            mat-header-cell 
-            *matHeaderCellDef 
-            style="color: black; font-weight: bold">
-            # <input cFormControl sizing="sm" disabled />
-          </th>
-
-          <td 
-            class="border" 
-            mat-cell 
-            *matCellDef="let asset" 
-            style="width: fit-content">
-            
-            <button 
-              class="btn btn-sm btn-warning m-1" 
-              (click)="this.myFunctionInstance!.infoasset(asset)"
-              style="width: 28px; height: 28px; padding: 4px">
-
-              <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
-                style="color: white; width: 100%; height: 100%">
-              </svg>
-
-            </button>
-
-          </td>
-
-        </ng-container>
-
-        <ng-container matColumnDef="Qrcode">
-
-          <th 
-            class="text-center border" 
-            mat-header-cell 
-            *matHeaderCellDef 
-            style="color: black; font-weight: bold">
-            Qrcode
-            <input cFormControl sizing="sm" disabled />
-          </th>
-
-          <td class="border" mat-cell 
-            *matCellDef="let asset" 
-            style="width: fit-content">
-
-            <div *ngIf="asset.qrCodeUrl">
-              <img 
-                [src]="asset.qrCodeUrl" 
-                alt="QR Code" 
-                style="width: 50px; height: 50px; margin-top: 5px" />
-            </div>
-          </td>
-
-        </ng-container>
-
-        <!-- Dynamic Columns -->
-        <ng-container 
-          *ngFor="let column of displayedColumns2; let i = index" 
-          [matColumnDef]="column">
-
-          <th 
-            class="mat-header-cell anuphan-600 border" 
-            mat-header-cell *matHeaderCellDef mat-sort-header>
-
-            <div style="color: black; font-weight: bold">
-              <label cLabel>{{ column }}</label>
-              <input 
-                cFormControl 
-                sizing="sm" 
-                placeholder="ค้นหาข้อมูล" 
-                (keyup)="applyFilter($event ,column)"
-                />
-            </div>
-
-          </th>
-
-          <td class="anuphan-500 border" mat-cell *matCellDef="let asset">
-
-            <div *ngIf="column !== 'ราคาต่อหน่วย'; else currencyFormat">
-              <div *ngIf="column !== 'สถานะ'; else status">
-                {{ asset[column] }}
+        <table class="table table-striped table-hover"
+               mat-table matSort [dataSource]="dataSource">
+    
+          <!-- Actions Column -->
+          <ng-container matColumnDef="Aactions">
+            <th mat-header-cell *matHeaderCellDef class="text-center border"
+                style="color: black; font-weight: bold; width: 5%;">
+              #
+              <input cFormControl sizing="sm" disabled />
+            </th>
+            <td mat-cell *matCellDef="let asset" class="border text-center">
+              <button class="btn btn-sm btn-warning m-1"
+                      (click)="this.myFunctionInstance!.infoasset(asset)"
+                      style="width: 28px; height: 28px; padding: 4px;">
+                <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
+                     style="color: white; width: 100%; height: 100%;">
+                </svg>
+              </button>
+            </td>
+          </ng-container>
+    
+          <!-- QR Code Column -->
+          <ng-container matColumnDef="Qrcode">
+            <th mat-header-cell *matHeaderCellDef class="text-center border"
+                style="color: black; font-weight: bold; width: 5%;">
+              Qrcode
+              <input cFormControl sizing="sm" disabled />
+            </th>
+            <td mat-cell *matCellDef="let asset" class="border text-center">
+              <div *ngIf="asset.qrCodeUrl">
+                <img [src]="asset.qrCodeUrl" alt="QR Code"
+                     style="width: 50px; height: 50px; margin-top: 5px;" />
               </div>
-            </div>
-
-            <ng-template #currencyFormat>
-              {{ asset[column] | currency : "" : "" : "1.2-2" }}
-            </ng-template>
-
-            <ng-template #status>
-              <span class="badge text-light"  [ngClass]="{
-                  'text-bg-success': asset[column] !== 'โอนย้าย' && 
-                  asset[column] !== 'ซ่อมแซม' && asset[column] !== '',
-                  'text-bg-warning': asset[column] === 'โอนย้าย',
-                  'text-bg-danger': asset[column] === 'ซ่อมแซม'
-                }" style="color: black; font-size: 16px;">
-                {{ asset[column] || 'ปกติ' }}
-              </span>
-            </ng-template>
-
-          </td>
-
-        </ng-container>
-
-        <!-- Header Row -->
-        <tr 
-          mat-header-row 
-          *matHeaderRowDef="displayedColumns3"></tr>
-
-        <!-- Data Rows -->
-        <tr 
-          mat-row 
-          *matRowDef="let row; columns: displayedColumns3" 
-          style="font-size: 12px;"></tr>
-
-      </table>
-
-   
-  </div>
-
+            </td>
+          </ng-container>
+    
+          <!-- Dynamic Columns -->
+          <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                class="mat-header-cell anuphan-600 border "
+                [ngStyle]="{ 
+                  'color': 'black', 
+                  'font-weight': 'bold', 
+                  'width': columnWidths[column] || '5%' 
+                }">
+              <div class="d-flex flex-column align-items-center">
+                <label cLabel>{{ column }}</label>
+                <input cFormControl sizing="sm" placeholder="ค้นหาข้อมูล"
+                       (keyup)="applyFilter($event, column)"
+                       [disabled]="column == 'สถานะ'" />
+              </div>
+            </th>
+            <td mat-cell *matCellDef="let asset" class="anuphan-500 border ">
+              <ng-container *ngIf="column !== 'ราคาต่อหน่วย'; else currencyFormat">
+                <ng-container *ngIf="column !== 'สถานะ'; else status">
+                  {{ asset[column] }}
+                </ng-container>
+              </ng-container>
+    
+              <!-- Currency Format -->
+              <ng-template #currencyFormat>
+                {{ asset[column] | currency : "" : "" : "1.2-2" }}
+              </ng-template>
+    
+              <!-- Status Format -->
+              <ng-template #status>
+                <span class="badge text-light"
+                      [ngClass]="{
+                        'text-bg-success': asset[column] !== 'โอนย้าย' && 
+                                          asset[column] !== 'ซ่อมแซม' && 
+                                          asset[column] !== '',
+                        'text-bg-warning': asset[column] === 'โอนย้าย',
+                        'text-bg-danger': asset[column] === 'ซ่อมแซม'
+                      }" 
+                      style="color: black; font-size: 16px;">
+                  {{ asset[column] || 'ปกติ' }}
+                </span>
+              </ng-template>
+            </td>
+          </ng-container>
+    
+          <!-- Header Row -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
+    
+          <!-- Data Rows -->
+          <tr mat-row *matRowDef="let row; columns: displayedColumns3"
+              style="font-size: 12px;"></tr>
+    
+        </table>
+      </div>
     </div>
+    
 
     <mat-paginator 
         [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" 

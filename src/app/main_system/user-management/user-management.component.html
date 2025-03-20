@@ -63,15 +63,14 @@
                   <!-- Actions Column -->
                   <ng-container matColumnDef="actions">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef style="font-weight: bold;" >#</th>
+                      
                       <td class="border anuphan-400" mat-cell *matCellDef="let user">
-                          <button class="btn btn-sm btn-warning m-1" (click)="editUser(user)"
-                              style="width: 28px; height: 28px; padding: 4px;">
-                              <svg [cIcon]="icons.cilPencil" style="color: white; width: 100%; height: 100%;"></svg>
+                          <button class="btn btn-sm btn-warning m-1" (click)="editUser(user)">
+                              <svg [cIcon]="icons.cilPencil" style="color: white; width: 16px; height: 16px;"></svg>
                           </button>
 
-                          <button class="btn btn-sm btn-danger m-1" (click)="deleteUser(user)"
-                              style="width: 28px; height: 28px; padding: 4px;">
-                              <svg [cIcon]="icons.cilTrash" style="color: white; width: 100%; height: 100%;"></svg>
+                          <button class="btn btn-sm btn-danger m-1" (click)="deleteUser(user)">
+                              <svg [cIcon]="icons.cilTrash" style="color: white; width: 16px; height: 16px;"></svg>
                           </button>
                       </td>
                   </ng-container>
@@ -79,43 +78,43 @@
                   <!-- User Code Column -->
                   <!-- <ng-container matColumnDef="รหัสผู้ใช้" style="width: fit-content;">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;width: fit-content;">รหัสผู้ใช้</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user" style="width: fit-content;">{{ user.CodeId }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" style="width: fit-content;" >{{ user.CodeId }}</td>
                   </ng-container> -->
 
                   <!-- Username Column -->
                   <ng-container matColumnDef="ชื่อผู้ใช้">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;width: 10%;">ชื่อผู้ใช้</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Username }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" >{{ user.Username }}</td>
                   </ng-container>
 
                   <!-- First Name Column -->
                   <ng-container matColumnDef="ชื่อ">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">ชื่อ</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Sname }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" >{{ user.Sname }}</td>
                   </ng-container>
 
                   <!-- Last Name Column -->
                   <ng-container matColumnDef="นามสกุล">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">นามสกุล</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Lname }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" >{{ user.Lname }}</td>
                   </ng-container>
 
                   <!-- Position Column -->
                   <ng-container matColumnDef="ตำแหน่ง">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">ตำแหน่ง</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Position }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" >{{ user.Position }}</td>
                   </ng-container>
 
                   <!-- Subposition Column -->
                   <ng-container matColumnDef="ตำแหน่งย่อย">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">ตำแหน่งย่อย</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Subposition }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" >{{ user.Subposition }}</td>
                   </ng-container>
 
                   <!-- Workgroup Column -->
                   <ng-container matColumnDef="กลุ่มงาน">
                       <th class="text-center border anuphan-600" mat-header-cell *matHeaderCellDef mat-sort-header style="font-weight: bold;">กลุ่มงาน</th>
-                      <td class="border anuphan-400" mat-cell *matCellDef="let user">{{ user.Affiliation }}</td>
+                      <td class="border anuphan-400" mat-cell *matCellDef="let user" >{{ user.Affiliation }}</td>
                   </ng-container>
 
                   <!-- <ng-container matColumnDef="บทบาท">
@@ -133,7 +132,7 @@
                           style="font-family:Anuphan,sans-serif;font-optical-sizing:auto;font-weight:500;font-style:normal"
                         >
                           <mat-option class="border-bottom" *ngFor="let role of availableRoles" [value]="role">
-                            <div class=" anuphan-600">{{ role }}</div>
+                            <div class=" anuphan-600" >{{ role }}</div>
                           </mat-option>
                         </mat-select>
                       </div>

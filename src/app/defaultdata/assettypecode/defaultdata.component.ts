@@ -19,7 +19,7 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../../app/ApiController/api-service.service';
 
 interface AssetDetails {
   assetCode: string;
@@ -126,29 +126,30 @@ export class DefaultdataComponent implements OnInit {
     const translationMap: { [key: string]: string } = {
       TypeCode: 'รหัสประเภทสินทรัพย์',
       TypeName: 'ชื่อประเภทสินทรัพย์',
-      Rate_dep: 'อัตราค่าเสื่อม',
-      Servicelife: 'อายุการใช้งาน',
     };
   
-    // Clone the object to avoid modifying the original data
-    const translatedAsset = { ...asset };
+    // Clone object for immutability
+    let translatedAsset: any = { ...asset };
   
     for (const key in asset) {
       if (!asset.hasOwnProperty(key)) continue;
   
-      // Translate flat properties
       if (translationMap[key]) {
         translatedAsset[translationMap[key]] = asset[key];
-        delete translatedAsset[key]; // Remove the original key
+        delete translatedAsset[key]; // Remove old key
       }
   
-      // Handle Depreciations array separately
-      if (key === 'Depreciations' && Array.isArray(asset[key])) {
-        translatedAsset['ค่าเสื่อมราคา'] = asset[key].map((depreciation: any) => ({
-          'อัตราค่าเสื่อม': depreciation.Rate_dep,
-          'อายุการใช้งาน': depreciation.Servicelife,
-        }));
-        delete translatedAsset[key]; // Remove the original Depreciations key
+      // Handle Depreciations separately - Extract first depreciation entry
+      if (key === 'Depreciations' && Array.isArray(asset[key]) && asset[key].length > 0) {
+        const depreciation = asset[key][0]; // Take the first entry (if exists)
+        translatedAsset['อัตราค่าเสื่อม'] = depreciation.Rate_dep ?? '-';
+        translatedAsset['อายุการใช้งาน'] = depreciation.Servicelife ?? '-';
+        delete translatedAsset[key]; // Remove original array
+      } else if (key === 'Depreciations') {
+        // If no depreciation data, set empty values
+        translatedAsset['อัตราค่าเสื่อม'] = '-';
+        translatedAsset['อายุการใช้งาน'] = '-';
+        delete translatedAsset[key];
       }
     }
   
@@ -156,8 +157,6 @@ export class DefaultdataComponent implements OnInit {
   }
   
   
-  
-
   deleteAsset(asset: any): void {
     Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
@@ -197,7 +196,6 @@ export class DefaultdataComponent implements OnInit {
       }
     });
   }
-
   editAsset(_t35: any) {throw new Error('Method not implemented.');}
 
 }

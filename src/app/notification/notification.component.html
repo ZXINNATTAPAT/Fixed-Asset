@@ -1,0 +1,30 @@
+<ng-container *ngIf="notifications.length > 0; else noNotifications">
+  <div *ngFor="let notification of notifications.slice(0, 1)" 
+       class="alert alert-dismissible fade show d-flex flex-column border border-success shadow"
+       [ngClass]="notification.IsRead ? 'alert-light' : 'alert-light'"
+       role="alert">
+    
+    <div class="d-flex justify-content-between align-items-center">
+      <strong>{{ notification.Message }}</strong>
+      <button type="button" class="btn-close" aria-label="Close" (click)="deleteNotification(notification.NotificationId)"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <small class="text-muted">📅 {{ notification.CreatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+
+      <a [routerLink]="['/inspection']" 
+         [queryParams]="{ id: notification.NotificationId }"
+         (click)="markAsRead(notification.NotificationId)"
+         class="text-decoration-none text-success fw-bold">
+        🔍 ตรวจรับที่นี่
+      </a>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ถ้าไม่มีแจ้งเตือน -->
+<ng-template #noNotifications>
+  <!-- <div class="alert alert-info text-center">
+    <strong>🎉 ไม่มีการแจ้งเตือนใหม่!</strong>
+  </div> -->
+</ng-template>

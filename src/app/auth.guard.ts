@@ -38,14 +38,14 @@ export class AuthGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     return this.authService.getAuthStatus().pipe(
       map(response => {
-        console.log("🔍 Auth Status:", response);
+        // console.log("🔍 Auth Status:", response);
   
         // ✅ ป้องกันกรณี `route.data.roles` เป็น undefined
         const allowedRoles = (route.data?.['roles'] as string[]) || [];
-        console.log("🔍 Allowed Roles:", allowedRoles);
+        // console.log("🔍 Allowed Roles:", allowedRoles);
   
         if (allowedRoles.length === 0) {
-          console.warn("⚠️ No roles defined for this route! Access granted by default.");
+          // console.warn("⚠️ No roles defined for this route! Access granted by default.");
           // window.location.href = '/login'
           return true;
         }

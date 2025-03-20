@@ -1,3 +1,35 @@
+/* ขนาด Card ตอนปกติ (เล็กลง) */
+.hover-card {
+    max-height: 100px; /* เริ่มต้นขนาดเล็ก */
+    transition: max-height 0.8s ease-in-out, 
+                box-shadow 0.6s ease-in-out 0.2s; 
+    overflow: hidden;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        max-height: 500px; /* ค่อยๆ ขยายตามเนื้อหา */
+        box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.25);
+        transition: max-height 1s ease-in-out, 
+                    box-shadow 0.6s ease-in-out;
+
+        .hover-button {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ซ่อนปุ่มเริ่มต้น */
+    .hover-button {
+        opacity: 0;
+        transform: translateY(15px); /* ขยับลงเล็กน้อย */
+        transition: opacity 0.7s ease-in-out 0.4s, 
+                    transform 0.7s ease-in-out 0.4s; 
+    }
+}
+
+
+
+  
 .custom-btn{
     background-color: white;
     width: 100%;

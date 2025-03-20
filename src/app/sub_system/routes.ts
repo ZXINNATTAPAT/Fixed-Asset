@@ -7,8 +7,13 @@ export const routes: Routes = [
         .then(m => m.AssetInventorySessionComponent),
         data: { title: 'inventorysession' }
     },
+    {
+        path: 'receive', // เปลี่ยนเป็นตัวพิมพ์เล็กทั้งหมด
+        loadComponent: () => import('./receive/receive.component')
+        .then(m => m.ReceiveComponent),
+        data: { title: 'receive' }
+    },
   {
-    
     path: '',
     data: {title: ''},
     children: [

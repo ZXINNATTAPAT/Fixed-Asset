@@ -12,7 +12,7 @@
       <c-nav-item *ngIf="userinfo.Affiliation === 'ส่วนกลาง'">
 
         <a cNavLink class="anuphan-700" style="font-size: medium; color: rgb(255, 255, 255)">
-          สำนักงานคณะกรรมการการเลือกตั้งส่วนกลาง ({{ userinfo.Department }})
+          สำนักงานคณะกรรมการการเลือกตั้งส่วนกลาง ({{ this.userinfo.Department }})
         </a>
         
       </c-nav-item>
@@ -26,26 +26,44 @@
       </c-nav-item>
 
       <!-- <c-nav-item>
-        <a cNavLink routerLink="/users" routerLinkActive="active">Users</a>
-      </c-nav-item>
-
-      <c-nav-item>
         <a cNavLink routerLink="/settings" routerLinkActive="active">Settings</a>
-      </c-nav-item> -->
+      </c-nav-item>  -->
       
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto d-flex align-items-center">
-      
-      <!-- <a cNavLink class="m-1 text-white" style="text-decoration: none;">
-        <svg [cIcon]="icons.cilUser"></svg>
-        <span style="font-size: 14px;">
-            คุณ {{userinfo.Sname}} {{userinfo.Lname}}  
-            {{ userinfo['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] }}
-        </span>
-      </a> --> 
-      
 
+       <!-- ปุ่มแจ้งเตือน -->
+       <div class="dropdown me-3">
+        <button 
+          class="btn btn-sm btn-outline-warning position-relative dropdown-toggle anuphan-600"
+          type="button"
+          id="notificationDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false">
+          🔔
+          <span *ngIf="unreadCount > 0" class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+            {{ unreadCount }}
+          </span>
+        </button>
+      
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
+          <li *ngIf="notifications.length === 0" class="dropdown-item text-muted text-center">
+            ไม่มีการแจ้งเตือน
+          </li>
+          <li *ngFor="let notification of notifications" 
+              class="dropdown-item d-flex justify-content-between align-items-center"
+              [class.unread]="notification.Status === 'new'">
+            <span>{{ notification.Message }}</span>
+            <button *ngIf="notification.Status === 'new'" class="btn btn-sm btn-success"
+                    (click)="markAsRead(notification.NotificationId)">
+              ✔
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      
       <div class="dropdown">
         <button 
           class="btn btn-sm btn-outline-light dropdown-toggle m-1 anuphan-600" 
@@ -53,12 +71,14 @@
           id="menuDropdown" 
           data-bs-toggle="dropdown" 
           aria-expanded="false">
-          รายการผู้ใช้งาน
+          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+          </svg>
         </button>
         <ul class="dropdown-menu" aria-labelledby="menuDropdown">
           <li><a class="dropdown-item" routerLink="/users">ประวัติผู้ใช้งาน</a></li>
           <li><a class="dropdown-item" routerLink="/settings">ตั้งค่า</a></li>
-          <li><a class="dropdown-item" routerLink="/settings">ออกจากระบบ</a></li>
+          <li><a class="dropdown-item" (click)="Logout()">ออกจากระบบ</a></li>        
         </ul>
       </div>
 

@@ -93,7 +93,7 @@ export class AssetcategoryComponent implements OnInit {
   displayedColumns2: string[] = [
     "รหัสหมวดสินทรัพย์",
     "ชื่อหมวดสินทรัพย์",
-    "รหัสประเภทสินทรัพย์"
+    "ชื่อประเภทสินทรัพย์"
   ];
 
   assetDetailsset: any[] = []
@@ -119,7 +119,7 @@ export class AssetcategoryComponent implements OnInit {
     const translationMap: { [key: string]: string } = {
       "CategoryCode": "รหัสหมวดสินทรัพย์",
       "CategoryName": "ชื่อหมวดสินทรัพย์",
-      "TypeName": "รหัสประเภทสินทรัพย์"
+      "TypeName": "ชื่อประเภทสินทรัพย์"
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {

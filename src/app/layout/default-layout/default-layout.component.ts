@@ -14,7 +14,6 @@ import {
   SidebarToggleDirective,
   SidebarTogglerDirective
 } from '@coreui/angular';
-
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { ICustomNavData, navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
 import { DataService } from '../../data-service/data-service.component';
@@ -52,7 +51,7 @@ function isOverflown(element: HTMLElement) {
 export class DefaultLayoutComponent implements OnInit {
 
   userinfo: any = {};
-  userId: string = '';
+  userId: string = '' ;
   userProfile: any = {};
   userRole: string[] = [];
 
@@ -63,11 +62,10 @@ export class DefaultLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.navItems = staticNavItems; // ✅ โหลดค่า navItems ก่อน
-    console.log("✅ Nav Items Loaded:", this.navItems); // ตรวจสอบว่ามีค่า
+    // console.log("✅ Nav Items Loaded:", this.navItems); // ตรวจสอบว่ามีค่า
     this.initializeUserData();
   }
   
-
   private async initializeUserData(): Promise<void> {
     try {
       this.dataService.userInfo$.subscribe(userInfo => {
@@ -78,7 +76,7 @@ export class DefaultLayoutComponent implements OnInit {
   
           this.userRole = userInfo.claims.Role ? [userInfo.claims.Role] : []; // ✅ Correct role extraction
   
-          console.log(`🔍 Debug: User ID: ${this.userId}, Roles: ${this.userRole}`);
+          // console.log(`🔍 Debug: User ID: ${this.userId}, Roles: ${this.userRole}`);
   
           if (this.userId) {
             this.loadUserProfile(this.userId);
@@ -95,7 +93,7 @@ export class DefaultLayoutComponent implements OnInit {
   }
   
   private updateNavItems() {
-    console.log("🔍 Debug: Checking navItems...", this.navItems);
+    // console.log("🔍 Debug: Checking navItems...", this.navItems);
   
     if (!this.navItems || this.navItems.length === 0) {
       console.error("❌ navItems is empty! Check if it's properly initialized.");
@@ -109,19 +107,15 @@ export class DefaultLayoutComponent implements OnInit {
       return item.roles.some(role => this.userRole.includes(role));
     });
   
-    console.log(`🔍 Debug: Filtered Nav Items`, this.navItemsFiltered);
+    // console.log(`🔍 Debug: Filtered Nav Items`, this.navItemsFiltered);
   }
-  
-  
-  
-  
   
   private async loadUserProfile(userId: string): Promise<void> {
     try {
-      await this.dataService.loadUserProfile(userId);
-      this.userProfile = this.dataService.getUserProfileSnapshot();
+      await this.dataService.userService.loadUserProfile(userId); // ✅ แปลง `userId` เป็น `number`
+      this.userProfile = this.dataService.userService.getUserProfileSnapshot();
   
-      console.log(`✅ User Profile Loaded:`, this.userProfile);
+      // console.log(`✅ User Profile Loaded:`, this.userProfile);
     } catch (error) {
       console.error('❌ Error loading User Profile:', error);
     }
@@ -130,7 +124,10 @@ export class DefaultLayoutComponent implements OnInit {
   onScrollbarUpdate(event: any): void {
     // console.log("🖱️ Scrollbar updated:", event);
   }
+
   
+  
+
   
 
   

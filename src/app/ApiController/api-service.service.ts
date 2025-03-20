@@ -73,7 +73,7 @@ export class ApiService {
       `${this.apiUrlauth}isauthenticated`,
       { withCredentials: true } // ✅ ต้องมีเพื่อให้ Cookies `HttpOnly` ถูกส่งไป
     ).pipe(
-      tap(response => console.log("🔍 API Auth Response:", response)),
+      // tap(response => console.log("🔍 API Auth Response:", response)),
       catchError(error => {
         console.error("❌ Error fetching auth status:", error);
         return of({ isAuthenticated: false, username: '', userId: 0, roles: [] }); // ✅ Fix return type
@@ -150,7 +150,7 @@ export class ApiService {
   // Example method to update data on the API
   async updateData(endpoint: string, data: any): Promise<any> {
     try {
-      const response = await axios.put(`${this.apiUrl}${endpoint}`, data);
+      const response = await axios.post(`${this.apiUrl}${endpoint}`, data ,{ withCredentials: true } ,);
       return response.data;
     } catch (error) {
       console.error('Error occurred while updating data:', error);
@@ -182,6 +182,11 @@ export class ApiService {
   // 📌 ดึงข้อมูลสินทรัพย์ตาม ID
   getAssetById(id: number): Observable<AssetInventoryDetails> {
     return this.http.get<AssetInventoryDetails>(`${this.apiUrl}AssetInventoryDetails/${id}`);
+  }
+
+  // ✅ ดึงจำนวนผู้ใช้ในสำนักงาน
+  getUserCountByDepartment(deptId: number): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}users/count/by-department/${deptId}`);
   }
 
   

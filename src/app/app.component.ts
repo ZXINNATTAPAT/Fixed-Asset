@@ -5,6 +5,7 @@ import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
 import { VERSION } from '@angular/material/core';
 import { DataService } from '../../src/app/data-service/data-service.component';
+import { UserService } from './data-service/user.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit {
     private router: Router,
     private titleService: Title,
     private iconSetService: IconSetService,
-    private dataService :DataService
+    private dataService :DataService,
+    private userService : UserService
   ) {
     this.titleService.setTitle(this.title);
     // iconSet singleton
@@ -28,7 +30,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
  
-      this.dataService.loadUserInfo(); // โหลดข้อมูล UserInfo เพียงครั้งเดียว
+    this.userService.loadUserInfo();  // โหลดข้อมูล UserInfo เพียงครั้งเดียว
   
     this.router.events.subscribe((evt) => {
       if (!(evt instanceof NavigationEnd)) {

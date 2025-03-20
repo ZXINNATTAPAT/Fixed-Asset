@@ -81,29 +81,30 @@
           >
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell class="border" *matHeaderCellDef style="font-weight: bold">
+              <th 
+                mat-header-cell 
+                class="border" 
+                *matHeaderCellDef 
+                style="font-weight: bold">
                 #
               </th>
               <td mat-cell class="border" *matCellDef="let asset">
+
                 <button
                   class="btn btn-sm btn-warning m-1"
-                  (click)="editAsset(asset)"
-                  style="width: 28px; height: 28px; padding: 4px"
-                >
+                  (click)="editAsset(asset)">
                   <svg
                     [cIcon]="icons.cilPencil"
-                    style="color: white; width: 100%; height: 100%"
+                    style="color: white; width: 16px; height: 16px;"
                   ></svg>
                 </button>
 
                 <button
                   class="btn btn-sm btn-danger m-1"
-                  (click)="deleteAsset(asset)"
-                  style="width: 28px; height: 28px; padding: 4px"
-                >
+                  (click)="deleteAsset(asset)">
                   <svg
                     [cIcon]="icons.cilTrash"
-                    style="color: white; width: 100%; height: 100%"
+                    style="color: white; width: 16px; height: 16px;"
                   ></svg>
                 </button>
               </td>
@@ -123,7 +124,7 @@
               >
                 {{ column }}
               </th>
-              <td mat-cell class="anuphan-600 border" *matCellDef="let asset">
+              <td mat-cell class="anuphan-500 border" *matCellDef="let asset">
                 {{ asset[column] }}
               </td>
             </ng-container>

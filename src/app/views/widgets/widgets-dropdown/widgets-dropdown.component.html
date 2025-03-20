@@ -1,50 +1,50 @@
 <c-row class="g-2">
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn1 shadow-sm anuphan-700 " (click)="linkadd()" >
-        <h3 class="custom-btn-text">
-            <span class="anuphan-700 p-0" >
-               เพิ่มครุภัณฑ์
-            </span>
-          </h3>      
+    <button class="btn custom-btn custom-btn1 shadow-sm anuphan-700 " (click)="linkadd()">
+      <h3 class="custom-btn-text">
+        <span class="anuphan-700 p-0">
+          เพิ่มครุภัณฑ์
+        </span>
+      </h3>
     </button>
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn2 shadow-sm anuphan-700 " (click)="linkassetall()" >
+    <button class="btn custom-btn custom-btn2 shadow-sm anuphan-700 " (click)="linkassetall()">
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-0" >
-            รายการครุภัณฑ์
-          </span>
-        </h3>
+        <span class="anuphan-700 p-0">
+          รายการครุภัณฑ์
+        </span>
+      </h3>
     </button>
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <button class="btn custom-btn custom-btn3 shadow-sm anuphan-700 "  (click)="linkrepair()">
+    <button class="btn custom-btn custom-btn3 shadow-sm anuphan-700 " (click)="linkrepair()">
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-0" >
-            ซ่อมแซมครุภัณฑ์
-          </span>
-        </h3>
+        <span class="anuphan-700 p-0">
+          ซ่อมแซมครุภัณฑ์
+        </span>
+      </h3>
     </button>
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
     <button class="btn custom-btn custom-btn4 shadow-sm anuphan-700 " (click)="linkcount()">
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-0" >
-            ตรวจนับครุภัณฑ์
-          </span>
-        </h3>
+        <span class="anuphan-700 p-0">
+          ตรวจนับครุภัณฑ์
+        </span>
+      </h3>
     </button>
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
     <button class="btn custom-btn custom-btn5 shadow-sm anuphan-700 " (click)="linktranfer()">
-      <h3 class="custom-btn-text " >
-          <span class="anuphan-700 p-0" >
-            โอนย้ายครุภัณฑ์
-          </span>
+      <h3 class="custom-btn-text ">
+        <span class="anuphan-700 p-0">
+          โอนย้ายครุภัณฑ์
+        </span>
       </h3>
 
     </button>
@@ -53,35 +53,27 @@
   <c-col sm="6" md="4" xl="2">
     <button class="btn custom-btn custom-btn6 shadow-sm anuphan-700 " (click)="linkdisasc()">
       <h3 class="custom-btn-text">
-          <span class="anuphan-700 p-0" >
-            จำหน่ายครุภัณฑ์
-          </span>
-        </h3>
+        <span class="anuphan-700 p-0">
+          จำหน่ายครุภัณฑ์
+        </span>
+      </h3>
     </button>
   </c-col>
 
-  
+
 </c-row>
 
 <hr />
 
 <c-row class="g-3">
   <c-col sm="6" md="4" xl="2">
-    <div
-      class="card shadow-sm"
-      style="border: none; background-color: white; color: green"
-    >
 
-    
-      <div class="card-body">
+    <div class="card hover-card shawdow-sm" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
+      style="border: none;">
+      <div class="card-body " (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
+
         <c-dropdown alignment="end" variant="btn-group" style="float: right">
-          <button
-            [caret]="false"
-            cButton
-            cDropdownToggle
-            class="p-0 text-white"
-            color="transparent"
-          >
+          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
@@ -91,59 +83,36 @@
           </ul>
         </c-dropdown>
 
-        <!-- <div *ngIf="!numberOfAssets">
-          <iframe src="https://lottie.host/embed/29329dbc-a2ea-4ae6-a82a-24ad670f7fdd/FdsbK2G4Tq.lottie"></iframe>
-        </div> -->
-
+        <!-- Loader -->
         <h2>
           <span class="anuphan-700 p-0" style="color: green">
-            <ng-container *ngIf="numberOfAssets || numberOfAssets === 0 ; else loading">
-              {{ numberOfAssets  }} <br />ครุภัณฑ์
-              <svg
-                [cIcon]="icons.cilSave"
-                height="32"
-                style="float: right"
-              ></svg>
+            <ng-container *ngIf="numberOfAssets || numberOfAssets === 0; else loading">
+              {{ numberOfAssets }} <br />ครุภัณฑ์
+              <svg [cIcon]="icons.cilSave" height="32" style="float: right"></svg>
             </ng-container>
             <ng-template #loading>
-              <img
-                src="../../../../assets/mc.gif"
-                alt="ss"
-                width="50px"
-                height="50px"
-              />
+              <img src="../../../../assets/mc.gif" alt="ss" width="50px" height="50px" />
             </ng-template>
           </span>
         </h2>
+
+        <!-- ปุ่มที่แสดงเมื่อ Hover -->
         <div class="d-grid">
-          <button
-            class="btn btn-sm btn btn-outline-light"
-            style="border-color: green; color: green"
-            (click)="linkassetall()"
-          >
+          <button class="btn btn-sm btn btn-outline-light hover-button" style="border-color: green; color: green"
+            [ngClass]="{ 'show-button': isHovered }" (click)="linkassetall()">
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
         </div>
       </div>
-
     </div>
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none; background-color: #ffffff">
-      <div class="card-body">
-        <c-dropdown
-          alignment="end"
-          variant="btn-group"
-          style="float: right; color: #000080"
-        >
-          <button
-            [caret]="false"
-            cButton
-            cDropdownToggle
-            class="p-0"
-            color="transparent"
-          >
+    <div class="card hover-card shawdow-sm" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
+      style="border: none;">
+      <div class="card-body " (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
+        <c-dropdown alignment="end" variant="btn-group" style="float: right; color: #000080">
+          <button [caret]="false" cButton cDropdownToggle class="p-0" color="transparent">
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
@@ -158,22 +127,15 @@
             <ng-container *ngIf="assetcom || assetcom === 0; else loading">
               {{ assetcom }} <br />
               คอมพิวเตอร์
-              <svg
-                [cIcon]="icons.cilDevices"
-                height="32"
-                style="float: right"
-              ></svg>
+              <svg [cIcon]="icons.cilDevices" height="32" style="float: right"></svg>
             </ng-container>
-            </span>
-        
+          </span>
+
         </h2>
 
         <div class="d-grid">
-          <button
-            class="btn btn-sm btn btn-outline-light"
-            style="border-color: #000080; color: #000080"
-            (click)="linkassetcom()"
-          >
+          <button class="btn btn-sm btn btn-outline-light" style="border-color: #000080; color: #000080"
+            (click)="linkassetcom()">
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
         </div>
@@ -182,20 +144,11 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none; background-color: white">
-      <div class="card-body">
-        <c-dropdown
-          alignment="end"
-          variant="btn-group"
-          style="float: right; color: orangered"
-        >
-          <button
-            [caret]="false"
-            cButton
-            cDropdownToggle
-            class="p-0 text-white"
-            color="transparent"
-          >
+    <div class="card hover-card shawdow-sm" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
+      style="border: none;">
+      <div class="card-body " (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
+        <c-dropdown alignment="end" variant="btn-group" style="float: right; color: orangered">
+          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
@@ -206,24 +159,16 @@
         </c-dropdown>
 
         <h2>
-          <span class="anuphan-700 p-0" style="color: orangered"
-            >
+          <span class="anuphan-700 p-0" style="color: orangered">
             <ng-container *ngIf="assetoffice || assetoffice === 0; else loading">
               {{ assetoffice }} <br />สำนักงาน
-              <svg
-                [cIcon]="icons.cilBuilding"
-                height="32"
-                style="float: right"
-              ></svg>
+              <svg [cIcon]="icons.cilBuilding" height="32" style="float: right"></svg>
             </ng-container>
           </span>
         </h2>
 
         <div class="d-grid">
-          <button
-            class="btn btn-sm btn btn-outline-light"
-            style="color: orangered; border-color: orangered"
-          >
+          <button class="btn btn-sm btn btn-outline-light" style="color: orangered; border-color: orangered">
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
         </div>
@@ -232,16 +177,11 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none; background-color: white">
-      <div class="card-body">
+    <div class="card hover-card shawdow-sm" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
+      style="border: none;">
+      <div class="card-body " (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
         <c-dropdown alignment="end" variant="btn-group" style="float: right">
-          <button
-            [caret]="false"
-            cButton
-            cDropdownToggle
-            class="p-0 text-white"
-            color="transparent"
-          >
+          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
@@ -254,21 +194,14 @@
         <h2>
           <span class="anuphan-700 p-0" style="color: slateblue">
             <ng-container *ngIf="assetinter || assetinter === 0; else loading">
-            {{ assetinter }} <br />ไฟฟ้าและวิทยุ
-            <svg
-              [cIcon]="icons.cilBullhorn"
-              height="32"
-              style="float: right"
-            ></svg>
-          </ng-container>
-        </span>
+              {{ assetinter }} <br />ไฟฟ้าและวิทยุ
+              <svg [cIcon]="icons.cilBullhorn" height="32" style="float: right"></svg>
+            </ng-container>
+          </span>
         </h2>
 
         <div class="d-grid">
-          <button
-            class="btn btn-sm btn btn-outline-light"
-            style="color: slateblue; border-color: slateblue"
-          >
+          <button class="btn btn-sm btn btn-outline-light" style="color: slateblue; border-color: slateblue">
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
         </div>
@@ -277,16 +210,11 @@
   </c-col>
 
   <c-col sm="6" md="4" xl="2">
-    <div class="card shadow-sm" style="border: none; background-color: white">
-      <div class="card-body">
+    <div class="card hover-card shawdow-sm" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false"
+      style="border: none;">
+      <div class="card-body " (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
         <c-dropdown alignment="end" variant="btn-group" style="float: right">
-          <button
-            [caret]="false"
-            cButton
-            cDropdownToggle
-            class="p-0 text-white"
-            color="transparent"
-          >
+          <button [caret]="false" cButton cDropdownToggle class="p-0 text-white" color="transparent">
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
@@ -297,20 +225,17 @@
         </c-dropdown>
 
         <h2>
-            <span class="anuphan-700 p-0" style="color: orange">
-              <!-- <ng-container *ngIf="numberOfUsers; else loading"> -->
-              <ng-container >
-              <!-- {{ numberOfUsers }} <br />ผู้ใช้ในระบบ -->
+          <span class="anuphan-700 p-0" style="color: orange">
+            <!-- <ng-container *ngIf="numberOfUsers; else loading"> -->
+            <ng-container>
+              {{ numberOfUsers }} <br />ผู้ใช้ในสำนักงาน
               <svg [cIcon]="icons.cilUser" height="32" style="float: right"></svg>
             </ng-container>
           </span>
         </h2>
 
         <div class="d-grid">
-          <button
-            class="btn btn-sm btn btn-outline-light"
-            style="color: orange; border-color: orange"
-          >
+          <button class="btn btn-sm btn btn-outline-light" style="color: orange; border-color: orange">
             ดูทั้งหมด <svg [cIcon]="icons.cilArrowCircleRight"></svg>
           </button>
         </div>

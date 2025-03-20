@@ -15,7 +15,7 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./dashboard/routes').then((m) => m.routes),
         canActivate: [AuthGuard], // ✅ ป้องกันเฉพาะ Role
-        data: { roles: ['Admin', 'AssetOfficer'] }
+        data: { roles: ['Admin', 'เจ้าหน้าที่ฝ่ายอำนวยการ'] }
       },
       {
         path: 'dashboard/ส่วนภูมิภาค',
@@ -44,14 +44,14 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./main_system/routes').then((m) => m.routes),
         canActivate: [AuthGuard], // ✅ เพิ่ม AuthGuard
-        data: { roles: ['Admin', 'SystemManager'] }
+        data: { roles: ['Admin', 'เจ้าหน้าที่ฝ่ายอำนวยการ'] }
       },
       {
         path: 'system/sub',
         loadChildren: () =>
           import('./sub_system/routes').then((m) => m.routes),
         canActivate: [AuthGuard], // ✅ เพิ่ม AuthGuard
-        data: { roles: ['Admin', 'SubSystemManager'] }
+        data: { roles: ['Admin', 'เจ้าหน้าที่ฝ่ายอำนวยการ'] }
       },
       {
         path: 'table',
@@ -61,7 +61,7 @@ export const routes: Routes = [
             import('./sub_system/routes')
           ]).then(([m1, m2]) => [...m1.routes, ...m2.routes]), // ✅ รวม routes
         canActivate: [AuthGuard], // ✅ ป้องกันหน้าด้วย AuthGuard
-        data: { roles: ['Admin', 'SubSystemManager'] }
+        data: { roles: ['Admin', 'เจ้าหน้าที่ฝ่ายอำนวยการ'] }
       },
       
       {
