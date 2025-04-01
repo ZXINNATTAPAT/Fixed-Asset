@@ -1,5 +1,5 @@
 import { AfterViewInit,Component,Injectable,OnDestroy,OnInit,ViewChild,} from '@angular/core';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { NgIf, NgStyle } from '@angular/common';
 import { cilPencil,cilTrash,cibAddthis,cilDataTransferDown,cilInfo,} from '@coreui/icons';
 import { MatFooterRow,MatRowDef,MatTableDataSource,MatTableModule,} from '@angular/material/table';
@@ -7,26 +7,9 @@ import { MatPaginator,MatPaginatorIntl,MatPaginatorModule,} from '@angular/mater
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import 'moment/locale/th.js';
 import { Subject, Subscription } from 'rxjs';
-import { DataService } from '../../data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 import { ChartDataset, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective  } from 'ng2-charts';
-
-
-// import moment from 'moment';
-
-// interface AssetDetails {
-//   assetId: any;
-//   purchaseDate: string;
-//   assetCode: string;
-//   assetName: string;
-//   purchasePrice: number;
-//   purchasedFrom: string;
-//   documentNumber: string;
-//   department: string;
-//   responsibleEmployee: string;
-//   Note: string;
-//   [key: string]: string | number; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
-// }
 
 interface AssetDetails {
   assetId: number;

@@ -1,251 +1,243 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ReactiveFormsModule,FormsModule,FormControl, Validators, FormGroup, FormBuilder,} from '@angular/forms';
-import { MatPaginator ,MatPaginatorModule } from '@angular/material/paginator';
+import { AfterViewInit, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ReactiveFormsModule, FormsModule, FormControl, Validators, FormGroup, FormBuilder, } from '@angular/forms';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
-import {TextColorDirective,TableModule,UtilitiesModule,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
+import { TextColorDirective, TableModule, UtilitiesModule, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
-import { MatOption, MatSelect } from '@angular/material/select';
+// import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
+import { MatFormField, MatLabel, MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../../ApiController/api-service.service';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerInput, MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input'; // ⬅️ สำหรับ input ที่ใช้ร่วมกับ datepicker
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, NativeDateAdapter } from '@angular/material/core'; // ⬅️ สำหรับ date format แบบไทย/สากล
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter, provideMomentDateAdapter } from '@angular/material-moment-adapter';
+
 
 interface AssetDetails {
   repairAssetId: any;
   assetCode: string;
-  assetName:string;
+  assetName: string;
   assetId: string;
   SerialNumber: string;
   Description: string;
   Amount: string;
 }
 @Component({
-    selector: 'app-edit-dialog',
-    standalone: true,
-    imports: [TextColorDirective,
-      CommonModule,
-      ReactiveFormsModule,
-      FormsModule,
-      TableModule,
-      NgxMatSelectSearchModule,
-      MatSelect,
-      MatOption,
-      MatPaginatorModule,
-      MatTableModule,
-      MatSortModule,
-      MatButtonModule, // Example: Add any other required Angular Material modules here
-      UtilitiesModule,
-      ButtonDirective,
-      NgStyle,
-      IconDirective,
-      FormDirective,
-      FormLabelDirective,
-      FormControlDirective,],
-    templateUrl: './edit-dialog.component.html',
-    styleUrl: './edit-dialog.component.scss'
-  })
+  selector: 'app-edit-dialog',
+  providers: [
+    // 👇 ตัวเลือก default ของ mat-form-field (ยังไม่จำเป็นถ้าไม่ได้ปรับ config พิเศษ)
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+    },
+
+    // ✅ ใช้ MomentDateAdapter + รูปแบบวันที่แบบไทย (พ.ศ.)
+    { provide: MAT_DATE_LOCALE, useValue: 'th' },
+
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+    },
+
+    {
+      provide: MAT_DATE_FORMATS,
+      useValue: {
+        parse: {
+          dateInput: 'DD/MM/YYYY',
+        },
+        display: {
+          dateInput: 'DD/MM/YYYY',
+          monthYearLabel: 'MMMM YYYY',
+          dateA11yLabel: 'LL',
+          monthYearA11yLabel: 'MMMM YYYY',
+        },
+      },
+    },
+
+    // ❌ ยังไม่ได้ใช้ — ถ้าไม่ได้ใช้ฟังก์ชัน provideMomentDateAdapter() จากไหน
+    // provideMomentDateAdapter({ ... }) 
+    // ==> ❌ คอมเมนต์หรือเอาออก
+    // ❗ ฟังก์ชันนี้ใช้ได้ในบางกรณีที่มี custom utility แต่ใน Angular Material ปกติไม่ต้องใช้
+  ],
+
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+
+    // Angular Material
+    MatFormFieldModule,
+    MatFormField,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatDatepickerToggle,
+    MatDatepickerInput,
+    MatSelect,
+    MatOption,
+    MatPaginatorModule,
+    MatTableModule,
+    MatSortModule,
+    MatButtonModule,
+    MatDialogActions,
+    MatDialogContent,
+    MatLabel,
+
+    // CoreUI / Custom UI
+    TextColorDirective,
+    TableModule,
+    UtilitiesModule,
+    ButtonDirective,
+    NgStyle,
+    IconDirective,
+    FormDirective,
+    FormLabelDirective,
+    FormControlDirective,
+
+    // External
+    NgxMatSelectSearchModule,
+  ],
+  templateUrl: './edit-dialog.component.html',
+  styleUrl: './edit-dialog.component.scss',
+})
+
 export class EditAssetDialog implements OnInit, OnDestroy, AfterViewInit {
+  form!: FormGroup;
 
-  
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
+  assetTypes: any[] = [];
+  assetCategories: any[] = [];
+  departments: any[] = [];
+  factions: any[] = [];
+  statuses: any[] = [];
+  assetId:number = 0;
 
-  statuses = [{ id: 1, name: 'ขาย' },{ id: 2, name: 'บริจาค' },{ id: 3, name: 'เลิกใช้' } ]; // ตัวอย่างสถานะ
-  showForm = false;
-  selectedStatusId: number = 0;
+  constructor(
+    private fb: FormBuilder,
+    private api: ApiService,
+    private dialogRef: MatDialogRef<EditAssetDialog>,
+    @Inject(MAT_DIALOG_DATA) public assetData: any
+  ) {}
 
-  assetDetails2: any[] = [];
-  filteredAssetData: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-  assetdataFilterCtrl: FormControl = new FormControl('');
-  searchTerm: string = '';
-  private _onDestroy = new Subject<void>();
-  mainForm!: FormGroup;
-  // assetdataFilterCtrl = { valueChanges: new Subject<string>() };
-
-  icons = { cilPencil, cilTrash, cilMagnifyingGlass };
-
-  dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
-  displayedColumns2: string[] = ['รหัสครุภัณฑ์', 'รายการครุภัณฑ์', 'รายละเอียด', 'จำนวนเงิน'];
-
-  asset: any = {amount: null, // ค่าเริ่มต้น
-    assetId: null,
-    assetCode: '',
-    assetName: '',
-  }; 
-  
-  constructor(private ap: ApiService,private fb : FormBuilder) {}
+  ngAfterViewInit(): void {}
+  ngOnDestroy(): void {}
 
   ngOnInit(): void {
-    this.initializeForm();
+    this.buildForm();
+    this.loadDropdowns();
 
-    // Listen for search changes with debounce
-    this.assetdataFilterCtrl.valueChanges
-      .pipe(debounceTime(550), distinctUntilChanged(), takeUntil(this._onDestroy))
-      .subscribe((search) => this.filterAsset(search));
+    if (this.assetData?.id && !this.assetData.AssetCode) {
+      this.assetId = this.assetData.id;
+      // 🔁 ดึงข้อมูล Asset ถ้ามีแค่ ID
+      this.api.fetchDatahttpbyId('AssetDetails', this.assetData.id).subscribe({
+        next: (res) => this.patchFormWithAsset(res),
+        error: (err) => console.error('ไม่สามารถโหลดข้อมูล Asset:', err)
+      });
+    } else {
+      
+      this.patchFormWithAsset(this.assetData);
+    }
   }
 
-  // ✅ ฟังก์ชันกำหนดค่าเริ่มต้นของฟอร์มหลัก
-  initializeForm(): void {
-    this.mainForm = this.fb.group({
-      status: [this.selectedStatusId, Validators.required], // สถานะปัจจุบัน
-
-      // 📌 ฟอร์มสำหรับ "บริจาค"
-      donationForm: this.fb.group({
-        recipientName: ['', Validators.required],
-        contactNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]], // ต้องเป็นเบอร์โทร 10 หลัก
-        address: ['', Validators.required],
-        assetDetails: ['', Validators.required],
-        donationDate: ['', Validators.required],
-        notes: ['']
-      }),
-
-      // 📌 ฟอร์มสำหรับ "เลิกใช้"
-      decommissionForm: this.fb.group({
-        assetId: ['', Validators.required],
-        saleDate: ['', Validators.required],
-        description: ['', Validators.required]
-      }),
-
-      // 📌 ฟอร์มสำหรับ "ขาย"
-      assetSalesForm: this.fb.group({
-        assetId: ['', Validators.required],
-        purchaseDate: [{ value: '', disabled: true }],
-        saleDate: ['', Validators.required],
-        sellingprice: ['', [Validators.required, Validators.min(0)]],
-        bookValue: [{ value: '', disabled: true }],
-        profit: [{ value: '', disabled: true }], // คำนวณอัตโนมัติ
-        description: ['', [Validators.maxLength(255)]]
-      })
+  buildForm(): void {
+    this.form = this.fb.group({
+      AssetId: [null],
+      AssetCode: ['', Validators.required],
+      AssetName: ['', Validators.required],
+      Quantity: [1],
+      TypeId: [null, Validators.required],
+      CategoryId: [null, Validators.required],
+      DepartmentId : [null, Validators.required],
+      FactionId: [null, Validators.required],
+      StatusId: [null, Validators.required],
+      ResponsibleEmployee: [''],
+      TaxInvoiceNumber: [''],
+      PurchaseDate: [''],
+      ReceiptDate: [''],
+      DepreciationStartDate: [''],
+      DepreciationCalculationStartDate: [''],
+      PurchasePrice: [0],
+      CalculatedPrice: [0],
+      ScrapPrice: [0],
+      AccumulatedDepreciation: [0],
+      DepreciationValue: [0],
+      BookValue: [0],
+      Note: ['']
     });
-
-    // คำนวณกำไรอัตโนมัติเมื่อค่าราคาเปลี่ยนแปลง
-    this.mainForm.get('assetSalesForm.bookValue')?.valueChanges.subscribe(() => this.calculateProfit());
-    this.mainForm.get('assetSalesForm.sellingprice')?.valueChanges.subscribe(() => this.calculateProfit());
   }
 
-  // ฟังก์ชันคำนวณกำไร
-  calculateProfit(): void {
-    const bookValue = this.mainForm.get('assetSalesForm.bookValue')?.value || 0;
-    const sellingPrice = this.mainForm.get('assetSalesForm.sellingprice')?.value || 0;
-    const profit = sellingPrice - bookValue;
-    this.mainForm.get('assetSalesForm.profit')?.setValue(profit);
+  patchFormWithAsset(asset: any): void {
+    this.form.patchValue({
+      AssetId: asset.AssetId,
+      AssetCode: asset.AssetCode,
+      AssetName: asset.AssetName,
+      Quantity: asset.Quantity,
+      TypeId: asset.TypeId,
+      CategoryId: asset.CategoryId,
+      DepartmentId: asset.DepartmentId,
+      FactionId: asset.FactionId,
+      StatusId: asset.StatusId,
+      ResponsibleEmployee: asset.ResponsibleEmployee,
+      TaxInvoiceNumber: asset.TaxInvoiceNumber,
+      PurchaseDate: this.formatDate(asset.PurchaseDate),
+      ReceiptDate: this.formatDate(asset.ReceiptDate),
+      DepreciationStartDate: this.formatDate(asset.DepreciationStartDate),
+      DepreciationCalculationStartDate: this.formatDate(asset.DepreciationCalculationStartDate),
+      PurchasePrice: asset.PurchasePrice,
+      CalculatedPrice: asset.CalculatedPrice,
+      ScrapPrice: asset.ScrapPrice,
+      AccumulatedDepreciation: asset.AccumulatedDepreciation,
+      DepreciationValue: asset.DepreciationValue,
+      BookValue: asset.BookValue,
+      Note: asset.Note
+    });
   }
 
-  // ฟังก์ชันส่งฟอร์ม
-  submitForm(): void {
-    if (this.mainForm.valid) {
-      console.log('Form Data:', this.mainForm.value);
-      alert('บันทึกข้อมูลสำเร็จ!');
+  formatDate(dateString: string): string {
+    return dateString ? dateString.split('T')[0] : '';
+  }
+
+  loadDropdowns(): void {
+    this.api.fetchDatahttp('Assettype').subscribe(data => this.assetTypes = data);
+
+    this.api.fetchDatahttp('AssetCategories').subscribe(data => this.assetCategories = data);
+
+    this.api.fetchDatahttp('Departments').subscribe(data => this.departments = data);
+
+    this.api.fetchDatahttp('Factiontypecodes').subscribe(data => this.factions = data);
+
+    this.api.fetchDatahttp('Status').subscribe(data => this.statuses = data);
+  }
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      this.api.updateData2(`AssetDetails`,this.assetId, this.form.value)
+        .then(() => {
+          alert('บันทึกข้อมูลสำเร็จ!');
+          this.dialogRef.close(true);
+        })
+        .catch(err => {
+          console.error(err);
+          alert('เกิดข้อผิดพลาดในการอัปเดต');
+        });
     } else {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
     }
   }
-  
-  onStatusChange(statusId: string): void {
-    if (this.selectedStatusId !== +statusId) {
-      this.selectedStatusId = +statusId;
-    }
+
+  closeDialog() {
+    this.dialogRef.close();
   }
-
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
-
-  getAssetdata(): void {
-    this.ap.fetchDatahttp('AssetDetails').subscribe((data) => {
-      this.assetDetails2 = data.map((asset: any) => ({
-        assetId: asset.AssetId,
-        assetCode: asset.AssetCode,
-        assetName: asset.AssetName,
-      }));
-
-      // Update data for dropdown
-      this.filteredAssetData.next(this.assetDetails2.slice());
-      this.dataSource.data = this.assetDetails2;
-    });
-  }
-
-  filterAsset(search: string): void {
-    if (!search) {
-      this.filteredAssetData.next(this.assetDetails2.slice());
-      return;
-    }
-
-    this.ap.fetchDatahttp(`AssetDetails?search=${search}`).subscribe((data) => {
-      const assets = data.map((asset: any) => ({
-        assetId: asset.AssetId,
-        assetCode: asset.AssetCode,
-        assetName: asset.AssetName,
-        purchaseDate:asset.PurchaseDate
-      }));
-      this.filteredAssetData.next(assets);
-    });
-  }
-
-  onSearch(): void {
-    const search = this.searchTerm.trim(); // ใช้ searchTerm เก็บค่าจาก input
-  
-    if (!search) {
-      // ถ้าไม่มีคำค้นหา แสดงข้อมูลทั้งหมด
-      this.filteredAssetData.next(this.assetDetails2.slice());
-      return;
-    }
-  
-    // เรียก API พร้อมส่งคำค้นหา
-    this.ap.fetchDatahttp(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
-      const assets = data.map((asset: any) => ({
-        assetId: asset.AssetId,
-        assetCode: asset.AssetCode,
-        assetName: asset.AssetName, //เพิ่มมูลค่าสินทรัพย์ วันที่ ได้มา bookvalue 
-      }));
-  
-      // อัปเดตตัวเลือกที่กรองแล้ว
-      this.filteredAssetData.next(assets);
-      
-      console.log(assets);
-
-      // กรณีไม่พบข้อมูล
-      if (assets.length === 0) {
-        console.warn('ไม่พบข้อมูลที่ตรงกับคำค้นหา');
-      }
-    });
-  }
-  
-  ngOnDestroy(): void {
-    this._onDestroy.next();
-    this._onDestroy.complete();
-  }
-
-  onSubmit() {
-   
-  }
-
-  translateToThai(asset: any): any {
-    const translationMap: { [key: string]: string } = {
-      assetId: 'assetId',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการครุภัณฑ์',
-      serialNumber: 'เลขที่เอกสาร',
-      description: 'รายละเอียด',
-      amount: 'จำนวนเงิน',
-    };
-    const translatedAsset: { [key: string]: any } = {};
-    for (const key in asset) {
-      if (asset.hasOwnProperty(key)) {
-        translatedAsset[translationMap[key] || key] = asset[key];
-      }
-    }
-    return translatedAsset;
-  }
-
- 
-  editAsset(_t35: any) {
-    throw new Error('Method not implemented.');
-  }
-
 }
+
+  
+
+

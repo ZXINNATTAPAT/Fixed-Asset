@@ -4,7 +4,18 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogActions, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { ApiService } from '../../../../../ApiController/api-service.service';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatNativeDateModule, MatOption } from '@angular/material/core';
+import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
 
+
+interface Role {
+  RoleId: number;
+  RoleName: string;
+}
 @Component({
   selector: 'app-add-user-dialog',
   standalone: true,
@@ -12,45 +23,103 @@ import { MatButtonModule } from '@angular/material/button';
     MatDialogActions,
     MatDialogContent,
     MatDialogModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatDatepicker,
+    MatDatepickerToggle,
+    MatNativeDateModule,
+    MatDatepickerInput,
+    MatLabel, MatDatepickerInput, MatFormFieldModule, MatInputModule,
+    MatFormFieldModule, MatSelect, MatOption, MatFormField,
     CommonModule,
-    MatButtonModule,FormsModule,ReactiveFormsModule
+    MatButtonModule, FormsModule, ReactiveFormsModule
   ],
   templateUrl: './add-user-dialog.component.html',
   styleUrls: ['./add-user-dialog.component.scss']
 })
 export class AddUserDialogComponent {
 
-  roles = ['Admin', 'เจ้าหน้าที่พัศดุ', 'ผู้อำนวยการ', 'เจ้าหน้าที่ตรวจนับ', 'เจ้าหน้าที่ทั่วไป'];
+  roles: Role[] = []; // เปลี่ยนจาก static เป็น dynamic
+
   userForm: FormGroup;
+
+  departments: any[] = [];
+
+  factions: any[] = [];
 
   constructor(
     private fb: FormBuilder,
-    public dialogRef: MatDialogRef<AddUserDialogComponent>, // Inject DialogRef
-    @Inject(MAT_DIALOG_DATA) public data: any // Inject Data (optional)
+    public dialogRef: MatDialogRef<AddUserDialogComponent>,
+    private ap: ApiService,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.userForm = this.fb.group({
-      userid: ['', Validators.required],
+      userId: [0],
       username: ['', [Validators.required, Validators.email]],
       prefix: ['', Validators.required],
       sname: ['', Validators.required],
       lname: ['', Validators.required],
-      password: ['', Validators.required],
+      password: ['',Validators.required],
       position: ['', Validators.required],
       subposition: [''],
-      workgroup: ['', Validators.required],
+      departmentId: [0, Validators.required],
+      factionId: [0, Validators.required],
       affiliation: ['', Validators.required],
       positiontype: ['', Validators.required],
-      enrollmentDate: ['', Validators.required],
-      roles: ['', Validators.required]
+      leveltype: ['', Validators.required],
+      enrollmentDate: [new Date()],
+      roleId: [0, Validators.required]
     });
+  }
+
+  ngOnInit() {
+    this.loadDepartments();
+    this.loadRoles(); 
+  }
+
+  loadRoles() {
+    this.ap.fetchData('Roles').then((res) => {
+      this.roles = res;
+      console.log('🎯 ดึง Roles สำเร็จ:', this.roles);
+    }).catch((err) => {
+      console.error('❌ ดึง Roles ไม่สำเร็จ:', err);
+    });
+  }
+
+  loadDepartments() {
+    this.ap.fetchData('Departments')  // เปลี่ยน URL ตาม API ของคุณ
+      .then(res => {
+        this.departments = res;
+      });
+  }
+
+  onDepartmentChange(deptId: number) {
+    const selectedDept = this.departments.find(d => d.DeptId === +deptId);
+    this.factions = selectedDept ? selectedDept.Factions : [];
+    this.userForm.patchValue({ factionId: 0 }); // reset faction เมื่อเปลี่ยนสำนัก
   }
 
   submitForm() {
     if (this.userForm.valid) {
-      console.log("✅ User Data:", this.userForm.value);
-      this.dialogRef.close(this.userForm.value);
+      const userData = this.userForm.value;
+  
+      // log ข้อมูลก่อนส่ง
+      console.log("✅ Sending to API:", userData);
+  
+      this.ap.postData('Users', userData).then((res) => {
+        console.log("🎉 POST สำเร็จ:", res);
+        this.dialogRef.close(res); // ปิด dialog พร้อมส่งข้อมูลกลับ
+      }).catch((err) => {
+        console.error("❌ POST ล้มเหลว:", err);
+        // คุณอาจแจ้งเตือนผู้ใช้ด้วย SweetAlert หรือ Snackbar ก็ได้
+      });
     }
-  } // ปิด Dialog และส่งข้อมูลกลับไป
+  }
+  
 
-  closeDialog() {this.dialogRef.close(); } // ปิด Dialog
+  closeDialog() {
+    this.dialogRef.close();
+  }
 }
+
+

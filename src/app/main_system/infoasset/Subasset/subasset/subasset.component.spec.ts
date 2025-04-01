@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DataServiceComponent } from './data-service.component';
+import { SubassetComponent } from './subasset.component';
 
-describe('DataServiceComponent', () => {
-  let component: DataServiceComponent;
-  let fixture: ComponentFixture<DataServiceComponent>;
+describe('SubassetComponent', () => {
+  let component: SubassetComponent;
+  let fixture: ComponentFixture<SubassetComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DataServiceComponent]
+      imports: [SubassetComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(DataServiceComponent);
+    fixture = TestBed.createComponent(SubassetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

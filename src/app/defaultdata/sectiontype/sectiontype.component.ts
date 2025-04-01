@@ -18,8 +18,6 @@ interface AssetDetails {
   sectioncode: string,
   sectionName: string
 }
-
-
 @Component({
   selector: 'app-sectiontype',
   standalone: true,
@@ -49,7 +47,7 @@ export class SectiontypeComponent {
   icons = { cilPencil, cilTrash };
   assetDetails: AssetDetails[] = [];
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
-  
+  isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 

@@ -16,7 +16,7 @@ import {
 } from '@coreui/angular';
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { ICustomNavData, navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
-import { DataService } from '../../data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 
 function isOverflown(element: HTMLElement) {
   return (

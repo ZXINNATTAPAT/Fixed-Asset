@@ -1,0 +1,32 @@
+<div class="card" style="border: none;">
+    <div class="card-body">
+      <h1><span class="anuphan-700">ประวัติการซ่อมครุภัณฑ์</span></h1><hr/>
+      <table class="table table-bordered table-striped" *ngIf="data.length">
+        <thead>
+          <tr class="anuphan-700">
+            <th>รหัสครุภัณฑ์</th>
+            <th>ชื่อครุภัณฑ์</th>
+            <th>Serial Number</th>
+            <th>รายละเอียด</th>
+            <th>จำนวนเงิน</th>
+            <th>วันที่ซ่อม</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="anuphan-500" *ngFor="let item of data">
+            <td>{{ item.AssetCode }}</td>
+            <td>{{ item.AssetName }}</td>
+            <td>{{ item.SerialNumber }}</td>
+            <td>{{ item.Description }}</td>
+            <td>{{ item.Amount | number:'1.2-2' }}</td>
+            <td>{{ item.Date | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <div *ngIf="!data.length">
+        ไม่พบข้อมูลการซ่อมของครุภัณฑ์นี้
+      </div>
+    </div>
+  </div>
+  

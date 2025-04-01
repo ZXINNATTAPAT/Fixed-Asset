@@ -17,7 +17,7 @@ import {
 } from '@coreui/angular';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/api-service.service';
 
 @Component({
   selector: 'app-login',

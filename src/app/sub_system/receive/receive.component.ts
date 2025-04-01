@@ -3,7 +3,7 @@ import { TextColorDirective ,FormDirective,FormLabelDirective,FormControlDirecti
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -13,7 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
-import { DataService } from '../../../app/data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 import { MatDialog } from '@angular/material/dialog';
 // import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
 // import { InfoassetComponent } from '../infoasset/infoasset.component';

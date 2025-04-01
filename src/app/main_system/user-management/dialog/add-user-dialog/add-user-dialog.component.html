@@ -1,89 +1,193 @@
-<h2 mat-dialog-title style="font-family:Anuphan,sans-serif;font-optical-sizing:auto;font-weight:600;font-style:normal">เพิ่มผู้ใช้ใหม่</h2>
+<h2 mat-dialog-title style="font-family:Anuphan,sans-serif;font-optical-sizing:auto;font-weight:600;font-style:normal">
+  เพิ่มผู้ใช้ใหม่</h2>
 
 <mat-dialog-content>
   <form [formGroup]="userForm">
-    <div class="row g-2 m-1">
-      <div class="col-md-3">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="userid">รหัสพนักงาน</label>
-              <input type="text" class="form-control" id="userid" formControlName="userid" />
-          </div>
+    <div class="row g-3 m-2">
+
+      <!-- คำนำหน้า -->
+      <div class="col-md-2">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>คำนำหน้า</mat-label>
+          <mat-select formControlName="prefix">
+            <mat-option value="นาย">นาย</mat-option>
+            <mat-option value="นางสาว">นางสาว</mat-option>
+            <mat-option value="นาง">นาง</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
-      <div class="col-md-3">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="username">Email</label>
-              <input type="email" class="form-control" id="username" formControlName="username" />
-          </div>
-      </div>
- 
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="prefix">คำนำหน้า</label>
-              <input type="text" class="form-control" id="prefix" formControlName="prefix" />
-          </div>
+      <!-- ชื่อ -->
+      <div class="col-md-5">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>ชื่อ</mat-label>
+          <input matInput formControlName="sname" />
+        </mat-form-field>
       </div>
 
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="sname">ชื่อ</label>
-              <input type="text" class="form-control" id="sname" formControlName="sname" />
-          </div>
-      </div>
-  
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="lname">นามสกุล</label>
-              <input type="text" class="form-control" id="lname" formControlName="lname" />
-          </div>
+      <!-- นามสกุล -->
+      <div class="col-md-5">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>นามสกุล</mat-label>
+          <input matInput formControlName="lname" />
+        </mat-form-field>
       </div>
 
+      <!-- อีเมล -->
       <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="position">ตำแหน่ง</label>
-              <input type="text" class="form-control" id="position" formControlName="position" />
-          </div>
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>อีเมล</mat-label>
+          <input matInput type="email" formControlName="username" />
+        </mat-form-field>
+      </div>
+      
+      <!-- รหัสผ่าน -->
+      <div class="col-md-6">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>รหัสผ่าน</mat-label>
+          <input matInput formControlName="password" />
+        </mat-form-field>
       </div>
 
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="subposition">ตำแหน่งย่อย</label>
-              <input type="text" class="form-control" id="subposition" formControlName="subposition" />
-          </div>
+      <!-- ตำแหน่งหลัก -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>ตำแหน่งหลัก</mat-label>
+          <mat-select formControlName="position">
+            <mat-option value="พนักงานการเลือกตั้ง">พนักงานการเลือกตั้ง</mat-option>
+            <mat-option value="นิติกร">นิติกร</mat-option>
+            <mat-option value="นักวิชาการคอมพิวเตอร์">นักวิชาการคอมพิวเตอร์</mat-option>
+            <mat-option value="นักวิชาการเงินและบัญชี">นักวิชาการเงินและบัญชี</mat-option>
+            <mat-option value="นักทรัพยากรบุคคล">นักทรัพยากรบุคคล</mat-option>
+            <mat-option value="นักจัดการงานทั่วไป">นักจัดการงานทั่วไป</mat-option>
+            <mat-option value="เจ้าพนักงานธุรการ">เจ้าพนักงานธุรการ</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="workgroup">กลุ่มงาน</label>
-              <input type="text" class="form-control" id="workgroup" formControlName="workgroup" required />
-          </div>
-      </div>
- 
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="affiliation">สังกัด</label>
-              <input type="text" class="form-control" id="affiliation" formControlName="affiliation" required />
-          </div>
-      </div>
-
-      <div class="col-md-6">
-          <div class="form-group">
-              <label class="form-label anuphan-600" for="positiontype">ประเภทตำแหน่ง</label>
-              <input type="text" class="form-control" id="positiontype" formControlName="positiontype" required />
-          </div>
+      <!-- ตำแหน่งย่อย / สายงาน -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>ตำแหน่งย่อย / สายงาน</mat-label>
+          <mat-select formControlName="subposition">
+            <mat-option value="พนักงานการเลือกตั้ง">พนักงานการเลือกตั้ง</mat-option>
+            <mat-option value="นิติกร">นิติกร</mat-option>
+            <mat-option value="นักวิชาการคอมพิวเตอร์">นักวิชาการคอมพิวเตอร์</mat-option>
+            <mat-option value="นักวิชาการเงินและบัญชี">นักวิชาการเงินและบัญชี</mat-option>
+            <mat-option value="นักทรัพยากรบุคคล">นักทรัพยากรบุคคล</mat-option>
+            <mat-option value="นักจัดการงานทั่วไป">นักจัดการงานทั่วไป</mat-option>
+            <mat-option value="เจ้าพนักงานธุรการ">เจ้าพนักงานธุรการ</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
-      <div class="col-md-6">
-          <label class="form-label anuphan-600" for="roles">บทบาท</label>
-          <select class="form-control" id="roles" formControlName="roles">
-              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-          </select>
+
+      <!-- กลุ่มงาน / ฝ่าย / สำนัก -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>สำนัก</mat-label>
+          <mat-select formControlName="departmentId" (selectionChange)="onDepartmentChange($event.value)">
+            <mat-option [value]="0" disabled>-- เลือกสำนัก --</mat-option>
+            <mat-option *ngFor="let dept of departments" [value]="dept.DeptId">
+              {{ dept.Name }} ({{ dept.Semin }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
-  </div>
+
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>ฝ่าย</mat-label>
+          <mat-select formControlName="factionId">
+            <mat-option [value]="0" disabled>-- เลือกฝ่าย --</mat-option>
+            <mat-option *ngFor="let fac of factions" [value]="fac.FactId">
+              {{ fac.Name }} ({{ fac.Semin }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- สังกัด -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>สังกัด</mat-label>
+          <mat-select formControlName="affiliation">
+            <mat-option value="ส่วนกลาง">ส่วนกลาง</mat-option>
+            <mat-option value="ส่วนภูมิภาค">ส่วนภูมิภาค</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      
+
+      <!-- ประเภทตำแหน่ง -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>ประเภทตำแหน่ง</mat-label>
+          <mat-select formControlName="positiontype">
+            <mat-option value="บริหาร">ประเภทบริหาร</mat-option>
+            <mat-option value="อำนวยการ">ประเภทอำนวยการ</mat-option>
+            <mat-option value="วิชาการ">ประเภทวิชาการ</mat-option>
+            <mat-option value="ทั่วไป">ประเภททั่วไป</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- ระดับตำแหน่ง -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>ระดับตำแหน่ง</mat-label>
+          <mat-select formControlName="leveltype">
+
+            <mat-optgroup label="ประเภทบริหาร">
+              <mat-option value="ระดับสูง">ระดับสูง (ปลัด/รองปลัด/อธิบดี)</mat-option>
+              <mat-option value="ระดับต้น">ระดับต้น (รองอธิบดี)</mat-option>
+            </mat-optgroup>
+
+            <mat-optgroup label="ประเภทอำนวยการ">
+              <mat-option value="ระดับสูง">ระดับสูง (ผอ.สำนัก)</mat-option>
+              <mat-option value="ระดับต้น">ระดับต้น (ผอ.กอง)</mat-option>
+            </mat-optgroup>
+
+            <mat-optgroup label="ประเภทวิชาการ">
+              <mat-option value="ทรงคุณวุฒิ">ทรงคุณวุฒิ</mat-option>
+              <mat-option value="เชี่ยวชาญ">เชี่ยวชาญ</mat-option>
+              <mat-option value="ชำนาญการพิเศษ">ชำนาญการพิเศษ</mat-option>
+              <mat-option value="ชำนาญการ">ชำนาญการ</mat-option>
+              <mat-option value="ปฏิบัติการ">ปฏิบัติการ</mat-option>
+            </mat-optgroup>
+
+            <mat-optgroup label="ประเภททั่วไป">
+              <mat-option value="ทักษะพิเศษ">ทักษะพิเศษ</mat-option>
+              <mat-option value="อาวุโส">อาวุโส</mat-option>
+              <mat-option value="ชำนาญงาน">ชำนาญงาน</mat-option>
+              <mat-option value="ปฏิบัติงาน">ปฏิบัติงาน</mat-option>
+            </mat-optgroup>
+
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+
+      <!-- บทบาท (สิทธิผู้ใช้งาน) -->
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>บทบาท</mat-label>
+          <mat-select formControlName="roleId">
+            <mat-option *ngFor="let role of roles" [value]="role.RoleId">
+              {{ role.RoleName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+    </div>
   </form>
 
-  <div class="d-flex justify-content-end gap-2">
+
+  <div class="d-flex justify-content-end gap-2 mt-3">
     <button class="btn btn-secondary" (click)="closeDialog()">ยกเลิก</button>
     <button class="btn btn-primary" (click)="submitForm()" [disabled]="userForm.invalid">บันทึก</button>
   </div>
+
 </mat-dialog-content>

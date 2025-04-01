@@ -82,7 +82,7 @@ export class AssetcategoryComponent implements OnInit {
 
   icons = { cilPencil, cilTrash };
   assetDetails: AssetDetails[] = [];
-
+  isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;

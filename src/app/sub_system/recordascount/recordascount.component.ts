@@ -18,7 +18,7 @@ import { HttpClient } from '@angular/common/http';
 import {cilPencil,cilTrash,cibAddthis,cilDataTransferDown,cilInfo,} from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
@@ -30,7 +30,7 @@ import { MatSort } from '@angular/material/sort';
 import 'moment/locale/th.js';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
-import { DataService } from '@services/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 
 interface AssetDetails {
   assetId: any;

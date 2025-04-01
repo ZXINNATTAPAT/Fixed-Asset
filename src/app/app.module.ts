@@ -19,12 +19,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 
 // Components
-import { AssetcountComponent } from './views/sub_system/assetcount/assetcount.component';
+import { AssetcountComponent } from './sub_system/assetcount/assetcount.component';
 import { RoleDialogComponent } from './main_system/user-management/dialog/role-dialog.component';
 import { UserEditDialogComponent } from './main_system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
 
+
 // Config
 import { appConfig } from './app.config';
+
 
 // สร้าง InjectionToken เพื่อใช้ในการให้ค่า appConfig
 export const APP_CONFIG = new InjectionToken<any>('app.config');

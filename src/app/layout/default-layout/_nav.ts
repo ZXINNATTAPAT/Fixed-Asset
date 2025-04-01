@@ -40,6 +40,7 @@ export const navItems: ICustomNavData[] = [
     children: [
       { name: 'รายการที่ต้องรับมอบ', url: '/table/receive', icon: 'nav-icon-bullet' },
       { name: 'รายการครุภัณฑ์', url: '/table/assettable', icon: 'nav-icon-bullet' },
+      { name: 'ค่าเสื่อมครุภัณฑ์', url: '/table/depreciation-table', icon: 'nav-icon-bullet' },
       { name: 'รายการการตรวจนับ', url: '/table/inventorysession', icon: 'nav-icon-bullet' }
     ]
   },
@@ -50,17 +51,17 @@ export const navItems: ICustomNavData[] = [
     roles: ['Admin', 'AssetOfficer', 'GeneralStaff']
   },
   {
-    name: 'เพิ่มข้อมูลตั้งต้น',
+    name: 'กำหนดข้อมูลตั้งต้น',
     url: '/defaultdata',
     iconComponent: { name: 'cil-pencil' },
     roles: ['Admin', 'AssetOfficer', 'GeneralStaff'],
     children: [
-      { name: 'กำหนดรหัสประเภทสินทรัพย์', url: '/defaultdata/Assettypecode', icon: 'nav-icon-bullet' },
-      { name: 'กำหนดหมวดสินทรัพย์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },
-      { name: 'กำหนดรหัสสำนักงาน', url: '/defaultdata/sectiontype', icon: 'nav-icon-bullet' },
-      { name: 'กำหนดรหัสฝ่าย', url: '/defaultdata/faction', icon: 'nav-icon-bullet' },
-      { name: 'กำหนดหน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
-      { name: 'กำหนดผู้ขายทรัพย์สิน', url: '/defaultdata/ps', icon: 'nav-icon-bullet' }
+      { name: 'รหัสประเภทสินทรัพย์', url: '/defaultdata/Assettypecode', icon: 'nav-icon-bullet' },
+      { name: 'หมวดสินทรัพย์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },
+      { name: 'รหัสสำนักงาน', url: '/defaultdata/sectiontype', icon: 'nav-icon-bullet' },
+      { name: 'รหัสฝ่าย', url: '/defaultdata/faction', icon: 'nav-icon-bullet' },
+      { name: 'หน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
+      { name: 'ผู้ขายทรัพย์สิน', url: '/defaultdata/ps', icon: 'nav-icon-bullet' }
     ]
   }
 ];

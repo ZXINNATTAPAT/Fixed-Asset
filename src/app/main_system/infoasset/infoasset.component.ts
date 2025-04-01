@@ -6,6 +6,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import {HistoryComponent} from '../history/history.component'
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ApiService } from '../../../ApiController/api-service.service';
+import { SubAssetDialogComponent } from './Subasset/subasset/subasset.component';
+import { RepairAssetComponent } from './repair-history/repair-history/repair-history.component';
 
 interface AssetDetails {
   assetId: any;
@@ -36,33 +39,31 @@ interface AssetDetails {
 @Component({
   selector: 'app-infoasset',
   standalone: true,
-  imports: [MatTabsModule ,HistoryComponent,CommonModule],
+  imports: [MatTabsModule ,
+    HistoryComponent,
+    CommonModule,
+    SubAssetDialogComponent,
+    RepairAssetComponent],
   templateUrl: './infoasset.component.html',
   styleUrl: './infoasset.component.scss',
 })
 export class InfoassetComponent {
-
-  // assetDetails: AssetDetails[] = [];
-  // assets: any = {};
-  // qrCodeUrl: string = '';
-
   assetId!: number;
   assets: any;
   qrCodeUrl!: string;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: any, // อนุญาตให้รับค่าได้ทั้ง object หรือ undefined
-    private http: HttpClient,
+    @Inject(MAT_DIALOG_DATA) public datadialog: any, // อนุญาตให้รับค่าได้ทั้ง object หรือ undefined
+    private ap: ApiService,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    console.log('ค่าที่ได้รับจาก Dialog:', this.data);
-
     // ตรวจสอบว่ามีค่า id มาจาก Dialog หรือไม่
-    if (this.data?.id) {
-      this.assetId = this.data.id; // ใช้ค่า id จาก Dialog
-    } else {
+    if (this.datadialog?.id) {
+      this.assetId = this.datadialog.id; // ใช้ค่า id จาก Dialog
+    } 
+    else {
       // ถ้าไม่มีค่า id จาก Dialog ให้ดึงจาก URL params แทน
       this.route.params.subscribe((params) => {
         if (params['assetId']) {
@@ -73,7 +74,7 @@ export class InfoassetComponent {
 
     if (this.assetId) {
       // เรียกข้อมูล AssetDetails จาก API
-      this.http.get<any>(`https://localhost:7204/api/AssetDetails/infoasset/${this.assetId}`)
+      this.ap.fetchDatahttpbyId2(`AssetDetails/infoasset`,this.assetId)
         .subscribe((data: any) => {
           this.assets = data;
           console.log('Asset Details:', this.assets);

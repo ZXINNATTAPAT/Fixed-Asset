@@ -24,9 +24,7 @@
 
       <div class="card-body">
 
-        <div class="card shadow-sm" 
-            [hidden]="hidden2" 
-            style="border-style: dotted; 
+        <div class="card shadow-sm" [hidden]="hidden2" style="border-style: dotted; 
             border-width: 3.5px">
 
           <div class="card-body">
@@ -108,14 +106,9 @@
 
                   </mat-select>
 
-                  <mat-select 
-                    *ngIf="!asset.get('TypeId')?.value" 
-                    placeholder="เลือกหมวดหมู่ครุภัณฑ์"
-                    panelClass="mat-select-panel" 
-                    #singleSelect disabled="true" 
-                    (click)="showAlert()"
-                    (keydown)="handleKeyDown($event)" 
-                    style="font-family:Anuphan,sans-serif;
+                  <mat-select *ngIf="!asset.get('TypeId')?.value" placeholder="เลือกหมวดหมู่ครุภัณฑ์"
+                    panelClass="mat-select-panel" #singleSelect disabled="true" (click)="showAlert()"
+                    (keydown)="handleKeyDown($event)" style="font-family:Anuphan,sans-serif;
                     font-optical-sizing:auto;font-weight:500;
                     font-style:normal">
                   </mat-select>
@@ -258,7 +251,7 @@
 
                 </div>
               </div>
-              
+
             </div>
 
             <!-- ######## line 2 ############ -->
@@ -267,35 +260,24 @@
 
               <div class="col">
 
-                <label 
-                  class="form-label" 
-                  for="Unitsinput" 
-                  style="font-weight: bold">
+                <label class="form-label" for="Unitsinput" style="font-weight: bold">
                   หน่วยนับ
                 </label>
 
                 <div class="form-control">
 
-                  <mat-select 
-                    placeholder="เลือกหน่วยนับ" 
-                    id="Unitsinput" 
-                    [formControl]="unitCtrl"
-                    (selectionChange)="onUnitChange($event)" 
-                    panelClass="mat-select-panel" #singleSelect>
+                  <mat-select placeholder="เลือกหน่วยนับ" id="Unitsinput" [formControl]="unitCtrl"
+                    (selectionChange)="onUnitChange($event)" panelClass="mat-select-panel" #singleSelect>
 
                     <!-- Search Input for Filtering -->
                     <mat-option>
-                      <ngx-mat-select-search 
-                        placeholderLabel="ค้นหาหน่วยนับ" 
-                        noEntriesFoundLabel="ไม่พบข้อมูล"
+                      <ngx-mat-select-search placeholderLabel="ค้นหาหน่วยนับ" noEntriesFoundLabel="ไม่พบข้อมูล"
                         [formControl]="unitFilterCtrl">
                       </ngx-mat-select-search>
                     </mat-option>
 
                     <!-- Display Filtered Units -->
-                    <mat-option 
-                      *ngFor="let unit of filteredUnits | async" 
-                      [value]="unit.word">
+                    <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit.word">
                       {{ unit.word }}
                     </mat-option>
                   </mat-select>
@@ -433,17 +415,12 @@
             </div>
 
             <div formArrayName="SubAssets">
-              <div 
-                *ngFor="let subAsset of subAssets.controls; let i = index" 
-                [formGroupName]="i"
-                class="card shadow-sm mb-3" 
-                style="border: none;">
+              <div *ngFor="let subAsset of subAssets.controls; let i = index" [formGroupName]="i"
+                class="card shadow-sm mb-3" style="border: none;">
 
                 <div class="card-body">
 
-                  <div 
-                    class="anuphan-600 mb-3" 
-                    style="font-size: large;font-weight: bold;">
+                  <div class="anuphan-600 mb-3" style="font-size: large;font-weight: bold;">
                     ครุภัณฑ์ย่อย
                   </div>
 
@@ -462,45 +439,30 @@
 
                     <div class="col-4">
 
-                      <label 
-                        class="form-label" 
-                        for="SubAsset Name">
+                      <label class="form-label" for="SubAsset Name">
                         ชื่อครุภัณฑ์ย่อย
                       </label>
 
-                      <input 
-                        class="form-control" 
-                        id="SubAsset Name" 
-                        formControlName="subAssetName"
+                      <input class="form-control" id="SubAsset Name" formControlName="subAssetName"
                         placeholder="SubAsset Name" />
                     </div>
 
                     <div class="col-2">
-                      
-                      <label 
-                        class="form-label" 
-                        for="Unit">
+
+                      <label class="form-label" for="Unit">
                         หน่วยนับ
                       </label>
 
-                      <input 
-                        class="form-control" 
-                        id="Unit" 
-                        formControlName="unit" 
-                        placeholder="หน่วยนับ" />
+                      <input class="form-control" id="Unit" formControlName="unit" placeholder="หน่วยนับ" />
                     </div>
 
                     <div class="col-5">
 
-                      <label 
-                        class="form-label" 
-                        for="note">
+                      <label class="form-label" for="note">
                         หมายเหตุ
                       </label>
 
-                      <input class="form-control" id="note" 
-                      formControlName="note" 
-                      placeholder="Note" />
+                      <input class="form-control" id="note" formControlName="note" placeholder="Note" />
 
                     </div>
 

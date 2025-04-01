@@ -3,7 +3,7 @@ import { TextColorDirective, InputGroupComponent, BorderDirective, RowComponent,
 import { CommonModule, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import Swal from 'sweetalert2';
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angular/material/datepicker';
@@ -21,7 +21,7 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 import { MatDialog } from '@angular/material/dialog';
-import { DataService } from '../../data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 import { HttpClient } from '@angular/common/http';
 import { QrScannerDialogComponent } from './Dialog/qr-scanner-dialog.component';
 import { AssetInventoryComponent } from './asset-inventory/asset-inventory.component'

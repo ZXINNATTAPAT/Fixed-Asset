@@ -55,6 +55,7 @@ interface AssetDetails {
 export class PropertySellerComponent implements OnInit {
 
   yourFormName: FormGroup<any> | undefined;
+  isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
   asset: any ={};
 
   onSubmit() {
@@ -128,14 +129,14 @@ export class PropertySellerComponent implements OnInit {
   
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
-      "sellerCode": "รหัสผู้ขาย",
-      "sellerName": "ชื่อผู้ขาย",
-      "address": "ที่อยู่",
-      "tel": "เบอร์โทรศัพท์",
-      "telfax": "เบอร์แฟ็กซ์",
-      "email": "อีเมล",
-      "homepage": "เว็บไซต์",
-      "tinNumber": "หมายเลขประจำตัวผู้เสียภาษี",
+      "SellerCode": "รหัสผู้ขาย",
+      "SellerName": "ชื่อผู้ขาย",
+      "Address": "ที่อยู่",
+      "Tel": "เบอร์โทรศัพท์",
+      "Telfax": "เบอร์แฟ็กซ์",
+      "Email": "อีเมล",
+      "Homepage": "เว็บไซต์",
+      "TinNumber": "หมายเลขประจำตัวผู้เสียภาษี",
     };
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {

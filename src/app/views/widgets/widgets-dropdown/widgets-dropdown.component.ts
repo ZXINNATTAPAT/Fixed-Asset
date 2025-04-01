@@ -22,7 +22,7 @@ import {
   DropdownItemDirective,
   DropdownDividerDirective,
 } from '@coreui/angular';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/api-service.service';
 import {
   cibAddthis,
   cilArrowCircleRight,
@@ -37,7 +37,7 @@ import {
   cilUser,
 } from '@coreui/icons';
 import { NgClass, NgIf } from '@angular/common';
-import { DataService } from '../../../data-service/data-service.component';
+import { DataService } from '../../../../data-service/data-service.component';
 import { catchError, filter, forkJoin, map, of, tap } from 'rxjs';
 
 @Component({

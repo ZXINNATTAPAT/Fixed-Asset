@@ -28,7 +28,7 @@ import Swal from 'sweetalert2';
 import { ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from 'src/app/ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 

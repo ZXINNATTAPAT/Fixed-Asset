@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NotificationService } from '../services/notification.service';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
-import { DataService } from '../data-service/data-service.component';
+import { DataService } from '../../data-service/data-service.component';
 
 @Component({
   selector: 'app-notification',

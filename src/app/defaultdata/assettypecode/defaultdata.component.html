@@ -3,169 +3,99 @@
   <div class="card-body">
     <h1><span class="anuphan-700">กำหนดรหัสประเภทครุภัณท์</span></h1>
     <hr />
-    
-      <div class="card" style="border: none;">
-        <div class="card-body">
-          <form (ngSubmit)="onSubmit()">
-            <div class="row  mb-3">
-              <div class="col">
-                <label cLabel for="assetCodeInput">รหัสประเภทครุภัณท์</label>
-                <input
-                  cFormControl
-                  name="assetCode"
-                  id="assetCodeInput"
-                  [(ngModel)]="asset.assetCode"
-                  placeholder="ระบุรหัสสินทรัพย์"
-                  class="form-control"
-                  type="text"
-                  required
-                />
-              </div>
 
-              <div class="col">
-                <label cLabel for="assetNameInput">ชื่อประเภทครุภัณท์</label>
-                <input
-                  cFormControl
-                  name="assetName"
-                  id="assetNameInput"
-                  [(ngModel)]="asset.assetName"
-                  placeholder="ระบุประเภทสินทรัพย์"
-                  class="form-control"
-                  type="text"
-                  required
-                />
-              </div>
-              <div class="col">
-                <label cLabel for="rate_depInput">อัตราค่าเสื่อม</label>
-                <input
-                  cFormControl
-                  name="rate_dep"
-                  id="rate_depInput"
-                  [(ngModel)]="asset.rate_dep"
-                  placeholder="ระบุประเภทสินทรัพย์"
-                  class="form-control"
-                  type="text"
-                  required
-                />
-              </div>
-
-              <div class="col">
-                <label cLabel for="servicelifeInput">อายุการใช้งาน</label>
-                <input
-                  cFormControl
-                  name="servicelife"
-                  id="servicelifeInput"
-                  [(ngModel)]="asset.servicelife"
-                  placeholder="ระบุประเภทสินทรัพย์"
-                  class="form-control"
-                  type="text"
-                  required
-                />
-              </div>
-
-              <div class="col align-self-end">
-                <button type="submit" class="btn btn-success anuphan-600 p-3" style="color: white;">ดำเนินการ</button>
-              </div>
+    <!-- ฟอร์ม (ซ่อนตอนเริ่มต้น) -->
+    <div class="card" *ngIf="isFormVisible" style="border: none;">
+      <div class="card-body">
+        <form (ngSubmit)="onSubmit()">
+          <div class="row mb-3">
+            <div class="col">
+              <label cLabel for="assetCodeInput">รหัสประเภทครุภัณท์</label>
+              <input cFormControl name="assetCode" id="assetCodeInput" [(ngModel)]="asset.assetCode"
+                placeholder="ระบุรหัสสินทรัพย์" class="form-control" type="text" required />
             </div>
-          </form>
 
-        </div>
+            <div class="col">
+              <label cLabel for="assetNameInput">ชื่อประเภทครุภัณท์</label>
+              <input cFormControl name="assetName" id="assetNameInput" [(ngModel)]="asset.assetName"
+                placeholder="ระบุประเภทสินทรัพย์" class="form-control" type="text" required />
+            </div>
+
+            <div class="col">
+              <label cLabel for="rate_depInput">อัตราค่าเสื่อม</label>
+              <input cFormControl name="rate_dep" id="rate_depInput" [(ngModel)]="asset.rate_dep"
+                placeholder="ระบุประเภทสินทรัพย์" class="form-control" type="text" required />
+            </div>
+
+            <div class="col">
+              <label cLabel for="servicelifeInput">อายุการใช้งาน</label>
+              <input cFormControl name="servicelife" id="servicelifeInput" [(ngModel)]="asset.servicelife"
+                placeholder="ระบุประเภทสินทรัพย์" class="form-control" type="text" required />
+            </div>
+
+            <div class="col align-self-end">
+              <button type="submit" class="btn btn-success anuphan-600" style="color: white;">ดำเนินการ</button>
+            </div>
+          </div>
+        </form>
+
       </div>
-        
-      <div class="table-responsive " >
-          <table
-            mat-table
-            [dataSource]="dataSource"
-            matSort
-            class="table table-striped table-hover anuphan-600"
-          >
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-              <th 
-                mat-header-cell 
-                class="border" 
-                *matHeaderCellDef 
-                style="font-weight: bold">
-                #
-              </th>
-              <td mat-cell class="border" *matCellDef="let asset">
-
-                <button
-                  class="btn btn-sm btn-warning m-1"
-                  (click)="editAsset(asset)">
-                  <svg
-                    [cIcon]="icons.cilPencil"
-                    style="color: white; width: 16px; height: 16px;"
-                  ></svg>
-                </button>
-
-                <button
-                  class="btn btn-sm btn-danger m-1"
-                  (click)="deleteAsset(asset)">
-                  <svg
-                    [cIcon]="icons.cilTrash"
-                    style="color: white; width: 16px; height: 16px;"
-                  ></svg>
-                </button>
-              </td>
-            </ng-container>
-
-            <!-- Dynamic Columns -->
-            <ng-container
-              *ngFor="let column of displayedColumns2"
-              [matColumnDef]="column"
-            >
-              <th
-                mat-header-cell
-                class="anuphan-600 border"
-                *matHeaderCellDef
-                mat-sort-header
-                style="font-weight: bold ;"
-              >
-                {{ column }}
-              </th>
-              <td mat-cell class="anuphan-500 border" *matCellDef="let asset">
-                {{ asset[column] }}
-              </td>
-            </ng-container>
-
-            <!-- Header Row -->
-            <tr
-              mat-header-row
-              *matHeaderRowDef="[
-                'actions',
-                'รหัสประเภทสินทรัพย์',
-                'ชื่อประเภทสินทรัพย์',
-                'อัตราค่าเสื่อม',
-                'อายุการใช้งาน'
-              ]"
-            ></tr>
-
-            <!-- Data Rows -->
-            <tr
-              mat-row
-              *matRowDef="
-                let row;
-                columns: [
-                  'actions',
-                  'รหัสประเภทสินทรัพย์',
-                  'ชื่อประเภทสินทรัพย์',
-                  'อัตราค่าเสื่อม',
-                  'อายุการใช้งาน'
-                ]
-              "
-            ></tr>
-            
-          </table>
-
-          <!-- Paginator -->
-          <mat-paginator
-            [pageSizeOptions]="[30, 50, 70, 100]"
-            [pageSize]="15"
-            showFirstLastButtons
-          ></mat-paginator>
-      </div>
-  
-   
     </div>
+
+    <div class="d-flex justify-content-between align-items-center m-1 mb-3">
+      <!-- ปุ่มเพิ่มข้อมูล -->
+      <button class="btn btn-sm btn-outline-success anuphan-500" (click)="isFormVisible = !isFormVisible"
+        style="color: green">
+        + เพิ่มข้อมูล
+      </button>
+
+      <!-- Paginator -->
+      <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" [pageSize]="15" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover anuphan-600">
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell class="border" *matHeaderCellDef [ngStyle]="{ 'width': '10%', 'font-weight': 'bold' }">
+            #
+          </th>
+          <td mat-cell class="border" *matCellDef="let asset" [ngStyle]="{ 'width': '10%' }">
+            <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)">
+              <svg [cIcon]="icons.cilPencil" style="color: white; width: 16px; height: 16px;">
+              </svg>
+            </button>
+
+            <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
+              <svg [cIcon]="icons.cilTrash" style="color: white; width: 16px; height: 16px;">
+              </svg>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Dynamic Columns -->
+        <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
+          <th mat-header-cell class="anuphan-600 border" *matHeaderCellDef mat-sort-header
+            [ngStyle]="{ 'width': column === 'actions' ? '8%' : 'auto', 'font-weight': 'bold' }">
+            {{ column }}
+          </th>
+          <td mat-cell class="anuphan-500 border" *matCellDef="let asset"
+            [ngStyle]="{ 'width': column === 'actions' ? '8%' : 'auto' }">
+            {{ asset[column] }}
+          </td>
+        </ng-container>
+
+        <!-- Header Row -->
+        <tr mat-header-row *matHeaderRowDef="['actions','รหัสประเภทสินทรัพย์','ชื่อประเภทสินทรัพย์','อัตราค่าเสื่อม(%)','อายุการใช้งาน']"></tr>
+
+        <!-- Data Rows -->
+        <tr mat-row *matRowDef="let row; columns: ['actions','รหัสประเภทสินทรัพย์','ชื่อประเภทสินทรัพย์','อัตราค่าเสื่อม(%)','อายุการใช้งาน']"></tr>
+        
+      </table>
+
+    </div>
+
+
   </div>
+</div>

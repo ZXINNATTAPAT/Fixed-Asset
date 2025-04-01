@@ -35,7 +35,7 @@ export class UserService {
     filter(profile => profile !== null)
   );
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router) { }
 
   async loadUserInfo(): Promise<void> {
     try {

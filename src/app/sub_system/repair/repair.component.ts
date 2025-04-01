@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 import { filter, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 
 interface AssetDetails {
   RepairAssetId: any;
@@ -76,6 +76,7 @@ export class RepairComponent implements OnInit, OnDestroy {
   @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
 
   searchTerm: string = '';
+  isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
 
   icons = { cilPencil, cilTrash, cilMagnifyingGlass };
 

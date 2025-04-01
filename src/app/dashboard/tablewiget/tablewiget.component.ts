@@ -3,7 +3,7 @@ import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirectiv
 import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -16,7 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
-import { DataService } from '../../data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 
 interface AssetDetails {
   assetId: any;
@@ -203,20 +203,20 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   };
   
 
-  // toggleColumn(event: MatSelectChange) {
-  //   const selectedColumns = event.value;
-  //   if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
-  //     this.displayedColumns3 = ['Aactions', ...this.displayedColumns2];
-  //   } else {
-  //     // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
-  //     this.displayedColumns3 = [
-  //       'Aactions',
-  //       ...selectedColumns.filter(
-  //         (column: string) => column !== 'เซตค่าคืนทั้งหมด'
-  //       ),
-  //     ];
-  //   }
-  // }
+  toggleColumn(event: MatSelectChange) {
+    const selectedColumns = event.value;
+    if (selectedColumns.includes('เซตค่าคืนทั้งหมด')) {
+      this.displayedColumns3 = ['Aactions', ...this.displayedColumns2];
+    } else {
+      // เลือกคอลัมน์ที่เลือกโดยไม่รวม "เซตค่าคืนทั้งหมด"
+      this.displayedColumns3 = [
+        'Aactions',
+        ...selectedColumns.filter(
+          (column: string) => column !== 'เซตค่าคืนทั้งหมด'
+        ),
+      ];
+    }
+  }
 
   setupFilter(column: string): void {
     this.dataSource.filterPredicate = (data: AssetDetails, filter: string): boolean => {

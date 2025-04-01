@@ -17,11 +17,7 @@
           </div>
 
           <div class="col-md-3">
-            <select 
-              id="status" 
-              class="form-select" 
-              formControlName="status" 
-              [(ngModel)]="selectedStatusId"
+            <select id="status" class="form-select" formControlName="status" [(ngModel)]="selectedStatusId"
               (ngModelChange)="onStatusChange($event)">
               <option value="" disabled>เลือกสถานะ </option>
               <option *ngFor="let status of statuses" [value]="status.id">
@@ -44,34 +40,23 @@
               <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
 
               <!-- Input Field for Search -->
-            <!-- <div class="d-flex align-items-center mb-2"> -->
+              <!-- <div class="d-flex align-items-center mb-2"> -->
               <div class="input-group ">
                 <!-- Label กกต -->
                 <span class="input-group-text" id="inputGroup-sizing-default">กกต</span>
-              
+
                 <!-- Input สำหรับคำค้นหา -->
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="พิมพ์คำค้นหา"
-                  [(ngModel)]="searchTerm"
-                  [ngModelOptions]="{ standalone: true }"
-                  style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
-                  aria-label="Search"
-                  aria-describedby="inputGroup-sizing-default"
-                />
-              
+                <input type="text" class="form-control" placeholder="พิมพ์คำค้นหา" [(ngModel)]="searchTerm"
+                  [ngModelOptions]="{ standalone: true }" style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                  aria-label="Search" aria-describedby="inputGroup-sizing-default" />
+
                 <!-- ปุ่มค้นหา -->
-                <button
-                  type="button"
-                  class="btn btn-success"
-                  (click)="onSearch()"
-                  style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white"
-                >
+                <button type="button" class="btn btn-success" (click)="onSearch()"
+                  style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white">
                   ค้นหา
                 </button>
               </div>
-              
+
             </div>
 
             <div class="col-md-6">
@@ -87,7 +72,7 @@
               <label for="saleDate" class="form-label">วันที่ขาย:</label>
               <input type="date" id="saleDate" class="form-control" formControlName="saleDate" />
             </div>
-            
+
             <div class="col-md-6">
               <label for="bookValue" class="form-label">มูลค่าทางบัญชี:</label>
               <input type="number" id="bookValue" class="form-control" formControlName="bookValue"
@@ -97,10 +82,11 @@
           </div>
 
           <div class="row mb-3">
-            
+
             <div class="col-md-6">
               <label for="sellingprice" class="form-label">ราคาขาย:</label>
-              <input type="number" id="sellingprice" class="form-control" formControlName="sellingprice" placeholder="ระบุราคาขาย" />
+              <input type="number" id="sellingprice" class="form-control" formControlName="sellingprice"
+                placeholder="ระบุราคาขาย" />
             </div>
 
             <div class="col-md-4">
@@ -113,82 +99,84 @@
                 ดำเนินการ
               </button>
             </div>
-            
+
           </div>
 
         </div>
 
-        <!-- ฟอร์มเฉพาะสถานะ "บริจาค" -->
-        <div *ngIf="selectedStatusId === 2" formGroupName="donationForm">
 
-          <!-- ชื่อผู้รับ -->
-          <div class="row mb-3">
-            <div class="col-md-3">
-              <label for="recipientName" class="form-label">ชื่อผู้รับ:</label>
+        <!-- ฟอร์มเฉพาะสถานะ "บริจาค" -->
+        <div *ngIf="selectedStatusId === 2" formGroupName="donationForm" class="p-4 bg-white rounded shadow-sm">
+
+          <div class="row g-4">
+
+            <!-- 🔍 ค้นหารหัสครุภัณฑ์ -->
+            <div class="col-md-6">
+              <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+              <div class="input-group">
+                <span class="input-group-text">กกต</span>
+                <input type="text" class="form-control" placeholder="พิมพ์คำค้นหา" [(ngModel)]="searchTerm"
+                  [ngModelOptions]="{ standalone: true }" style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                  aria-label="Search">
+                <button type="button" class="btn btn-success"
+                  style="font-weight: 600; color: white; font-family: 'Anuphan', sans-serif;" (click)="onSearch()">
+                  ค้นหา
+                </button>
+              </div>
             </div>
-            <div class="col-md-9">
+
+            <!-- 👤 ชื่อผู้รับ -->
+            <div class="col-md-6">
+              <label for="recipientName" class="form-label">ชื่อผู้รับ</label>
               <input type="text" id="recipientName" class="form-control" formControlName="recipientName"
                 placeholder="ระบุชื่อผู้รับ" />
             </div>
-          </div>
 
-          <!-- เบอร์ติดต่อ -->
-          <div class="row mb-3">
-            <div class="col-md-3">
-              <label for="contactNumber" class="form-label">เบอร์ติดต่อ:</label>
-            </div>
-            <div class="col-md-9">
+            <!-- ☎ เบอร์ติดต่อ -->
+            <div class="col-md-6">
+              <label for="contactNumber" class="form-label">เบอร์ติดต่อ</label>
               <input type="tel" id="contactNumber" class="form-control" formControlName="contactNumber"
-                placeholder="ระบุเบอร์ติดต่อ" />
+                placeholder="ระบุเบอร์ติดต่อ (10 หลัก)" />
             </div>
-          </div>
 
-          <!-- ที่อยู่ -->
-          <div class="row mb-3">
-            <div class="col-md-3">
-              <label for="address" class="form-label">ที่อยู่:</label>
-            </div>
-            <div class="col-md-9">
+            <!-- 🏠 ที่อยู่ -->
+            <div class="col-md-12">
+              <label for="address" class="form-label">ที่อยู่</label>
               <textarea id="address" class="form-control" rows="3" formControlName="address"
                 placeholder="ระบุที่อยู่ผู้รับ"></textarea>
             </div>
-          </div>
 
-          <!-- รายละเอียดครุภัณฑ์ -->
-          <div class="row mb-3">
-            <div class="col-md-3">
-              <label for="assetDetails" class="form-label">รายละเอียดครุภัณฑ์:</label>
-            </div>
-            <div class="col-md-9">
+            <!-- 🛠 รายละเอียดครุภัณฑ์ -->
+            <div class="col-md-12">
+              <label for="assetDetails" class="form-label">รายละเอียดครุภัณฑ์</label>
               <input type="text" id="assetDetails" class="form-control" formControlName="assetDetails"
                 placeholder="ระบุรายละเอียดสิ่งที่บริจาค" />
             </div>
-          </div>
 
-          <!-- วันที่บริจาค -->
-          <div class="row mb-3">
-            <div class="col-md-3">
-              <label for="donationDate" class="form-label">วันที่บริจาค:</label>
-            </div>
-            <div class="col-md-9">
+            <!-- 📅 วันที่บริจาค -->
+            <div class="col-md-6">
+              <label for="donationDate" class="form-label">วันที่บริจาค</label>
               <input type="date" id="donationDate" class="form-control" formControlName="donationDate" />
             </div>
-          </div>
 
-          <!-- หมายเหตุ -->
-          <div class="row mb-3">
-
-            <div class="col-md-3">
-              <label for="notes" class="form-label">หมายเหตุ:</label>
+            <!-- 📝 หมายเหตุ -->
+            <div class="col-md-6">
+              <label for="notes" class="form-label">หมายเหตุ</label>
+              <input type="text" id="notes" class="form-control" formControlName="notes"
+                placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" />
             </div>
 
-            <div class="col-md-9">
-              <input id="notes" class="form-control" rows="3" formControlName="notes"
-                placeholder="หมายเหตุเพิ่มเติม" />
+            <!-- ✅ ปุ่ม -->
+            <div class="col-12 d-flex justify-content-end">
+              <button type="submit" class="btn btn-success px-4 py-2" style="color: white; font-weight: 600;"
+                (click)="onSubmit()">
+                ดำเนินการ
+              </button>
             </div>
           </div>
-          
         </div>
+
+
 
         <!-- ฟอร์มเฉพาะสถานะ "เลิกใช้" -->
         <div *ngIf="selectedStatusId === 3" formGroupName="decommissionForm">
@@ -201,26 +189,15 @@
             <div class="input-group ">
               <!-- Label กกต -->
               <span class="input-group-text" id="inputGroup-sizing-default">กกต</span>
-            
+
               <!-- Input สำหรับคำค้นหา -->
-              <input
-                type="text"
-                class="form-control"
-                placeholder="พิมพ์คำค้นหา"
-                [(ngModel)]="searchTerm"
-                [ngModelOptions]="{ standalone: true }"
-                style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
-                aria-label="Search"
-                aria-describedby="inputGroup-sizing-default"
-              />
-            
+              <input type="text" class="form-control" placeholder="พิมพ์คำค้นหา" [(ngModel)]="searchTerm"
+                [ngModelOptions]="{ standalone: true }" style="font-family: 'Anuphan', sans-serif; font-weight: 400;"
+                aria-label="Search" aria-describedby="inputGroup-sizing-default" />
+
               <!-- ปุ่มค้นหา -->
-              <button
-                type="button"
-                class="btn btn-success"
-                (click)="onSearch()"
-                style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white"
-              >
+              <button type="button" class="btn btn-success" (click)="onSearch()"
+                style="font-family: 'Anuphan', sans-serif; font-weight: 600;color:white">
                 ค้นหา
               </button>
             </div>
@@ -231,7 +208,7 @@
             <label for="saleDate" class="form-label">วันที่ยกเลิก:</label>
             <input type="date" id="saleDate" class="form-control" formControlName="saleDate" />
           </div>
-          
+
 
           <div class="row mb-3">
             <!-- รายละเอียด -->
@@ -239,9 +216,9 @@
               <label for="description" class="form-label">รายละเอียด:</label>
               <input id="description" class="form-control" rows="3" formControlName="description"
                 placeholder="ระบุรายละเอียดเพิ่มเติม" />
-            </div> 
+            </div>
 
-            
+
             <div class="col-md-2 d-flex align-items-end">
               <button class="btn btn-success " type="submit" style="color: white;" (click)="onSubmit()">
                 ดำเนินการ
@@ -276,7 +253,7 @@
 
     </div>
 
-    
+
 
   </div>
 

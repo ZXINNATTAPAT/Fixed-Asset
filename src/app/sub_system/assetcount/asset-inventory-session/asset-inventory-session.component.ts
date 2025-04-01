@@ -3,7 +3,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { IconDirective } from '@coreui/icons-angular';
 import { CommonModule } from '@angular/common';
-import { ApiService, AssetInventorySession } from '../../../ApiController/api-service.service';
+import { ApiService, AssetInventorySession } from '../../../../ApiController/api-service.service';
 import { AssetInventorySessionHelper } from './utils';
 import { MatDialog } from '@angular/material/dialog';
 import { cilSearch, cilPencil, cilTrash, cilInfo } from '@coreui/icons';
@@ -11,7 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { AssetInventoryComponent } from '../asset-inventory/asset-inventory.component';
-import { TextColorDirective, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
+import { TextColorDirective, FormDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 import Swal from 'sweetalert2';
 import { EditSessionDialogComponent } from './Dialog/edit-session-dialog/edit-session-dialog.component';
 
@@ -38,23 +38,17 @@ import { EditSessionDialogComponent } from './Dialog/edit-session-dialog/edit-se
 })
 export class AssetInventorySessionComponent implements OnInit {
 
-  displayedColumns: string[] = ['SessionId', 'SessionName', 'Date', 'actions'];
-
+  displayedColumns: string[] = ['SessionId', 'SessionName', 'Date', 'InspectorsList', 'VerifierName', 'actions'];
   displayedColumnsDetails: string[] = ['AssetCode', 'AssetName', 'SystemQuantity', 'CountedQuantity', 'Note'];
 
-  selectedSessionId: number | null = null; // ใช้ตรวจสอบว่าต้องแสดงข้อมูล InventoryDetails หรือไม่
-
+  selectedSessionId: number | null = null;
   assetDetails: AssetInventorySession[] = [];
-
   inventoryDetails: any[] = [];
-
   dataSource: MatTableDataSource<AssetInventorySession>;
 
   myFunctionInstance: AssetInventorySessionHelper;
+  instan = { icons: { cilPencil, cilTrash, cilInfo, cilSearch } };
 
-  // icons = { cilPencil, cilTrash, cilInfo, cilSearch };
-
-  instan = { icons: { cilPencil, cilTrash, cilInfo, cilSearch } }; // ✅ ตรวจสอบว่าไอคอนถูกต้อง
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private apiService: ApiService, public dialog: MatDialog) {
@@ -67,35 +61,50 @@ export class AssetInventorySessionComponent implements OnInit {
     this.dataSource.paginator = this.paginator;
   }
 
-  // 🔹 โหลดข้อมูล AssetInventorySession
+  // ✅ กรองตามช่อง input เฉพาะคอลัมน์
+  filters = {SessionName: '',Date: '',Inspector: '',Verifier: ''};
+
+  applyFilters() {
+    this.dataSource.filter = JSON.stringify({
+      sessionName: this.filters.SessionName || '',
+      date: this.filters.Date || '',
+      inspector: this.filters.Inspector || '',
+      verifier: this.filters.Verifier || ''
+    });
+  }
+
+  // ✅ โหลดข้อมูล session พร้อมแปลงวันที่และชื่อ
   private getAssetDetails(): void {
     this.apiService.fetchDatahttp('AssetInventorySession').subscribe({
       next: (data) => {
-        // ✅ แปลงวันที่และเรียงลำดับก่อนใส่ลงใน `this.assetDetails`
-        this.assetDetails = (data as AssetInventorySession[])
-          .map(session => ({
-            ...session,
-            Date: this.convertDate(session.Date), // ✅ ใช้ฟังก์ชันแปลงวันที่
-          }))
-          .sort((a, b) => this.sortByDate(a, b)); // ✅ เรียงลำดับวันที่
+        this.assetDetails = (data as AssetInventorySession[]).map(session => ({
+          ...session,
+          Date: this.convertDate(session.Date),
+          InspectorsList: (session.Inspectors ?? []).map(i => i.InspectorName).join(', ') || 'ไม่ระบุ',
+          VerifierName: session.VerifierName || 'ไม่ระบุ'
+        }));
 
-        // ✅ อัปเดต DataSource และ Paginator
+        this.assetDetails.sort(this.sortByDate);
+
         this.dataSource = new MatTableDataSource<AssetInventorySession>(this.assetDetails);
         this.dataSource.paginator = this.paginator;
+
+        // ✅ ตั้ง filterPredicate ที่นี่เลย
+        this.dataSource.filterPredicate = this.customFilterPredicate();
       },
-      error: (err) => console.error('Error loading AssetInventorySession:', err),
+      error: (err) => console.error('❌ Error loading AssetInventorySession:', err),
     });
   }
 
 
-  // 🔹 เรียงตามวันที่ (ล่าสุดก่อน)
+  // ✅ เรียงตามวันที่
   private sortByDate(a: AssetInventorySession, b: AssetInventorySession): number {
     return new Date(b.Date).getTime() - new Date(a.Date).getTime();
   }
 
-  // 🔹 แปลงวันที่เป็นรูปแบบไทย
+  // ✅ แปลงวันที่ให้อยู่ในรูปแบบไทย
   private convertDate(DateString: string): string {
-    if (!DateString) return '-'; // ถ้าไม่มีค่าให้คืนค่า "-"
+    if (!DateString) return '-';
     const date = new Date(DateString);
     return date.toLocaleDateString('th-TH', {
       year: 'numeric',
@@ -103,6 +112,20 @@ export class AssetInventorySessionComponent implements OnInit {
       day: 'numeric',
     });
   }
+
+  private customFilterPredicate(): (data: any, filter: string) => boolean {
+    return (data: any, filter: string): boolean => {
+      const searchTerms = JSON.parse(filter);
+
+      return (
+        (data.SessionName ?? '').toLowerCase().includes(searchTerms.sessionName.toLowerCase()) &&
+        (data.Date ?? '').toLowerCase().includes(searchTerms.date.toLowerCase()) &&
+        (data.InspectorsList ?? '').toLowerCase().includes(searchTerms.inspector.toLowerCase()) &&
+        (data.VerifierName ?? '').toLowerCase().includes(searchTerms.verifier.toLowerCase())
+      );
+    };
+  }
+
 
 
   // เพิ่มตัวแปรเก็บชื่อรอบการตรวจนับ
@@ -136,46 +159,46 @@ export class AssetInventorySessionComponent implements OnInit {
   // 🔹 อัปเดตรายการตรวจนับครุภัณฑ์
   editSession(sessionId: number) {
     console.log("Opening edit dialog for sessionId:", sessionId);
-  
+
     const session = this.dataSource.data.find(s => s.SessionId === sessionId);
     console.log("Session data:", session); // ✅ Debug ตรวจสอบค่า session
-  
+
     if (!session) {
       Swal.fire('เกิดข้อผิดพลาด', 'ไม่พบข้อมูลที่ต้องแก้ไข', 'error');
       return;
     }
-  
+
     const dialogRef = this.dialog.open(EditSessionDialogComponent, {
       width: '400px',
       data: { session } // ✅ ต้องส่ง `{ session }` ไปด้วย
     });
-  
+
     dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
         try {
           console.log("Result from dialog:", result); // ✅ Debug ก่อนใช้งาน
-  
+
           interface UpdatedData {
             SessionName: string;
             Date: string;
             VerifierId: number;
             Inspectors: { SessionId: number; InspectorId: number }[];
           }
-  
+
           const updatedData: UpdatedData = {
             SessionName: result.SessionName,
             Date: result.Date,
             VerifierId: result.VerifierId,
             Inspectors: Array.isArray(result.Inspectors) && result.Inspectors.length > 0
               ? result.Inspectors.map((inspector: { InspectorId: number }) => ({
-                  SessionId: sessionId,
-                  InspectorId: inspector.InspectorId
-                }))
+                SessionId: sessionId,
+                InspectorId: inspector.InspectorId
+              }))
               : [] // ✅ ถ้า `Inspectors` ไม่มีค่า ให้ส่ง `[]`
           };
-  
+
           console.log("Updated Data:", updatedData); // ✅ Debug ก่อนส่ง API
-  
+
           await this.apiService.updateData(`AssetInventorySession/${sessionId}`, updatedData);
           Swal.fire('สำเร็จ', 'อัปเดตข้อมูลเรียบร้อยแล้ว', 'success');
           this.getAssetDetails();
@@ -186,9 +209,6 @@ export class AssetInventorySessionComponent implements OnInit {
       }
     });
   }
-  
-  
-
 
   // 🔹 ลบรายการตรวจนับครุภัณฑ์
   async deleteSession(session: AssetInventorySession) {

@@ -70,21 +70,26 @@ export class UserManagementComponent implements OnInit {
   @ViewChild(AddUserDialogComponent) addUserDialog!: AddUserDialogComponent;
 
   displayedColumns: string[] = [
-    "actions",
+    "การกระทำ",
     // "รหัสผู้ใช้",
     "ชื่อผู้ใช้",
     "ชื่อ",
     "นามสกุล",
     "ตำแหน่ง",
     "ตำแหน่งย่อย",
-    "กลุ่มงาน",
+    // "กลุ่มงาน",
+    "สังกัด",
+    "ประเภทตำแหน่ง",
+    "ระดับตำแหน่ง",
+    "สำนัก",
+    "ฝ่าย",
     "บทบาท"
   ];
-  
+
   constructor(private http: HttpClient,private dialog: MatDialog) { }
 
   ngOnInit(): void {this.getUsers();}
-
+  
   editUser(user: any): void {
     const dialogRef = this.dialog.open(UserEditDialogComponent, {
       width: '1000px',
@@ -135,7 +140,7 @@ export class UserManagementComponent implements OnInit {
       this.dataSource = new MatTableDataSource<any>(this.userDetails);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      console.log(this.userDetails);
+      // console.log(this.userDetails);
     });
   }
   searchValue: string = '';
@@ -262,7 +267,5 @@ export class UserManagementComponent implements OnInit {
         return 'btn-outline-secondary'; // สีเทา
     }
   }
-
-  
   
 }

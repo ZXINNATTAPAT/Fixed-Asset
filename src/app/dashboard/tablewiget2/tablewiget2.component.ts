@@ -1,46 +1,35 @@
-import {
-  AfterViewInit,
-  Component,
-  Injectable,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import {AfterViewInit,Component,Injectable,OnDestroy,OnInit,ViewChild,} from '@angular/core';
+import {MatFooterRow,MatRowDef,MatTableDataSource,MatTableModule,} from '@angular/material/table';
+import {MatPaginator,MatPaginatorIntl,MatPaginatorModule,} from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { CommonModule, NgStyle } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {
-  MatFooterRow,
-  MatRowDef,
-  MatTableDataSource,
-  MatTableModule,
-} from '@angular/material/table';
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-} from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-
 import 'moment/locale/th.js';
 // import moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
-import { DataService } from 'src/app/data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
+import { ApiService } from '../../../ApiController/api-service.service';
 
-interface AssetDetails {
-  assetId: any;
-  purchaseDate: string;
-  assetCode: string;
-  assetName: string;
-  purchasePrice: number;
-  purchasedFrom: string;
-  documentNumber: string;
-  agency: string;
-  department: string;
-  assetLocation: string;
-  responsibleEmployee: string;
+export interface AssetDetails {
+  AssetId: number;
+  PurchaseDate: string;              // ISO date string
+  AssetCode: string;
+  AssetName: string;
+  PurchasePrice: number;
+  PurchasedFrom: string;
+  DocumentNumber: string;
+  Agency: string;
+  Department: string;
+  Faction: string;                   // เพิ่มให้ตรงกับที่คุณใช้ในกราฟ
+  AssetLocation: string;
+  ResponsibleEmployee: string;
+  Status: string;
   Note: string;
-  [key: string]: string | number; // ลักษณะดัชนีสำหรับการเข้าถึงด้วยชื่อคอลัมน์อื่นๆ
+
+  // Optional: หากคุณยังต้องการให้เข้าถึงผ่าน key string อื่นๆ ได้
+  [key: string]: string | number | undefined;
 }
+
 
 @Injectable()
 export class MyCustomPaginatorIntl implements MatPaginatorIntl {
@@ -66,69 +55,39 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   selector: 'app-tablewiget2',
   standalone: true,
   imports: [
+    CommonModule,
     MatPaginatorModule,
     MatTableModule,
-    MatPaginator,
     MatSortModule,
-    MatSort,
-    MatPaginator,
-    MatFooterRow,
-    MatRowDef,
     NgStyle,
   ],
   templateUrl: './tablewiget2.component.html',
   styleUrl: './tablewiget2.component.scss',
   providers: [{ provide: MatPaginatorIntl, useClass: MyCustomPaginatorIntl }],
 })
+
 export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
-
-  assetDetails: AssetDetails[] = [];
-
   assetDetails2: AssetDetails[] = [];
 
-  displayedColumns2: string[] = [
-    'การดำเนินการ',
-    'วันเดือนปี',
-    'รหัสครุภัณฑ์',
-    'รายการ',
-    'ราคาต่อหน่วย',
-    'วิธีการได้มา',
-    'เลขที่เอกสาร',
-    'ฝ่าย',
-    'ที่อยู่',
-    'ผู้ใช้งาน',
-    'หมายเหตุ',
-  ];
-
-  displayedColumns3: string[] = ['location', 'assetCount'];
+  displayedColumns3: string[] = ['Faction', 'ResponsibleEmployee', 'AssetCount'];
 
   dataSource = new MatTableDataSource<any>();
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
-
-  // dataSource2 = new MatTableDataSource<any>();
-
-  displayedColumns: string[] = [
-    'purchaseDate',
-    'assetCode',
-    'assetName',
-    'purchasePrice',
-    'purchasedFrom',
-    'documentNumber',
-    'department',
-    'assetLocation',
-    'responsibleEmployee',
-    'note',
-  ];
-
   private dataSubscription!: Subscription;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(private http: HttpClient,private ap: ApiService, private dataService: DataService) {}
 
   ngOnInit(): void {
     this.getAssetDetails();
+    console.log('📊 dataSource:', this.dataSource.data);
+
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   ngOnDestroy(): void {
@@ -136,98 +95,59 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
       this.dataSubscription.unsubscribe();
     }
   }
-  constructor(private http: HttpClient, private dataService: DataService) {
-    this.getAssetDetails();
-  }
-
-  @ViewChild(MatSort) sort!: MatSort;
 
   getAssetDetails(): void {
-    if (this.dataService.getAssetDetails()) {
-      this.dataSubscription = this.dataService.getAssetDetails()
-        .subscribe((data) => {
-          this.assetDetails2 = data.map((asset) => {
-            return asset;
+    const existingData = this.dataService.getAssetDetails();
+  
+    this.dataSubscription = existingData?.subscribe((data) => {
+      if (data && data.length > 0) {
+        console.log('📥 Loaded from dataService (cache):', data);
+        this.assetDetails2 = data;
+        this.countAssetsByFactionAndUser();
+      } else {
+        console.log('📡 Fallback to API because dataService is empty');
+        this.ap.fetchDatahttp('AssetDetails/GetForTable')
+          .subscribe((apiData) => {
+            console.log('📥 Loaded from API:', apiData);
+            this.assetDetails2 = apiData;
+            this.countAssetsByFactionAndUser();
           });
-          this.countAssetsByLocation();
-        });
-    }
-    else {
-      this.dataSubscription = this.http
-        .get<AssetDetails[]>('https://localhost:7204/api/AssetDetails')
-        .subscribe((data) => {
-          this.assetDetails2 = data.map((asset) => {
-            return asset;
-          });
-          this.countAssetsByLocation();
-        });
-    }
-
-  }
-
-  countAssetsByLocation(): void {
-    const assetCountByLocation: { [location: string]: number } = {};
-    // Create an object to store the count of assets in each location
-    this.assetDetails2.forEach((asset) => {
-      const location = asset.responsibleEmployee;
-      // console.log(location);
-      assetCountByLocation[location] = assetCountByLocation[location]
-        ? assetCountByLocation[location] + 1
-        : 1;
+      }
     });
-
-    // สร้างข้อมูลสำหรับแสดงในตาราง
-    const dataToShowInTable = Object.keys(assetCountByLocation).map(
-      (location) => {
-        return {
-          location: location,
-          assetCount: assetCountByLocation[location],
-        };
-      }
-    );
-
-    // Sort the array by assetCount in descending order
-    dataToShowInTable.sort((a, b) => b.assetCount - a.assetCount);
-
-    // Assign the sorted data to the dataSource
-    this.dataSource.data = dataToShowInTable;
   }
+  
 
-  addasset(): void {
-    window.location.href = '#/system/AssetDetails';
-  }
-
-  translateToThai(asset: any): any {
-    const translationMap: { [key: string]: string } = {
-      purchaseDate: 'วันเดือนปี',
-      assetCode: 'รหัสครุภัณฑ์',
-      assetName: 'รายการ',
-      purchasePrice: 'ราคาต่อหน่วย',
-      purchasedFrom: 'วิธีการได้มา',
-      documentNumber: 'เลขที่เอกสาร',
-      assetLocation: 'ที่อยู่',
-      department: 'ฝ่าย',
-      responsibleEmployee: 'ผู้ใช้งาน',
-      note: 'หมายเหตุ',
-    };
-
-    const translatedAsset: { [key: string]: any } = {};
-    for (const key in asset) {
-      if (asset.hasOwnProperty(key)) {
-        translatedAsset[translationMap[key] || key] = asset[key];
-      }
-    }
-    return translatedAsset;
-  }
+  countAssetsByFactionAndUser(): void {
+    const assetCountMap: { [key: string]: number } = {};
+  
+    this.assetDetails2.forEach((asset) => {
+      const faction = asset.Faction || 'ไม่ระบุฝ่าย';
+      const user = asset.ResponsibleEmployee || 'ไม่ระบุผู้ใช้งาน';
+      const key = `${faction}|||${user}`;
+      assetCountMap[key] = (assetCountMap[key] || 0) + 1;
+    });
+  
+    const dataToShow = Object.keys(assetCountMap).map((key) => {
+      const [faction, user] = key.split('|||');
+      return {
+        faction,
+        responsibleEmployee: user,
+        assetCount: assetCountMap[key],
+      };
+    });
+  
+    dataToShow.sort((a, b) => b.assetCount - a.assetCount);
+  
+    this.dataSource.data = dataToShow;
+  }  
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);
-    const formattedDate = date.toLocaleDateString('th', {
+    return date.toLocaleDateString('th', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
-    return formattedDate ?? '';
   }
 
   formatCurrency(price: number): string {
@@ -235,5 +155,9 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
       maximumFractionDigits: 2,
       minimumFractionDigits: 2,
     });
+  }
+
+  addasset(): void {
+    window.location.href = '#/system/AssetDetails';
   }
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ApiService, AssetInventoryDetails } from '../../../ApiController/api-service.service';
+import { ApiService, AssetInventoryDetails } from '../../../../ApiController/api-service.service';
 
 @Component({
   selector: 'app-asset-inventory',

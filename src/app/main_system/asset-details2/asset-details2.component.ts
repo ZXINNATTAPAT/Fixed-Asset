@@ -4,7 +4,7 @@ import { CommonModule, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // import { DocsExampleComponent } from '@docs-components/public-api';
 
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective ,FormSelectDirective } from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2'

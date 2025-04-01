@@ -15,7 +15,6 @@ import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
 
-
 interface AssetDetails {
   FactionCode: string,
   FactionName: string
@@ -50,34 +49,25 @@ export class FactionCodeComponent implements OnInit {
 
   icons = { cilPencil, cilTrash };
   assetDetails: any[] = []; // Array to hold the faction details data
+  isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
 
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>(this.assetDetails);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-
   constructor(private http: HttpClient) { }
-
-  displayedColumns2: string[] = ["รหัสฝ่าย","ชื่อฝ่าย",];
-
+  displayedColumns2 = ['รหัสฝ่าย', 'ชื่อฝ่าย', 'ชื่อสำนัก']; // <-- เพิ่มชื่อสำนัก
   asset: any = {};
 
-  ngOnInit(): void {
-    this.getAssetType();
-  }
+  ngOnInit(): void {this.getAssetType();}
 
   getAssetType(): void {
     this.http.get<any[]>('https://localhost:7204/api/Factiontypecodes').subscribe(data => {
-
       this.assetDetails = data.map(asset => this.translateToThai(asset));
-
       this.dataSource = new MatTableDataSource<any>(this.assetDetails);
-
       this.dataSource.paginator = this.paginator;
-
       this.dataSource.sort = this.sort;
-
-      console.log(this.dataSource);
+      // console.log(this.dataSource);
 
     });
   }
@@ -108,7 +98,8 @@ export class FactionCodeComponent implements OnInit {
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
       "Code": "รหัสฝ่าย",
-      "Name": "ชื่อฝ่าย"
+      "Name": "ชื่อฝ่าย",
+      "DepartmentName":"ชื่อสำนัก"
     };
     
     const translatedAsset: { [key: string]: any } = {};
@@ -122,7 +113,6 @@ export class FactionCodeComponent implements OnInit {
     return translatedAsset;
   }
   
-
   deleteAsset(asset: any): void {
     Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',

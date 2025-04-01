@@ -13,6 +13,12 @@ export const routes: Routes = [
         .then(m => m.ReceiveComponent),
         data: { title: 'receive' }
     },
+    {
+        path: 'depreciation-table', // เปลี่ยนเป็นตัวพิมพ์เล็กทั้งหมด
+        loadComponent: () => import('./depreciation-table/depreciation-table.component')
+        .then(m => m.DepreciationTableComponent),
+        data: { title: 'depreciation-table' }
+    },
   {
     path: '',
     data: {title: ''},

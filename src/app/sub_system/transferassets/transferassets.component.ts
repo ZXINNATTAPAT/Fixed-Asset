@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
 import { debounceTime, distinctUntilChanged, ReplaySubject} from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../../src/app/ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 

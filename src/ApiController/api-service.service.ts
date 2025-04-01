@@ -7,11 +7,19 @@ export interface AssetInventorySession {
   SessionId: number;
   Date: string;
   SessionName: string;
-  DepartmentId?: number;
-  FactionId?: number;
-  VerifierId?: number;
-  Note?: string;
+  DepartmentId: number;
+  VerifierId: number;
+
+  // ✅ เพิ่ม `Inspectors` ถ้ามีอยู่ใน API
+  Inspectors?: {
+    InspectorName: any; Id: number; SessionId: number; InspectorId: number 
+}[];
+
+  // ✅ เพิ่ม Fields ชั่วคราวเพื่อใช้ใน Angular Template
+  InspectorsList?: string;
+  VerifierName?: string;
 }
+
 
 export interface AssetInventoryDetails {
   inventoryDetailId: number;
@@ -109,6 +117,9 @@ export class ApiService {
   fetchDatahttpbyId(endpoint: string, id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}${endpoint}/${id}`,{ withCredentials: true });
   }
+  fetchDatahttpbyId2(endpoint: string, id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}${endpoint}/${id}`,{ withCredentials: true });
+  }
   
   fetchDatahttp25(endpoint: string, queryParams: any): Observable<any> {
     const params = new HttpParams({ fromObject: queryParams });
@@ -159,10 +170,24 @@ export class ApiService {
       // throw error.response ? error.response.data : error.message;
     }
   }
+
+  async updateData2(endpoint: string, id: number, data: any): Promise<any> {
+    try {
+      const response = await axios.put(`${this.apiUrl}${endpoint}/${id}`, data, {
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error occurred while updating data:', error);
+      throw error.response?.data || error.message;
+    }
+  }
   
   // Example method to delete data from the API
   async deleteData(endpoint: string): Promise<any> {
-    const response = await axios.delete(`${this.apiUrl}${endpoint}`);
+    const response = await axios.delete(`${this.apiUrl}${endpoint}`, {
+      withCredentials: true
+    });
     return response.data;
   }
 

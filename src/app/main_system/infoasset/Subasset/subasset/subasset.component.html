@@ -1,0 +1,33 @@
+<div class="card" style="border: none;">
+    <div class="card-body">
+      <h1><span class="anuphan-700">รายละเอียดครุภัณฑ์ย่อย</span></h1>
+      <hr />
+      <table class="table table-bordered table-striped table-hover " *ngIf="data.length">
+        <thead>
+          <tr class="anuphan-700">
+            <th>ชื่อครุภัณฑ์ย่อย</th>
+            <th>หน่วย</th>
+            <th>ที่ตั้ง</th>
+            <th>ผู้รับผิดชอบ</th>
+            <th>สถานะ</th>
+            <th>หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of data" class="anuphan-500">
+            <td>{{ item.SubAssetName }}</td>
+            <td>{{ item.Unit }}</td>
+            <td>{{ item.AssetLocation || '-' }}</td>
+            <td>{{ item.ResponsibleEmployee }}</td>
+            <td>{{ item.Status || '-' }}</td>
+            <td>{{ item.Note || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="!data.length">
+        ไม่มีข้อมูล SubAsset
+      </div>
+      
+    </div>
+  </div>
+  

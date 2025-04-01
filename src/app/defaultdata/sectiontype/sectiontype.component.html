@@ -2,28 +2,42 @@
 
 <c-card class="mb-4 shadow-sm" style="border: none;">
   <c-card-body>
-
     <h1><span class="anuphan-700">กำหนดรหัสแผนก / สำนัก </span></h1>
     <hr />
 
-    <form (submit)="postAssetType(sectionCodeInput.value, sectionNameInput.value); $event.preventDefault()" cForm>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3 m-1">
+    <div *ngIf="isFormVisible">
+      <form (submit)="postAssetType(sectionCodeInput.value, sectionNameInput.value); $event.preventDefault()" cForm>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3 m-1">
 
-        <div class="col">
-          <label cLabel for="sectionCodeInput">รหัสแผนก</label>
-          <input #sectionCodeInput cFormControl id="sectionCodeInput" placeholder="ระบุรหัสแผนก" class="form-control"
-            type="text" required />
+          <div class="col">
+            <label cLabel for="sectionCodeInput">รหัสแผนก</label>
+            <input #sectionCodeInput cFormControl id="sectionCodeInput" placeholder="ระบุรหัสแผนก" class="form-control"
+              type="text" required />
+          </div>
+          <div class="col">
+            <label cLabel for="sectionNameInput">ชื่อแผนก</label>
+            <input #sectionNameInput cFormControl id="sectionNameInput" placeholder="ระบุชื่อแผนก" class="form-control"
+              type="text" required />
+          </div>
+          <div class="col align-self-end">
+            <button type="submit" class="btn btn-primary">เพิ่ม</button>
+          </div>
         </div>
-        <div class="col">
-          <label cLabel for="sectionNameInput">ชื่อแผนก</label>
-          <input #sectionNameInput cFormControl id="sectionNameInput" placeholder="ระบุชื่อแผนก" class="form-control"
-            type="text" required />
-        </div>
-        <div class="col align-self-end">
-          <button type="submit" class="btn btn-primary">เพิ่ม</button>
-        </div>
-      </div>
-    </form><br />
+      </form><br />
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center m-1 mb-3">
+      <!-- ปุ่มเพิ่มข้อมูล -->
+      <button class="btn btn-sm btn-outline-success anuphan-500" (click)="isFormVisible = !isFormVisible"
+        style="color: green">
+        + เพิ่มข้อมูล
+      </button>
+
+      <!-- Paginator -->
+      <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" [pageSize]="15" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+
 
     <div class="table-responsive">
       <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover ">
@@ -32,7 +46,7 @@
 
           <th mat-header-cell *matHeaderCellDef class="border" style="font-weight: bold;">#</th>
 
-          <td mat-cell *matCellDef="let asset" class="border">
+          <td mat-cell *matCellDef="let asset" class="border" style="width: 10%;">
 
             <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)">
               <svg [cIcon]="icons.cilPencil" style="color: white; width: 16px; height: 16px;"></svg>
@@ -65,8 +79,7 @@
 
       </table>
 
-      <!-- Paginator -->
-      <mat-paginator [pageSizeOptions]="[ 30, 50, 70, 100 ]" [pageSize]="15" showFirstLastButtons></mat-paginator>
+      
     </div>
 
 

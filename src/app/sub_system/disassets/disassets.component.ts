@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ReactiveFormsModule,FormsModule,FormControl, Validators, FormGroup, FormBuilder,} from '@angular/forms';
 import { MatPaginator ,MatPaginatorModule } from '@angular/material/paginator';
@@ -9,11 +8,12 @@ import {TextColorDirective,TableModule,UtilitiesModule,FormDirective,FormLabelDi
 import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
-import Swal from 'sweetalert2';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../../src/app/ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
+// import { HttpClient } from '@angular/common/http';
+// import Swal from 'sweetalert2';
 
 interface AssetDetails {
   repairAssetId: any;
@@ -39,7 +39,7 @@ interface AssetDetails {
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
-    MatButtonModule, // Example: Add any other required Angular Material modules here
+    MatButtonModule,
     UtilitiesModule,
     ButtonDirective,
     NgStyle,
@@ -99,6 +99,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // 📌 ฟอร์มสำหรับ "บริจาค"
       donationForm: this.fb.group({
+        assetId: ['', Validators.required],
         recipientName: ['', Validators.required],
         contactNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]], // ต้องเป็นเบอร์โทร 10 หลัก
         address: ['', Validators.required],
@@ -195,7 +196,6 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mainForm.get('assetSalesForm.profit')?.setValue(profit);
   }
 
-  
   onStatusChange(statusId: string): void {
     if (this.selectedStatusId !== +statusId) {
       this.selectedStatusId = +statusId;
@@ -239,35 +239,59 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSearch(): void {
-    const search = this.searchTerm.trim(); // ใช้ searchTerm เก็บค่าจาก input
+    const search = this.searchTerm.trim();
   
     if (!search) {
-      // ถ้าไม่มีคำค้นหา แสดงข้อมูลทั้งหมด
       this.filteredAssetData.next(this.assetDetails2.slice());
       return;
     }
   
-    // เรียก API พร้อมส่งคำค้นหา
     this.ap.fetchDatahttp(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
       const assets = data.map((asset: any) => ({
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,
-        assetName: asset.AssetName, //เพิ่มมูลค่าสินทรัพย์ วันที่ ได้มา bookvalue 
-        purchaseDate:asset.PurchaseDate,
-        
+        assetName: asset.AssetName,
+        purchaseDate: asset.PurchaseDate,
+        bookValue: asset.BookValue
       }));
   
-      // อัปเดตตัวเลือกที่กรองแล้ว
       this.filteredAssetData.next(assets);
-      
       console.log(assets);
-
-      // กรณีไม่พบข้อมูล
+  
       if (assets.length === 0) {
         console.warn('ไม่พบข้อมูลที่ตรงกับคำค้นหา');
+        return;
+      }
+  
+      // 👉 ใส่ค่ารายการแรกลงในฟอร์มที่ใช้งานอยู่
+      const selected = assets[0];
+      const formattedDate = this.formatDateForInput(selected.purchaseDate);
+  
+      if (this.selectedStatusId === 1) {
+        // 📦 ฟอร์ม "ขาย"
+        (this.mainForm.get('assetSalesForm') as FormGroup).patchValue({
+          assetId: selected.assetId,
+          purchaseDate: formattedDate,
+          bookValue: selected.bookValue
+        });
+      }
+  
+      if (this.selectedStatusId === 2) {
+        // 🙌 ฟอร์ม "บริจาค"
+        (this.mainForm.get('donationForm') as FormGroup).patchValue({
+          assetId: selected.assetId,
+          assetDetails: `${selected.assetCode} - ${selected.assetName}`
+        });
       }
     });
   }
+  
+  formatDateForInput(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  }
+  
+  
   
   ngOnDestroy(): void {
     this._onDestroy.next();

@@ -1,24 +1,25 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
 import { TextColorDirective ,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective} from '@coreui/angular';
 import { CommonModule, DatePipe, NgStyle } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/api-service.service';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import 'moment/locale/th.js';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
-import { DataService } from '../../../app/data-service/data-service.component';
+import { DataService } from '../../../data-service/data-service.component';
 import { MatDialog } from '@angular/material/dialog';
 import { EditAssetDialog } from './Dialog/edit-dialog/edit-dialog.component';
 import { InfoassetComponent } from '../infoasset/infoasset.component';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 interface AssetDetails {
   AssetId: any;
@@ -26,6 +27,7 @@ interface AssetDetails {
   AssetCode: string;
   AssetName: string;
   TypeId:number;
+  CategoryId:number;
   PurchasePrice: number;
   PurchasedFrom: string;
   DocumentNumber: string;
@@ -54,98 +56,111 @@ interface AssetDetails {
     MatFormFieldModule,
     MatSelectModule,
     ButtonDirective,
-    // MatDialog,
-    // ResizedDirective,
+    NgxMatSelectSearchModule,
     NgStyle,
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
 })
-
 export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
-  
+
+  private _onDestroy = new Subject<void>(); // ✅ เพิ่มตรงนี้
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   assets: AssetDetails[] = []; // แก้จาก any = {} เป็น array
+  
   qrCodeUrl: string = '';
-  selectedAssetType: string = '';
+
+  selectedAssetType: number = 0;
+  selectedCategoryId: number = 0 ;
+
   displayedColumns: string[];  //Eng
   displayedColumns1: string[]; //ทั้งหมด
   displayedColumns2: string[]; //ไว้เรียงข้อมูลในตาราง
   displayedColumns3!: string[]; //ไว้จัด Header row & col
-  
-  icons = {};
-  
-  userinfo: any = [];
-
-  assetTypes: any[] = [];
 
   myFunctionInstance: myFunction | undefined;
 
   assetDetails: AssetDetails[] = [];
+  icons = {};
+  userinfo: any = [];
+  assetTypes: any[] = [];
+
+  assetCategory: any[] = [];
+  filteredCategoryList: any[] = [];
+
+  categoryCtrl: FormControl = new FormControl();
+  categoryFilterCtrl: FormControl = new FormControl();
 
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
-
   private dataSubscription!: Subscription;
   
-  constructor(private apiService: ApiService ,private dataService :DataService,public dialog: MatDialog) {
+  constructor(
+    private apiService: ApiService ,
+    private dataService :DataService,
+    public dialog: MatDialog) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
     this.displayedColumns2 = this.myFunctionInstance.displayedColumns2;
     this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
-    this.getAssetDetails();
+    // this.getAssetDetails();
   }
+  
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator; 
+    this.dataSource.sort = this.sort;
+  } 
 
-  ngAfterViewInit() {this.dataSource.paginator = this.paginator;} 
+  onAssetTypeChange(): void {
+    this.filterAssets();
+  }// เรียกเมื่อประเภท Asset เปลี่ยน
 
-  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
-
-  ngOnDestroy(): void {if (this.dataSubscription) this.dataSubscription.unsubscribe();}
-
-  ngOnInit(): void {this.initializeUserInfo();this.loadAssetTypes();this.getAssetDetails();}
-
-  editDialog(): void {
-    const dialogRef = this.dialog.open(EditAssetDialog, {
-      width: '700px',
-      data: { status: 'donation' } // ส่งค่าไปให้ Dialog
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('ผลลัพธ์จาก Dialog:', result);
-      }
-    });
+  ngOnDestroy(): void {
+    if (this.dataSubscription) this.dataSubscription.unsubscribe();
+    this._onDestroy.next();     // ✅ แจ้งว่า component จะถูกทำลาย
+    this._onDestroy.complete(); // ✅ ปิด stream เพื่อไม่ให้ memory leak
   }
+  
+  ngOnInit(): void {
+    this.initializeUserInfo();
+    this.loadAssetTypes();
+    // this.getAssetDetails();
+    this.loadAssetCategory(); 
+    this.categoryFilterCtrl.valueChanges
+    .pipe(takeUntil(this._onDestroy))
+    .subscribe(() => {
+      this.filterCategoryList();
+    });}
 
-  assetDialog(assetId: number): void {
-    const dialogRef = this.dialog.open(InfoassetComponent, {
-      width: '1200px',
-      data: { id: assetId }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('ผลลัพธ์จาก Dialog:', result);
-      }
-    });
-  }
+  
+  
   
   // โหลดข้อมูล UserInfo
   private async initializeUserInfo(): Promise<void> {
-    // await this.dataService.loadUserInfo();
     this.dataService.userInfo$.subscribe(userInfo => {
       if (userInfo) {
         this.userinfo = userInfo.claims;
         console.log("✅ UserInfo Loaded:", userInfo);
-      } else {
-        console.warn("⚠️ UserInfo not available");
+  
+        // ✅ เมื่อโหลด UserInfo เสร็จแล้ว ค่อยโหลด Asset Details
+        this.getAssetDetails();
       }
     });    
   }
   
+
+  // โหลดข้อมูล Asset Details
+  private getAssetDetails(): void {
+    this.apiService.fetchDatahttp(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}`).subscribe({
+      next: (data) => this.handleAssetDetails(data),
+      error: (err) => console.error('Error loading Asset Details:', err),
+    });
+  }
+
   // โหลดข้อมูล Asset Types
   private loadAssetTypes(): void {
     this.apiService.fetchDatahttp('Assettype').subscribe({
@@ -154,12 +169,36 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // โหลดข้อมูล Asset Details
-  private getAssetDetails(): void {
-    this.apiService.fetchDatahttp('AssetDetails/GetForTable').subscribe({
-      next: (data) => this.handleAssetDetails(data),
-      error: (err) => console.error('Error loading Asset Details:', err),
+  private loadAssetCategory(): void {
+    this.apiService.fetchDatahttp('Assetcategories').subscribe({
+      next: (data) => {
+        this.assetCategory = data;
+        this.filteredCategoryList = data.slice(); // ✅ ทำสำเนาเพื่อให้กรองได้
+      },
+      error: (err) => console.error('Error loading Asset Categories:', err),
     });
+  }
+  
+  // ฟิลเตอร์ Asset ตามประเภท
+  filterAssets(): void {
+    this.dataSource.data = this.selectedAssetType
+      ? this.assetDetails.filter((asset) => asset.TypeId === this.selectedAssetType)
+      : this.assetDetails;
+      // console.log('Filtered Asset Details:', this.selectedAssetType);
+  }
+
+  filterByCategory(): void {
+    this.dataSource.data = this.selectedCategoryId
+      ? this.assetDetails.filter(asset => asset.CategoryId === this.selectedCategoryId)
+      : this.assetDetails;
+    // console.log('Filtered by CategoryId:', this.selectedCategoryId);
+  }
+
+  filterCategoryList(): void {
+    const search = this.categoryFilterCtrl.value?.toLowerCase() || '';
+    this.filteredCategoryList = this.assetCategory.filter(cat =>
+      cat.CategoryName.toLowerCase().includes(search)
+    );
   }
   
   // จัดการข้อมูล Asset Details
@@ -188,11 +227,30 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     return new Date(b.PurchaseDate).getTime() - new Date(a.PurchaseDate).getTime();
   }
   
-  // ฟิลเตอร์ Asset ตามประเภท
-  filterAssets(): void {
-    this.dataSource.data = this.selectedAssetType
-      ? this.assetDetails.filter((asset) => asset.TypeId.toString() === this.selectedAssetType)
-      : this.assetDetails;
+  editDialog(assetId: number): void {
+    const dialogRef = this.dialog.open(EditAssetDialog, {
+      width: '1200px',
+      data: { id: assetId } // ส่งค่าไปให้ Dialog
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('ผลลัพธ์จาก Dialog:', result);
+      }
+    });
+  }
+
+  assetDialog(assetId: number): void {
+    const dialogRef = this.dialog.open(InfoassetComponent, {
+      width: '1200px',
+      data: { id: assetId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('ผลลัพธ์จาก Dialog:', result);
+      }
+    });
   }
   
   // สลับคอลัมน์ที่แสดง
@@ -339,6 +397,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       a.click();
     });
   }
+
+  
 }  
   
 
