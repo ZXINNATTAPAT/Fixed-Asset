@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { getStyle } from '@coreui/utils';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   RowComponent,
@@ -83,7 +83,8 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private apiService: ApiService,
-    private dataService: DataService
+    private dataService: DataService,
+    private router: Router
   ) {}
 
 userinfo: any = [];
@@ -179,15 +180,33 @@ loadUserCount(): void {
     .subscribe();
 }
 
+linkadd(): void {
+  this.router.navigate(['/system/main/assetDetails']);
+}
 
+linkdisasc(): void {
+  this.router.navigate(['/system/sub/disassets']);
+}
 
-linkadd(): void {window.location.href = "http://localhost:4200/system/assetDetails";}
-linkdisasc(): void {window.location.href = "http://localhost:4200/system/disassets";}
-linkcount(): void {window.location.href = "http://localhost:4200/system/assetcount";}
-linkassetall(): void {window.location.href = "http://localhost:4200/table/assettable";}
-linkrepair(): void {window.location.href = "http://localhost:4200/system/repair";}
-linktranfer(): void {window.location.href = "http://localhost:4200/system/transferassets";}
-linkassetcom(): void {window.location.href = "http://localhost:4200/assettable";}
+linkcount(): void {
+  this.router.navigate(['/system/sub/assetcount']);
+}
+
+linkassetall(): void {
+  this.router.navigate(['/table/assettable']);
+}
+
+linkrepair(): void {
+  this.router.navigate(['/system/sub/repair']);
+}
+
+linktranfer(): void {
+  this.router.navigate(['/system/sub/transferassets']);
+}
+
+linkassetcom(): void {
+  this.router.navigate(['/assettable']);
+}
   data: any[] = [];
   
   options: any[] = [];

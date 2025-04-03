@@ -47,7 +47,7 @@ export class CountingunitComponent implements OnInit {
   asset: any = {}; 
 
   onSubmit() {
-    this.http.post<any>('https://localhost:7204/api/Countingunits', this.asset)
+    this.http.post<any>('https://localhost:7204/api/Countingunits', this.asset ,{withCredentials: true})
         .subscribe(
           response => {
             // console.log(response);
@@ -91,7 +91,7 @@ export class CountingunitComponent implements OnInit {
   assetDetailsset: any[] = []
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Countingunits').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/Countingunits', { withCredentials: true }).subscribe(data => {
       this.assetDetails = data.map(asset => {
         asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
         return asset;
@@ -135,7 +135,7 @@ export class CountingunitComponent implements OnInit {
   
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/Countingunits/${asset.id}`).subscribe(
+        this.http.delete(`https://localhost:7204/api/Countingunits/${asset.id}`, { withCredentials: true }).subscribe(
           () => {
             const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
               if (index !== -1) {

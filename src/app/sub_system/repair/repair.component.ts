@@ -187,7 +187,7 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   onSubmit() {
       this.http
-        .post<any>('https://localhost:7204/api/RepairAsset/', this.asset)
+        .post<any>('https://localhost:7204/api/RepairAsset/', this.asset, { withCredentials: true })
         .subscribe(
           (response) => {
 
@@ -233,7 +233,7 @@ export class RepairComponent implements OnInit, OnDestroy {
 
   getAssetType(): void {
     this.http
-      .get<any[]>('https://localhost:7204/api/RepairAsset')
+      .get<any[]>('https://localhost:7204/api/RepairAsset', { withCredentials: true })
       .subscribe((data) => {
         this.assetDetails = data.map((asset) => {
           const foundAsset = this.assetDetails2.find(

@@ -135,7 +135,7 @@ export class UserManagementComponent implements OnInit {
   }
   
   getUsers(): void {
-    this.http.get<any[]>('https://localhost:7204/api/users/GetUserFull').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/users/GetUserFull' , {withCredentials: true}).subscribe(data => {
       this.userDetails = data;
       this.dataSource = new MatTableDataSource<any>(this.userDetails);
       this.dataSource.paginator = this.paginator;
@@ -172,7 +172,8 @@ export class UserManagementComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.http.patch(`https://localhost:7204/api/Users/${userId}/role`, JSON.stringify(role), {
-          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
         }).subscribe(
           () => {
             // อัปเดตบทบาทใน userDetails

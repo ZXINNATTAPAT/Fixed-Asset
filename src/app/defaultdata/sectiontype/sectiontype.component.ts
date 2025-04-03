@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup } from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator ,MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { CommonModule, NgStyle } from '@angular/common';
-import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { Router } from '@angular/router';
 import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent, TableModule, UtilitiesModule } from '@coreui/angular';
@@ -34,32 +33,37 @@ interface AssetDetails {
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
-    MatButtonModule, // Example: Add any other required Angular Material modules here
+    MatButtonModule,
     UtilitiesModule,
     ButtonDirective,
     NgStyle,
-    IconDirective,FormDirective, FormLabelDirective, FormControlDirective,
+    IconDirective, FormDirective, FormLabelDirective, FormControlDirective,
   ],
   templateUrl: './sectiontype.component.html',
   styleUrl: './sectiontype.component.scss'
 })
 export class SectiontypeComponent {
   icons = { cilPencil, cilTrash };
+
   assetDetails: AssetDetails[] = [];
+
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
+
   isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private http: HttpClient, private router: Router) { }
 
-  displayedColumns2: string[] = ["รหัสแผนก","ชื่อแผนก"];
+  displayedColumns2: string[] = ["รหัสแผนก", "ชื่อแผนก"];
   assetDetailsset: any[] = [];
 
-  ngOnInit(): void {this.getAssetType();}
+  ngOnInit(): void { this.getAssetType(); }
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Departments').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/Departments', { withCredentials: true }).subscribe(data => {
       this.assetDetails = data.map(asset => {
         asset = this.translateToThai(asset);
         return asset;
@@ -90,7 +94,7 @@ export class SectiontypeComponent {
       sectionCode,
       sectionName
     };
-    this.http.post('https://localhost:7204/api/SectionTypeCodes', newAssetType).subscribe(
+    this.http.post('https://localhost:7204/api/SectionTypeCodes', newAssetType, { withCredentials: true }).subscribe(
       response => {
         console.log('Asset Type created:', response);
         this.getAssetType(); // Refresh data after post

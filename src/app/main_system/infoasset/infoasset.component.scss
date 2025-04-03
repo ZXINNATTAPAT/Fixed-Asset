@@ -1,11 +1,33 @@
-.btn-info-custom{
-    background-color: white;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-}
-.btn-info-custom:hover{
-    background-color: whitesmoke;
-    border: green;
+.btn-info-custom {
+  background-color: white;
+  width: 100%;
+  height: 100%;
+  text-align: center;
 }
 
+.btn-info-custom:hover {
+  background-color: whitesmoke;
+  border: green;
+}
+
+.mat-tab-label {
+  background-color: #e9f7ef; // สีพื้นหลังเขียวอ่อน
+  color: #28a745; // สีข้อความ
+  border-radius: 6px 6px 0 0;
+  margin-right: 4px;
+  transition: background-color 0.3s;
+}
+
+.mat-tab-label:hover {
+  background-color: #d4edda; // เขียวเข้มขึ้นตอน hover
+}
+
+.mat-tab-label-active {
+  background-color: #28a745; // เขียวเข้ม
+  color: white; // ข้อความสีขาว
+  font-weight: 600;
+}
+
+.mat-ink-bar {
+  background-color: #28a745; // เส้นใต้แท็บ
+}

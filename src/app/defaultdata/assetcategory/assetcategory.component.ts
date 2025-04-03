@@ -53,7 +53,7 @@ export class AssetcategoryComponent implements OnInit {
   asset: any = {};
 
   onSubmit() {
-    this.http.post<any>('https://localhost:7204/api/Assetcategories', this.asset)
+    this.http.post<any>('https://localhost:7204/api/Assetcategories', this.asset ,{withCredentials: true})
         .subscribe(
           response => {
             console.log(response);
@@ -99,7 +99,7 @@ export class AssetcategoryComponent implements OnInit {
   assetDetailsset: any[] = []
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Assetcategories').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/Assetcategories', { withCredentials: true }).subscribe(data => {
       this.assetDetails = data.map(asset => {
         asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
         return asset;
@@ -142,7 +142,7 @@ export class AssetcategoryComponent implements OnInit {
 
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/Assetcategories/${asset.id}`).subscribe(
+        this.http.delete(`https://localhost:7204/api/Assetcategories/${asset.id}`, { withCredentials: true }).subscribe(
           () => {
             const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
               if (index !== -1) {

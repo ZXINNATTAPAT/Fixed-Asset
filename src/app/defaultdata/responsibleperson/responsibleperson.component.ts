@@ -82,7 +82,7 @@ export class ResponsiblepersonComponent implements OnInit {
   }
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/ResponsiblePersons').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/ResponsiblePersons', { withCredentials: true }).subscribe(data => {
       this.assetDetails = data.map(asset => this.translateToThai(asset));
       this.dataSource = new MatTableDataSource<any>(this.assetDetails);
       this.dataSource.paginator = this.paginator;
@@ -106,7 +106,7 @@ export class ResponsiblepersonComponent implements OnInit {
 
   onSubmit(): void {
     const formData = this.yourFormName.value;
-    this.http.post<any>('https://localhost:7204/api/ResponsiblePersons', formData).subscribe(
+    this.http.post<any>('https://localhost:7204/api/ResponsiblePersons', { withCredentials: true }, formData).subscribe(
       response => {
         const newAsset = this.translateToThai(response);
         this.assetDetails.push(newAsset);
@@ -137,7 +137,7 @@ export class ResponsiblepersonComponent implements OnInit {
       cancelButtonText: 'ไม่'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`https://localhost:7204/api/ResponsiblePersons/${asset.id}`).subscribe(
+        this.http.delete(`https://localhost:7204/api/ResponsiblePersons/${asset.id}`, { withCredentials: true }).subscribe(
           () => {
             const index = this.assetDetails.findIndex(a => a.id === asset.id);
             if (index !== -1) {

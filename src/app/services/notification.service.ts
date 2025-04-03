@@ -12,17 +12,17 @@ export class NotificationService {
 
   // 📌 ดึงรายการแจ้งเตือนของผู้ใช้ (NotificationRecipientController)
   getNotifications(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/notificationrecipient/${userId}/notifications`);
+    return this.http.get<any[]>(`${this.baseUrl}/notificationrecipient/${userId}/notifications`, { withCredentials: true });
   }
 
   // 📌 อัปเดตสถานะแจ้งเตือน (Mark as Read) (NotificationRecipientController)
   markAsRead(notificationId: number, userId: number): Observable<any> {
-    return this.http.put(`${this.baseUrl}/notificationrecipient/${notificationId}/mark-as-read/${userId}`, {});
+    return this.http.put(`${this.baseUrl}/notificationrecipient/${notificationId}/mark-as-read/${userId}`, {}, { withCredentials: true });
   }
 
   // 📌 ลบการแจ้งเตือน (NotificationsController)
   deleteNotification(notificationId: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/notifications/${notificationId}`);
+    return this.http.delete(`${this.baseUrl}/notifications/${notificationId}`, { withCredentials: true });
   }
 
 }

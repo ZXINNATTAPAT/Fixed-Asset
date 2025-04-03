@@ -59,7 +59,7 @@ export class PropertySellerComponent implements OnInit {
   asset: any ={};
 
   onSubmit() {
-    this.http.post<any>('https://localhost:7204/api/PropertySellers', this.asset)
+    this.http.post<any>('https://localhost:7204/api/PropertySellers', { withCredentials: true }, this.asset)
         .subscribe(
           response => {
             // console.log(response);
@@ -109,7 +109,7 @@ export class PropertySellerComponent implements OnInit {
   assetDetailsset: any[] = []
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/PropertySellers').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/PropertySellers',{withCredentials: true}).subscribe(data => {
       this.assetDetails = data.map(asset => {
         asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
         return asset;

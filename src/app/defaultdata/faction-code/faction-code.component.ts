@@ -62,7 +62,7 @@ export class FactionCodeComponent implements OnInit {
   ngOnInit(): void {this.getAssetType();}
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Factiontypecodes').subscribe(data => {
+    this.http.get<any[]>('https://localhost:7204/api/Factiontypecodes',{withCredentials: true}).subscribe(data => {
       this.assetDetails = data.map(asset => this.translateToThai(asset));
       this.dataSource = new MatTableDataSource<any>(this.assetDetails);
       this.dataSource.paginator = this.paginator;
@@ -73,7 +73,7 @@ export class FactionCodeComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.http.post<any>('https://localhost:7204/api/Factiontypecodes', this.asset)
+    this.http.post<any>('https://localhost:7204/api/Factiontypecodes', { withCredentials: true }, this.asset)
       .subscribe(
         response => {
           const newAsset = this.translateToThai(response);
@@ -123,7 +123,7 @@ export class FactionCodeComponent implements OnInit {
       cancelButtonText: 'ไม่'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`https://localhost:7204/api/Factiontypecodes/${asset.id}`).subscribe(
+        this.http.delete(`https://localhost:7204/api/Factiontypecodes/${asset.id}`, { withCredentials: true }).subscribe(
           () => {
             const index = this.assetDetails.findIndex(a => a.id === asset.id);
             if (index !== -1) {

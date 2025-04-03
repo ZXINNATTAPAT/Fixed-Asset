@@ -99,7 +99,7 @@ export class AssetDetails2Component implements OnInit {
   }; 
 
   onSubmit(): void {
-    this.http.post<any>('https://localhost:7204/api/AssetDetails2', this.asset)
+    this.http.post<any>('https://localhost:7204/api/AssetDetails2', this.asset, { withCredentials: true })
       .subscribe(
         response => {
           console.log(response);

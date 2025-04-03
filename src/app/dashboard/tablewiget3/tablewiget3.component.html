@@ -1,31 +1,29 @@
-<div class="card border shadow-sm">
+<div class="card shadow-sm" style="border: none;">
 
   <div class="card-body">
 
-    <h3 class="border-bottom">
+    <h3 class="">
       <span class="anuphan-700" style="color: green;">รายละเอียดครุภัณฑ์ที่ครอบครอง</span>
     </h3>
+    <hr/>
 
     <div class="chart-container">
-      
-      <!-- <h2 class="anuphan-700" style="color: green;">
-        {{ selectedCategory ? 'หมวดหมู่ครุภัณฑ์: ' + selectedCategory : 'ภาพรวมครุภัณฑ์' }}
-      </h2> -->
-    
-      <button *ngIf="selectedCategory" (click)="goBack()" class="btn btn-primary">ย้อนกลับ</button>
-    
       <canvas baseChart 
         [datasets]="pieChartData"
         [labels]="pieChartLabels"
         [options]="pieChartOptions"
         [type]="'pie'"
         (chartClick)="onChartClick($event)">
-      </canvas>
-    </div>
-    
-    
+      </canvas> <br/>
 
-    
+      <button 
+        *ngIf="selectedCategory" 
+        (click)="goBack()" 
+        class="btn btn-sm w-100 m-1 border" style="background-color: #f8f9fa; color: #000000;">
+        ย้อนกลับ
+      </button> 
+    </div>
+
     <br/>
     <button class="btn btn-sm btn-outline-success w-100 anuphan-400">ดูข้อมูลทั้งหมด</button>
   

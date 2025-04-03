@@ -35,7 +35,7 @@ import { BarcodeFormat } from '@zxing/library';
 interface AssetDetails {
   repairAssetId: any;
   assetCode: string;
-  assetName:string;
+  assetName: string;
   assetId: string;
   SerialNumber: string;
   Description: string;
@@ -93,7 +93,7 @@ export class SellassetsComponent implements OnInit, OnDestroy {
 
   assetCode: string = ''; //for input
 
-  constructor(private http: HttpClient , private ap: ApiService) {}
+  constructor(private http: HttpClient, private ap: ApiService) { }
 
   assetDetails: AssetDetails[] = [];
 
@@ -177,7 +177,7 @@ export class SellassetsComponent implements OnInit, OnDestroy {
 
   onSubmit() {
     this.http
-      .post<any>('https://localhost:7204/api/RepairAsset/', this.asset)
+      .post<any>('https://localhost:7204/api/RepairAsset/', this.asset, { withCredentials: true })
       .subscribe(
         (response) => {
           const newAsset = response;
@@ -203,12 +203,12 @@ export class SellassetsComponent implements OnInit, OnDestroy {
 
   getAssetType(): void {
     this.http
-      .get<any[]>('https://localhost:7204/api/RepairAsset')
+      .get<any[]>('https://localhost:7204/api/RepairAsset', { withCredentials: true })
       .subscribe((data) => {
         this.assetDetails = data.map((asset) => {
           const foundAsset = this.assetDetails2.find(
             (asset2) => asset2.assetId === asset.assetId
-            
+
           );
           if (foundAsset) {
             asset.assetCode = foundAsset.assetCode; // เพิ่ม property assetCode เข้าไปในข้อมูล asset
@@ -241,7 +241,7 @@ export class SellassetsComponent implements OnInit, OnDestroy {
             assetName: asset.assetName,
           };
         });
-        
+
         // อัปเดตค่าใน filteredAssetData ซึ่งเป็นตัวกรองข้อมูลสำหรับ dropdown ที่ใช้ในการเลือก asset
         this.filteredAssetData.next(this.assetDetails2.slice());
 
@@ -280,31 +280,28 @@ export class SellassetsComponent implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http
-          .delete(
-            `https://localhost:7204/api/RepairAsset/${asset.repairAssetId}`
-          )
-          .subscribe(
-            () => {
-              const index = this.assetDetails.findIndex(
-                (a) => a.repairAssetId === asset.repairAssetId
-              );
-              if (index !== -1) {
-                this.assetDetails.splice(index, 1);
-                // Update the data source after deletion
-                this.dataSource.data = this.assetDetails;
-              }
-              Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
-            },
-            (error) => {
-              console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-              Swal.fire(
-                'ข้อผิดพลาด!',
-                'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
-                'error'
-              );
+        this.http.delete(`https://localhost:7204/api/RepairAsset/${asset.repairAssetId}`, { withCredentials: true }
+        ).subscribe(
+          () => {
+            const index = this.assetDetails.findIndex(
+              (a) => a.repairAssetId === asset.repairAssetId
+            );
+            if (index !== -1) {
+              this.assetDetails.splice(index, 1);
+              // Update the data source after deletion
+              this.dataSource.data = this.assetDetails;
             }
-          );
+            Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
+          },
+          (error) => {
+            console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+            Swal.fire(
+              'ข้อผิดพลาด!',
+              'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์',
+              'error'
+            );
+          }
+        );
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
         Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');

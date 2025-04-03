@@ -6,58 +6,56 @@
   colorScheme="light"
   visible
 >
-  <c-sidebar-header
-    class="border-bottom"
-    style="text-align: center; background: transparent"
-  >
-    <c-sidebar-brand [routerLink]="[]">
-      <br />
-      <img
-        class=""
-        src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png"
-        height="100"
-        alt="ss"
-        style="padding: 2px; margin-left: 65px"
-      />
-      <br /><br />
-    </c-sidebar-brand>
-  </c-sidebar-header>
+  <!-- ✅ โลโก้ + ข้อมูลผู้ใช้ ซ่อนเมื่อย่อ -->
+  <ng-container *ngIf="isSidebarNarrow !== true">
+    <!-- โลโก้ -->
+    <c-sidebar-header class="border-bottom bg-transparent text-center py-3">
+      <c-sidebar-brand [routerLink]="[]" class="d-flex justify-content-center">
+        <div class="container">
+          <div class="d-flex flex-column flex-md-row align-items-center justify-content-center text-center text-md-start gap-3">
+            <img
+              src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png"
+              alt="สำนักงานคณะกรรมการการเลือกตั้ง"
+              class="img-fluid"
+              style="max-width: 60px;"
+            />
+            <div>
+              <h5 class="fw-bold text-dark mb-1">
+                <span class="anuphan-700">สำนักงานคณะกรรมการการเลือกตั้ง</span>
+              </h5>
+              <p class="text-muted small mb-0">
+                เขตพื้นที่ส่วนกลาง ({{ userinfo.Department }})
+              </p>
+            </div>
+          </div>
+        </div>
+      </c-sidebar-brand>
+    </c-sidebar-header>
 
-  <div
-    class="m-1 p-3"
-    style="
-      background-color: rgba(48, 144, 106);
-      border-radius: 4px;
-      color: white;">
-      
-    <div class="row">
-      
-      <div class="col-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="34"
-          height="34"
-          fill="currentColor"
-          class="bi bi-person-fill"
-          viewBox="0 0 16 16"
-        >
-          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
-        </svg>
-      </div>
-
-      <div class="col-10">
-        <span style="font-size: 15.5px">
-          {{ userProfile.Position }}</span
-        ><br />
-        <span style="font-size: 11.5px"
-          >คุณ {{ userProfile.Sname }} {{ userProfile.Lname }}
-        </span>
-        <br />
-        <!-- <span style="font-size: 10px;">{{userinfo.position}}/{{userinfo.positiontype}}</span> -->
+    <!-- กล่องผู้ใช้ -->
+    <div class="m-2 p-3 rounded text-white" style="background-color: rgba(48, 144, 106, 0.95);">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          <div class="d-flex justify-content-center align-items-center bg-white bg-opacity-10 rounded-circle" style="width: 50px; height: 50px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
+              class="bi bi-person-fill" viewBox="0 0 16 16">
+              <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+            </svg>
+          </div>
+        </div>
+        <div class="col">
+          <div class="text-white-50 small mb-1">
+            {{ userProfile.Position }}
+          </div>
+          <div class="fw-bold">
+            คุณ {{ userProfile.Sname }} {{ userProfile.Lname }}
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </ng-container>
 
+  <!-- เมนูหลัก -->
   <ng-scrollbar
     #scrollbar="ngScrollbar"
     (updated)="onScrollbarUpdate(scrollbar.state)"
@@ -73,17 +71,18 @@
     />
   </ng-scrollbar>
 
-  @if (!sidebar1.narrow) {
   <c-sidebar-footer
-    cSidebarToggle="sidebar1"
-    class="border-top d-none d-lg-flex"
-    toggle="unfoldable"
-    style="cursor: pointer"
-  >
-    <button cSidebarToggler></button>
-  </c-sidebar-footer>
-  }
+  *ngIf="!sidebar1?.narrow"
+  cSidebarToggle="sidebar1"
+  class="border-top d-none d-lg-flex"
+  toggle="visible"
+  style="cursor: pointer"
+>
+  <button cSidebarToggler></button>
+</c-sidebar-footer>
+
 </c-sidebar>
+
 
 <!--main-->
 <div class="wrapper d-flex flex-column min-vh-100">

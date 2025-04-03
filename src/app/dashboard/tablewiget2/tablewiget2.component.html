@@ -1,10 +1,12 @@
 <div class="card shadow-sm" style="border: none">
   <div class="card-body">
-    <h3 class="border-bottom">
+    <h3>
       <span class="anuphan-700" style="color: green"
-        >สำนักมีครุภัณฑ์จำนวน</span
-      >
+        >สำนักมีครุภัณฑ์จำนวน</span>
     </h3>
+     <hr/>
+     <mat-paginator [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
+      <br/>
     <div class="table-responsive m-1 p-1">
       <table mat-table [dataSource]="dataSource" class="table table-striped">
         <ng-container matColumnDef="Faction">
@@ -26,9 +28,7 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns3;"></tr>
       </table>
       
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
       
-
       <button class="btn btn-sm btn-outline-success w-100 anuphan-400">ดูข้อมูลทั้งหมด</button>
 
     </div>

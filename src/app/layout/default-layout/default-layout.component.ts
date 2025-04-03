@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
 import { IconDirective } from '@coreui/icons-angular';
@@ -17,6 +17,7 @@ import {
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { ICustomNavData, navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
 import { DataService } from '../../../data-service/data-service.component';
+import { CommonModule, NgIf, NgStyle } from '@angular/common';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -37,6 +38,8 @@ function isOverflown(element: HTMLElement) {
     RouterLink,
     IconDirective,
     NgScrollbar,
+    NgIf,NgStyle,
+    CommonModule,
     SidebarNavComponent,
     SidebarFooterComponent,
     SidebarToggleDirective,
@@ -49,7 +52,8 @@ function isOverflown(element: HTMLElement) {
   ]
 })
 export class DefaultLayoutComponent implements OnInit {
-
+  @ViewChild('sidebar1') sidebar1!: any;
+  isSidebarNarrow: boolean = false;
   userinfo: any = {};
   userId: string = '' ;
   userProfile: any = {};
@@ -58,14 +62,27 @@ export class DefaultLayoutComponent implements OnInit {
   public navItems: ICustomNavData[] = []; // ✅ ใช้ Custom Interface
   public navItemsFiltered: ICustomNavData[] = [];
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService ,private cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.navItems = staticNavItems; // ✅ โหลดค่า navItems ก่อน
     // console.log("✅ Nav Items Loaded:", this.navItems); // ตรวจสอบว่ามีค่า
     this.initializeUserData();
   }
+  ngAfterViewInit() {
+    // sync state ครั้งแรก (ป้องกัน error)
+    this.isSidebarNarrow = this.sidebar1?.narrow ?? false;
+    this.cdRef.detectChanges();
+  }
   
+  onToggleSidebar(): void {
+    this.sidebar1.toggle(); // CoreUI ทำการพับ
+    setTimeout(() => {
+      this.isSidebarNarrow = this.sidebar1.narrow;
+      this.cdRef.detectChanges();
+    }, 100); // รอให้ toggle ทำงานก่อนนิดนึง
+  }
+
   private async initializeUserData(): Promise<void> {
     try {
       this.dataService.userInfo$.subscribe(userInfo => {
@@ -76,7 +93,7 @@ export class DefaultLayoutComponent implements OnInit {
   
           this.userRole = userInfo.claims.Role ? [userInfo.claims.Role] : []; // ✅ Correct role extraction
   
-          // console.log(`🔍 Debug: User ID: ${this.userId}, Roles: ${this.userRole}`);
+          // console.log("✅ User Info:", this.userinfo);
   
           if (this.userId) {
             this.loadUserProfile(this.userId);

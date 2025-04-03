@@ -90,7 +90,7 @@ export class EditassetDetailComponent {
       // ถ้าค่า assetId ไม่เป็น undefined หรือ null ให้เรียก API เพื่อดึงข้อมูลของ asset
       if (assetId) {
         this.http
-          .get<any>('https://localhost:7204/api/AssetDetails/' + assetId)
+          .get<any>('https://localhost:7204/api/AssetDetails/' + assetId, { withCredentials: true })
           .subscribe(
             (response) => {
               // กำหนดค่าของ oldasset เมื่อได้รับข้อมูลกลับมา
@@ -113,7 +113,7 @@ export class EditassetDetailComponent {
     this.http
       .put<any>(
         `https://localhost:7204/api/AssetDetails/${this.oldasset.assetId}`,
-        this.oldasset
+        this.oldasset, { withCredentials: true }
       )
       .subscribe(
         (response) => {

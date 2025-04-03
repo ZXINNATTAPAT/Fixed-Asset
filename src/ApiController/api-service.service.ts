@@ -111,8 +111,9 @@ export class ApiService {
   }
 
   fetchDatahttp(endpoint: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}${endpoint}`);
+    return this.http.get<any>(`${this.apiUrl}${endpoint}`, { withCredentials: true });
   }
+  
 
   fetchDatahttpbyId(endpoint: string, id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}${endpoint}/${id}`,{ withCredentials: true });
@@ -123,8 +124,9 @@ export class ApiService {
   
   fetchDatahttp25(endpoint: string, queryParams: any): Observable<any> {
     const params = new HttpParams({ fromObject: queryParams });
-    return this.http.get<any>(`${this.apiUrl}${endpoint}`, { params });
+    return this.http.get<any>(`${this.apiUrl}${endpoint}`, { params, withCredentials: true });
   }
+  
 
    /**
    * ดึงข้อมูลจาก API
@@ -192,26 +194,26 @@ export class ApiService {
   }
 
   getStatusCounts(): Observable<any> {
-    return this.http.get<any>('https://localhost:7204/api/AssetDetails/statuscount');
+    return this.http.get<any>('https://localhost:7204/api/AssetDetails/statuscount', { withCredentials: true });
   }
-
+  
   getSessions(endpoint:string): Observable<AssetInventorySession[]> {
-    return this.http.get<AssetInventorySession[]>(`${this.apiUrl}${endpoint}`);
+    return this.http.get<AssetInventorySession[]>(`${this.apiUrl}${endpoint}`, { withCredentials: true });
   }
 
   // 📌 ดึงข้อมูลสินทรัพย์ทั้งหมด
   getAssetInventory(): Observable<AssetInventoryDetails[]> {
-    return this.http.get<AssetInventoryDetails[]>(`${this.apiUrl}AssetInventoryDetails`);
+    return this.http.get<AssetInventoryDetails[]>(`${this.apiUrl}AssetInventoryDetails`, { withCredentials: true });
   }
 
   // 📌 ดึงข้อมูลสินทรัพย์ตาม ID
   getAssetById(id: number): Observable<AssetInventoryDetails> {
-    return this.http.get<AssetInventoryDetails>(`${this.apiUrl}AssetInventoryDetails/${id}`);
+    return this.http.get<AssetInventoryDetails>(`${this.apiUrl}AssetInventoryDetails/${id}`, { withCredentials: true });
   }
 
   // ✅ ดึงจำนวนผู้ใช้ในสำนักงาน
   getUserCountByDepartment(deptId: number): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}users/count/by-department/${deptId}`);
+    return this.http.get<number>(`${this.apiUrl}users/count/by-department/${deptId}`, { withCredentials: true });
   }
 
   

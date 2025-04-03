@@ -250,7 +250,7 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
         this.http
-          .delete(`https://localhost:7204/api/AssetDetails/${asset.assetId}`)
+          .delete(`https://localhost:7204/api/AssetDetails/${asset.assetId}`, { withCredentials: true })
           .subscribe(
             () => {
               const index = this.assetDetails.findIndex(

@@ -2,10 +2,10 @@ import { Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import QRCode from 'qrcode';
-import { MatTabsModule } from '@angular/material/tabs';
-import {HistoryComponent} from '../history/history.component'
-import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTabContent, MatTabsModule } from '@angular/material/tabs';
+import { HistoryComponent } from '../history/history.component'
+import { CommonModule, NgStyle } from '@angular/common';
+import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
 import { ApiService } from '../../../ApiController/api-service.service';
 import { SubAssetDialogComponent } from './Subasset/subasset/subasset.component';
 import { RepairAssetComponent } from './repair-history/repair-history/repair-history.component';
@@ -39,30 +39,42 @@ interface AssetDetails {
 @Component({
   selector: 'app-infoasset',
   standalone: true,
-  imports: [MatTabsModule ,
+  imports: [
+    MatTabsModule,
     HistoryComponent,
     CommonModule,
     SubAssetDialogComponent,
+    MatTabContent,
+    MatDialogContent,
+    MatDialogModule,
+    NgStyle,
     RepairAssetComponent],
   templateUrl: './infoasset.component.html',
   styleUrl: './infoasset.component.scss',
 })
 export class InfoassetComponent {
+
   assetId!: number;
   assets: any;
   qrCodeUrl!: string;
+
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
+  uploadMessage = '';
+  assetImages: any[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public datadialog: any, // อนุญาตให้รับค่าได้ทั้ง object หรือ undefined
     private ap: ApiService,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit() {
+
     // ตรวจสอบว่ามีค่า id มาจาก Dialog หรือไม่
     if (this.datadialog?.id) {
       this.assetId = this.datadialog.id; // ใช้ค่า id จาก Dialog
-    } 
+    }
     else {
       // ถ้าไม่มีค่า id จาก Dialog ให้ดึงจาก URL params แทน
       this.route.params.subscribe((params) => {
@@ -74,7 +86,7 @@ export class InfoassetComponent {
 
     if (this.assetId) {
       // เรียกข้อมูล AssetDetails จาก API
-      this.ap.fetchDatahttpbyId2(`AssetDetails/infoasset`,this.assetId)
+      this.ap.fetchDatahttpbyId2(`AssetDetails/infoasset`, this.assetId)
         .subscribe((data: any) => {
           this.assets = data;
           console.log('Asset Details:', this.assets);
@@ -87,6 +99,52 @@ export class InfoassetComponent {
           });
         });
     }
+
+    if (this.assetId) {
+      this.loadAssetImages();
+    }
+
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      const reader = new FileReader();
+      reader.onload = () => this.previewUrl = reader.result as string;
+      reader.readAsDataURL(file);
+    }
+  }
+
+  uploadImage() {
+    if (!this.selectedFile || !this.assetId) return;
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.ap.postData(`AssetImages/upload/${this.assetId}`, formData)
+      .then((res: any) => {
+        this.uploadMessage = '✅ อัปโหลดเรียบร้อยแล้ว!';
+        this.previewUrl = null;
+        this.selectedFile = null;
+        this.loadAssetImages(); // โหลดใหม่หลังอัป
+      })
+      .catch((err: any) => {
+        this.uploadMessage = '❌ เกิดข้อผิดพลาดในการอัปโหลด';
+        console.error(err);
+      });
+  }
+
+  loadAssetImages() {
+    this.ap.fetchDatahttpbyId2('AssetImages/by-asset', this.assetId).subscribe({
+      next: (data: any) => {
+        this.assetImages = data;
+      },
+      error: err => {
+        console.error('โหลดรูปไม่สำเร็จ', err);
+      }
+    });
   }
 
   convertDate(dateString: string): string {
@@ -100,7 +158,6 @@ export class InfoassetComponent {
   }
 
   annualDepreciationRate = 0.25; // อัตราค่าเสื่อมต่อปี
-
 
   //ปิดการใช้งานไว้ก่อน
   calculateDepreciation(): number {
@@ -133,6 +190,6 @@ export class InfoassetComponent {
 
     return Math.round(depreciation * 100) / 100; // ปัดเศษทศนิยมสองตำแหน่ง
   }
-  
-  
+
+
 }
