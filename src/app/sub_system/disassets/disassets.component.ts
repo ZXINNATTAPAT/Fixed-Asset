@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 // import { HttpClient } from '@angular/common/http';
 // import Swal from 'sweetalert2';
 
@@ -176,7 +176,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   
     // 📌 เรียก API เฉพาะตามสถานะที่เลือก
-    this.ap.postData(apiEndpoint, payload)
+    this.ap.assetService.postData(apiEndpoint, payload)
       .then((response) => {
         alert("ข้อมูลถูกบันทึกเรียบร้อย!");
         console.log(response);
@@ -208,7 +208,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getAssetdata(): void {
-    this.ap.fetchDatahttp('AssetDetails').subscribe((data) => {
+    this.ap.assetService.fetchData('AssetDetails').subscribe((data) => {
       this.assetDetails2 = data.map((asset: any) => ({
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,
@@ -227,7 +227,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.ap.fetchDatahttp(`AssetDetails?search=${search}`).subscribe((data) => {
+    this.ap.assetService.fetchData(`AssetDetails?search=${search}`).subscribe((data) => {
       const assets = data.map((asset: any) => ({
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,
@@ -246,7 +246,7 @@ export class DisassetsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
   
-    this.ap.fetchDatahttp(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
+    this.ap.assetService.fetchData(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
       const assets = data.map((asset: any) => ({
         assetId: asset.AssetId,
         assetCode: asset.AssetCode,

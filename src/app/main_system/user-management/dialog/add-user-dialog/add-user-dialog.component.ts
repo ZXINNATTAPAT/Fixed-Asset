@@ -4,7 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogActions, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { ApiService } from '../../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../../ApiController/apiservice/api-service.service';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
@@ -78,18 +78,26 @@ export class AddUserDialogComponent {
   }
 
   loadRoles() {
-    this.ap.fetchData('Roles').then((res) => {
-      this.roles = res;
-      console.log('🎯 ดึง Roles สำเร็จ:', this.roles);
-    }).catch((err) => {
-      console.error('❌ ดึง Roles ไม่สำเร็จ:', err);
+    this.ap.assetService.fetchData('Roles').subscribe({
+      next: (res) => {
+        this.roles = res;
+        console.log('🎯 ดึง Roles สำเร็จ:', this.roles);
+      },
+      error: (err) => {
+        console.error('❌ ดึง Roles ไม่สำเร็จ:', err);
+      }
     });
   }
 
   loadDepartments() {
-    this.ap.fetchData('Departments')  // เปลี่ยน URL ตาม API ของคุณ
-      .then(res => {
-        this.departments = res;
+    this.ap.assetService.fetchData('Departments')  // เปลี่ยน URL ตาม API ของคุณ
+      .subscribe({
+        next: (res) => {
+          this.departments = res;
+        },
+        error: (err) => {
+          console.error('❌ Failed to load departments:', err);
+        }
       });
   }
 
@@ -106,7 +114,7 @@ export class AddUserDialogComponent {
       // log ข้อมูลก่อนส่ง
       console.log("✅ Sending to API:", userData);
   
-      this.ap.postData('Users', userData).then((res) => {
+      this.ap.assetService.postData('Users', userData).then((res) => {
         console.log("🎉 POST สำเร็จ:", res);
         this.dialogRef.close(res); // ปิด dialog พร้อมส่งข้อมูลกลับ
       }).catch((err) => {

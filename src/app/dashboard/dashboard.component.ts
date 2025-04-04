@@ -10,7 +10,7 @@ import { Tablewiget4Component } from './tablewiget4/tablewiget4.component';
 import { Tablewidget5Component } from './tablewiget5/tablewidget5.component';
 import { DataService } from '../../data-service/data-service.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../ApiController/api-service.service';
+import { ApiService } from '../../ApiController/apiservice/api-service.service';
 import { NotificationComponent } from '../notification/notification.component';
 
 @Component({

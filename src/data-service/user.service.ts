@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, filter, firstValueFrom } from 'rxjs';
-import { ApiService } from '../ApiController/api-service.service';
+import { ApiService } from '../ApiController/apiservice/api-service.service';
 import { Router } from '@angular/router';
 
 // ✅ สร้าง interface เพื่อกำหนดโครงสร้าง UserInfo
@@ -40,7 +40,7 @@ export class UserService {
   async loadUserInfo(): Promise<void> {
     try {
       console.log("🔍 Fetching user info...");
-      const data = await firstValueFrom(this.apiService.getUserInfos());
+      const data = await firstValueFrom(this.apiService.authService.getUserInfos());
 
       if (data?.isAuthenticated) {
         this.userInfoSubject.next(data);
@@ -72,7 +72,7 @@ export class UserService {
   async loadUserProfile(userId: string): Promise<void> {
     try {
       // console.log(`🔍 Fetching profile for userId: ${userId}`);
-      const profile = await firstValueFrom(this.apiService.getUserProfile(userId.toString()));
+      const profile = await firstValueFrom(this.apiService.userService.getUserProfile(userId.toString()));
 
       if (profile) {
         this.userProfileSubject.next(profile);

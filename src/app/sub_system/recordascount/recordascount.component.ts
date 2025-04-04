@@ -18,7 +18,7 @@ import { HttpClient } from '@angular/common/http';
 import {cilPencil,cilTrash,cibAddthis,cilDataTransferDown,cilInfo,} from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
@@ -143,8 +143,7 @@ export class RecordascountComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   getAssetDetails(): void {
-    this.dataSubscription = this.apiService
-      .fetchDatahttp('assetDetails')
+    this.dataSubscription = this.apiService.assetService.fetchData('assetDetails')
       .subscribe((data) => {
         // console.log(this.userinfo.affiliation);
         this.assetDetails = data

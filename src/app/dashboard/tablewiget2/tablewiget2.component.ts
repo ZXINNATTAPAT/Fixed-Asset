@@ -8,7 +8,7 @@ import 'moment/locale/th.js';
 // import moment from 'moment';
 import { Subject, Subscription } from 'rxjs';
 import { DataService } from '../../../data-service/data-service.component';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 export interface AssetDetails {
   AssetId: number;
@@ -106,7 +106,7 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
         this.countAssetsByFactionAndUser();
       } else {
         console.log('📡 Fallback to API because dataService is empty');
-        this.ap.fetchDatahttp('AssetDetails/GetForTable')
+        this.ap.assetService.fetchData('AssetDetails/GetForTable')
           .subscribe((apiData) => {
             console.log('📥 Loaded from API:', apiData);
             this.assetDetails2 = apiData;

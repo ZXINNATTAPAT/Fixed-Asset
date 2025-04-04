@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { ApiService } from '../../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../../ApiController/apiservice/api-service.service';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 
@@ -41,7 +41,7 @@ export class RepairAssetComponent implements OnInit {
   }
 
   loadRepairAssets(assetId: number): void {
-    this.apiService.fetchDatahttp(`RepairAsset?assetId=${assetId}`).subscribe({
+    this.apiService.assetService.fetchData(`RepairAsset?assetId=${assetId}`).subscribe({
       next: (res) => {
         this.data = res;
       },

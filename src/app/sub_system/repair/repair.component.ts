@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 import { filter, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 interface AssetDetails {
   RepairAssetId: any;
@@ -122,7 +122,7 @@ export class RepairComponent implements OnInit, OnDestroy {
     }
   
     // เรียก API พร้อมส่งคำค้นหา
-    this.ap.fetchDatahttp(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
+    this.ap.assetService.fetchData(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
       const assets = data.map((asset: any) => ({
         AssetId: asset.AssetId,
         AssetCode: asset.AssetCode,
@@ -261,8 +261,7 @@ export class RepairComponent implements OnInit, OnDestroy {
   }
 
   getAssetdata(): void {
-    this.ap
-      .fetchDatahttp('AssetDetails')
+    this.ap.assetService.fetchData('AssetDetails')
       .subscribe((data) => {
         this.assetDetails2 = data.map((asset: { assetId: any; assetCode: any; assetName: any; }) => {
           return {
@@ -321,7 +320,7 @@ export class RepairComponent implements OnInit, OnDestroy {
   
     try {
       // ใช้ lastValueFrom() เพื่อแปลง Observable เป็น Promise
-      await this.ap.deleteData(`RepairAsset/${asset.RepairAssetId}`);
+      await this.ap.assetService.deleteData(`RepairAsset/${asset.RepairAssetId}`);
   
       // ลบข้อมูลออกจาก array และอัปเดต dataSource
       this.assetDetails = this.assetDetails.filter(a => a.RepairAssetId !== asset.RepairAssetId);

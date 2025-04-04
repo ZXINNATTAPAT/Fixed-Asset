@@ -4,10 +4,11 @@ import { CommonModule, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // import { DocsExampleComponent } from '@docs-components/public-api';
 
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective ,FormSelectDirective } from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2'
+import { catchError } from 'rxjs';
 
 @Component({
     selector: 'app-form-controls2',//ไว้เรียกใช้ในหน้าอื่นนได้++++
@@ -65,7 +66,12 @@ export class AssetDetails2Component implements OnInit {
   
 
   getAssetDetails(): void {
-    this.apiService.fetchData('assetDetails').catch((data: any[]) => {
+    this.apiService.assetService.fetchData('assetDetails').pipe(
+        catchError((error) => {
+            console.error('Error fetching asset details:', error);
+            return [];
+        })
+    ).subscribe((data: any[]) => {
         this.assetDetails = data.map(asset => {
             return {
                 assetCode: asset.assetCode,

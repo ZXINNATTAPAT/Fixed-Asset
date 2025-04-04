@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
@@ -34,9 +34,8 @@ export class DepreciationTableComponent implements OnInit {
   constructor(private ap: ApiService,public dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.ap.fetchData('AssetDetails/Depreciations').then(
-      data => this.dataSource.data = data
-    ).catch(
+    this.ap.assetService.fetchData('AssetDetails/Depreciations').subscribe(
+      data => this.dataSource.data = data,
       err => console.error('API error', err)
     );
   }

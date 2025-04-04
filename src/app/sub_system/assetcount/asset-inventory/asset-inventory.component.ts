@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
-import { ApiService, AssetInventoryDetails } from '../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
+import { AssetInventoryDetails } from 'src/ApiController/apiservice/asset/asset.service';
 
 @Component({
   selector: 'app-asset-inventory',
@@ -17,7 +18,7 @@ export class AssetInventoryComponent implements OnInit {
   constructor(private ap:ApiService) {}
 
   ngOnInit(): void {
-    this.ap.getAssetInventory().subscribe(
+    this.ap.assetService.getAssetInventory().subscribe(
       (data) => {
         this.assetInventoryList = data;
         this.loading = false;

@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
-import { ApiService } from '../ApiController/api-service.service';
+import { ApiService } from '../ApiController/apiservice/api-service.service';
 
 @Injectable({providedIn: 'root'})
 
@@ -36,7 +36,7 @@ export class AuthGuard implements CanActivate {
   // }
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
-    return this.authService.getAuthStatus().pipe(
+    return this.authService.authService.getAuthStatus().pipe(
       map(response => {
         // console.log("🔍 Auth Status:", response);
   

@@ -13,14 +13,13 @@
       <p>
         ส่งออกข้อมูล :
         <button class="btn btn-sm btn-success" type="button" (click)="exportExcel()" style="color: white">
-  
+
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,256,256" style="height: 22px">
             <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
               stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
               font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal">
               <g transform="scale(5.12,5.12)">
-                <path
-                  d="M28.875,0c-0.01953,0.00781 -0.04297,0.01953 -0.0625,0.03125l-28,5.3125c-0.47656,0.08984 
+                <path d="M28.875,0c-0.01953,0.00781 -0.04297,0.01953 -0.0625,0.03125l-28,5.3125c-0.47656,0.08984 
                   -0.82031,0.51172 -0.8125,1v37.3125c-0.00781,0.48828 0.33594,0.91016 0.8125,1l28,5.3125c0.28906,0.05469 0.58984,
                   -0.01953 0.82031,-0.20703c0.22656,-0.1875 0.36328,-0.46484 0.36719,-0.76172v-5h17c1.09375,0 2,-0.90625 2,-2v-34c0,-1.09375 -0.90625,
                   -2 -2,-2h-17v-5c0.00391,-0.28906 -0.12109,-0.5625 -0.33594,-0.75391c-0.21484,-0.19141 -0.50391,-0.28125 -0.78906,-0.24609zM28,
@@ -72,65 +71,57 @@
       </div> -->
 
     </div>
-  
-    <div 
-      *ngIf="dataSource.data.length === 0"  
-      class="alert alert-info text-center">
+
+    <div *ngIf="dataSource.data.length === 0" class="alert alert-info text-center">
       ไม่มีข้อมูลในระบบ กรุณาเพิ่มข้อมูลหรือรอการอัปเดต
     </div>
-    
+
     <div class="table-container">
       <div class="table-responsive" *ngIf="dataSource.data.length > 0">
-        <table class="table table-striped table-hover"
-               mat-table matSort [dataSource]="dataSource">
-    
+        <table class="table table-striped table-hover" mat-table matSort [dataSource]="dataSource">
+
           <!-- Actions Column -->
           <ng-container matColumnDef="Aactions">
             <th mat-header-cell *matHeaderCellDef class="text-center border"
-                style="color: black; font-weight: bold; width: 5%;">
+              style="color: black; font-weight: bold; width: 5%;">
               #
               <input cFormControl sizing="sm" disabled />
             </th>
             <td mat-cell *matCellDef="let asset" class="border text-center">
-              <button class="btn btn-sm btn-warning m-1"
-                      (click)="this.myFunctionInstance!.infoasset(asset)"
-                      style="width: 28px; height: 28px; padding: 4px;">
+              <button class="btn btn-sm btn-warning m-1" (click)="this.myFunctionInstance!.infoasset(asset)"
+                style="width: 28px; height: 28px; padding: 4px;">
                 <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
-                     style="color: white; width: 100%; height: 100%;">
+                  style="color: white; width: 100%; height: 100%;">
                 </svg>
               </button>
             </td>
           </ng-container>
-    
+
           <!-- QR Code Column -->
           <ng-container matColumnDef="Qrcode">
             <th mat-header-cell *matHeaderCellDef class="text-center border"
-                style="color: black; font-weight: bold; width: 5%;">
+              style="color: black; font-weight: bold; width: 5%;">
               Qrcode
               <input cFormControl sizing="sm" disabled />
             </th>
             <td mat-cell *matCellDef="let asset" class="border text-center">
               <div *ngIf="asset.qrCodeUrl">
-                <img [src]="asset.qrCodeUrl" alt="QR Code"
-                     style="width: 50px; height: 50px; margin-top: 5px;" />
+                <img [src]="asset.qrCodeUrl" alt="QR Code" style="width: 50px; height: 50px; margin-top: 5px;" />
               </div>
             </td>
           </ng-container>
-    
+
           <!-- Dynamic Columns -->
           <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header
-                class="mat-header-cell anuphan-600 border "
-                [ngStyle]="{ 
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="mat-header-cell anuphan-600 border " [ngStyle]="{ 
                   'color': 'black', 
                   'font-weight': 'bold', 
                   'width': columnWidths[column] || '5%' 
                 }">
               <div class="d-flex flex-column align-items-center">
                 <label cLabel>{{ column }}</label>
-                <input cFormControl sizing="sm" placeholder="ค้นหาข้อมูล"
-                       (keyup)="applyFilter($event, column)"
-                       [disabled]="column == 'สถานะ'" />
+                <input cFormControl sizing="sm" placeholder="ค้นหาข้อมูล" (keyup)="applyFilter($event, column)"
+                  [disabled]="column == 'สถานะ'" />
               </div>
             </th>
             <td mat-cell *matCellDef="let asset" class="anuphan-500 border ">
@@ -139,49 +130,47 @@
                   {{ asset[column] }}
                 </ng-container>
               </ng-container>
-    
+
               <!-- Currency Format -->
               <ng-template #currencyFormat>
                 {{ asset[column] | currency : "" : "" : "1.2-2" }}
               </ng-template>
-    
+
               <!-- Status Format -->
               <ng-template #status>
-                <span class="badge text-light"
-                      [ngClass]="{
+                <span class="badge text-light" [ngClass]="{
                         'text-bg-success': asset[column] !== 'โอนย้าย' && 
                                           asset[column] !== 'ซ่อมแซม' && 
                                           asset[column] !== '',
                         'text-bg-warning': asset[column] === 'โอนย้าย',
                         'text-bg-danger': asset[column] === 'ซ่อมแซม'
-                      }" 
-                      style="color: black; font-size: 16px;">
+                      }" style="color: black; font-size: 16px;">
                   {{ asset[column] || 'ปกติ' }}
                 </span>
               </ng-template>
             </td>
           </ng-container>
-    
+
           <!-- Header Row -->
           <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
-    
+
           <!-- Data Rows -->
-          <tr mat-row *matRowDef="let row; columns: displayedColumns3"
-              style="font-size: 12px;"></tr>
-    
+          <tr mat-row *matRowDef="let row; columns: displayedColumns3" style="font-size: 12px;"></tr>
+
         </table>
       </div>
     </div>
-    
 
-    <mat-paginator 
-        [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" 
-        [pageSize]="5" showFirstLastButtons
-        class="paginator-style ">
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" [pageSize]="5" showFirstLastButtons
+      class="paginator-style ">
     </mat-paginator>
-    <br/>
+    <br />
 
-    <button class="btn btn-sm btn-outline-success w-100 anuphan-400">ดูข้อมูลทั้งหมด</button>
+    <button class="btn btn-sm btn-outline-success w-100 anuphan-400" (click)="goToAssetDetails()">
+      ดูข้อมูลทั้งหมด
+    </button>
+
 
   </div>
 </div>

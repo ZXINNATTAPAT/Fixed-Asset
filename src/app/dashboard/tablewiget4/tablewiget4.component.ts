@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
 import { TextColorDirective, TableModule, UtilitiesModule, ButtonDirective, } from '@coreui/angular';
@@ -6,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
 import { ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { ChartDataset, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -62,11 +61,10 @@ export class Tablewiget4Component implements OnInit {
     { data: [], label: 'จำนวนครุภัณฑ์ที่ซ่อม' }
   ];
 
-  constructor(private http: HttpClient) { }
+  constructor(private ap:ApiService) { }
 
   ngOnInit(): void {
-    this.http.get<any[]>('https://localhost:7204/api/RepairAsset',
-      { withCredentials: true }).subscribe((data) => {
+    this.ap.assetService.getRepairAssets().subscribe((data) => {
       const allMonths = [
         'ม.ค. 2025', 'ก.พ. 2025', 'มี.ค. 2025', 'เม.ย. 2025',
         'พ.ค. 2025', 'มิ.ย. 2025', 'ก.ค. 2025', 'ส.ค. 2025',

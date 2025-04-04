@@ -90,31 +90,35 @@
         [dataSource]="dataSource">
 
         <!-- Actions Column -->
+        <!-- Actions Column -->
         <ng-container matColumnDef="Aactions">
-
           <th class="text-center border" mat-header-cell *matHeaderCellDef style="color: black; font-weight: bold">
             # <input cFormControl sizing="sm" disabled />
           </th>
 
           <td class="border" mat-cell *matCellDef="let asset" style="width: 12%">
 
-            <button class="btn btn-sm  btn-primary m-1" (click)="assetDialog(asset.AssetId)">
+            <!-- 🔍 ปุ่มดู (ทุกคนเห็นได้) -->
+            <button class="btn btn-sm btn-primary m-1" (click)="assetDialog(asset.AssetId)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilSearch"
                 style="color: white; width: 16px; height: 16px;"></svg>
             </button>
 
-            <button class="btn btn-sm  btn-warning m-1" (click)="editDialog(asset.AssetId)">
+            <!-- ✏️ ปุ่มแก้ไข (ซ่อนถ้าเป็นเจ้าหน้าที่ทั่วไปเท่านั้น) -->
+            <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-warning m-1" (click)="editDialog(asset.AssetId)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
                 style="color: white; width: 16px; height: 16px;"></svg>
             </button>
 
-            <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
+            <!-- 🗑️ ปุ่มลบ (ซ่อนถ้าเป็นเจ้าหน้าที่ทั่วไปเท่านั้น) -->
+            <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilTrash"
                 style="color: white; width: 16px; height: 16px;"></svg>
             </button>
-          </td>
 
+          </td>
         </ng-container>
+
 
         <ng-container matColumnDef="Qrcode">
           <th class="text-center border" mat-header-cell *matHeaderCellDef

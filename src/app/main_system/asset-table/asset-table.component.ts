@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
 import { TextColorDirective ,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective} from '@coreui/angular';
-import { CommonModule, DatePipe, NgStyle } from '@angular/common';
+import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -57,7 +57,7 @@ interface AssetDetails {
     MatSelectModule,
     ButtonDirective,
     NgxMatSelectSearchModule,
-    NgStyle,
+    NgStyle,NgIf
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
@@ -90,6 +90,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   assetCategory: any[] = [];
   filteredCategoryList: any[] = [];
+
+  userRoles: string[] = [];
 
   categoryCtrl: FormControl = new FormControl();
   categoryFilterCtrl: FormControl = new FormControl();
@@ -127,35 +129,41 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   ngOnInit(): void {
     this.initializeUserInfo();
+
     this.loadAssetTypes();
+
     // this.getAssetDetails();
+
     this.loadAssetCategory(); 
+    
     this.categoryFilterCtrl.valueChanges
     .pipe(takeUntil(this._onDestroy))
     .subscribe(() => {
       this.filterCategoryList();
     });}
+    
+    // โหลดข้อมูล UserInfo
+    private async initializeUserInfo(): Promise<void> {
+      this.dataService.userInfo$.subscribe(userInfo => {
+        if (userInfo) {
+          this.userinfo = userInfo.claims;
+          this.getAssetDetails();// ✅ เมื่อโหลด UserInfo เสร็จแล้ว ค่อยโหลด Asset Details
+        }
+      });    
 
-  
-  
-  
-  // โหลดข้อมูล UserInfo
-  private async initializeUserInfo(): Promise<void> {
-    this.dataService.userInfo$.subscribe(userInfo => {
-      if (userInfo) {
-        this.userinfo = userInfo.claims;
-        console.log("✅ UserInfo Loaded:", userInfo);
-  
-        // ✅ เมื่อโหลด UserInfo เสร็จแล้ว ค่อยโหลด Asset Details
-        this.getAssetDetails();
-      }
-    });    
+    this.apiService.authService.getUserRole().subscribe(res => {
+      this.userRoles = res.roles;
+    });
+  }
+
+  // ✅ ช่วยเช็กว่าเป็นเจ้าหน้าที่ทั่วไปหรือไม่
+  isGeneralStaffOnly(): boolean {
+    return this.userRoles.includes('เจ้าหน้าที่ทั่วไป') && this.userRoles.length === 1;
   }
   
-
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
-    this.apiService.fetchDatahttp(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}`).subscribe({
+    this.apiService.assetService.fetchData(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}`).subscribe({
       next: (data) => this.handleAssetDetails(data),
       error: (err) => console.error('Error loading Asset Details:', err),
     });
@@ -163,14 +171,14 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // โหลดข้อมูล Asset Types
   private loadAssetTypes(): void {
-    this.apiService.fetchDatahttp('Assettype').subscribe({
+    this.apiService.assetService.fetchData('Assettype').subscribe({
       next: (data) => (this.assetTypes = data),
       error: (err) => console.error('Error loading Asset Types:', err),
     });
   }
 
   private loadAssetCategory(): void {
-    this.apiService.fetchDatahttp('Assetcategories').subscribe({
+    this.apiService.assetService.fetchData('Assetcategories').subscribe({
       next: (data) => {
         this.assetCategory = data;
         this.filteredCategoryList = data.slice(); // ✅ ทำสำเนาเพื่อให้กรองได้
@@ -184,14 +192,12 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.data = this.selectedAssetType
       ? this.assetDetails.filter((asset) => asset.TypeId === this.selectedAssetType)
       : this.assetDetails;
-      // console.log('Filtered Asset Details:', this.selectedAssetType);
   }
 
   filterByCategory(): void {
     this.dataSource.data = this.selectedCategoryId
       ? this.assetDetails.filter(asset => asset.CategoryId === this.selectedCategoryId)
       : this.assetDetails;
-    // console.log('Filtered by CategoryId:', this.selectedCategoryId);
   }
 
   filterCategoryList(): void {
@@ -306,8 +312,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   showQrAsset(asset: any): void {
-    this.apiService
-      .fetchDatahttp('AssetDetails/' + asset.AssetId)
+    this.apiService.assetService.fetchData('AssetDetails/' + asset.AssetId)
       .subscribe((data: any) => {
         this.assets = data;
 
@@ -336,7 +341,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
     if (result.isConfirmed) {
       try {
-        await this.apiService.deleteData(`AssetDetails/${asset.AssetId}`);
+        await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`);
         const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
         if (index !== -1) {
           this.assetDetails.splice(index, 1);

@@ -17,7 +17,7 @@ import {
 } from '@coreui/angular';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-import { ApiService } from '../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
 
 @Component({
   selector: 'app-login',
@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit {
     const credentials = { username, password };
     this.isLoading = true; // เริ่ม Loading
   
-    this.authService.login(credentials).subscribe(
+    this.authService.authService.login(credentials).subscribe(
       (response: any) => {
         Swal.fire({
           icon: 'success',

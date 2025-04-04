@@ -3,7 +3,7 @@ import { TextColorDirective, InputGroupComponent, BorderDirective, RowComponent,
 import { CommonModule, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import Swal from 'sweetalert2';
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput, } from '@angular/material/datepicker';
@@ -166,7 +166,7 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   /** โหลดข้อมูลผู้ตรวจสอบ */
   private async loadInspectors() {
     try {
-      this.ap.fetchDatahttp('users?role=Inspector').subscribe(inspectors => {
+      this.ap.assetService.fetchData('users?role=Inspector').subscribe(inspectors => {
         this.inspectors = inspectors || [];
       });
     } catch (error) {
@@ -187,7 +187,7 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   /** โหลดข้อมูลสำนัก */
   private async loadDepartments() {
     try {
-      this.ap.fetchDatahttp('departments').subscribe((departments: any[]) => {
+      this.ap.assetService.fetchData('departments').subscribe((departments: any[]) => {
         // 🔹 แยกฝ่าย (Factions) ออกจาก Departments
         this.departments = departments.map((dept: any) => ({
           DeptId: dept.DeptId,
@@ -283,7 +283,7 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const data = await firstValueFrom(this.ap.fetchDatahttp(`AssetDetails?search=${encodeURIComponent(search)}`));
+      const data = await firstValueFrom(this.ap.assetService.fetchData(`AssetDetails?search=${encodeURIComponent(search)}`));
       if (data && data.length > 0) {
         const asset = data[0];
 
@@ -374,7 +374,7 @@ extractAssetIdFromUrl(url: string): string | null {
 
 /** 🔍 ดึงข้อมูลครุภัณฑ์จาก QR Code */
 fetchAssetById(id: string) {
-  this.ap.fetchDatahttpbyId(`AssetDetails`,id).subscribe({
+  this.ap.assetService.fetchDataById(`AssetDetails`,id).subscribe({
     next: (assetData) => {
       console.log('✅ Asset Data:', assetData);
       
@@ -447,7 +447,7 @@ fetchAssetById(id: string) {
     console.log('📤 ส่งข้อมูลไปที่ API:', sessionRequest);
   
     try {
-      await this.ap.postData('AssetInventorySession', sessionRequest);
+      await this.ap.assetService.postData('AssetInventorySession', sessionRequest);
 
       Swal.fire({
         icon: 'success',

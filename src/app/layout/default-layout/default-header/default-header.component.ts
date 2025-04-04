@@ -32,7 +32,7 @@ import { cilAccountLogout, cilUser } from '@coreui/icons';
 import CountyData from './County.json';
 import { HttpClient } from '@angular/common/http';
 // import { json } from 'stream/consumers';
-import { ApiService } from '../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
 import { DataService } from '../../../../data-service/data-service.component';
 import { navItems, INavData } from '../_nav';
 import { NotificationService } from '../../../services/notification.service';
@@ -240,7 +240,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   // ✅ ฟังก์ชัน Logout
   Logout(): void {
-    this.apiService.logout().subscribe({
+    this.apiService.userService.logout().subscribe({
       next: () => {
         console.log('✅ Logged out from server.');
   

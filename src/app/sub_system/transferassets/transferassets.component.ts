@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
 import { debounceTime, distinctUntilChanged, ReplaySubject} from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -141,7 +141,7 @@ export class TransferassetsComponent implements OnInit {
     };
   
     // เรียก API PUT เพื่ออัปเดต Department และ Faction
-    this.ap.updateData(`AssetDetails/${assetId}/UpdateDepartmentAndFaction`, payload)
+    this.ap.assetService.updateData(`AssetDetails/${assetId}/UpdateDepartmentAndFaction`, payload)
     .then(() => {
       alert('อัปเดตข้อมูลสำเร็จ');
     })
@@ -161,7 +161,7 @@ export class TransferassetsComponent implements OnInit {
     if (!assetCode) {alert('กรุณาระบุรหัสครุภัณฑ์'); return;}
 
     // เรียก API ใหม่ GetTransferDetails
-    this.ap.fetchDatahttp(`AssetDetails/GetTransferDetails?search=${assetCode}`).subscribe({
+    this.ap.assetService.fetchData(`AssetDetails/GetTransferDetails?search=${assetCode}`).subscribe({
       next: (data: any) => {
         if (data && data.length > 0) {
           const asset = data[0];
@@ -181,7 +181,7 @@ export class TransferassetsComponent implements OnInit {
   }
 
   loadDepartments(): void {
-    this.ap.fetchDatahttp('Departments').subscribe((data: any) => {
+    this.ap.assetService.fetchData('Departments').subscribe((data: any) => {
       this.departments = data;
       this.filteredDepartments.next(this.departments.slice());
     });

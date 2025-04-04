@@ -1,19 +1,9 @@
+import {ContainerComponent,ShadowOnScrollDirective,SidebarBrandComponent,SidebarComponent,SidebarFooterComponent,SidebarHeaderComponent,SidebarNavComponent,SidebarToggleDirective,SidebarTogglerDirective} from '@coreui/angular';
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
 import { IconDirective } from '@coreui/icons-angular';
-import {
-  ContainerComponent,
-  INavData,
-  ShadowOnScrollDirective,
-  SidebarBrandComponent,
-  SidebarComponent,
-  SidebarFooterComponent,
-  SidebarHeaderComponent,
-  SidebarNavComponent,
-  SidebarToggleDirective,
-  SidebarTogglerDirective
-} from '@coreui/angular';
+
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { ICustomNavData, navItems as staticNavItems } from './_nav';// นำเข้าค่า navItems เดิม
 import { DataService } from '../../../data-service/data-service.component';
@@ -25,30 +15,15 @@ function isOverflown(element: HTMLElement) {
     element.scrollWidth > element.clientWidth
   );
 }
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './default-layout.component.html',
   styleUrls: ['./default-layout.component.scss'],
   standalone: true,
-  imports: [
-    SidebarComponent,
-    SidebarHeaderComponent,
-    SidebarBrandComponent,
-    RouterLink,
-    IconDirective,
-    NgScrollbar,
-    NgIf,NgStyle,
-    CommonModule,
-    SidebarNavComponent,
-    SidebarFooterComponent,
-    SidebarToggleDirective,
-    SidebarTogglerDirective,
-    DefaultHeaderComponent,
-    ShadowOnScrollDirective,
-    ContainerComponent,
-    RouterOutlet,
-    DefaultFooterComponent
+  imports: [SidebarComponent,SidebarHeaderComponent,SidebarBrandComponent,RouterLink,
+    IconDirective,NgScrollbar,NgIf,NgStyle,CommonModule,SidebarNavComponent,SidebarFooterComponent,
+    SidebarToggleDirective,SidebarTogglerDirective,DefaultHeaderComponent,
+    ShadowOnScrollDirective,ContainerComponent,RouterOutlet,DefaultFooterComponent
   ]
 })
 export class DefaultLayoutComponent implements OnInit {
@@ -66,7 +41,6 @@ export class DefaultLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.navItems = staticNavItems; // ✅ โหลดค่า navItems ก่อน
-    // console.log("✅ Nav Items Loaded:", this.navItems); // ตรวจสอบว่ามีค่า
     this.initializeUserData();
   }
   ngAfterViewInit() {

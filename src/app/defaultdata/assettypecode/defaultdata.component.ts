@@ -9,7 +9,7 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 interface AssetDetails {
   assetCode: string;
@@ -55,7 +55,7 @@ export class DefaultdataComponent implements OnInit {
 
   async onSubmit() {
     try {
-      const response = await this.apiService.postData(
+      const response = await this.apiService.assetService.postData(
         'Assettype/',
         this.asset
       );
@@ -87,7 +87,7 @@ export class DefaultdataComponent implements OnInit {
   assetDetailsset: any[] = [];
 
   getAssetType(): void {
-    this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
+    this.apiService.assetService.fetchData('Assettype').subscribe((data) => {
       this.assetDetails = data.map((asset: any) => this.translateToThai(asset)); // Apply translation
       this.assetDetailsset = [...this.assetDetails]; // Clone the array for immutability
       this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
@@ -148,7 +148,7 @@ export class DefaultdataComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.apiService.deleteData(`Assettype/${asset.TypeId}`)
+        this.apiService.assetService.deleteData(`Assettype/${asset.TypeId}`)
           .then(() => {
             const index = this.assetDetailsset.findIndex(
               (a) => a.TypeId === asset.TypeId

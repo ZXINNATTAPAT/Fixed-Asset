@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 // import { BehaviorSubject, debounceTime, distinctUntilChanged, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
 import { MatFormField, MatLabel, MatOption, MatSelect } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ApiService } from '../../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../../ApiController/apiservice/api-service.service';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerInput, MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
@@ -137,7 +137,7 @@ export class EditAssetDialog implements OnInit, OnDestroy, AfterViewInit {
     if (this.assetData?.id && !this.assetData.AssetCode) {
       this.assetId = this.assetData.id;
       // 🔁 ดึงข้อมูล Asset ถ้ามีแค่ ID
-      this.api.fetchDatahttpbyId('AssetDetails', this.assetData.id).subscribe({
+      this.api.assetService.getAssetById('AssetDetails', this.assetData.id).subscribe({
         next: (res) => this.patchFormWithAsset(res),
         error: (err) => console.error('ไม่สามารถโหลดข้อมูล Asset:', err)
       });
@@ -206,20 +206,20 @@ export class EditAssetDialog implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadDropdowns(): void {
-    this.api.fetchDatahttp('Assettype').subscribe(data => this.assetTypes = data);
+    this.api.assetService.fetchData('Assettype').subscribe(data => this.assetTypes = data);
 
-    this.api.fetchDatahttp('AssetCategories').subscribe(data => this.assetCategories = data);
+    this.api.assetService.fetchData('AssetCategories').subscribe(data => this.assetCategories = data);
 
-    this.api.fetchDatahttp('Departments').subscribe(data => this.departments = data);
+    this.api.assetService.fetchData('Departments').subscribe(data => this.departments = data);
 
-    this.api.fetchDatahttp('Factiontypecodes').subscribe(data => this.factions = data);
+    this.api.assetService.fetchData('Factiontypecodes').subscribe(data => this.factions = data);
 
-    this.api.fetchDatahttp('Status').subscribe(data => this.statuses = data);
+    this.api.assetService.fetchData('Status').subscribe(data => this.statuses = data);
   }
 
   onSubmit(): void {
     if (this.form.valid) {
-      this.api.updateData2(`AssetDetails`,this.assetId, this.form.value)
+      this.api.assetService.updateDataById(`AssetDetails`,this.assetId, this.form.value)
         .then(() => {
           alert('บันทึกข้อมูลสำเร็จ!');
           this.dialogRef.close(true);

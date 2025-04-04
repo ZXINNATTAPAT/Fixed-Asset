@@ -1,28 +1,10 @@
-import {
-  AfterContentInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  OnInit,
-} from '@angular/core';
+import {AfterContentInit,ChangeDetectionStrategy,ChangeDetectorRef,Component,OnInit,} from '@angular/core';
 import { getStyle } from '@coreui/utils';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
 import { Router, RouterLink } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
-import {
-  RowComponent,
-  ColComponent,
-  WidgetStatAComponent,
-  TemplateIdDirective,
-  ThemeDirective,
-  DropdownComponent,
-  ButtonDirective,
-  DropdownToggleDirective,
-  DropdownMenuDirective,
-  DropdownItemDirective,
-  DropdownDividerDirective,
-} from '@coreui/angular';
-import { ApiService } from '../../../../ApiController/api-service.service';
+import {RowComponent,ColComponent,WidgetStatAComponent,TemplateIdDirective,ThemeDirective,DropdownComponent,ButtonDirective,DropdownToggleDirective,DropdownMenuDirective,DropdownItemDirective,DropdownDividerDirective,} from '@coreui/angular';
+import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
 import {
   cibAddthis,
   cilArrowCircleRight,
@@ -123,7 +105,7 @@ loadAssetCounts(): void {
 
   const url = `Assettype/AssetCountsByTypeCode?deptId=${this.userinfo.DeptId}`;
 
-  this.apiService.fetchDatahttp(url)
+  this.apiService.assetService.fetchData(url)
     .pipe(
       tap((counts: any[]) => {
         console.log('✅ Asset counts response:', counts);
@@ -166,7 +148,7 @@ loadUserCount(): void {
 
   const url = `Users/count/by-department/${this.userinfo.DeptId}`;
 
-  this.apiService.fetchDatahttp(url)
+  this.apiService.assetService.fetchData(url)
     .pipe(
       tap((userCount: number) => {
         this.numberOfUsers = userCount;

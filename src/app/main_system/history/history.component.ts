@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { IconDirective } from '@coreui/icons-angular';
 import { cilPencil } from '@coreui/icons';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -16,7 +16,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
   styleUrl: './history.component.scss'
 })
 export class HistoryComponent implements OnInit {
-  
+
   assetId!: number;
   data: any[] = [];
   icons = { cilPencil };
@@ -42,7 +42,7 @@ export class HistoryComponent implements OnInit {
     }
 
     // ดึงข้อมูลประวัติจาก API
-    this.ap.fetchDatahttp('AssetDetailsAudit').pipe(
+    this.ap.assetService.fetchData('AssetDetailsAudit').pipe(
       map((response: any[]) => {
         return response.filter(item => item.AssetId === this.assetId);
       })

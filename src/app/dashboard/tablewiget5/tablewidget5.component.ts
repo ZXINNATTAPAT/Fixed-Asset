@@ -1,7 +1,7 @@
 import { Component, OnInit ,ChangeDetectorRef  } from '@angular/core';
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 @Component({
   selector: 'app-tablewiget5',

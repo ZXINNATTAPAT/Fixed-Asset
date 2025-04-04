@@ -6,7 +6,7 @@ import { MatTabContent, MatTabsModule } from '@angular/material/tabs';
 import { HistoryComponent } from '../history/history.component'
 import { CommonModule, NgStyle } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { SubAssetDialogComponent } from './Subasset/subasset/subasset.component';
 import { RepairAssetComponent } from './repair-history/repair-history/repair-history.component';
 
@@ -86,7 +86,7 @@ export class InfoassetComponent {
 
     if (this.assetId) {
       // เรียกข้อมูล AssetDetails จาก API
-      this.ap.fetchDatahttpbyId2(`AssetDetails/infoasset`, this.assetId)
+      this.ap.assetService.fetchDataById(`AssetDetails/infoasset`, this.assetId)
         .subscribe((data: any) => {
           this.assets = data;
           console.log('Asset Details:', this.assets);
@@ -123,7 +123,7 @@ export class InfoassetComponent {
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    this.ap.postData(`AssetImages/upload/${this.assetId}`, formData)
+    this.ap.assetService.postData(`AssetImages/upload/${this.assetId}`, formData)
       .then((res: any) => {
         this.uploadMessage = '✅ อัปโหลดเรียบร้อยแล้ว!';
         this.previewUrl = null;
@@ -137,7 +137,7 @@ export class InfoassetComponent {
   }
 
   loadAssetImages() {
-    this.ap.fetchDatahttpbyId2('AssetImages/by-asset', this.assetId).subscribe({
+    this.ap.assetService.fetchDataById('AssetImages/by-asset', this.assetId).subscribe({
       next: (data: any) => {
         this.assetImages = data;
       },

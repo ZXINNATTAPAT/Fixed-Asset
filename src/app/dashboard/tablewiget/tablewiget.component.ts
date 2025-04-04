@@ -3,7 +3,7 @@ import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirectiv
 import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -17,6 +17,7 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
 import { myFunction } from './utils';
 import { DataService } from '../../../data-service/data-service.component';
+import { Router } from '@angular/router';
 
 interface AssetDetails {
   assetId: any;
@@ -78,7 +79,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private dataSubscription!: Subscription;
 
-  constructor(private apiService: ApiService ,private dataService :DataService) {
+  constructor(private apiService: ApiService ,private dataService :DataService,private router: Router) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -100,7 +101,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
         }),
         switchMap((userInfo: any) => {
           if (userInfo.claims.DeptId) {
-            return this.apiService.fetchDatahttp(`AssetDetails?deptId=${userInfo.claims.DeptId}&page=1&pageSize=20`);
+            return this.apiService.assetService.fetchData(`AssetDetails?deptId=${userInfo.claims.DeptId}&page=1&pageSize=20`);
           }
           return of([]); // ถ้าไม่มี DeptId ให้ return ค่าว่างแทน
         })
@@ -109,7 +110,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
         this.processAssetData(data);
       });
   
-    this.apiService.fetchDatahttp('Assettype').subscribe((data) => {
+    this.apiService.assetService.fetchData('Assettype').subscribe((data) => {
       this.assetTypes = data;
     });
   }
@@ -117,8 +118,8 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   // 📌 API จะโหลดข้อมูลเป็นเซ็ต (หน้าแรก 20 รายการ)
   getAssetDetails(page: number = 1, pageSize: number = 20): void {
     if (this.userinfo?.DeptId) {
-      this.dataSubscription = this.apiService
-        .fetchDatahttp(`AssetDetails?deptId=${this.userinfo.DeptId}&page=${page}&pageSize=${pageSize}`)
+      this.dataSubscription = this.apiService.assetService
+        .fetchData(`AssetDetails?deptId=${this.userinfo.DeptId}&page=${page}&pageSize=${pageSize}`)
         .subscribe((data) => {
           this.processAssetData(data);
         });
@@ -238,8 +239,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   
 
   showQrAsset(asset: any): void {
-    this.apiService
-      .fetchDatahttp('AssetDetails/' + asset.assetId)
+    this.apiService.assetService.fetchData('AssetDetails/' + asset.assetId)
       .subscribe((data: any) => {
         this.assets = data;
 
@@ -294,7 +294,6 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     // }
   }
 
-
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
 
@@ -343,5 +342,9 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
       a.download = 'assets.xlsx';
       a.click();
     });
+  }
+
+  goToAssetDetails(): void {
+    this.router.navigate(['/system/main/assetDetails']);
   }
 }

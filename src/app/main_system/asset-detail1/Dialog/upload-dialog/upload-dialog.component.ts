@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { ExcelService } from '../../Service/excel.service';
-import { ApiService } from '../../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../../ApiController/apiservice/api-service.service';
 import { MatCommonModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 
@@ -78,7 +78,7 @@ export class UploadDialogComponent {
   private async sendRequest(asset: any): Promise<void> {
     try {
       console.log('Sending asset data:', asset);
-      const response = await firstValueFrom(await this.ap.postData('AssetDetails', asset));
+      const response = await firstValueFrom(await this.ap.assetService.postData('AssetDetails', asset));
       console.log('Response:', response);
       Swal.fire({
         title: 'Success',

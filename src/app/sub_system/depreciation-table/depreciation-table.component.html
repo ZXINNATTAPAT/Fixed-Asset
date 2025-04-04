@@ -46,7 +46,7 @@
         </div>
     
       <div class="table-responsive" style="overflow-x: auto;">
-        <table mat-table [dataSource]="dataSource" class="table table-striped shadow-sm" style="min-width: 1600px;">
+        <table mat-table [dataSource]="dataSource" class="table table-striped" style="min-width: 1600px;">
 
             <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef class=" border"> # </th>
@@ -69,67 +69,67 @@
           <!-- รหัส -->
           <ng-container matColumnDef="code">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 " style="min-width: 180px;"> รหัส </th>
-            <td mat-cell *matCellDef="let a" class="border" style="min-width: 180px;"> {{ a.AssetCode }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500" style="min-width: 180px;"> {{ a.AssetCode }} </td>
           </ng-container>
   
           <!-- รายการ -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 " style="min-width: 280px;"> รายการ </th>
-            <td mat-cell *matCellDef="let a" class="border" style="min-width: 280px;"> {{ a.AssetName }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500" style="min-width: 280px;"> {{ a.AssetName }} </td>
           </ng-container>
   
           <!-- ราคา -->
           <ng-container matColumnDef="price">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> ราคา </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ a.PurchasePrice | number:'1.2-2' }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ a.PurchasePrice | number:'1.2-2' }} </td>
           </ng-container>
   
           <!-- จำนวน -->
           <ng-container matColumnDef="qty">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> จำนวน </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ a.Quantity }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ a.Quantity }} </td>
           </ng-container>
   
           <!-- จำนวนเงิน -->
           <ng-container matColumnDef="amount">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> จำนวนเงิน </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ getAmount(a) | number:'1.2-2' }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ getAmount(a) | number:'1.2-2' }} </td>
           </ng-container>
   
           <!-- อัตราค่าเสื่อม -->
           <ng-container matColumnDef="rate">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> อัตราค่าเสื่อม </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ getDepreciationRate(a) }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ getDepreciationRate(a) }} </td>
           </ng-container>
   
           <!-- มูลค่าทรัพย์สินต้นงวด -->
           <ng-container matColumnDef="openingValue">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 " style="min-width: 150px;"> มูลค่าทรัพย์สินต้นงวด </th>
-            <td mat-cell *matCellDef="let a" class="border"style="min-width: 150px;"> {{ a.PurchasePrice | number:'1.2-2' }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"style="min-width: 150px;"> {{ a.PurchasePrice | number:'1.2-2' }} </td>
           </ng-container>
   
           <!-- ค่าเสื่อมราคาประจำปี -->
           <ng-container matColumnDef="depreciation">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> ค่าเสื่อมราคาประจำปี </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ a.DepreciationValue | number:'1.2-2' }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ a.DepreciationValue | number:'1.2-2' }} </td>
           </ng-container>
   
           <!-- ค่าเสื่อมสะสม -->
           <ng-container matColumnDef="accumulated">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> ค่าเสื่อมราคาสะสม </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ a.AccumulatedDepreciation | number:'1.2-2' }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ a.AccumulatedDepreciation | number:'1.2-2' }} </td>
           </ng-container>
   
           <!-- มูลค่าสุทธิ -->
           <ng-container matColumnDef="netValue">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> มูลค่าทรัพย์สินสุทธิ </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ a.BookValue | number:'1.2-2' }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ a.BookValue | number:'1.2-2' }} </td>
           </ng-container>
   
           <!-- วันที่รับ -->
           <ng-container matColumnDef="received">
             <th mat-header-cell *matHeaderCellDef class="border anuphan-700 "> วันที่รับ </th>
-            <td mat-cell *matCellDef="let a" class="border"> {{ formatDate(a.ReceiptDate) }} </td>
+            <td mat-cell *matCellDef="let a" class="border anuphan-500"> {{ formatDate(a.ReceiptDate) }} </td>
           </ng-container>
   
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -1,15 +1,14 @@
 import { AfterViewInit,Component,Injectable,OnDestroy,OnInit,ViewChild,} from '@angular/core';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { NgIf, NgStyle } from '@angular/common';
-import { cilPencil,cilTrash,cibAddthis,cilDataTransferDown,cilInfo,} from '@coreui/icons';
 import { MatFooterRow,MatRowDef,MatTableDataSource,MatTableModule,} from '@angular/material/table';
 import { MatPaginator,MatPaginatorIntl,MatPaginatorModule,} from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import 'moment/locale/th.js';
 import { Subject, Subscription } from 'rxjs';
-import { DataService } from '../../../data-service/data-service.component';
 import { ChartDataset, ChartOptions, ChartType } from 'chart.js';
 import { BaseChartDirective  } from 'ng2-charts';
+import { Router } from '@angular/router';
 
 interface AssetDetails {
   assetId: number;
@@ -84,7 +83,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private apiService: ApiService, private dataService: DataService) {}
+  constructor(private apiService: ApiService, private router :Router) {}
 
   ngOnInit(): void {
     this.loadAssetData();
@@ -103,7 +102,7 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
 
   // ✅ โหลดข้อมูลจาก API
   loadAssetData(): void {
-    this.dataSubscription = this.apiService.fetchDatahttp('AssetDetails/AssetCountsByCategory').subscribe({
+    this.dataSubscription = this.apiService.assetService.fetchData('AssetDetails/AssetCountsByCategory').subscribe({
       next: (data) => {
         this.assets = data;
         this.dataSource.data = this.assets;
@@ -154,6 +153,10 @@ export class Tablewiget3Component implements OnInit, OnDestroy, AfterViewInit {
   // ✅ กลับไปดู AssetType หลัก
   goBack(): void {
     this.updateMainChart();
+  }
+
+  goToAssetDetails(): void {
+    this.router.navigate(['/system/main/assetDetails']);
   }
 }
 

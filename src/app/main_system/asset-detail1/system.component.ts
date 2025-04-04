@@ -18,7 +18,7 @@ import { BehaviorSubject, Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { DataService } from '../../../data-service/data-service.component';
-import { ApiService } from '../../../ApiController/api-service.service';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { AssetService } from './Service/asset.service'
 import { FilterService } from './Service/filter.service';
 import { UploadDialogComponent } from './Dialog/upload-dialog/upload-dialog.component';
@@ -198,7 +198,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     
         if (typeId && receiptDate && purchasePrice > 0) {
           // เรียก API เมื่อค่าฟอร์มครบถ้วน
-          this.ap.fetchDatahttpbyId('Depreciations/type', typeId)
+          this.ap.assetService.fetchDataById('Depreciations/type', typeId)
           .subscribe((depreciations) => {
             this.updateDepreciationSchedule(depreciations);
           });
@@ -294,12 +294,12 @@ export class SystemComponent implements OnInit, OnDestroy {
 
     this.asset.get('TypeId')?.valueChanges.pipe(
       filter((typeId) => !!typeId),
-      switchMap((typeId) => this.ap.fetchDatahttpbyId('Assetcategories/by-type', typeId))
+      switchMap((typeId) => this.ap.assetService.fetchDataById('Assetcategories/by-type', typeId))
     ).subscribe((data) => this.handleAssetCategoryChange(data));
 
     this.asset.get('TypeId')?.valueChanges.pipe(
       filter((typeId) => !!typeId), // ตรวจสอบว่า typeId ไม่เป็น null หรือ undefined
-      switchMap((typeId) => this.ap.fetchDatahttpbyId('Depreciations/type', typeId)) // เรียก API
+      switchMap((typeId) => this.ap.assetService.fetchDataById('Depreciations/type', typeId)) // เรียก API
     ).subscribe((depreciations) => {
       this.updateDepreciationSchedule(depreciations);
     });
@@ -341,7 +341,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   // Load initial data for asset types and categories
   private loadInitialData(): void {
-    this.ap.fetchDatahttp('Assettype').subscribe((data) => (this.assetTypes = data));
+    this.ap.assetService.fetchData('Assettype').subscribe((data) => (this.assetTypes = data));
     this.assetCategoryCtrl = this.formBuilder.control(null);
   }
 
@@ -350,7 +350,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     if (Array.isArray(data)) {
       this.assetCategory = data;
       this.assetCategoryCtrl.setValue(null);
-      console.log('Asset Categories:', this.assetCategory);
+      // console.log('Asset Categories:', this.assetCategory);
     } else {
       console.error('Unexpected data format:', data);
     }
@@ -436,7 +436,7 @@ export class SystemComponent implements OnInit, OnDestroy {
       Year: year.toString(),
     };
 
-    this.ap.generateAssetCode(payload).subscribe({
+    this.ap.assetService.generateAssetCode(payload).subscribe({
       next: (response) => {
         if (response && response.assetCode) {
           this.handleGeneratedAssetCode(response.assetCode, year.toString());
@@ -493,7 +493,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
     const resourceId = '5b2605ca-cd5c-4034-bc35-3c681c6fedaa';
 
-    this.ap.getData(resourceId).pipe(
+    this.ap.externalDataService.getData(resourceId).pipe(
       catchError(() => {
         console.error('Error fetching countingUnits. Defaulting to empty array.');
         return of([]);
@@ -511,7 +511,7 @@ export class SystemComponent implements OnInit, OnDestroy {
           });
     
           this.filteredUnits.next(this.countingUnits.slice());
-          console.log('CountingUnits:', this.countingUnits);
+          // console.log('CountingUnits:', this.countingUnits);
         } else {
           console.warn('No records found for Countingunits.');
         }
@@ -522,7 +522,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     );
     
 
-    this.ap.fetchDatahttp('Departments').pipe(
+    this.ap.assetService.fetchData('Departments').pipe(
       catchError((error) => {
         console.error('Error fetching departments and factions:', error);
         return of({ Factions: [], Departments: [] }); // Provide default structure
@@ -535,7 +535,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
         // Debugging logs
         // console.log('Factions:', this.factions);
-        console.log('Departments:', this.Department);
+        // console.log('Departments:', this.Department);
       });
 
     this.setupFilterListeners();
@@ -580,7 +580,7 @@ export class SystemComponent implements OnInit, OnDestroy {
       }
   
       // ✅ ส่งข้อมูลไปยัง API
-      await this.ap.postData('AssetDetails', dataToSend);
+      await this.ap.assetService.postData('AssetDetails', dataToSend);
   
       // ✅ แจ้งเตือนเมื่อสำเร็จ
       Swal.fire({
@@ -634,7 +634,9 @@ export class SystemComponent implements OnInit, OnDestroy {
     const assetCodeInput = this.asset.get('AssetCode');
 
     // const depreciationStartDateInput = this.asset.get('ReceiptDate');
+
     // const depreciationStartDateInput = this.asset.get('DepreciationStartDate');
+
     // depreciationStartDateInput?.value?.setValue(this.asset.get('DepreciationStartDate')?.value)
 
     if (assetCodeInput && assetCodeInput.value) {
@@ -750,7 +752,7 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   // Handle faction selection
   onFactionChange(event: MatSelectChange): void {
-    console.log('Selected value:', event.value); // e.g., "ฝวส"
+    // console.log('Selected value:', event.value); // e.g., "ฝวส"
     this.asset.patchValue({ FactionId: event.value }); // Update form control value
   }
 
@@ -766,18 +768,13 @@ export class SystemComponent implements OnInit, OnDestroy {
   }
 
   onUnitChange(event: MatSelectChange): void {
-    console.log('Selected value:', event.value);
-    // console.log('MatSelect source:', event.source); 
     this.asset.patchValue({ Unit: event.value }); // Update form control value
   }
 
   private updateDepreciationSchedule(depreciations: any): void {
-
-    // console.log('Received Depreciations:', depreciations);
   
     // ตรวจสอบว่า depreciations มีข้อมูลหรือไม่
     if (!depreciations || depreciations.length === 0) {
-      console.log('ไม่พบข้อมูลค่าเสื่อมราคา');
       this.asset.get('DepreciationRate')?.setValue('');
       this.asset.get('AssetAge')?.setValue('');
       return;
@@ -791,11 +788,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     this.asset.get('DepreciationRate')?.setValue(depreciationRate, { emitEvent: false });
 
     this.asset.get('AssetAge')?.setValue(assetAge, { emitEvent: false });
-  
-    console.log('Depreciation Rate:', depreciationRate);
-    
-    console.log('Asset Age:', assetAge);
-  
+
     // ดึงข้อมูลจากฟอร์ม
     const purchasePrice = this.asset.get('PurchasePrice')?.value || 0;
 
@@ -810,10 +803,10 @@ export class SystemComponent implements OnInit, OnDestroy {
         receiptDate
       );
   
-      console.log('Depreciation Schedule:', schedule);
-
       this.asset.get('AccumulatedDepreciation')?.setValue(schedule[0].accumulatedDepreciation);
+
       this.asset.get('BookValue')?.setValue(schedule[0].bookValue);
+
       this.asset.get('DepreciationValue')?.setValue(schedule[0].depreciation);
   
       // ตั้งค่าผลลัพธ์ในฟอร์ม (ถ้าต้องการ)

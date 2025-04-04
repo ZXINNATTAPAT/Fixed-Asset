@@ -3,7 +3,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { IconDirective } from '@coreui/icons-angular';
 import { CommonModule } from '@angular/common';
-import { ApiService, AssetInventorySession } from '../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
 import { AssetInventorySessionHelper } from './utils';
 import { MatDialog } from '@angular/material/dialog';
 import { cilSearch, cilPencil, cilTrash, cilInfo } from '@coreui/icons';
@@ -14,6 +14,7 @@ import { AssetInventoryComponent } from '../asset-inventory/asset-inventory.comp
 import { TextColorDirective, FormDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 import Swal from 'sweetalert2';
 import { EditSessionDialogComponent } from './Dialog/edit-session-dialog/edit-session-dialog.component';
+import { AssetInventorySession } from 'src/ApiController/apiservice/inventory/inventory.service';
 
 @Component({
   selector: 'app-asset-inventory-session',
@@ -75,7 +76,7 @@ export class AssetInventorySessionComponent implements OnInit {
 
   // ✅ โหลดข้อมูล session พร้อมแปลงวันที่และชื่อ
   private getAssetDetails(): void {
-    this.apiService.fetchDatahttp('AssetInventorySession').subscribe({
+    this.apiService.assetService.fetchData('AssetInventorySession').subscribe({
       next: (data) => {
         this.assetDetails = (data as AssetInventorySession[]).map(session => ({
           ...session,
@@ -141,7 +142,7 @@ export class AssetInventorySessionComponent implements OnInit {
     this.selectedSessionName = session ? session.SessionName : 'ไม่พบชื่อรอบ';
 
     // โหลดข้อมูล InventoryDetails ตาม SessionId
-    this.apiService.fetchDatahttp(`AssetInventorySession/${sessionId}`).subscribe({
+    this.apiService.assetService.fetchData(`AssetInventorySession/${sessionId}`).subscribe({
       next: (data) => {
         this.inventoryDetails = data.InventoryDetails || []; // ถ้าไม่มีข้อมูลให้กำหนดเป็นอาร์เรย์ว่าง
       },
@@ -199,7 +200,8 @@ export class AssetInventorySessionComponent implements OnInit {
 
           console.log("Updated Data:", updatedData); // ✅ Debug ก่อนส่ง API
 
-          await this.apiService.updateData(`AssetInventorySession/${sessionId}`, updatedData);
+          await this.apiService.assetService.updateDataById('AssetInventorySession', sessionId, updatedData);
+
           Swal.fire('สำเร็จ', 'อัปเดตข้อมูลเรียบร้อยแล้ว', 'success');
           this.getAssetDetails();
         } catch (error) {
@@ -225,7 +227,7 @@ export class AssetInventorySessionComponent implements OnInit {
 
     if (confirmDelete.isConfirmed) {
       try {
-        await this.apiService.deleteData(`AssetInventorySession/${session.SessionId}`);
+        await this.apiService.assetService.deleteData(`AssetInventorySession/${session.SessionId}`);
         Swal.fire('สำเร็จ', 'ลบข้อมูลเรียบร้อยแล้ว', 'success');
         console.log('Deleted session:', session.SessionId);
 

@@ -4,7 +4,7 @@ import { map } from 'rxjs';
 import { IconDirective } from '@coreui/icons-angular';
 import { cilPencil } from '@coreui/icons';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ApiService } from '../../../../../ApiController/api-service.service';
+import { ApiService } from '../../../../../ApiController/apiservice/api-service.service';
 import { CommonModule } from '@angular/common';
 
 export interface SubAsset {
@@ -46,7 +46,7 @@ export class SubAssetDialogComponent implements OnInit {
   }
 
   loadSubAssets(assetId: number): void {
-    this.subAssetService.fetchDatahttp(`SubAssets?assetId=${assetId}`).subscribe({
+    this.subAssetService.assetService.fetchData(`SubAssets?assetId=${assetId}`).subscribe({
       next: (res) => {
         this.data = res;
         console.log('SubAssets loaded:', res);
