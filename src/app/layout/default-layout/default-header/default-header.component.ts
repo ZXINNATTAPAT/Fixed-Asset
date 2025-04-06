@@ -240,7 +240,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   // ✅ ฟังก์ชัน Logout
   Logout(): void {
-    this.apiService.userService.logout().subscribe({
+    this.apiService.authService.logout().subscribe({
       next: () => {
         console.log('✅ Logged out from server.');
   

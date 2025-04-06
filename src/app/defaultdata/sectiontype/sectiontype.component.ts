@@ -12,6 +12,7 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
 import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 interface AssetDetails {
   sectioncode: string,
@@ -55,7 +56,7 @@ export class SectiontypeComponent {
   
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router,private ap :ApiService){ }
 
   displayedColumns2: string[] = ["รหัสแผนก", "ชื่อแผนก"];
   assetDetailsset: any[] = [];
@@ -63,10 +64,10 @@ export class SectiontypeComponent {
   ngOnInit(): void { this.getAssetType(); }
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Departments', { withCredentials: true }).subscribe(data => {
-      this.assetDetails = data.map(asset => {
+    this.ap.assetService.fetchData('Departments').subscribe(data => {
+      this.assetDetails = data.map((asset: { [key: string]: any }) => {
         asset = this.translateToThai(asset);
-        return asset;
+        return asset as AssetDetails;
       });
       this.assetDetailsset = this.assetDetails;
       this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
@@ -94,11 +95,12 @@ export class SectiontypeComponent {
       sectionCode,
       sectionName
     };
-    this.http.post('https://localhost:7204/api/SectionTypeCodes', newAssetType, { withCredentials: true }).subscribe(
+    this.ap.assetService.postData('SectionTypeCodes', newAssetType).then(
       response => {
         console.log('Asset Type created:', response);
         this.getAssetType(); // Refresh data after post
-      },
+      }
+    ).catch(
       error => {
         console.error('Error creating Asset Type:', error);
       }

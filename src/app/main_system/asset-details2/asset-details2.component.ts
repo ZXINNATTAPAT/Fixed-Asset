@@ -8,7 +8,7 @@ import { ApiService } from '../../../ApiController/apiservice/api-service.servic
 import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective ,FormSelectDirective } from '@coreui/angular';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2'
-import { catchError } from 'rxjs';
+import { catchError, from } from 'rxjs';
 
 @Component({
     selector: 'app-form-controls2',//ไว้เรียกใช้ในหน้าอื่นนได้++++
@@ -105,7 +105,7 @@ export class AssetDetails2Component implements OnInit {
   }; 
 
   onSubmit(): void {
-    this.http.post<any>('https://localhost:7204/api/AssetDetails2', this.asset, { withCredentials: true })
+    from(this.apiService.assetService.postData('AssetDetails2', this.asset))
       .subscribe(
         response => {
           console.log(response);

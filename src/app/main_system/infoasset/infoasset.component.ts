@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import QRCode from 'qrcode';
 import { MatTabContent, MatTabsModule } from '@angular/material/tabs';
 import { HistoryComponent } from '../history/history.component'
@@ -60,7 +59,7 @@ export class InfoassetComponent {
 
   selectedFile: File | null = null;
   previewUrl: string | null = null;
-  uploadMessage = '';
+  uploadMessage: string | null = '';
   assetImages: any[] = [];
 
   constructor(
@@ -106,35 +105,65 @@ export class InfoassetComponent {
 
   }
 
+  readonly maxFileSize = 2 * 1024 * 1024; // 2MB
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = () => this.previewUrl = reader.result as string;
-      reader.readAsDataURL(file);
+    // ตรวจสอบว่าเป็นรูปภาพ
+    if (!file.type.startsWith('image/')) {
+      this.uploadMessage = '❌ กรุณาเลือกรูปภาพเท่านั้น';
+      this.selectedFile = null;
+      this.previewUrl = null;
+      return;
     }
+
+    // ตรวจสอบขนาดไฟล์
+    if (file.size > this.maxFileSize) {
+      this.uploadMessage = '❌ ไฟล์มีขนาดใหญ่เกินไป (สูงสุด 2MB)';
+      this.selectedFile = null;
+      this.previewUrl = null;
+      return;
+    }
+
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl = reader.result as string;
+    reader.readAsDataURL(file);
+
+    this.uploadMessage = null;
   }
 
-  uploadImage() {
-    if (!this.selectedFile || !this.assetId) return;
 
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-
-    this.ap.assetService.postData(`AssetImages/upload/${this.assetId}`, formData)
-      .then((res: any) => {
-        this.uploadMessage = '✅ อัปโหลดเรียบร้อยแล้ว!';
-        this.previewUrl = null;
-        this.selectedFile = null;
-        this.loadAssetImages(); // โหลดใหม่หลังอัป
-      })
-      .catch((err: any) => {
-        this.uploadMessage = '❌ เกิดข้อผิดพลาดในการอัปโหลด';
-        console.error(err);
-      });
+uploadImage() {
+  if (!this.selectedFile) {
+    this.uploadMessage = '⚠️ กรุณาเลือกรูปก่อนอัปโหลด';
+    return;
   }
+
+  if (!this.assetId) {
+    this.uploadMessage = '⚠️ ไม่พบรหัสทรัพย์สิน';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', this.selectedFile);
+
+  this.ap.assetService.postData(`AssetImages/upload/${this.assetId}`, formData)
+    .then((res: any) => {
+      this.uploadMessage = '✅ อัปโหลดเรียบร้อยแล้ว!';
+      this.previewUrl = null;
+      this.selectedFile = null;
+      this.loadAssetImages(); // โหลดรูปใหม่หลังอัป
+    })
+    .catch((err: any) => {
+      this.uploadMessage = '❌ เกิดข้อผิดพลาดในการอัปโหลด';
+      console.error(err);
+    });
+}
+
 
   loadAssetImages() {
     this.ap.assetService.fetchDataById('AssetImages/by-asset', this.assetId).subscribe({
@@ -163,18 +192,22 @@ export class InfoassetComponent {
   calculateDepreciation(): number {
     const purchasePrice = this.assets.PurchasePrice;
     const purchaseDate = new Date(this.assets.PurchaseDate);
-    const assetAge = this.assets.AssetAge;
 
     const purchaseDay = purchaseDate.getDate();
     const purchaseMonth = purchaseDate.getMonth();
-    const purchaseYear = purchaseDate.getFullYear();
+    let purchaseYear = purchaseDate.getFullYear();
 
     // ตรวจสอบว่าวันที่เป็นวันที่ 1-15 ของเดือนหรือไม่
     const isFullMonth = purchaseDay <= 15;
 
     // กำหนดเดือนเริ่มต้นการคำนวณ
     const startMonth = isFullMonth ? purchaseMonth : purchaseMonth + 1;
-    const startYear = isFullMonth ? purchaseYear : (startMonth > 11 ? purchaseYear + 1 : purchaseYear);
+    let adjustedStartMonth = startMonth;
+    if (startMonth > 11) {
+      adjustedStartMonth = 0; // Reset to January of the next year
+      purchaseYear += 1;
+    }
+    const startYear = isFullMonth ? purchaseYear : adjustedStartMonth;
 
     // คำนวณจำนวนเดือนที่ใช้งานจนถึงปัจจุบัน
     const currentDate = new Date();

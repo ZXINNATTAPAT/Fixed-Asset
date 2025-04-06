@@ -1,1 +1,92 @@
-@import "variables";@import "@coreui/coreui/scss/coreui";@import "theme";@import "custom";html,body{height:100%}body{margin:0;font-family:Roboto,"Helvetica Neue",sans-serif}.anuphan-400{font-family:"Anuphan",sans-serif;font-optical-sizing:auto;font-weight:400;font-style:normal}.anuphan-500{font-family:"Anuphan",sans-serif;font-optical-sizing:auto;font-weight:500;font-style:normal}.anuphan-600{font-family:"Anuphan",sans-serif;font-optical-sizing:auto;font-weight:600;font-style:normal}.anuphan-700{font-family:"Anuphan",sans-serif;font-optical-sizing:auto;font-weight:700;font-style:normal}
+@import "variables";
+@import "@coreui/coreui/scss/coreui";
+@import "theme";
+@import "custom";
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif
+}
+
+.anuphan-400 {
+    font-family: "Anuphan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal
+}
+
+.anuphan-500 {
+    font-family: "Anuphan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal
+}
+
+.anuphan-600 {
+    font-family: "Anuphan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal
+}
+
+.anuphan-700 {
+    font-family: "Anuphan", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal
+}
+@font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-ExtraLight.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-Medium.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Anuphan';
+    src: url('../../src/assets/Anuphan/static/Anuphan-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  

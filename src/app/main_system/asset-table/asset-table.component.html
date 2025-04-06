@@ -1,19 +1,22 @@
 <div class="card shadow-sm" style="border: none">
   <div class="card-body">
     <div class="border-bottom mb-3" style="display: flex; justify-content: space-between; align-items: center">
+
       <div style="margin-right: auto">
         <h1>
           <span class="anuphan-700">รายการครุภัณฑ์</span>
         </h1>
       </div>
-      <p>
-        ส่งออกข้อมูล :
-        <button class="btn btn-success" type="button" (click)="exportExcel()" style="color: white">
-          <!-- <svg [cIcon]="icons.cilDataTransferUp"></svg> -->
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,256,256" style="height: 22px">
+
+      <div class="d-flex align-items-center" style="gap: 10px;">
+        <span>ส่งออกข้อมูล :</span>
+
+        <button class="btn btn-success d-flex align-items-center justify-content-center" type="button"
+          (click)="exportExcel()" style="width: 40px; height: 40px; padding: 0;" title="ส่งออก Excel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,256,256" style="width: 20px; height: 20px;">
             <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
-              stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
-              font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal">
+              stroke-linejoin="miter" stroke-miterlimit="10" font-family="none" font-weight="none" font-size="none"
+              text-anchor="none" style="mix-blend-mode: normal">
               <g transform="scale(5.12,5.12)">
                 <path d="M28.875,0c-0.01953,0.00781 -0.04297,0.01953 -0.0625,0.03125l-28,5.3125c-0.47656,0.08984 -0.82031,
                   0.51172 -0.8125,1v37.3125c-0.00781,0.48828 0.33594,0.91016 0.8125,1l28,5.3125c0.28906,0.05469 0.58984,
@@ -24,21 +27,29 @@
                   15.6875l5.46875,9.34375l-5.96875,9.34375h5l3.25,-6.03125c0.22656,-0.58203 0.375,-1.02734 0.4375,-1.3125h0.03125c0.12891,0.60938 0.25391,
                   1.02344 0.375,1.25l3.25,6.09375h4.96875l-5.75,-9.4375l5.59375,-9.25h-4.6875l-2.96875,5.53125c-0.28516,
                   0.72266 -0.48828,1.29297 -0.59375,1.65625h-0.03125c-0.16406,-0.60937 -0.35156,-1.15234 -0.5625,-1.59375l-2.6875,
-                  -5.59375zM36,20v2h8v-2zM36,27v2h8v-2zM36,35v2h8v-2z">
-                </path>
+                  -5.59375zM36,20v2h8v-2zM36,27v2h8v-2zM36,35v2h8v-2z"></path>
               </g>
             </g>
           </svg>
         </button>
-      </p>
+
+
+        <button class="btn btn-secondary d-flex align-items-center justify-content-center" type="button"
+          (click)="openTrashDialog()" style="width: 40px; height: 40px; padding: 0;">
+          <svg [cIcon]="this.myFunctionInstance?.icons?.cilTrash"
+            style="color: white; width: 16px; height: 16px;"></svg>
+        </button>
+      </div>
+
     </div>
 
     <div class="row mb-3">
-    
+
       <div class="col-2">
-        <label class="form-label">กรองตามประเภทครุภัณฑ์</label>
+        <label class="form-label" for="assetTypeSelect">กรองตามประเภทครุภัณฑ์</label>
         <mat-form-field appearance="fill" class="w-100">
-          <mat-select [(ngModel)]="selectedAssetType" (selectionChange)="onAssetTypeChange()" placeholder="เลือกประเภท">
+          <mat-select id="assetTypeSelect" [(ngModel)]="selectedAssetType" (selectionChange)="onAssetTypeChange()"
+            placeholder="เลือกประเภท">
             <mat-option value="">ทั้งหมด</mat-option>
             <mat-option *ngFor="let type of assetTypes" [value]="type.TypeId">
               {{ type.TypeName }}
@@ -48,33 +59,27 @@
       </div>
 
       <div class="col-2">
-        <label class="form-label">กรองตามหมวดหมู่</label>
+        <label class="form-label" for="categorySelect">กรองตามหมวดหมู่</label>
         <mat-form-field appearance="fill" class="w-100">
-          <mat-select 
-            placeholder="เลือกหมวดหมู่"
-            [(ngModel)]="selectedCategoryId" 
-            (selectionChange)="filterByCategory()"
-            [formControl]="categoryCtrl" >
-      
+          <mat-select id="categorySelect" placeholder="เลือกหมวดหมู่" [(ngModel)]="selectedCategoryId"
+            (selectionChange)="filterByCategory()" [formControl]="categoryCtrl">
+
             <!-- 🔍 ช่องค้นหา -->
             <mat-option>
-              <ngx-mat-select-search [formControl]="categoryFilterCtrl"
-                                     placeholderLabel="ค้นหาหมวดหมู่"
-                                     noEntriesFoundLabel="ไม่พบหมวดหมู่">
+              <ngx-mat-select-search [formControl]="categoryFilterCtrl" placeholderLabel="ค้นหาหมวดหมู่"
+                noEntriesFoundLabel="ไม่พบหมวดหมู่">
               </ngx-mat-select-search>
             </mat-option>
-      
+
             <!-- 🔽 ตัวเลือก -->
             <mat-option [value]="null">ทั้งหมด</mat-option>
             <mat-option *ngFor="let cat of filteredCategoryList" [value]="cat.CategoryId">
               {{ cat.CategoryName }}
             </mat-option>
-      
+
           </mat-select>
         </mat-form-field>
       </div>
-      
-      
 
       <!-- Paginator -->
       <div class="col">
@@ -90,7 +95,6 @@
         [dataSource]="dataSource">
 
         <!-- Actions Column -->
-        <!-- Actions Column -->
         <ng-container matColumnDef="Aactions">
           <th class="text-center border" mat-header-cell *matHeaderCellDef style="color: black; font-weight: bold">
             # <input cFormControl sizing="sm" disabled />
@@ -105,7 +109,8 @@
             </button>
 
             <!-- ✏️ ปุ่มแก้ไข (ซ่อนถ้าเป็นเจ้าหน้าที่ทั่วไปเท่านั้น) -->
-            <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-warning m-1" (click)="editDialog(asset.AssetId)">
+            <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-warning m-1"
+              (click)="editDialog(asset.AssetId)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilPencil"
                 style="color: white; width: 16px; height: 16px;"></svg>
             </button>
@@ -118,7 +123,6 @@
 
           </td>
         </ng-container>
-
 
         <ng-container matColumnDef="Qrcode">
           <th class="text-center border" mat-header-cell *matHeaderCellDef
@@ -140,8 +144,8 @@
             [style.width]="column === 'สถานะ' ? '2%' : (column === 'รายการ' ? '20%' : 'auto')">
             <div style="color: black; font-weight: bold">
               <label cLabel [for]="'filter-' + column">{{ column }}</label>
-              <input cFormControl sizing="sm" [id]="'filter-' + column" placeholder="ค้นหาข้อมูล" (keyup)="applyFilter($event)"
-                (focus)="setupFilter(column)" />
+              <input cFormControl sizing="sm" [id]="'filter-' + column" placeholder="ค้นหาข้อมูล"
+                (keyup)="applyFilter($event)" (focus)="setupFilter(column)" />
             </div>
           </th>
 
@@ -155,11 +159,8 @@
             <ng-template #defaultFormat>
               <ng-container *ngIf="column === 'สถานะ'; else normalText">
                 <span class="badge text-light" [ngClass]="{
-                    'text-bg-success': asset[column] !== 'โอนย้าย' && 
-                                      asset[column] !== 'ซ่อมแซม' && 
-                                      asset[column] !== 'ส่งมอบ' && 
-                                      asset[column] !== '',
-                    'text-bg-warning': asset[column] === 'โอนย้าย' || asset[column] === 'ส่งมอบ',
+                    'text-bg-success': asset[column] !== 'โอนย้าย' && asset[column] !== 'ซ่อมแซม' && asset[column] !== 'ส่งมอบ' && asset[column] !== '',
+                    'text-bg-warning': asset[column] === 'โอนย้าย' || asset[column] === 'รับมอบ',
                     'text-bg-danger': asset[column] === 'ซ่อมแซม'
                   }" style="color: black; font-size: 16px;">
                   {{ asset[column] || 'ปกติ' }}
@@ -174,16 +175,11 @@
           </td>
         </ng-container>
 
+        <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr><!-- Header Row -->
 
-        <!-- Header Row -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
-
-        <!-- Data Rows -->
-        <tr mat-row *matRowDef="let row; columns: displayedColumns3"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns3"></tr> <!-- Data Rows -->
       </table>
 
     </div>
-
   </div>
-
 </div>

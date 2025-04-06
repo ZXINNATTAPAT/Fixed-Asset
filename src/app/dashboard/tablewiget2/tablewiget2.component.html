@@ -9,20 +9,22 @@
       <br/>
     <div class="table-responsive m-1 p-1">
       <table mat-table [dataSource]="dataSource" class="table table-striped">
-        <ng-container matColumnDef="Faction">
+
+       <ng-container matColumnDef="faction">
           <th mat-header-cell *matHeaderCellDef class="border"> ฝ่าย </th>
           <td mat-cell *matCellDef="let row" class="border"> {{ row.faction }} </td>
         </ng-container>
-      
-        <ng-container matColumnDef="ResponsibleEmployee">
+
+        <ng-container matColumnDef="responsibleEmployee">
           <th mat-header-cell *matHeaderCellDef class="border"> ผู้ใช้งาน </th>
           <td mat-cell *matCellDef="let row" class="border"> {{ row.responsibleEmployee }} </td>
         </ng-container>
-      
-        <ng-container matColumnDef="AssetCount">
+
+        <ng-container matColumnDef="assetCount">
           <th mat-header-cell *matHeaderCellDef class="border"> จำนวนครุภัณฑ์ </th>
           <td mat-cell *matCellDef="let row" class="border"> {{ row.assetCount }} </td>
         </ng-container>
+
       
         <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns3;"></tr>

@@ -12,6 +12,8 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
+import { from } from 'rxjs';
 
 interface AssetDetails {
   id:string,
@@ -47,7 +49,7 @@ export class CountingunitComponent implements OnInit {
   asset: any = {}; 
 
   onSubmit() {
-    this.http.post<any>('https://localhost:7204/api/Countingunits', this.asset ,{withCredentials: true})
+    from(this.ap.assetService.postData('Countingunits', this.asset))
         .subscribe(
           response => {
             // console.log(response);
@@ -81,7 +83,7 @@ export class CountingunitComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private ap :ApiService) { }
 
   displayedColumns2: string[] = [
     "รหัสหน่วยนับ",
@@ -91,8 +93,8 @@ export class CountingunitComponent implements OnInit {
   assetDetailsset: any[] = []
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Countingunits', { withCredentials: true }).subscribe(data => {
-      this.assetDetails = data.map(asset => {
+    this.ap.assetService.fetchData('Countingunits').subscribe(data => {
+      this.assetDetails = data.map((asset: any) => {
         asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
         return asset;
       });
@@ -135,7 +137,7 @@ export class CountingunitComponent implements OnInit {
   
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/Countingunits/${asset.id}`, { withCredentials: true }).subscribe(
+        this.ap.assetService.deleteData(`Countingunits/${asset.id}`).then(
           () => {
             const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
               if (index !== -1) {
@@ -147,7 +149,8 @@ export class CountingunitComponent implements OnInit {
               'สินทรัพย์ของคุณถูกลบแล้ว',
               'success'
             );
-          },
+          }
+        ).catch(
           (error) => {
             console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
             Swal.fire(

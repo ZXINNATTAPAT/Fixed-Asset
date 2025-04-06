@@ -14,6 +14,7 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 
 interface AssetDetails {
@@ -65,11 +66,8 @@ export class ResponsiblepersonComponent implements OnInit {
 
   yourFormName: FormGroup;
 
-  constructor(private http: HttpClient, private formBuilder: FormBuilder) {
-    this.yourFormName = this.formBuilder.group({
-      rP_Code: '',
-      rP_Name: ''
-    });
+  constructor(private http: HttpClient, private formBuilder: FormBuilder ,private ap: ApiService) {
+    this.yourFormName = this.formBuilder.group({rP_Code: '',rP_Name: ''});
   }
 
   displayedColumns2: string[] = [
@@ -82,8 +80,8 @@ export class ResponsiblepersonComponent implements OnInit {
   }
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/ResponsiblePersons', { withCredentials: true }).subscribe(data => {
-      this.assetDetails = data.map(asset => this.translateToThai(asset));
+    this.ap.assetService.fetchData('ResponsiblePersons').subscribe(data => {
+      this.assetDetails = data.map((asset: AssetDetails) => this.translateToThai(asset));
       this.dataSource = new MatTableDataSource<any>(this.assetDetails);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -106,7 +104,7 @@ export class ResponsiblepersonComponent implements OnInit {
 
   onSubmit(): void {
     const formData = this.yourFormName.value;
-    this.http.post<any>('https://localhost:7204/api/ResponsiblePersons', { withCredentials: true }, formData).subscribe(
+    this.ap.assetService.postData('ResponsiblePersons', formData).then(
       response => {
         const newAsset = this.translateToThai(response);
         this.assetDetails.push(newAsset);
@@ -116,7 +114,8 @@ export class ResponsiblepersonComponent implements OnInit {
           title: "บันทึกเสร็จสิ้น",
           icon: "success"
         });
-      },
+      }
+    ).catch(
       error => {
         console.error('Error:', error);
         Swal.fire({
@@ -137,7 +136,7 @@ export class ResponsiblepersonComponent implements OnInit {
       cancelButtonText: 'ไม่'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`https://localhost:7204/api/ResponsiblePersons/${asset.id}`, { withCredentials: true }).subscribe(
+        this.ap.assetService.fetchData(`ResponsiblePersons/${asset.id}`).subscribe(
           () => {
             const index = this.assetDetails.findIndex(a => a.id === asset.id);
             if (index !== -1) {

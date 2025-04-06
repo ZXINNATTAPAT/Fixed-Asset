@@ -216,21 +216,6 @@ export class RepairComponent implements OnInit, OnDestroy {
           }
         );
   }
-
-  // ฟังก์ชันสำหรับอัปเดตสถานะของสินทรัพย์
-  // updateAssetStatus(assetId: number, status: string) {
-  //   const url = `https://localhost:7204/api/AssetTransferLog/${assetId}/status`;
-  //   this.http.patch(url, JSON.stringify(status), { headers: { 'Content-Type': 'application/json' } })
-  //     .subscribe(
-  //       () => {
-  //         console.log('Status updated successfully');
-  //       },
-  //       (error) => {
-  //         console.error('Error updating status', error);
-  //       }
-  //     );
-  // }
-
   getAssetType(): void {
     this.http
       .get<any[]>('https://localhost:7204/api/RepairAsset', { withCredentials: true })

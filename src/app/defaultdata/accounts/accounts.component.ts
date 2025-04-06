@@ -14,6 +14,7 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 interface AssetDetails {
   accounts_Code: "string",
@@ -48,13 +49,19 @@ interface AssetDetails {
 export class AccountsComponent implements OnInit {
 
   // yourFormName: FormGroup<any> | undefined;
+  icons = { cilPencil, cilTrash };
+  assetDetails: AssetDetails[] = [];
 
+  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   asset: any =[];
+  constructor(private http: HttpClient,private ap :ApiService, private router: Router) { }
 
   onSubmit() {
-    this.http.post<any>('https://localhost:7204/api/Countingunits', { withCredentials: true }, this.asset)
-        .subscribe(
-          response => {
+    this.ap.assetService.postData('Countingunits', this.asset)
+        .then(response => {
             // console.log(response);
             const newAsset = response;
             // console.log(newAsset);
@@ -65,8 +72,8 @@ export class AccountsComponent implements OnInit {
               title: "บันทึกเสร็จสิ้น",
               icon: "success"
             });
-          },
-          error => {
+        })
+        .catch(error => {
             console.error(error);
             if (error) {
               Swal.fire({
@@ -74,19 +81,12 @@ export class AccountsComponent implements OnInit {
                 icon: "error"
               });
             }
-          }
-        );
+        });
   }
 
-  icons = { cilPencil, cilTrash };
-  assetDetails: AssetDetails[] = [];
+  
 
-  dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-
-  constructor(private http: HttpClient, private router: Router) { }
+  
 
   displayedColumns2: string[] = [
     "รหัสบัญชี",
@@ -96,8 +96,8 @@ export class AccountsComponent implements OnInit {
   assetDetailsset: any[] = []
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/Accounts', { withCredentials: true }).subscribe(data => {
-      this.assetDetails = data.map(asset => {
+    this.ap.assetService.fetchData('Accounts').subscribe(data => {
+      this.assetDetails = data.map((asset: any) => {
         asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
         return asset;
       });
@@ -140,7 +140,7 @@ export class AccountsComponent implements OnInit {
   
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/Accounts/${asset.id}`, { withCredentials: true }).subscribe(
+        this.ap.assetService.deleteData(`Accounts/${asset.id}`).then(
           () => {
             const index = this.assetDetailsset.findIndex(a => a.id === asset.id);
               if (index !== -1) {
@@ -152,7 +152,8 @@ export class AccountsComponent implements OnInit {
               'สินทรัพย์ของคุณถูกลบแล้ว',
               'success'
             );
-          },
+          }
+        ).catch(
           (error) => {
             console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
             Swal.fire(

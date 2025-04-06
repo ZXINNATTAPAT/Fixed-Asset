@@ -8,7 +8,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import 'moment/locale/th.js';
-import { Subscription } from 'rxjs';
+import { filter, of, Subscription, switchMap, tap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import QRCode from 'qrcode';
@@ -17,7 +17,7 @@ import { DataService } from '../../../data-service/data-service.component';
 import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
-import { InfoassetComponent } from 'src/app/main_system/infoasset/infoasset.component';
+import { InfoassetComponent } from '../../../app/main_system/infoasset/infoasset.component';
 
 interface AssetDetails {
   AssetId: any;
@@ -53,8 +53,7 @@ interface AssetDetails {
     MatFormFieldModule,
     MatSelectModule,
     ButtonDirective,
-    // MatDialog,
-    // ResizedDirective,
+    MatPaginator,MatSort,
     NgStyle,
   ],
   templateUrl: './receive.component.html',
@@ -112,14 +111,68 @@ export class ReceiveComponent {
 
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
-    this.apiService.assetService.fetchData('AssetDetails/Receive').subscribe({
-      next: (data) => {
-        this.handleAssetDetails(data); // ✅ แปลงก่อนแสดงผล
-      },
-      error: (err) => console.error('Error loading Asset Details:', err),
+    this.dataService.userInfo$
+    .pipe(
+      filter((userInfo: any) => !!userInfo && !!userInfo.claims), // ตรวจสอบว่ามี claims
+      tap((userInfo: any) => {
+        this.userinfo = userInfo.claims || {};
+        console.log('✅ UserInfo Loaded:', this.userinfo);
+      }),
+      switchMap((userInfo: any) => {
+        const deptId = userInfo.claims?.DeptId;
+        if (deptId) {
+          return this.apiService.assetService.fetchData(`AssetDetails/Receive?deptId=${deptId}`);
+        }
+        return of([]); // ถ้าไม่มี DeptId
+      })
+    )
+    .subscribe({
+      next: (data) => this.handleAssetDetails(data),
+      error: (err) => console.error('❌ Error loading asset details:', err)
     });
   }
 
+  // โหลดข้อมูล UserInfo
+  private async initializeUserInfo(): Promise<void> {
+    this.dataService.userInfo$.subscribe(userInfo => {
+      if (userInfo) {
+        this.userinfo = userInfo.claims;
+        // console.log("✅ UserInfo Loaded:", userInfo);
+      } else {
+        console.warn("⚠️ UserInfo not available");
+      }
+    });
+  }
+
+  // โหลดข้อมูล Asset Types
+  private loadAssetTypes(): void {
+    this.apiService.assetService.fetchData('Assettype').subscribe({
+      next: (data) => (this.assetTypes = data),
+      error: (err) => console.error('Error loading Asset Types:', err),
+    });
+  }
+
+  // จัดการข้อมูล Asset Details
+  private handleAssetDetails(data: any[]): void {
+    this.assetDetails = data
+      .filter((asset) => this.filterAssetByAffiliation(asset))
+      .sort((a, b) => this.sortByPurchaseDate(a, b))
+      .map((asset) => this.transformAsset(asset));
+
+    this.dataSource.data = this.assetDetails;
+    // console.log('Processed Asset Details:', this.assetDetails);
+  }
+
+  // ฟิลเตอร์ข้อมูล Asset ตาม Affiliation
+  private filterAssetByAffiliation(asset: any): boolean {
+    const assetCode = asset.AssetCode || '';
+    const affiliation = this.userinfo?.Affiliation || '';
+
+    return affiliation === 'ส่วนกลาง'
+      ? assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.')
+      : assetCode.startsWith('กกต');
+  }
+  
   updateAllStatuses(): void {
 
     if (!this.dataSource || this.dataSource.data.length === 0) {
@@ -168,50 +221,6 @@ export class ReceiveComponent {
         }
       });
     }
-
-  // โหลดข้อมูล UserInfo
-  private async initializeUserInfo(): Promise<void> {
-    // await this.dataService.loadUserInfo();
-    this.dataService.userInfo$.subscribe(userInfo => {
-      if (userInfo) {
-        this.userinfo = userInfo.claims;
-        console.log("✅ UserInfo Loaded:", userInfo);
-      } else {
-        console.warn("⚠️ UserInfo not available");
-      }
-    });
-  }
-
-  // โหลดข้อมูล Asset Types
-  private loadAssetTypes(): void {
-    this.apiService.assetService.fetchData('Assettype').subscribe({
-      next: (data) => (this.assetTypes = data),
-      error: (err) => console.error('Error loading Asset Types:', err),
-    });
-  }
-
-
-
-  // จัดการข้อมูล Asset Details
-  private handleAssetDetails(data: any[]): void {
-    this.assetDetails = data
-      .filter((asset) => this.filterAssetByAffiliation(asset))
-      .sort((a, b) => this.sortByPurchaseDate(a, b))
-      .map((asset) => this.transformAsset(asset));
-
-    this.dataSource.data = this.assetDetails;
-    console.log('Processed Asset Details:', this.assetDetails);
-  }
-
-  // ฟิลเตอร์ข้อมูล Asset ตาม Affiliation
-  private filterAssetByAffiliation(asset: any): boolean {
-    const assetCode = asset.AssetCode || '';
-    const affiliation = this.userinfo?.Affiliation || '';
-
-    return affiliation === 'ส่วนกลาง'
-      ? assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.')
-      : assetCode.startsWith('กกต');
-  }
 
   // จัดเรียงข้อมูล Asset ตามวันที่ซื้อ
   private sortByPurchaseDate(a: any, b: any): number {

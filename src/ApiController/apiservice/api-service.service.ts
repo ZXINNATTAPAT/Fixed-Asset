@@ -5,12 +5,13 @@ import { AssetService } from './asset/asset.service';
 import { InventoryService } from './inventory/inventory.service';
 import { UserService } from './users/user.service';
 import { ExternalDataService } from './external-data/external-data.service';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
 
   constructor(
+    public http: HttpClient,
     public authService: AuthService,
     public assetService: AssetService,
     public inventoryService: InventoryService,
@@ -18,7 +19,8 @@ export class ApiService {
     public externalDataService: ExternalDataService
   ) {}
 
-  public apiUrl_link = 'https://localhost:7204/api/'; // URL ของ API
+  // public apiUrl_link = 'https://localhost:7204/api/'; // URL ของ API
+  public apiUrl_link = 'https://dotnetapi-fixasset.onrender.com/api/'; // URL ของ API
 
   
 }

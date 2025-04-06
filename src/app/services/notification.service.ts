@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class NotificationService {
-  private baseUrl = 'https://localhost:7204/api'; // เปลี่ยนเป็น API ของคุณ
+  // private baseUrl = 'https://localhost:7204/api'; // เปลี่ยนเป็น API ของคุณ
+  private baseUrl = 'https://dotnetapi-fixasset.onrender.com/api'; // เปลี่ยนเป็น API ของคุณ
 
   constructor(private http: HttpClient) {}
 

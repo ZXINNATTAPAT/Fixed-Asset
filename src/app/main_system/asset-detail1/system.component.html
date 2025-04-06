@@ -24,94 +24,63 @@
 
       <div class="card-body">
 
-        <div class="card shadow-sm" [hidden]="hidden2" style="border-style: dotted; 
-            border-width: 3.5px">
-
-          <div class="card-body">
-
-            <app-upload-dialog />
-
-          </div>
-
-        </div>
-
         <h3><span class="anuphan-700">ข้อมูลครุภัณฑ์</span></h3>
 
-        <form cForm [formGroup]="asset" (ngSubmit)="autoInput(); onSubmit()">
+        <form *ngIf="asset" cForm [formGroup]="asset" (ngSubmit)="autoInput(); onSubmit()">
 
           <div class="p-2">
 
             <div class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-lg-3">
 
               <div class="col">
-
                 <label class="form-label" style="font-weight: bold;" for="assetTypeInput">
                   <span class="text-danger">*</span> ประเภทครุภัณฑ์
                 </label>
-
                 <div class="form-control">
-
                   <mat-select formControlName="TypeId" panelClass="mat-select-panel" placeholder="เลือกประเภทครุภัณฑ์"
                     style="font-family: 'Anuphan', sans-serif; font-weight: 600">
-
                     <mat-option class="anuphan-700" *ngFor="let type of assetTypes" [value]="type.TypeId">
                       <span class="anuphan-600">
-
                         {{ type.TypeCode }} : {{ type.TypeName }}
-
                       </span>
                     </mat-option>
-
                   </mat-select>
-
                 </div>
-
               </div>
 
               <!-- หมวดหมู่ครุภัณฑ์ -->
               <div class="col">
-
                 <label class="form-label" style="font-weight: bold;" for="assetCategoryInput">
                   <span class="text-danger">*</span> หมวดหมู่ครุภัณฑ์
                 </label>
-
-                <!-- <input
-                        class="form-control "
-                      cFormControl
-                      id="assetCategoryInput"
-                      placeholder="ระบุหมวดหมู่ครุภัณฑ์"
-                      formControlName="assetCategory"
-                      type="text"
-                      [hidden]="!showAssetCategoryInput"
-                    /> -->
-
                 <div class="form-control ">
 
-                  <mat-select *ngIf="asset.get('TypeId')?.value" formControlName="CategoryId"
-                    placeholder="เลือกหมวดหมู่ครุภัณฑ์" panelClass="mat-select-panel" style="font-family:Anuphan,
-                        sans-serif;font-optical-sizing:auto;
-                        font-weight:600;font-style:normal" required>
+                  <ng-container *ngIf="asset.get('TypeId')?.value; else alertSelect">
+                    <mat-select formControlName="CategoryId" placeholder="เลือกหมวดหมู่ครุภัณฑ์"
+                      panelClass="mat-select-panel" style="font-family:Anuphan,sans-serif; font-weight:600">
+                      <mat-option>
+                        <ngx-mat-select-search placeholderLabel="ค้นหาหมวดหมู่" noEntriesFoundLabel="'ไม่พบข้อมูล'"
+                          [formControl]="assetCategoryFilterCtrl">
+                        </ngx-mat-select-search>
+                      </mat-option>
 
-                    <mat-option>
-                      <ngx-mat-select-search placeholderLabel="ค้นหาหมวดหมู่" noEntriesFoundLabel="'ไม่พบข้อมูล'"
-                        [formControl]="assetCategoryFilterCtrl">
-                      </ngx-mat-select-search>
-                    </mat-option>
-
-                    <mat-option *ngFor="let category of filteredAssetCategories | async" [value]="category.CategoryId">
-                      <span class="anuphan-600">
+                      <mat-option *ngFor="let category of filteredAssetCategories | async"
+                        [value]="category.CategoryId">
                         {{ category.CategoryCode }} : {{ category.CategoryName }}
-                      </span>
-                    </mat-option>
+                      </mat-option>
+                    </mat-select>
+                  </ng-container>
 
-                  </mat-select>
+                  <ng-template #alertSelect>
+                    <mat-select disabled placeholder="เลือกหมวดหมู่ครุภัณฑ์" panelClass="mat-select-panel"
+                      (click)="showAlert()" (keydown)="handleKeyDown($event)"
+                      style="font-family:Anuphan,sans-serif; font-weight:500">
+                    </mat-select>
+                  </ng-template>
 
-                  <mat-select *ngIf="!asset.get('TypeId')?.value" placeholder="เลือกหมวดหมู่ครุภัณฑ์"
-                    panelClass="mat-select-panel" #singleSelect disabled="true" (click)="showAlert()"
-                    (keydown)="handleKeyDown($event)" style="font-family:Anuphan,sans-serif;
-                    font-optical-sizing:auto;font-weight:500;
-                    font-style:normal">
-                  </mat-select>
+
+
+
 
                 </div>
 
@@ -254,9 +223,7 @@
 
             </div>
 
-            <!-- ######## line 2 ############ -->
             <div class="row mb-3 row-cols-1 row-cols-sm-3 row-cols-lg-4 g-3 g-lg-3">
-
 
               <div class="col">
 
@@ -266,24 +233,22 @@
 
                 <div class="form-control">
 
-                  <mat-select placeholder="เลือกหน่วยนับ" id="Unitsinput" [formControl]="unitCtrl"
-                    (selectionChange)="onUnitChange($event)" panelClass="mat-select-panel" #singleSelect>
+                  <mat-select formControlName="Unit" placeholder="เลือกหน่วยนับ" panelClass="mat-select-panel"
+                    (selectionChange)="onUnitChange($event)" #singleSelect>
 
-                    <!-- Search Input for Filtering -->
                     <mat-option>
                       <ngx-mat-select-search placeholderLabel="ค้นหาหน่วยนับ" noEntriesFoundLabel="ไม่พบข้อมูล"
                         [formControl]="unitFilterCtrl">
                       </ngx-mat-select-search>
                     </mat-option>
 
-                    <!-- Display Filtered Units -->
                     <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit.word">
                       {{ unit.word }}
                     </mat-option>
                   </mat-select>
+
                 </div>
               </div>
-
 
               <div class="col">
                 <label class="form-label" style="font-weight: bold;" for="EmployeeInput">
@@ -306,7 +271,6 @@
 
               </div>
 
-
               <div class="col">
                 <label class="form-label" style="font-weight: bold;" for="quantitySelect">
                   จำนวนข้อมูลที่จะบันทึก
@@ -317,11 +281,8 @@
                     <mat-option *ngFor="let num of options" [value]="num">{{ num }}</mat-option>
                   </mat-select>
                 </div>
-
               </div>
-
             </div>
-
 
             <h3>
               <a class="bt" (click)="toggleForm()">
@@ -351,28 +312,6 @@
 
             <div *ngIf="showForm" class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-3">
 
-
-              <!-- <div class="col">
-                  <div class="row"> -->
-
-              <!-- <label class="col-sm-3 col-form-label" 
-                          style="font-weight: bold;" 
-                          for="documentNumberInput">เลขที่เอกสาร 
-                          <span style="opacity: 50%">(ถ้ามี)</span>
-                      </label>
-
-                      <div class="col-sm-9">
-                        <input 
-                          class="form-control" 
-                          cFormControl id="documentNumberInput" 
-                          placeholder="ระบุเลขที่เอกสาร"
-                          formControlName="documentNumber" 
-                          type="text" />
-                      </div> -->
-
-              <!-- </div> 
-                </div>  -->
-
               <div class="col">
 
                 <label class="form-label" style="font-weight: bold;" for="purchasedFromInput">ซื้อจาก
@@ -384,19 +323,13 @@
 
               </div>
 
-
               <div class="col">
-
 
                 <label class="form-label" style="font-weight: bold;" for="taxInvoiceNumberInput">เลขที่ใบกำกับภาษี
                   <span style="opacity: 50%">(ถ้ามี)</span></label>
 
-
-
                 <input class="form-control " cFormControl id="taxInvoiceNumberInput" placeholder="ระบุเลขที่ใบกำกับภาษี"
                   type="text" formControlName="TaxInvoiceNumber" />
-
-
 
               </div>
 
@@ -409,275 +342,41 @@
                 <input class="form-control" cFormControl id="annotationInput" placeholder="ระบุหมายเหตุ"
                   formControlName="Note" type="text" />
 
-
               </div>
 
             </div>
 
             <div formArrayName="SubAssets">
-              <div *ngFor="let subAsset of subAssets.controls; let i = index" [formGroupName]="i"
-                class="card shadow-sm mb-3" style="border: none;">
-
-                <div class="card-body">
-
-                  <div class="anuphan-600 mb-3" style="font-size: large;font-weight: bold;">
-                    ครุภัณฑ์ย่อย
-                  </div>
-
-                  <div class="row m-1">
-
-                    <!-- <div class="col">
-                        <label 
-                          class="form-label" 
-                          for="subAssetCode">รหัสครุภัณฑ์ย่อย</label>
-                        <input 
-                          class="form-control" 
-                          id="subAssetCode" 
-                          formControlName="subAssetCode" 
-                          placeholder="SubAsset Code" />
-                      </div> -->
-
-                    <div class="col-4">
-
-                      <label class="form-label" for="SubAsset Name">
-                        ชื่อครุภัณฑ์ย่อย
-                      </label>
-
-                      <input class="form-control" id="SubAsset Name" formControlName="subAssetName"
-                        placeholder="SubAsset Name" />
-                    </div>
-
-                    <div class="col-2">
-
-                      <label class="form-label" for="Unit">
-                        หน่วยนับ
-                      </label>
-
-                      <input class="form-control" id="Unit" formControlName="unit" placeholder="หน่วยนับ" />
-                    </div>
-
-                    <div class="col-5">
-
-                      <label class="form-label" for="note">
-                        หมายเหตุ
-                      </label>
-
-                      <input class="form-control" id="note" formControlName="note" placeholder="Note" />
-
-                    </div>
-
-                    <div class="col">
-
-                      <br />
-                      <button type="button" class="btn btn-danger mt-2" style="color: white;"
-                        (click)="removeSubAsset(i)">ลบ
-                      </button>
-
-                    </div>
-                  </div>
-
-                </div>
+              <div
+                *ngFor="let control of subAssets.controls; let i = index"
+                class="mb-3"
+              >
+                <app-sub-asset-form
+                  [subAssetForm]="getSubAssetForm(i)"
+                  [index]="i"
+                  [onRemove]="removeSubAsset"
+                ></app-sub-asset-form>
               </div>
             </div>
-
-            <!-- <hr /> -->
-
           </div>
 
-
-          <div class="table-responsive  mb-4  ">
-            <h3><span class="anuphan-700">ตารางแสดงค่าเสื่อม</span></h3>
-            <table class="table table-bordered table-striped shadow-sm">
-              <tbody>
-                <tr>
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="depreciationStartDateInput">
-                      วันที่เริ่มคิดค่าเสื่อม
-                    </label>
-                  </th>
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="depreciationCalculationStartDateInput">
-                      วันที่เริ่มคำนวณค่าเสื่อม
-                    </label>
-                  </th>
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="calculatedPriceInput">
-                      ราคาคำนวณ
-                    </label>
-                  </th>
-                  <!-- <th class="" id="#" colspan="4">
-                      <label 
-                        class="form-label" 
-                        style="font-weight: bold " 
-                        for="scrapPriceInput">
-                        ราคาซาก
-                      </label>
-                    </th> -->
-
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="depreciationRateInput">
-                      อัตราการคิดค่าเสื่อม(%)
-                    </label>
-                  </th>
-
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="assetAgeInput">
-                      อายุของครุภัณฑ์
-                    </label>
-                  </th>
-
-                </tr>
-
-                <tr>
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="depreciationStartDateInput"
-                      formControlName="DepreciationStartDate" [value]="displayDate" readonly style="border: none;" />
-                  </td>
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="depreciationCalculationStartDateInput"
-                      formControlName="DepreciationCalculationStartDate" [value]="displayDate" readonly
-                      style="border: none;" />
-                  </td>
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="calculatedPriceInput"
-                      formControlName="CalculatedPrice" placeholder="ระบุราคาคำนวณ" type="number" readonly
-                      style="border: none;" />
-                  </td>
-                  <!-- <td colspan="4">
-                      <input class="form-control  p-1" 
-                        cFormControl id="scrapPriceInput"
-                        placeholder="ราคาซาก" 
-                        type="number" 
-                        readonly 
-                        style="border: none;" />
-                    </td> -->
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="depreciationRateInput"
-                      placeholder="ระบุอัตราการคิดค่าเสื่อม" type="number" formControlName="DepreciationRate" readonly
-                      style="border: none;" />
-                  </td>
-
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl i d="assetAgeInput" placeholder="ระบุอายุของครุภัณฑ์"
-                      type="number" formControlName="AssetAge" readonly style="border: none;" />
-                  </td>
-
-                </tr>
-
-                <tr>
-
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="accumulatedDepreciationInput">
-                      ค่าเสื่อมสะสม
-                    </label>
-                  </th>
-
-                  <th class="" id="#" colspan="4">
-                    <label class="form-label" style="font-weight: bold " for="depreciationValueInput">
-                      มูลค่าค่าเสื่อม
-                    </label>
-                  </th>
-
-                  <th class="" id="#" colspan="4"></th>
-                  <th class="" id="#" colspan="4"></th>
-                  <th class="" id="#" colspan="4"></th>
-
-                </tr>
-
-                <tr>
-
-
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="accumulatedDepreciationInput"
-                      formControlName="AccumulatedDepreciation" placeholder="ระบุค่าเสื่อมสะสม" type="number" readonly
-                      style="border: none;" />
-                  </td>
-
-                  <td colspan="4">
-                    <input class="form-control  p-1" cFormControl id="depreciationValueInput"
-                      formControlName="DepreciationValue" placeholder="ระบุมูลค่าค่าเสื่อม" type="number" readonly
-                      style="border: none;" />
-
-                  </td>
+          <app-depreciation-preview [formGroup]="asset"></app-depreciation-preview>
 
 
 
-                  <!-- <td colspan="4">
-                      <input class="form-control  p-1" 
-                        cFormControl id="scrapPriceInput"
-                        placeholder="ระบุราคาขีดความสามารถใช้" 
-                        type="number" 
-                        readonly 
-                        style="border: none;" />
-                    </td>
-                    
-                    <td colspan="4">
-                      <input class="form-control  p-1" 
-                        cFormControl 
-                        id="depreciationRateInput"
-                        placeholder="ระบุอัตราการคิดค่าเสื่อม" 
-                        type="number" 
-                        formControlName="depreciationRate" 
-                        readonly
-                        style="border: none;" />
-                    </td>
-                    
-                    <td colspan="4">
-                      <input 
-                        class="form-control  p-1" 
-                        cFormControl i
-                        d="assetAgeInput"
-                        placeholder="ระบุอายุของครุภัณฑ์" 
-                        type="number" 
-                        formControlName="assetAge" 
-                        readonly
-                        style="border: none;" />
-                    </td> -->
-
-                  <td colspan="4"></td>
-                  <td colspan="4"></td>
-                  <td colspan="4"></td>
-
-                </tr>
-              </tbody>
-
-            </table>
-
-            <div class="text-end d-grid gap-2 d-md-flex justify-content-md-end">
+          <div class="text-end d-grid gap-2 d-md-flex justify-content-md-end">
 
 
-              <button cButton class="anuphan-600" type="submit" color="success" style="color: white">
-                ดำเนินการ
-              </button>
+            <button cButton class="anuphan-600" type="submit" color="success" style="color: white">
+              ดำเนินการ
+            </button>
 
-            </div>
           </div>
-
         </form>
 
 
       </div>
     </div>
-
-  </div>
-
-</div>
-
-<div *ngIf="this.asset.get('assetType')?.value === '004'" class="mb-3 shadow card" style="border: none">
-
-  <div class="card-body">
-
-    <h1>
-
-      <span class="anuphan-700">
-        บันทึกรายการเพิ่มเติมสำหรับ ครุภัณฑ์คอมพิวเตอร์
-      </span>
-
-    </h1>
-
-    <hr />
-
-    <app-form-controls2></app-form-controls2>
 
   </div>
 

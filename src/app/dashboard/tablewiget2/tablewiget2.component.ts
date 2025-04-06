@@ -6,7 +6,7 @@ import { CommonModule, NgStyle } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import 'moment/locale/th.js';
 // import moment from 'moment';
-import { Subject, Subscription } from 'rxjs';
+import { filter, map, of, Subject, Subscription, switchMap } from 'rxjs';
 import { DataService } from '../../../data-service/data-service.component';
 import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
@@ -28,6 +28,15 @@ export interface AssetDetails {
 
   // Optional: หากคุณยังต้องการให้เข้าถึงผ่าน key string อื่นๆ ได้
   [key: string]: string | number | undefined;
+}
+
+interface Claims {
+  DeptId: string;
+  Faction: string;
+  FactionId: string;
+  Role: string;
+  Affiliation: string;
+  Department: string;
 }
 
 
@@ -59,6 +68,7 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
+    MatSort,
     NgStyle,
   ],
   templateUrl: './tablewiget2.component.html',
@@ -69,64 +79,82 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
 export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
   assetDetails2: AssetDetails[] = [];
 
-  displayedColumns3: string[] = ['Faction', 'ResponsibleEmployee', 'AssetCount'];
+  displayedColumns3: string[] = ['faction', 'responsibleEmployee', 'assetCount'];
 
   dataSource = new MatTableDataSource<any>();
 
+  userinfo: any = [];
+
   private dataSubscription!: Subscription;
+  private userInfoSubscription!: Subscription;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient,private ap: ApiService, private dataService: DataService) {}
+  constructor(
+    private http: HttpClient,
+    private ap: ApiService,
+    private dataService: DataService
+  ) {}
 
   ngOnInit(): void {
-    this.getAssetDetails();
-    console.log('📊 dataSource:', this.dataSource.data);
-
+    this.initializeUserInfo();
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngOnDestroy(): void {
     if (this.dataSubscription) {
       this.dataSubscription.unsubscribe();
     }
+    if (this.userInfoSubscription) {
+      this.userInfoSubscription.unsubscribe();
+    }
   }
 
-  getAssetDetails(): void {
+  initializeUserInfo(): void {
+    this.userInfoSubscription = this.dataService.userInfo$
+      .pipe(filter((userInfo: any) => !!userInfo?.claims?.DeptId))
+      .subscribe((userInfo: any) => {
+        this.userinfo = userInfo.claims;
+        console.log("✅ UserInfo Loaded:", this.userinfo);
+        this.getAssetDetails(this.userinfo.DeptId);
+      });
+  }
+
+  getAssetDetails(deptId: string): void {
     const existingData = this.dataService.getAssetDetails();
-  
+
     this.dataSubscription = existingData?.subscribe((data) => {
       if (data && data.length > 0) {
-        console.log('📥 Loaded from dataService (cache):', data);
-        this.assetDetails2 = data;
+        const filtered = data.filter(asset => asset.DeptId == deptId);
+        console.log('📥 Loaded from cache (filtered):', filtered);
+        this.assetDetails2 = filtered;
         this.countAssetsByFactionAndUser();
       } else {
-        console.log('📡 Fallback to API because dataService is empty');
-        this.ap.assetService.fetchData('AssetDetails/GetForTable')
+        this.ap.assetService.fetchData(`AssetDetails/GetForTable?deptId=${deptId}`)
           .subscribe((apiData) => {
-            console.log('📥 Loaded from API:', apiData);
+            console.log('🌐 Loaded from API (filtered):', apiData);
             this.assetDetails2 = apiData;
             this.countAssetsByFactionAndUser();
           });
       }
     });
   }
-  
 
   countAssetsByFactionAndUser(): void {
     const assetCountMap: { [key: string]: number } = {};
-  
+
     this.assetDetails2.forEach((asset) => {
       const faction = asset.Faction || 'ไม่ระบุฝ่าย';
       const user = asset.ResponsibleEmployee || 'ไม่ระบุผู้ใช้งาน';
       const key = `${faction}|||${user}`;
       assetCountMap[key] = (assetCountMap[key] || 0) + 1;
     });
-  
+
     const dataToShow = Object.keys(assetCountMap).map((key) => {
       const [faction, user] = key.split('|||');
       return {
@@ -135,11 +163,14 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
         assetCount: assetCountMap[key],
       };
     });
-  
+
     dataToShow.sort((a, b) => b.assetCount - a.assetCount);
-  
-    this.dataSource.data = dataToShow;
-  }  
+
+    // ให้ Angular จัดการ render paginator ก่อน
+    setTimeout(() => {
+      this.dataSource.data = dataToShow;
+    });
+  }
 
   convertDate(dateString: string): string {
     const date = new Date(dateString);
@@ -161,3 +192,5 @@ export class Tablewiget2Component implements OnInit, OnDestroy, AfterViewInit {
     window.location.href = '#/system/AssetDetails';
   }
 }
+
+

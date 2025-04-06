@@ -31,7 +31,8 @@
                     <mat-form-field appearance="fill" class="w-100">
                     <mat-label>ประเภทครุภัณฑ์</mat-label>
                     <mat-select formControlName="TypeId">
-                        <mat-option *ngFor="let type of assetTypes" [value]="type.TypeId">{{ type.TypeName }}</mat-option>
+                        <mat-option *ngFor="let type of assetTypes" 
+                        [value]="type.TypeId">{{ type.TypeName }}</mat-option>
                     </mat-select>
                     </mat-form-field>
                 </div>
@@ -41,7 +42,8 @@
                     <mat-form-field appearance="fill" class="w-100">
                     <mat-label>หมวดหมู่</mat-label>
                     <mat-select formControlName="CategoryId">
-                        <mat-option *ngFor="let cat of assetCategories" [value]="cat.CategoryId">{{ cat.CategoryName }}</mat-option>
+                        <mat-option *ngFor="let cat of assetCategories" 
+                        [value]="cat.CategoryId">{{ cat.CategoryName }}</mat-option>
                     </mat-select>
                     </mat-form-field>
                 </div>

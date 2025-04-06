@@ -16,7 +16,8 @@ export interface AssetInventoryDetails {
 
 @Injectable({ providedIn: 'root' })
 export class AssetService {
-  private readonly baseUrl = 'https://localhost:7204/api/';
+  // private readonly baseUrl = 'https://localhost:7204/api/';
+  private readonly baseUrl = 'https://dotnetapi-fixasset.onrender.com/api/';
 
   constructor(private http: HttpClient) {}
 
@@ -83,5 +84,17 @@ export class AssetService {
   // ✅ ดึงรายการซ่อมแซมทั้งหมด
   getRepairAssets(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}RepairAsset`, { withCredentials: true });
+  }
+
+  getDeletedAssets(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/AssetDetails/trash`, { withCredentials: true });
+  }
+  
+  restoreAsset(id: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/AssetDetails/restore/${id}`, {}, { withCredentials: true });
+  }
+  
+  deleteAssetPermanently(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/AssetDetails/permanent/${id}`, { withCredentials: true });
   }
 }

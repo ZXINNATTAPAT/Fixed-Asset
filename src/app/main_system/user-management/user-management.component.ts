@@ -32,6 +32,7 @@ import { RoleDialogComponent } from './dialog/role-dialog.component';
 import { UserEditDialogComponent } from './dialog/user-edit-dialog/user-edit-dialog.component'
 import { MatIcon } from '@angular/material/icon';
 import { AddUserDialogComponent } from './dialog/add-user-dialog/add-user-dialog.component';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 
 @Component({
@@ -86,7 +87,7 @@ export class UserManagementComponent implements OnInit {
     "บทบาท"
   ];
 
-  constructor(private http: HttpClient,private dialog: MatDialog) { }
+  constructor(private http: HttpClient,private dialog: MatDialog,private ap :ApiService) { }
 
   ngOnInit(): void {this.getUsers();}
   
@@ -100,23 +101,22 @@ export class UserManagementComponent implements OnInit {
     dialogRef.afterClosed().subscribe((updatedUser) => {
       if (updatedUser) {
         // Call API to update user details
-        this.http.put(`https://localhost:7204/api/Users/${user.id}`, updatedUser).subscribe(
+        this.ap.assetService.updateData(`https://localhost:7204/api/Users/${user.id}`, updatedUser).then(
           () => {
             Swal.fire({
               icon: 'success',
               title: 'ข้อมูลอัปเดตเรียบร้อยแล้ว',
             });
             this.getUsers(); // Refresh the user list
-          },
-          (error) => {
-            console.error('Error updating user:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'เกิดข้อผิดพลาด',
-              text: 'ไม่สามารถอัปเดตข้อมูลผู้ใช้ได้',
-            });
           }
-        );
+        ).catch((error) => {
+          console.error('Error updating user:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถอัปเดตข้อมูลผู้ใช้ได้',
+          });
+        });
       }
     });
   }
@@ -135,7 +135,7 @@ export class UserManagementComponent implements OnInit {
   }
   
   getUsers(): void {
-    this.http.get<any[]>('https://localhost:7204/api/users/GetUserFull' , {withCredentials: true}).subscribe(data => {
+    this.ap.assetService.fetchData('users/GetUserFull' ).subscribe(data => {
       this.userDetails = data;
       this.dataSource = new MatTableDataSource<any>(this.userDetails);
       this.dataSource.paginator = this.paginator;
@@ -171,10 +171,7 @@ export class UserManagementComponent implements OnInit {
       cancelButtonText: 'ยกเลิก',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.patch(`https://localhost:7204/api/Users/${userId}/role`, JSON.stringify(role), {
-          withCredentials: true,
-          headers: { 'Content-Type': 'application/json' }
-        }).subscribe(
+        this.ap.assetService.updateData(`Users/${userId}/role`, JSON.stringify(role)).then(
           () => {
             // อัปเดตบทบาทใน userDetails
             const userIndex = this.userDetails.findIndex(user => user.id === userId);
@@ -189,16 +186,15 @@ export class UserManagementComponent implements OnInit {
               icon: 'success',
               title: 'อัปเดตบทบาทเรียบร้อยแล้ว',
             });
-          },
-          (error) => {
-            console.error('Error updating role:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'เกิดข้อผิดพลาด',
-              text: 'ไม่สามารถแก้ไขบทบาทได้',
-            });
           }
-        );
+        ).catch((error) => {
+          console.error('Error updating role:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถแก้ไขบทบาทได้',
+          });
+        });
       } else {
         Swal.fire({
           icon: 'info',
@@ -218,17 +214,16 @@ export class UserManagementComponent implements OnInit {
       cancelButtonText: 'ไม่'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(`https://localhost:7204/api/users/${user.id}`).subscribe(
+        this.ap.assetService.deleteData(`users/${user.id}`).then(
           () => {
             this.userDetails = this.userDetails.filter(u => u.id !== user.id);
             this.dataSource.data = this.userDetails;
             Swal.fire('ลบแล้ว!', 'ผู้ใช้ของคุณถูกลบแล้ว', 'success');
-          },
-          (error) => {
-            console.error('เกิดข้อผิดพลาดในการลบผู้ใช้:', error);
-            Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบผู้ใช้', 'error');
           }
-        );
+        ).catch((error) => {
+          console.error('เกิดข้อผิดพลาดในการลบผู้ใช้:', error);
+          Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบผู้ใช้', 'error');
+        });
       } else {
         Swal.fire('ยกเลิกแล้ว', 'ข้อมูลผู้ใช้ของคุณปลอดภัย :)', 'info');
       }

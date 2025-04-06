@@ -7,7 +7,11 @@
       
         <!-- Paginator -->
         <div class="col"><br/>
-          <mat-paginator [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" [pageSize]="10" showFirstLastButtonsclass="paginator-style"></mat-paginator>
+          <mat-paginator 
+          [pageSizeOptions]="[5, 10, 15, 30, 50, 70, 100]" 
+          [pageSize]="10" 
+          [showFirstLastButtons]="true" 
+          class="paginator-style"></mat-paginator>
         </div>
 
       </div>
@@ -80,7 +84,7 @@
                                         asset[column] !== 'ซ่อมแซม' && 
                                         asset[column] !== 'ส่งมอบ' && 
                                         asset[column] !== '',
-                      'text-bg-warning': asset[column] === 'โอนย้าย' || asset[column] === 'ส่งมอบ',
+                      'text-bg-warning': asset[column] === 'โอนย้าย' || asset[column] === 'รับมอบ',
                       'text-bg-danger': asset[column] === 'ซ่อมแซม'
                     }"
                     style="color: black; font-size: 16px;">

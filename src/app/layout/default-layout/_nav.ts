@@ -67,7 +67,7 @@ export const navItems: ICustomNavData[] = [
       { name: 'หมวดสินทรัพย์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },
       { name: 'รหัสสำนักงาน', url: '/defaultdata/sectiontype', icon: 'nav-icon-bullet' },
       { name: 'รหัสฝ่าย', url: '/defaultdata/faction', icon: 'nav-icon-bullet' },
-      { name: 'หน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
+      // { name: 'หน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
       { name: 'ผู้ขายทรัพย์สิน', url: '/defaultdata/ps', icon: 'nav-icon-bullet' }
     ]
   }

@@ -14,6 +14,7 @@ import { cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
+import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 
 interface AssetDetails {
   sellerCode: "string",
@@ -46,7 +47,7 @@ interface AssetDetails {
     UtilitiesModule,
     ButtonDirective,
     NgStyle,
-    IconDirective,FormDirective, FormLabelDirective, FormControlDirective,
+    IconDirective, FormDirective, FormLabelDirective, FormControlDirective,
   ],
   templateUrl: './property-seller.component.html',
   styleUrl: './property-seller.component.scss'
@@ -56,35 +57,7 @@ export class PropertySellerComponent implements OnInit {
 
   yourFormName: FormGroup<any> | undefined;
   isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
-  asset: any ={};
-
-  onSubmit() {
-    this.http.post<any>('https://localhost:7204/api/PropertySellers', { withCredentials: true }, this.asset)
-        .subscribe(
-          response => {
-            // console.log(response);
-            const newAsset = response;
-            // console.log(newAsset);
-            this.assetDetails.push(this.translateToThai(newAsset));
-            this.dataSource.data = this.assetDetails;
-  
-            Swal.fire({
-              title: "บันทึกเสร็จสิ้น",
-              icon: "success"
-            });
-          },
-          error => {
-            console.error(error);
-            if (error) {
-              Swal.fire({
-                title: "มีข้อมูลในระบบอยู่แล้ว",
-                icon: "error"
-              });
-            }
-          }
-        );
-  }
-
+  asset: any = {};
   icons = { cilPencil, cilTrash };
   assetDetails: AssetDetails[] = [];
 
@@ -93,8 +66,33 @@ export class PropertySellerComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private router: Router, private ap: ApiService) { }
 
+  onSubmit() {
+    this.ap.assetService.postData('PropertySellers', this.asset)
+      .then(response => {
+        // console.log(response);
+        const newAsset = response;
+        // console.log(newAsset);
+        this.assetDetails.push(this.translateToThai(newAsset));
+        this.dataSource.data = this.assetDetails;
+
+        Swal.fire({
+          title: "บันทึกเสร็จสิ้น",
+          icon: "success"
+        });
+      })
+      .catch(error => {
+        console.error(error);
+        if (error) {
+          Swal.fire({
+            title: "มีข้อมูลในระบบอยู่แล้ว",
+            icon: "error"
+          });
+        }
+      });
+  }
+  
   displayedColumns2: string[] = [
     "รหัสผู้ขาย",
     "ชื่อผู้ขาย",
@@ -109,10 +107,10 @@ export class PropertySellerComponent implements OnInit {
   assetDetailsset: any[] = []
 
   getAssetType(): void {
-    this.http.get<any[]>('https://localhost:7204/api/PropertySellers',{withCredentials: true}).subscribe(data => {
-      this.assetDetails = data.map(asset => {
+    this.ap.assetService.fetchData('PropertySellers').subscribe(data => {
+      this.assetDetails = data.map((asset: Record<string, any>): AssetDetails => {
         asset = this.translateToThai(asset); // ฟังก์ชันที่แปลงข้อมูลเป็นภาษาไทย
-        return asset;
+        return asset as AssetDetails;
       });
       console.log(this.assetDetails);
       this.assetDetailsset = this.assetDetails;
@@ -126,7 +124,7 @@ export class PropertySellerComponent implements OnInit {
   ngOnInit(): void {
     this.getAssetType();
   }
-  
+
   translateToThai(asset: any): any {
     const translationMap: { [key: string]: string } = {
       "SellerCode": "รหัสผู้ขาย",

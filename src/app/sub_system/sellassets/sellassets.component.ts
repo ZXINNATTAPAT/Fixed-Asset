@@ -279,8 +279,7 @@ export class SellassetsComponent implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         // ผู้ใช้ยืนยันแล้ว ดำเนินการลบ
-        this.http.delete(`https://localhost:7204/api/RepairAsset/${asset.repairAssetId}`, { withCredentials: true }
-        ).subscribe(
+        this.ap.assetService.deleteData(`RepairAsset/${asset.repairAssetId}`).then(
           () => {
             const index = this.assetDetails.findIndex(
               (a) => a.repairAssetId === asset.repairAssetId
@@ -291,7 +290,8 @@ export class SellassetsComponent implements OnInit, OnDestroy {
               this.dataSource.data = this.assetDetails;
             }
             Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
-          },
+          }
+        ).catch(
           (error) => {
             console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
             Swal.fire(

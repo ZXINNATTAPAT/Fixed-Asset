@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, } from '@angular/core';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, MatOption } from '@angular/material/core';
-import { ReactiveFormsModule, FormsModule, FormControl, Validators, FormGroup, FormBuilder, FormArray } from '@angular/forms';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatCommonModule, MatNativeDateModule, MatOption } from '@angular/material/core';
+import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, FormArray } from '@angular/forms';
 import { MatFormField, MatFormFieldModule, MatLabel, MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions, } from '@angular/material/form-field';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter, MomentDateModule, provideMomentDateAdapter, } from '@angular/material-moment-adapter';
 import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput } from '@angular/material/datepicker';
@@ -9,28 +9,29 @@ import { CommonModule, NgIf, NgStyle } from '@angular/common';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { cilDataTransferUp } from '@coreui/icons';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogActions, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
 import { AssetDetails2Component } from '../asset-details2/asset-details2.component';
 import { AssetDetails3Component } from '../asset-details3/asset-details3.component';
-import Swal from 'sweetalert2';
-import 'moment/locale/th.js';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { DataService } from '../../../data-service/data-service.component';
 import { ApiService } from '../../../ApiController/apiservice/api-service.service';
-import { AssetService } from './Service/asset.service'
-import { FilterService } from './Service/filter.service';
 import { UploadDialogComponent } from './Dialog/upload-dialog/upload-dialog.component';
-import { DepreciationService } from './Service/depreciation.service';
-import moment from 'moment';
+import { AssetCodeService } from './Service/asset-code.service';
+import { MatButtonModule } from '@angular/material/button';
+import Swal from 'sweetalert2';
+import 'moment/locale/th.js';
+import { FormService } from './Service/form.service';
+import { SubAssetService } from './Service/sub-asset.service';
+import { DepreciationScheduleService } from './Service/depreciation-schedule.service';
+import { DepreciationPreviewComponent } from './components/depreciation-preview.component';
+import { SubAssetFormComponent } from './components/sub-asset-form.component';
 
 const formFieldOptions: MatFormFieldDefaultOptions = {
   hideRequiredMarker: true,
   // Optional: hide the required marker (*) globally
 };
-
-export interface asc { asc_Code: string; asc_Name: string; }
 
 @Component({
   selector: 'app-form-controls',
@@ -85,572 +86,121 @@ export interface asc { asc_Code: string; asc_Name: string; }
     }), // Provide options for the date adapter
   ],
   imports: [
-    AssetDetails2Component, AssetDetails3Component, UploadDialogComponent,
+    AssetDetails2Component, AssetDetails3Component, UploadDialogComponent,DepreciationPreviewComponent, SubAssetFormComponent,
     MomentDateModule, MatNativeDateModule, MatDatepicker, MatDatepickerToggle,
     MatLabel, MatDatepickerInput, MatFormFieldModule, MatInputModule,
     MatFormFieldModule, MatSelect, MatOption, MatFormField,
     FormsModule, FormDirective, FormLabelDirective, FormControlDirective,
     CommonModule, ReactiveFormsModule, NgxMatSelectSearchModule,
-    ButtonDirective, NgStyle, NgIf,
+    ButtonDirective, NgStyle, NgIf,MatDialogModule,
+    MatDialogActions,
+    MatDialogContent,
+    MatButtonModule,
+    MatCommonModule
   ],
 })
 
 export class SystemComponent implements OnInit, OnDestroy {
-
-  // References for elements using @ViewChild
-  @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
-  @ViewChild('assetCategorySelect') assetCategorySelect!: ElementRef;
-  @ViewChild('factions') factionsElementRef!: ElementRef;
-
-  // Asset-related properties
-  // User info and token management
-  userinfo: any = [];  
-  asset: FormGroup = new FormGroup({});
-
-  // เก็บชุดข้อมูลที่สร้าง
-  generatedData: any[] = []; 
-  asset2: any = {};
   assetDetails: any[] = [];
+  @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
+  asset!: FormGroup;
+  userinfo: any = {};
   assetTypes: any[] = [];
-  factions: { FactId: number; Name: string; Semin: string; Code: string }[] = [];
-  Department: any[] = [];
   assetCategory: any[] = [];
-  countingUnits: any[] = [];
+  departments: any[] = [];
+  depreciationSchedule: any[] = [];
+  unit: any[] = [];
 
-  //เชตจำนวนข้อมูลที่จะเพิ่ม
-  numberOfCopies: number = 1;
-  options: number[] = [];
+  unitCtrl = new FormControl();
+  unitFilterCtrl = new FormControl();
+  DepartmentFilterCtrl = new FormControl();
+  factionsFilterCtrl = new FormControl();
+  assetCategoryFilterCtrl = new FormControl();
 
+  filteredUnits = new BehaviorSubject<any[]>([]);
+  filteredFactions = new BehaviorSubject<any[]>([]);
+  filteredDepartment = new BehaviorSubject<any[]>([]);
+  filteredAssetCategories = new BehaviorSubject<any[]>([]);
+
+  showForm = false;
+  hidden2 = true;
+  options = Array.from({ length: 25 }, (_, i) => i + 1);
   selectedFaction: string | null = null;
-  isCustomInput: boolean = false;
+  displayDate = '';
 
-  // เก็บวันที่ในรูปแบบ DD/MM/YY เพื่อแสดงผล
-  displayDate: string = ''; 
-
-  // Controls and filters for dropdowns
-  assetCategoryCtrl: FormControl = new FormControl();
-  assetCategoryFilterCtrl: FormControl = new FormControl('');
-
-  unitCtrl      : FormControl = new FormControl();
-  unitFilterCtrl: FormControl = new FormControl('');
-
-  factionsCtrl: FormControl = new FormControl();
-  factionsFilterCtrl: FormControl = new FormControl('');
-
-  DepartmentCtrl: FormControl = new FormControl();
-  DepartmentFilterCtrl: FormControl = new FormControl('');
-
-  filteredAssetCategories: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-
-  filteredUnits: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-
-  filteredFactions: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-
-  filteredDepartment: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
-  
-  // Toggle visibility
-  hidden: boolean = true; 
-  hidden2: boolean = true; 
-  showForm: boolean = false;
-  
-  // Fixed settings
-  fixedPrefix: string = ''; 
-  fixedSuffix: string = ''; 
-  editablePartLength: number = 15; 
-
-  //เซต Icon 
-  icons = { cilDataTransferUp };
-  colors = { color: 'primary', textColor: 'primary' };
-
-  //เซต types บนตารางค่าเสื่อม
-  depreciationSchedule: { year: string; bookValue: number; depreciation: number }[] = [];
-
-  _onDestroy = new Subject<void>();
+  private _onDestroy = new Subject<void>();
 
   constructor(
-    private formBuilder: FormBuilder, 
-    private dataService: DataService, 
-    private service: AssetService,
-    private ap: ApiService, 
-    private dialog: MatDialog,
-    private depreciationService: DepreciationService,
-    private filterService: FilterService) { }
+    private formService: FormService,
+    private subAssetService: SubAssetService,
+    private depreciationScheduleService: DepreciationScheduleService,
+    private assetCodeService: AssetCodeService,
+    private api: ApiService,
+    private dataService: DataService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
-      this.initializeUserInfo();
-      this.loadAllData();
-      this.initializeAssetForm();
-      this.initializeValueChangeHandlers();
+    this.dataService.userInfo$.subscribe(user => {
+      this.userinfo = user;
+      this.asset = this.formService.createAssetForm(this.userinfo.userId);
+      this.formService.autoInputFields(this.asset, this.userinfo, this.assetTypes);
+      this.setupFormListeners();
       this.loadInitialData();
-      this.options = Array.from({ length: 25 }, (_, i) => i + 1); 
-      // console.log(this.asset.value);
-    
-      // เรียก updateDepreciationSchedule เมื่อฟอร์มโหลดเสร็จ
-      this.asset.valueChanges.pipe(
-        debounceTime(700), // รอ 700 มิลลิวินาทีก่อนดำเนินการ
-        distinctUntilChanged(
-          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
-        ) // ตรวจสอบค่าที่เปลี่ยนจริง
-      ).subscribe((formValues) => {
-        const typeId = formValues.TypeId;
-        const receiptDate = formValues.ReceiptDate;
-        const purchasePrice = formValues.PurchasePrice;
-    
-        if (typeId && receiptDate && purchasePrice > 0) {
-          // เรียก API เมื่อค่าฟอร์มครบถ้วน
-          this.ap.assetService.fetchDataById('Depreciations/type', typeId)
-          .subscribe((depreciations) => {
-            this.updateDepreciationSchedule(depreciations);
-          });
-        } else {
-          console.log('กำลังรอข้อมูลเพิ่มเติม...');
-        }
-      });
-  }
-
-  // Load user information and handle it
-  private initializeUserInfo(): void {
-      this.dataService.userInfo$.subscribe((userInfo) => {
-        this.userinfo = userInfo;
-        console.log('DefaultHeader UserInfo:', userInfo);
-      });
-  }
-
-  // Initialize the reactive form
-  private initializeAssetForm(): void {
-    this.asset = this.formBuilder.group({
-      AssetId: [0, Validators.required],
-      AssetCode: [''],
-      AssetName: ['', Validators.required],
-      Quantity: [1, [Validators.required, Validators.min(1)]],
-      Unit: ['', Validators.required],
-      PropertySeller: ['', Validators.required],
-      TypeId: [0, Validators.required],
-      CategoryId: [0, Validators.required],
-      DepartmentId: [0, Validators.required],
-      FactionId: [0, Validators.required],
-      ResponsibleEmployee: ['', Validators.required],
-      TaxInvoiceNumber: [''],
-      PurchaseDate: ['', Validators.required],
-      ReceiptDate: ['', Validators.required],
-      DepreciationStartDate: ['', Validators.required],
-      DepreciationCalculationStartDate: ['', Validators.required],
-      PurchasePrice: [0, [Validators.required]],
-      CalculatedPrice: [0, [Validators.required, Validators.min(0)]],
-      ScrapPrice: [0, [Validators.required, Validators.min(0)]],
-      DepreciationRate: [0, [Validators.required, Validators.min(0)]],
-      AssetAge: [0, [Validators.required, Validators.min(0)]],
-      DepreciationEndDate: [''],
-      AccumulatedDepreciation: [0, [Validators.required, Validators.min(0)]],
-      DepreciationValue: [0, [Validators.required, Validators.min(0)]],
-      BookValue: [0, [Validators.required, Validators.min(0)]],
-      Note: [''],
-      StatusId: [4], //4:ส่งมอบ 1:ใข้งาน 
-      CreatedBy:[this.userinfo.userId],
-      SubAssets: this.formBuilder.array([]),
-      numberOfCopies: [1]
     });
   }
-  
-  get subAssets(): FormArray { return this.asset.get('SubAssets') as FormArray; }
 
-  addSubAsset(subAssetData?: any): void {
-    const assetCode = this.asset.get('AssetCode')?.value || '';
-    const existingSubAssets = this.subAssets.controls.map(sub => sub.get('subAssetCode')?.value);
-    
-    let nextSequence = 1; // เริ่มที่ (1)
+  get subAssets(): FormArray {
+    return this.asset.get('SubAssets') as FormArray;
+  }
   
-    if (existingSubAssets.length > 0) {
-      // หาเลขลำดับสูงสุดที่มีอยู่แล้ว
-      const maxSequence = existingSubAssets
-        .map(code => {
-          const match = code.match(/\((\d+)\)$/); // ค้นหา (1), (2), (3), ...
-          return match ? parseInt(match[1], 10) : 0;
-        })
-        .reduce((max, num) => Math.max(max, num), 0);
-  
-      nextSequence = maxSequence + 1; // เพิ่มลำดับต่อไป
-    }
-  
-    this.subAssets.push(
-      this.formBuilder.group({
-        subAssetId: [subAssetData?.SubAssetId || 0], // SubAssetId
-        assetId: [subAssetData?.AssetId || 0], // AssetId
-        subAssetCode: [`${assetCode}(${nextSequence})`], // SubAssetCode อัปเดตให้เป็น (1), (2), (3)
-        subAssetName: [subAssetData?.SubAssetName || ''], // SubAssetName
-        unit: [subAssetData?.Unit || '', Validators.required], // Unit
-        assetLocation: [subAssetData?.AssetLocation || ''], // AssetLocation
-        ResponsibleEmployee: [this.asset.get('ResponsibleEmployee')?.value || '', Validators.required], // ResponsibleEmployee
-        status: [subAssetData?.Status || ''], // Status
-        note: [subAssetData?.Note || ''], // Note
-        assetDetails: [], // AssetDetails
-      })
+
+  generateAssetCode(): void {
+    this.formService.generateAssetCode(
+      this.asset,
+      this.assetCategory,
+      this.assetDetails,
+      this.api,
+      () => this.showAlert(),
+      (msg) => this.showError(msg),
+      () => console.log('Asset code generated & validated ✅')
     );
   }
-  
 
-  // Handle reactive form value changes
-  private initializeValueChangeHandlers(): void {
-
-    this.asset.get('TypeId')?.valueChanges.pipe(
-      filter((typeId) => !!typeId),
-      switchMap((typeId) => this.ap.assetService.fetchDataById('Assetcategories/by-type', typeId))
-    ).subscribe((data) => this.handleAssetCategoryChange(data));
-
-    this.asset.get('TypeId')?.valueChanges.pipe(
-      filter((typeId) => !!typeId), // ตรวจสอบว่า typeId ไม่เป็น null หรือ undefined
-      switchMap((typeId) => this.ap.assetService.fetchDataById('Depreciations/type', typeId)) // เรียก API
-    ).subscribe((depreciations) => {
-      this.updateDepreciationSchedule(depreciations);
-    });
-    
-    // this.asset.get('typeId')?.valueChanges.subscribe((value) => this.updateDepreciationSchedule(value));
-
-    this.asset.get('AssetCode')?.valueChanges.subscribe((value) => this.validateAssetCode(value));
-
-    this.asset.get('ReceiptDate')?.valueChanges.subscribe((value) => {
-      const isoDate = moment(value.clone().startOf('day').hours(8)).toISOString();
-      if (value) {
-        this.updateDisplayDate(value);
-        this.asset.patchValue(
-          {
-            DepreciationStartDate: isoDate,
-            DepreciationCalculationStartDate: isoDate,
-          })
-      }
-    });
-    
-    this.asset.get('PurchasePrice')?.valueChanges.subscribe((value) => {
-      this.asset.patchValue({ CalculatedPrice: value });
-      // this.updateDepreciationSchedule(value);
-    });
-
-    const updateAssetCode = () => this.generateAssetCode();
-    ['TypeId', 'CategoryId', 'PurchaseDate'].forEach((field) =>
-      this.asset.get(field)?.valueChanges.subscribe(updateAssetCode)
-    );
-
-
-    this.asset.get('DepartmentId')?.valueChanges.subscribe((value) => this.filterFactionsByDepartment(value));
-
-    [this.assetCategoryFilterCtrl, this.factionsFilterCtrl, this.DepartmentFilterCtrl, this.unitFilterCtrl]
-      .forEach((ctrl, index) =>
-        ctrl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => this.handleFilterChange(index))
-      );
-  }
-
-  // Load initial data for asset types and categories
-  private loadInitialData(): void {
-    this.ap.assetService.fetchData('Assettype').subscribe((data) => (this.assetTypes = data));
-    this.assetCategoryCtrl = this.formBuilder.control(null);
-  }
-
-  // Update the asset category on type change
-  private handleAssetCategoryChange(data: any): void {
-    if (Array.isArray(data)) {
-      this.assetCategory = data;
-      this.assetCategoryCtrl.setValue(null);
-      // console.log('Asset Categories:', this.assetCategory);
-    } else {
-      console.error('Unexpected data format:', data);
-    }
-  }
-
-  // เมื่อเลือกวันที่ใน mat-datepicker
-  onDateChange(event: any) {
-    const selectedDate = event.value;
-    // console.log(selectedDate);
-    if (selectedDate) {
-      const isoDate = moment(selectedDate.clone().startOf('day').hours(8)).toISOString(); // แปลงเป็น ISO 8601
-      // console.log(isoDate);
-      // console.log(moment(selectedDate));
-      this.asset.patchValue({ ReceiptDate: isoDate }, { emitEvent: false });
-      this.updateDisplayDate(selectedDate); // อัปเดตค่าแสดงผล
-    }
-  }
-  
-  onDateChange2(event: any) {
-    const selectedDate = event.value;
-    // console.log(selectedDate);
-    if (selectedDate) {
-      const isoDate = moment(selectedDate.clone().startOf('day').hours(8)).toISOString(); // แปลงเป็น ISO 8601
-      // console.log(isoDate);
-      // console.log(moment(selectedDate));
-      this.asset.patchValue({ PurchaseDate: isoDate }, { emitEvent: false });
-  
-    }
-  }
-
-  // อัปเดตวันที่แสดงผลเป็น DD/MM/YY
-  private updateDisplayDate(date: any) {
-    this.displayDate = moment(date).format('DD/MM/YY');
-  }
-
-  // ฟังก์ชันสร้างข้อมูล
-  generateData(): void {
-    const formValue = this.asset.value; // ค่าจากฟอร์มหลัก
-    const quantity = formValue.quantity; // จำนวนชุดที่ต้องการ
-
-    if (quantity <= 0) {
-      console.error('Invalid quantity value');
-      return;
-    }
-
-    // สร้างชุดข้อมูลตามจำนวนที่ระบุ
-    this.generatedData = Array.from({ length: quantity }, (_, index) => ({
-      ...formValue,
-      assetId: formValue.assetId + index + 1, // เพิ่ม ID ตามลำดับ
-      note: `${formValue.note || ''} ชุดที่ ${index + 1}` // เพิ่มหมายเหตุแยกแต่ละชุด
-    }));
-
-    console.log('Generated Data:', this.generatedData);
-  }
-
-  // Validate asset code uniqueness
-  private validateAssetCode(value: string): void {
-    const isDuplicate = this.assetDetails.some((asset) => asset.AssetCode === value);
+  private showError(message: string): void {
     Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: isDuplicate ? 'error' : 'success',
-      html: `<span style="font-family: 'Anuphan', sans-serif; font-weight: 700; color: ${isDuplicate ? 'red' : 'green'
-        };">${isDuplicate ? 'รหัสรหัสครุภัณฑ์ซ้ำ' : 'รหัสรหัสครุภัณฑ์ใช้ได้'}</span>`,
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: message,
     });
   }
 
-  // Generate a unique asset code based on form values
-  private generateAssetCode(): void {
-    const category = this.assetCategory.find(
-      (type) => type.CategoryId === this.asset.get('CategoryId')?.value
-    );
-    const purchaseDate = this.asset.get('PurchaseDate')?.value;
-    const year = purchaseDate ? new Date(purchaseDate).getFullYear() + 543 : '';
-    if (!category || !year) return;
-
-    const payload = {
-      Affiliation: 'กกต',
-      AssetCategory: category.CategoryCode,
-      Year: year.toString(),
-    };
-
-    this.ap.assetService.generateAssetCode(payload).subscribe({
-      next: (response) => {
-        if (response && response.assetCode) {
-          this.handleGeneratedAssetCode(response.assetCode, year.toString());
-        } else {
-          console.error('Response does not contain assetCode.');
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Asset code generation failed. Please try again.',
-          });
-        }
-      },
-      error: (err) => {
-        console.error('Error generating asset code:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to generate asset code. Please check your connection or try again later.',
-        });
-      },
-    });
-    
+  autoInput(): void {
+    this.formService.autoInputFields(this.asset, this.userinfo, this.assetTypes);
   }
 
-  private handleGeneratedAssetCode(generatedCode: string, year: string): void {
-    const isDuplicate = this.assetDetails.some((asset) => asset.AssetCode === generatedCode);
-    if (isDuplicate) {
-      let suffix = 1;
-      while (
-        this.assetDetails.some((asset) => asset.AssetCode === `${generatedCode.split('-')[0]}-${suffix}-${year}`)
-      ) {
-        suffix++;
-      }
-      generatedCode = `${generatedCode.split('-')[0]}-${suffix}-${year}`;
-    }
-    this.asset.patchValue({ AssetCode: generatedCode });
+  toggleForm(): void {
+    this.showForm = !this.showForm;
   }
 
-  // Filter factions by department
-  private filterFactionsByDepartment(departmentId: string): void {
-    const department = this.Department.find((c) => c.DeptId === departmentId);
-    const factions = department ? department.Factions : [];
-    this.filteredFactions.next(factions);
-    this.factions = factions;
+  onDateChange(event: any): void {
+    this.displayDate = this.formService.onReceiptDateChange(event, this.asset);
   }
 
-  // Generic filter handler
-  private handleFilterChange(index: number): void {
-    const filters = [this.filterAssetCategories, this.filterFactions, this.filterDepartments, this.filterUnits];
-    filters[index].call(this);
-  }
-
-  private loadAllData(): void {
-
-    const resourceId = '5b2605ca-cd5c-4034-bc35-3c681c6fedaa';
-
-    this.ap.externalDataService.getData(resourceId).pipe(
-      catchError(() => {
-        console.error('Error fetching countingUnits. Defaulting to empty array.');
-        return of([]);
-      })
-    ).subscribe(
-      (response) => {
-        if (response?.result?.records) {
-          // แปลงชื่อฟิลด์จาก 'คำ' เป็น 'word'
-          this.countingUnits = response.result.records.map((unit: any) => {
-            return {
-              word: unit.ลักษณนาม, // แปลง 'คำ' เป็น 'word'
-              // ลักษณนาม: unit.ลักษณนาม, // คงไว้เหมือนเดิม
-              // ...unit, // เก็บฟิลด์เดิมอื่น ๆ ไว้ (ถ้ามี)
-            };
-          });
-    
-          this.filteredUnits.next(this.countingUnits.slice());
-          // console.log('CountingUnits:', this.countingUnits);
-        } else {
-          console.warn('No records found for Countingunits.');
-        }
-      },
-      (error) => {
-        console.error('Error fetching countingUnits:', error);
-      }
-    );
-    
-
-    this.ap.assetService.fetchData('Departments').pipe(
-      catchError((error) => {
-        console.error('Error fetching departments and factions:', error);
-        return of({ Factions: [], Departments: [] }); // Provide default structure
-      })).subscribe((response: any) => {
-        // Extract Factions and Departments from the response
-        const setdata = response
-        this.Department = setdata || [];
-
-        this.filteredDepartment.next(this.Department);
-
-        // Debugging logs
-        // console.log('Factions:', this.factions);
-        // console.log('Departments:', this.Department);
-      });
-
-    this.setupFilterListeners();
-
-  }
-
-  openUploadDialog(): void {
-    this.dialog.open(UploadDialogComponent, {
-      width: '600px',
-      data: { assetCategory: this.assetCategory, assetTypes: this.assetTypes },
-    });
-
+  onDateChange2(event: any): void {
+    this.formService.onPurchaseDateChange(event, this.asset);
+    this.generateAssetCode(); // 👈 เพิ่มบรรทัดนี้
   }
   
-  async onSubmit(): Promise<void> {
-    try {
-      // ✅ ตรวจสอบว่า `userinfo.userId` มีค่าหรือไม่
-      if (!this.userinfo || !this.userinfo.userId) {
-        throw new Error('ไม่พบข้อมูลผู้ใช้งาน (CreatedBy)');
-      }
-  
-      // ✅ ตรวจสอบค่าในฟอร์ม
-      if (!this.asset.get("numberOfCopies")?.value || this.asset.get("numberOfCopies")?.value <= 0) {
-        throw new Error('Number of copies must be greater than 0.');
-      }
-  
-      // ✅ ดึงค่าฟอร์ม
-      const payload: any = { ...this.asset.value };
-  
-      // ✅ ตรวจสอบว่ามี `CreatedBy` หรือไม่ ถ้าไม่มีให้กำหนดค่า
-      payload.CreatedBy = this.asset.get("CreatedBy")?.value ?? this.userinfo.userId;
-  
-      const count = this.asset.get("numberOfCopies")?.value;
-  
-      // ✅ สร้าง Array ของ Payload ที่จะส่ง
-      const dataToSend: any[] = [];
-      for (let i = 0; i < count; i++) {
-        dataToSend.push({
-          ...payload,
-          uniqueKey: `${payload.assetName}-${i + 1}`
-        });
-      }
-  
-      // ✅ ส่งข้อมูลไปยัง API
-      await this.ap.assetService.postData('AssetDetails', dataToSend);
-  
-      // ✅ แจ้งเตือนเมื่อสำเร็จ
-      Swal.fire({
-        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
-        icon: 'success',
-        showCancelButton: false,
-        confirmButtonText: 'OK',
-      }).then((result) => {
-        this.loadAllData();
-        this.asset.reset();
-        this.assetCategoryCtrl.reset();
-      });
-  
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        html: `<h1><span style="font-family: 'Anuphan', sans-serif; font-weight: 600; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
-        icon: 'error',
-      });
-    }
-  }
-  
-  autoInput() {
-    this.asset.get('Quantity')?.setValue(1); //เซคจำนวน
-    this.asset.get('CalculatedPrice')?.setValue(this.asset.get('PurchasePrice')?.value); //เซคราคาคำนวณ
-    this.asset.get('DepreciationCalculationStartDate')?.setValue(this.asset.get('ReceiptDate')?.value);
-    this.asset.get('DepreciationStartDate')?.setValue(this.asset.get('ReceiptDate')?.value);
-
-    const assetTypesControlValue = this.asset.get('AssetType')?.value;
-    if (assetTypesControlValue) {
-
-      const matchingAssetType = this.assetTypes.find(asset => asset.AssetCode === assetTypesControlValue);
-
-      if (matchingAssetType) {
-        const depreciationRateControl = this.asset.get('DepreciationRate');
-
-        if (depreciationRateControl) {
-          depreciationRateControl.setValue(matchingAssetType.rate_dep);
-        }
-      }
-    }
-
-
-    if (this.userinfo.Affiliation === 'ส่วนกลาง') {
-      this.asset.get('DepartmentId')?.setValue(`${this.userinfo?.DepartmentId}`); //เซตสังกัด หรือ สำนัก
-      this.asset.get('FactionId')?.setValue(`${this.userinfo?.FactionId}`); //เซตฝ่าย
-    } else {
-      // this.asset.get('agen')
-    }
-
-    const assetCodeInput = this.asset.get('AssetCode');
-
-    // const depreciationStartDateInput = this.asset.get('ReceiptDate');
-
-    // const depreciationStartDateInput = this.asset.get('DepreciationStartDate');
-
-    // depreciationStartDateInput?.value?.setValue(this.asset.get('DepreciationStartDate')?.value)
-
-    if (assetCodeInput && assetCodeInput.value) {
-      const currentValue = assetCodeInput.value;
-
-      if (!currentValue.startsWith(`กกต`)) {
-        assetCodeInput.setValue(
-          `กกต` + ' ' + currentValue
-        );
-      }
-    }
+  handleInput(event: Event): void {
+    this.formService.handleAssetCodeInput(event, this.asset);
   }
 
-  handleKeyPress(event: KeyboardEvent, nextInputId: string) {
+  handleKeyDown(event: KeyboardEvent): void {
+    this.formService.preventEditingFixedPart(event);
+  }
+
+  handleKeyPress(event: KeyboardEvent, nextInputId: string): void {
     if (event.key === 'Enter') {
       event.preventDefault();
       const nextInput = document.getElementById(nextInputId);
@@ -660,184 +210,193 @@ export class SystemComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const fixedPrefix = 'กกต 0401-'; // กำหนดค่า prefix คงที่
-    const fixedSuffix = '-2567'; // กำหนดค่า suffix คงที่
-    const editablePartLength = 3; // ความยาวของส่วนที่สามารถแก้ไขได้
+  private setupFormListeners(): void {
+    this.asset.get('PurchasePrice')?.valueChanges.subscribe(() => {
+      this.formService.syncCalculatedPrice(this.asset);
+    });
 
-    let value = input.value;
+    this.asset.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+    ).subscribe(values => {
+      const { TypeId, ReceiptDate, PurchasePrice } = values;
+      if (TypeId && ReceiptDate && PurchasePrice > 0) {
+        this.api.assetService.fetchDataById('Depreciations/type', TypeId).subscribe(deps => {
+          const schedule = this.depreciationScheduleService.calculateSchedule(PurchasePrice, deps[0].Rate_dep, ReceiptDate);
+          const summary = this.depreciationScheduleService.extractFirstYearSummary(schedule);
+          this.asset.patchValue({
+            DepreciationRate: deps[0].Rate_dep,
+            AssetAge: deps[0].Servicelife,
+            DepreciationValue: summary.depreciation,
+            AccumulatedDepreciation: summary.accumulatedDepreciation,
+            BookValue: summary.bookValue
+          });
+          this.depreciationSchedule = schedule;
+        });
+      }
+    });
 
-    // ตรวจสอบว่าค่า input มีรูปแบบที่ถูกต้อง
-    const regex = /^กกต\s\d{4}-\d{3}-\d{4}$/;
+    this.asset.get('TypeId')?.valueChanges.subscribe((typeId) => {
+      if (typeId) {
+        this.api.assetService.fetchDataById('Assetcategories/by-type', typeId).subscribe((data) => {
+          this.assetCategory = data;
+          this.filteredAssetCategories.next(data);
+          this.asset.get('CategoryId')?.setValue(null);
+        });
+      }
+    });
 
-    // หากค่า input ไม่ตรงกับรูปแบบ ให้ตั้งค่ากลับไปเป็นค่าที่อยู่ในฟอร์มควบคุม
-    if (!regex.test(value)) {
-      input.value = this.asset.get('AssetCode')!.value;
-    } else {
-      // ดึงส่วนที่สามารถแก้ไขได้
-      const editablePart = value.slice(
-        fixedPrefix.length,
-        fixedPrefix.length + editablePartLength
+    this.assetCategoryFilterCtrl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
+      const search = this.assetCategoryFilterCtrl.value?.toLowerCase() || '';
+      const filtered = this.assetCategory.filter(cat =>
+        cat.CategoryName.toLowerCase().includes(search) ||
+        cat.CategoryCode.toLowerCase().includes(search)
       );
+      this.filteredAssetCategories.next(filtered);
+    });
 
-      // ประกอบค่าใหม่
-      const newValue = `${fixedPrefix}${editablePart}${fixedSuffix}`;
+    this.DepartmentFilterCtrl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
+      const search = this.DepartmentFilterCtrl.value?.toLowerCase() || '';
+      const filtered = this.departments.filter(dep =>
+        dep.Name.toLowerCase().includes(search) ||
+        dep.Semin.toLowerCase().includes(search)
+      );
+      this.filteredDepartment.next(filtered);
+    });
 
-      // อัปเดตค่าใน input และฟอร์มควบคุม
-      input.value = newValue;
-      this.asset.get('AssetCode')!.setValue(newValue);
-    }
-  }
+    this.factionsFilterCtrl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
+      const search = this.factionsFilterCtrl.value?.toLowerCase() || '';
+      const filtered = this.filteredFactions.value.filter(fac =>
+        fac.Name.toLowerCase().includes(search) ||
+        fac.Semin.toLowerCase().includes(search)
+      );
+      this.filteredFactions.next(filtered);
+    });
 
-  handleKeyDown(event: KeyboardEvent): void {
-    const input = event.target as HTMLInputElement;
-    const cursorPosition = input.selectionStart;
-
-    // Prevent editing fixed parts of the input
-    if (cursorPosition! < 10 || cursorPosition! >= 13) {
-      event.preventDefault();
-    }
-  }
-
-  private filterAssetCategories(): void {
-    const searchValue = this.assetCategoryFilterCtrl.value;
-    this.filterService.filterAssetCategories(this.assetCategory, searchValue).subscribe((filtered) => {
-      this.filteredAssetCategories.next(filtered); // Emit the filtered data
+    this.unitFilterCtrl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
+      const search = this.unitFilterCtrl.value?.toLowerCase() || '';
+      const filtered = this.unit.filter(unit =>
+        unit.word.toLowerCase().includes(search)
+      );
+      this.filteredUnits.next(filtered);
     });
   }
 
-  private filterUnits(): void {
-    const searchValue = this.unitFilterCtrl.value?.toLowerCase() || '';
-    const filtered = this.countingUnits.filter((unit) =>
-      unit.word.toLowerCase().includes(searchValue)
+  addSubAsset(): void {
+    const responsible = this.asset.get('ResponsibleEmployee')?.value || '';
+    const assetCode = this.asset.get('AssetCode')?.value || '';
+    this.subAssetService.addSubAsset(this.asset, this.assetTypes, assetCode, responsible);
+  }
+  
+  getSubAssetForm(index: number): FormGroup {
+    return this.subAssets.at(index) as FormGroup;
+  }
+  
+  removeSubAsset = (index: number): void => {
+    this.subAssetService.removeSubAsset(this.asset, index);
+  };
+  
+
+  private loadInitialData(): void {
+    this.api.assetService.fetchData('Assettype').subscribe(types => this.assetTypes = types);
+    this.api.assetService.fetchData('Assetcategories').subscribe(cats => this.assetCategory = cats);
+    this.api.assetService.fetchData('Departments').subscribe((data: any) => {
+      this.departments = data || [];
+      this.filteredDepartment.next(this.departments);
+    });
+    this.api.assetService.fetchData('Assetcategories').subscribe(cats => {
+      this.assetCategory = cats;
+      this.filteredAssetCategories.next(cats);
+    });
+    const resourceId = '5b2605ca-cd5c-4034-bc35-3c681c6fedaa';
+
+    this.api.externalDataService.getData(resourceId).pipe(
+      catchError(() => {
+        console.error('Error fetching countingUnits. Defaulting to empty array.');
+        return of([]);
+      })
+    ).subscribe(
+      (response) => {
+        if (response?.result?.records) {
+          this.unit = response.result.records.map((unit: any) => ({
+            word: unit.ลักษณนาม
+          }));
+          this.filteredUnits.next(this.unit.slice());
+        } else {
+          console.warn('No records found for Countingunits.');
+        }
+      },
+      (error) => {
+        console.error('Error fetching countingUnits:', error);
+      }
     );
-    this.filteredUnits.next(filtered);
   }
 
-  private filterFactions(): void {
-    const searchValue = this.factionsFilterCtrl.value?.toLowerCase() || '';
-    this.filterService.filterFactions(this.factions, searchValue).subscribe((faction) => {
-      this.filteredFactions.next(faction);
-    }
-    );
-
-  }
-
-  private filterDepartments(): void {
-    const searchValue = this.DepartmentFilterCtrl.value?.toLowerCase() || '';
-    this.filterService.filterDepartments(this.Department, searchValue).subscribe((department) => {
-      this.filteredDepartment.next(department)
-    }
-    );
-  }
-
-  private setupFilterListeners(): void {
-    this.assetCategoryFilterCtrl.valueChanges.subscribe(() => {
-      this.filterAssetCategories();
-    });
-
-    this.unitFilterCtrl.valueChanges.subscribe(() => {
-      this.filterUnits();
-    });
-
-    this.factionsFilterCtrl.valueChanges.subscribe(() => {
-      this.filterFactions();
-    });
-
-    this.DepartmentFilterCtrl.valueChanges.subscribe(() => {
-      this.filterDepartments();
+  openUploadDialog(): void {
+    this.dialog.open(UploadDialogComponent, {
+      width: '1000px',
+      data: {
+        departments: this.departments,
+        assetCategory: this.assetCategory,
+        assetTypes: this.assetTypes,
+      },
     });
   }
 
-  // Handle faction selection
-  onFactionChange(event: MatSelectChange): void {
-    // console.log('Selected value:', event.value); // e.g., "ฝวส"
-    this.asset.patchValue({ FactionId: event.value }); // Update form control value
+  showAlert(): void {
+    Swal.fire({
+      icon: 'info',
+      title: 'กรุณาเลือกประเภทครุภัณฑ์ก่อน',
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2500
+    });
   }
 
-  onDepartmentChange(event: MatSelectChange): void {
+  onUnitChange(event: any): void {
+    this.asset.patchValue({ Unit: event.value });
+  }
+
+  onFactionChange(event: any): void {
+    this.asset.patchValue({ FactionId: event.value });
+  }
+
+  onDepartmentChange(event: any): void {
     const selectedDeptId = event.value;
-    const department = this.Department.find((dept) => dept.DeptId === selectedDeptId);
+    const department = this.departments.find((dept: any) => dept.DeptId === selectedDeptId);
+    this.filteredFactions.next(department ? department.Factions || [] : []);
+  }
 
-    if (department) {
-      this.filteredFactions.next(department.Factions || []);
-    } else {
-      this.filteredFactions.next([]);
+  async onSubmit(): Promise<void> {
+    try {
+      if (!this.userinfo || !this.userinfo.userId) throw new Error('ไม่พบข้อมูลผู้ใช้งาน');
+      const payload = { ...this.asset.value, CreatedBy: this.userinfo.userId };
+      const count = this.asset.get("numberOfCopies")?.value || 1;
+      const dataToSend = Array.from({ length: count }, (_, i) => ({
+        ...payload,
+        uniqueKey: `${payload.assetName}-${i + 1}`
+      }));
+
+      await this.api.assetService.postData('AssetDetails', dataToSend);
+
+      Swal.fire({
+        html: `<h1><span style="font-family: 'Anuphan'; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
+
+      this.asset.reset();
+    } catch (error) {
+      Swal.fire({
+        html: `<h1><span style="font-family: 'Anuphan'; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
+        icon: 'error'
+      });
     }
   }
 
-  onUnitChange(event: MatSelectChange): void {
-    this.asset.patchValue({ Unit: event.value }); // Update form control value
+  ngOnDestroy(): void {
+    this._onDestroy.next();
+    this._onDestroy.complete();
   }
-
-  private updateDepreciationSchedule(depreciations: any): void {
-  
-    // ตรวจสอบว่า depreciations มีข้อมูลหรือไม่
-    if (!depreciations || depreciations.length === 0) {
-      this.asset.get('DepreciationRate')?.setValue('');
-      this.asset.get('AssetAge')?.setValue('');
-      return;
-    }
-  
-    // ดึงข้อมูลค่าเสื่อมราคาและอายุการใช้งาน
-    const depreciationRate = depreciations[0]?.Rate_dep || null;
-    const assetAge = depreciations[0]?.Servicelife || null;
-  
-    // ตั้งค่าฟอร์ม
-    this.asset.get('DepreciationRate')?.setValue(depreciationRate, { emitEvent: false });
-
-    this.asset.get('AssetAge')?.setValue(assetAge, { emitEvent: false });
-
-    // ดึงข้อมูลจากฟอร์ม
-    const purchasePrice = this.asset.get('PurchasePrice')?.value || 0;
-
-    const receiptDate = this.asset.get('ReceiptDate')?.value || '';
-  
-    // ตรวจสอบข้อมูลก่อนคำนวณ
-    if (purchasePrice > 0 && depreciationRate > 0 && receiptDate) {
-      // คำนวณตารางค่าเสื่อมราคา
-      const schedule = this.depreciationService.calculateDepreciationWithPartialYear(
-        purchasePrice,
-        depreciationRate,
-        receiptDate
-      );
-  
-      this.asset.get('AccumulatedDepreciation')?.setValue(schedule[0].accumulatedDepreciation);
-
-      this.asset.get('BookValue')?.setValue(schedule[0].bookValue);
-
-      this.asset.get('DepreciationValue')?.setValue(schedule[0].depreciation);
-  
-      // ตั้งค่าผลลัพธ์ในฟอร์ม (ถ้าต้องการ)
-      // this.asset.get('accumulatedDepreciation')?.setValue(schedule);
-    } else {
-      console.log('ข้อมูลไม่ครบสำหรับการคำนวณ');
-    }
-    console.log('Current Values:', {
-      purchasePrice,
-      receiptDate,
-      depreciationRate,
-      assetAge,
-    });
-  }
-  
-  toggleHidden(): void { this.hidden = !this.hidden; }// เมื่อคลิกปุ่มจะเปลี่ยนค่า hidden เป็นค่าตรงกันข้าม
-
-  removeSubAsset(index: number): void { this.subAssets.removeAt(index); }
-
-  ngOnDestroy(): void { this._onDestroy.next(); this._onDestroy.complete(); }
-
-  translateToEnglish(asset: any): any { this.service.translateToEnglish(asset); }
-
-  convertToDate(dateString: string): Date { return this.service.convertToDate(dateString); }
-
-  showAlert(): void { this.service.showAlert(); }
-
-  toggleForm(): void {this.showForm = !this.showForm;}
-  
-  enableCustomInput(): void { this.isCustomInput = true; this.selectedFaction = null; }
-
-  disableCustomInput(): void { this.isCustomInput = false; this.asset.patchValue({ assetLocation: '' }); }
-
 }

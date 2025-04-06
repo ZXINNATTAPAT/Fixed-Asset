@@ -20,6 +20,8 @@ import { InfoassetComponent } from '../infoasset/infoasset.component';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { DialogMessageComponent, TrashComponent, TrashDialogWrapper } from './Dialog/TrashComponent/TrashDialog';
+import { MatIconModule } from '@angular/material/icon';
 
 interface AssetDetails {
   AssetId: any;
@@ -57,6 +59,8 @@ interface AssetDetails {
     MatSelectModule,
     ButtonDirective,
     NgxMatSelectSearchModule,
+    DialogMessageComponent,
+    MatIconModule,
     NgStyle,NgIf
   ],
   templateUrl: './asset-table.component.html',
@@ -109,7 +113,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns2 = this.myFunctionInstance.displayedColumns2;
     this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
-    // this.getAssetDetails();
   }
   
   ngAfterViewInit() {
@@ -328,7 +331,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  //ลบสินทรัพย์
+  // ลบสินทรัพย์แบบ Soft Delete
   async deleteAsset(asset: any): Promise<void> {
     const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
@@ -338,59 +341,88 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       confirmButtonText: 'ใช่',
       cancelButtonText: 'ไม่',
     });
-  
+
     if (result.isConfirmed) {
       try {
-        await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`);
+        await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`); // soft delete endpoint
         const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
         if (index !== -1) {
-          this.assetDetails.splice(index, 1);
-          // Update the data source after deletion
-          this.dataSource.data = this.assetDetails;
+          this.assetDetails.splice(index, 1); // เอาออกจากหน้าแสดงผล (ไม่ลบจริง)
+          this.dataSource.data = this.assetDetails; // อัปเดตตาราง
         }
-        Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
+        Swal.fire('ลบแล้ว!', 'สินทรัพย์ถูกย้ายไปถังขยะแล้ว', 'success');
       } catch (error) {
         console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-        Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์', 'error');
+        Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถลบสินทรัพย์ได้', 'error');
       }
     } else if (result.dismiss === Swal.DismissReason.cancel) {
-      // ผู้ใช้ยกเลิก ไม่ต้องกระทำอะไร
-      Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
+      Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณยังคงอยู่', 'info');
     }
   }
+
   
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Assets');
   
-    // Remove 'Aactions', 'Qrcode', and 'สถานะ' before creating headers
-    const exportColumns = this.displayedColumns3.filter(column => 
+    const exportColumns = this.displayedColumns3.filter(column =>
       column !== 'Aactions' && column !== 'Qrcode' && column !== 'สถานะ'
     );
   
-    // Set Title Row (Merged and Centered)
-    const title = 'ทะเบียนคุมครุภัณฑ์'; // Excel title
+    // Title row
+    const title = 'ทะเบียนคุมครุภัณฑ์';
     const titleRow = worksheet.addRow([title]);
-  
-    // Merge Title Row across all columns
     worksheet.mergeCells(`A1:${String.fromCharCode(65 + exportColumns.length - 1)}1`);
-    titleRow.getCell(1).alignment = { horizontal: 'center' }; // Center align title
-    titleRow.getCell(1).font = { bold: true, size: 14 }; // Bold and larger font for title
+    titleRow.getCell(1).alignment = { horizontal: 'center' };
+    titleRow.getCell(1).font = {
+      name: 'TH SarabunPSK',
+      bold: true,
+      size: 14,
+    };
+    
   
-    // Add headers dynamically (in row 2)
+    // Header row (row 2)
     worksheet.addRow(exportColumns);
   
-    // Add data rows (starting from row 3)
-    this.assetDetails.forEach((asset: any) => {
-      const row = exportColumns.map(column => 
-        column === 'ราคาต่อหน่วย' 
-          ? this.myFunctionInstance!.formatCurrency(asset[column]) 
-          : asset[column]
-      );
-      worksheet.addRow(row);
-    });
+    // จัดกลุ่มตามปีงบประมาณ
+    const groupedByYear = this.groupByFiscalYear(this.assetDetails);
   
-    // Generate Excel file
+    let currentRow = 3;
+  
+    for (const year in groupedByYear) {
+      // แถวคั่นปีงบประมาณ (สีเทา)
+      const yearRow = worksheet.insertRow(currentRow, [`ประจำปีงบประมาณ ${year}`]);
+      worksheet.mergeCells(`A${currentRow}:${String.fromCharCode(65 + exportColumns.length - 1)}${currentRow}`);
+      yearRow.getCell(1).font = {
+        name: 'TH SarabunPSK',
+        bold: true,
+      };
+      yearRow.getCell(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFD9D9D9' }, // สีเทาอ่อน
+      };
+      yearRow.getCell(1).alignment = { horizontal: 'center' };
+      currentRow++;
+  
+      // เพิ่มข้อมูลของปีนั้นๆ
+      groupedByYear[year].forEach((asset: any) => {
+        const row = exportColumns.map(column =>
+          column === 'ราคาต่อหน่วย'
+            ? this.myFunctionInstance!.formatCurrency(asset[column])
+            : asset[column]
+        );
+        const dataRow = worksheet.insertRow(currentRow, row);
+        dataRow.eachCell(cell => {
+          cell.font = {
+            name: 'TH SarabunPSK',
+          };
+        });
+        currentRow++;
+      });      
+    }
+  
+    // ดาวน์โหลดไฟล์
     workbook.xlsx.writeBuffer().then((data: any) => {
       const blob = new Blob([data], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -402,29 +434,32 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       a.click();
     });
   }
-
   
+  // 🧠 ฟังก์ชันแยกตามปีงบประมาณ (ตัวอย่าง logic นายอาจต้องปรับให้เข้ากับข้อมูลจริง)
+  groupByFiscalYear(assets: any[]): { [year: string]: any[] } {
+    const grouped: { [year: string]: any[] } = {};
+  
+    assets.forEach(asset => {
+      // ตัวอย่าง: ดึงปีจากรหัสครุภัณฑ์ (เช่น "0313-4-2541" => 2541)
+      const match = asset['รหัสครุภัณฑ์']?.match(/(\d{4})$/);
+      const year = match ? match[1] : 'ไม่ทราบปี';
+  
+      if (!grouped[year]) {
+        grouped[year] = [];
+      }
+      grouped[year].push(asset);
+    });
+  
+    return grouped;
+  }
+
+  openTrashDialog() {
+    this.dialog.open(TrashDialogWrapper, {
+      width: '800px',
+      height: '600px',
+    });
+  }
+  
+
 }  
   
-
-//   async searchAsset(): Promise<void> {
-//     const AssetCode = this.AssetCodeInput;
-
-//     // ใช้เงื่อนไขการเปรียบเทียบค่าที่ต้องการ (เช่น >=, <=, === เป็นต้น) กับค่าที่มีอยู่ในรายการ
-//     const foundAsset = this.assetDetailsset.find(asset => {
-//         // เช็คว่ารหัสครุภัณฑ์ในรายการเป็นค่าที่คล้ายค่าที่ผู้ใช้ป้อนเข้ามาหรือไม่
-//         return asset.รหัสครุภัณฑ์.startsWith(AssetCode) || asset.รหัสครุภัณฑ์.startsWith(AssetCode + "-");
-//     });
-
-//     if (foundAsset) {
-//         // พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Found asset:', foundAsset);
-//         this.dataSource = new MatTableDataSource<any>([foundAsset]); // แปลงเป็นอาร์เรย์เดี่ยวแล้วสร้าง MatTableDataSource
-
-//         // ทำอย่างไรก็ได้ตามที่ต้องการกับข้อมูลที่พบ
-//     } else {
-//         // ไม่พบรหัสครุภัณฑ์ในรายการ
-//         console.log('Asset with code', AssetCode, 'not found.');
-//         // จัดการกรณีที่ไม่พบรหัสครุภัณฑ์ที่ต้องการ
-//     }
-// }

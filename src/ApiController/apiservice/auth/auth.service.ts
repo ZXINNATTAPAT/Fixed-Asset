@@ -6,7 +6,8 @@ import { catchError, map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly authUrl = 'https://localhost:7204/auth/';
+  // private readonly authUrl = 'https://localhost:7204/auth/';
+  private readonly authUrl = 'https://dotnetapi-fixasset.onrender.com/auth/';
 
   constructor(private http: HttpClient) {}
 

@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly baseUrl = 'https://localhost:7204/api/';
+  // private readonly baseUrl = 'https://localhost:7204/api/';
+  private readonly baseUrl = 'https://dotnetapi-fixasset.onrender.com/api/';
 
   constructor(private http: HttpClient) {}
 
