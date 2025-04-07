@@ -186,7 +186,7 @@ export class ReceiveComponent {
     }
 
     const assetIds = this.dataSource.data.map((asset: AssetDetails) => asset.AssetId);
-    const updatePayload = { AssetIds: assetIds, StatusId: 2 };
+    const updatePayload = { AssetIds: assetIds, StatusId: 1 };
 
     this.apiService.assetService.updateData('AssetDetails/UpdateStatusAll', updatePayload)
       .then(() => {
