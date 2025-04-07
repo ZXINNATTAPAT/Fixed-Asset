@@ -12,7 +12,7 @@ import { catchError, from } from 'rxjs';
 
 @Component({
     selector: 'app-form-controls2',//ไว้เรียกใช้ในหน้าอื่นนได้++++
-    templateUrl: 'asset-details2.Component.html',
+    templateUrl: 'asset-details2.component.html',
     standalone: true,
     imports: [
         CommonModule,FormSelectDirective,

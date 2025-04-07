@@ -6,7 +6,7 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
 
 @Component({
     selector: 'app-form-controls-3',
-    templateUrl: 'asset-details3.Component.html',
+    templateUrl: 'asset-details3.component.html',
     standalone: true,
     imports: [
         TextColorDirective,
@@ -24,7 +24,8 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
         FormDirective, 
         FormLabelDirective, 
         FormControlDirective, 
-        ButtonDirective, NgStyle]
+        ButtonDirective, 
+        NgStyle]
 })
 export class AssetDetails3Component {
   autoInput(event: KeyboardEvent) {
