@@ -9,7 +9,8 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # ✅ เข้าสู่โฟลเดอร์ Angular ก่อน build
-WORKDIR /app  # หรือ WORKDIR /app/<ชื่อโปรเจกต์> ถ้าซ้อนอยู่ใน subfolder
+WORKDIR /app  
+# หรือ WORKDIR /app/<ชื่อโปรเจกต์> ถ้าซ้อนอยู่ใน subfolder
 
 RUN npm run build -- --configuration=production --base-href=/
 
