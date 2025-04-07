@@ -9,8 +9,6 @@ import { CommonModule, NgIf, NgStyle } from '@angular/common';
 import { MatSelect } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogActions, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
-import { AssetDetails2Component } from '../asset-details2/asset-details2.component';
-import { AssetDetails3Component } from '../asset-details3/asset-details3.component';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
