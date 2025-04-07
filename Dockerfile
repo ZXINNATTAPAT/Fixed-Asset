@@ -11,7 +11,7 @@ RUN npm run build -- --configuration=production --base-href=/
 FROM nginx:alpine
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist/ETC-ASSET-SYSTEM /usr/share/nginx/html
+COPY --from=build /app/dist/ETC-ASSET-SYSTEM/browser /usr/share/nginx/html
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
