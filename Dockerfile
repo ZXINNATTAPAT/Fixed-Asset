@@ -23,4 +23,5 @@ COPY --from=build /app/dist/ETC-ASSET-SYSTEM .
 # ให้รัน server ที่ port 8080
 EXPOSE 8080
 
-CMD ["http-server", "-p", "8080"]
+CMD ["http-server", "-p", "8080", "-c-1", "--proxy", "http://localhost:8080?"]
+
