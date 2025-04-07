@@ -10,7 +10,7 @@ RUN npm install --legacy-peer-deps
 # Copy the source code and build the Angular app
 COPY . .
 # RUN npm run build --prod
-RUN npm run build -- --configuration=production
+RUN npm run build --configuration=production
 
 
 # Step 2: Serve with NGINX
