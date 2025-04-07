@@ -2,12 +2,11 @@ import { Component } from '@angular/core';
 import { TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent } from '@coreui/angular';
 import { NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-// import { DocsExampleComponent } from '@docs-components/public-api';
 import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 
 @Component({
     selector: 'app-form-controls-3',
-    templateUrl: 'asset-Details3.Component.html',
+    templateUrl: 'asset-details3.Component.html',
     standalone: true,
     imports: [
         TextColorDirective,
@@ -20,7 +19,6 @@ import { RowComponent, ColComponent, FormDirective, FormLabelDirective, FormCont
         CardComponent, 
         CardHeaderComponent, 
         CardBodyComponent, 
-        // DocsExampleComponent, 
         ReactiveFormsModule, 
         FormsModule, 
         FormDirective, 

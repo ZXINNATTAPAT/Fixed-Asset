@@ -85,7 +85,9 @@ const formFieldOptions: MatFormFieldDefaultOptions = {
     }), // Provide options for the date adapter
   ],
   imports: [
-    AssetDetails2Component, AssetDetails3Component, UploadDialogComponent,DepreciationPreviewComponent, SubAssetFormComponent,
+    // AssetDetails2Component, AssetDetails3Component, 
+    UploadDialogComponent,DepreciationPreviewComponent, 
+    SubAssetFormComponent,
     MomentDateModule, MatNativeDateModule, MatDatepicker, MatDatepickerToggle,
     MatLabel, MatDatepickerInput, MatFormFieldModule, MatInputModule,
     MatFormFieldModule, MatSelect, MatOption, MatFormField,
