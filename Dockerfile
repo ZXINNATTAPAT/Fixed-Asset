@@ -1,6 +1,5 @@
-# Step 1: Build Angular app
+# Build Angular App
 FROM node:18 AS build
-
 WORKDIR /app
 
 COPY package*.json ./
@@ -9,19 +8,17 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build -- --configuration=production --base-href=/
 
-# Step 2: Serve with http-server
-FROM node:18 AS run
-
-# ติดตั้ง http-server แบบ global
-RUN npm install -g http-server
-
+# Serve using http-server
+FROM node:18 AS runtime
 WORKDIR /app
 
-# คัดลอกไฟล์ที่ build แล้วจากขั้นตอนก่อนหน้า
-COPY --from=build /app/dist/ETC-ASSET-SYSTEM .
+# ติดตั้ง http-server
+RUN npm install -g http-server
 
-# ให้รัน server ที่ port 8080
+# คัดลอกไฟล์ที่ build แล้วมา
+COPY --from=build /app/dist/ETC-ASSET-SYSTEM /app
+
 EXPOSE 8080
 
-CMD ["http-server", "-p", "8080", "-c-1", "--proxy", "http://localhost:8080?"]
-
+# เสิร์ฟแบบ SPA (สำคัญมาก!)
+CMD ["http-server", "-p", "8080", "-c-1", "--spa"]
