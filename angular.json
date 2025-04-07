@@ -41,7 +41,13 @@
               "src/scss/styles.scss"
             ],
             "scripts": [],
-            "allowedCommonJsDependencies": []
+            "allowedCommonJsDependencies": [
+              "sweetalert2",
+              "exceljs",
+              "qrcode",
+              "moment"
+            ]
+
           },
           "configurations": {
             "production": {
