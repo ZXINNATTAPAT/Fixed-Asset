@@ -2,16 +2,25 @@
 FROM node:18 AS build
 
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
+
 COPY . .
 RUN npm run build -- --configuration=production --base-href=/
 
-# Step 2: Serve with NGINX
-FROM nginx:alpine
+# Step 2: Serve with http-server
+FROM node:18 AS run
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist/ETC-ASSET-SYSTEM/browser /usr/share/nginx/html
+# ติดตั้ง http-server แบบ global
+RUN npm install -g http-server
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /app
+
+# คัดลอกไฟล์ที่ build แล้วจากขั้นตอนก่อนหน้า
+COPY --from=build /app/dist/ETC-ASSET-SYSTEM .
+
+# ให้รัน server ที่ port 8080
+EXPOSE 8080
+
+CMD ["http-server", "-p", "8080"]
