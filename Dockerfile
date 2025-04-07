@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Copy the source code and build the Angular app
 COPY . .
