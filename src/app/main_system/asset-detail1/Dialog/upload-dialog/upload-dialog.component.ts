@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { ExcelPreviewHelper } from '../../Service/excel-preview.helper';
 import Swal from 'sweetalert2';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DepreciationScheduleService } from '../../Service/depreciation-schedule.service';
 
 @Component({
   selector: 'app-upload-dialog',
@@ -44,6 +45,8 @@ export class UploadDialogComponent {
 
   private ap = inject(ApiService);
 
+   private depreciationScheduleService = inject(DepreciationScheduleService)
+
   ngOnInit() {
 
     // ✅ ดึงค่าจาก data ที่ inject มา
@@ -58,45 +61,66 @@ export class UploadDialogComponent {
 
   onFileChange(event: any): void {
     const file: File = event.target.files[0];
-
+  
     if (file) {
       ExcelPreviewHelper.parseExcel(file)
-      .then((rows) => {
-        console.log(this.userId);
-        const result = ExcelPreviewHelper.validateDataAgainstMaster(rows, this.departments, this.assetCategory, this.userId);
-
-        // ✅ แปลงชื่อ field ภาษาไทย → ภาษาอังกฤษ
-        this.asset2 = result.data.map(row => ExcelPreviewHelper.translateToEnglish(row));
-
-        this.validationFlags = result.validationFlags;
-      })
-      .catch((error) => {
-        Swal.fire({
-          title: 'Error importing Excel',
-          text: 'Please check your file and try again.',
-          icon: 'error',
+        .then(async (rows) => {
+          const result = ExcelPreviewHelper.validateDataAgainstMaster(rows, this.departments, this.assetCategory, this.userId);
+          this.asset2 = result.data.map(row => ExcelPreviewHelper.translateToEnglish(row));
+          this.validationFlags = result.validationFlags;
+  
+          // 👉 วน loop แต่ละ row เพื่อคำนวณค่าเสื่อมแบบแยกประเภท
+          const updatedAssets = await Promise.all(this.asset2.map(async (asset) => {
+            if (!asset.TypeId) return asset;
+  
+            try {
+              const deps: any = await firstValueFrom(this.ap.assetService.fetchDataById('Depreciations/type', asset.TypeId));
+              const schedule = this.depreciationScheduleService.calculateSchedule(asset.PurchasePrice, deps[0].Rate_dep, asset.ReceiptDate);
+              const summary = this.depreciationScheduleService.extractFirstYearSummary(schedule);
+  
+              return {
+                ...asset,
+                DepreciationRate: deps[0].Rate_dep,
+                AssetAge: deps[0].Servicelife,
+                DepreciationValue: summary.depreciation,
+                AccumulatedDepreciation: summary.accumulatedDepreciation,
+                BookValue: summary.bookValue
+              };
+            } catch (e) {
+              console.warn(`❌ ไม่สามารถดึง Depreciation ของ TypeId: ${asset.TypeId}`);
+              return asset;
+            }
+          }));
+  
+          this.asset2 = updatedAssets;
+        })
+        .catch(() => {
+          Swal.fire({
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถอ่านไฟล์ Excel ได้ กรุณาตรวจสอบรูปแบบไฟล์',
+            icon: 'error',
+          });
         });
-      });
     }
   }
-
+  
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
-
+  
     if (!this.validateUniqueAssetCodes(this.asset2)) return;
-
     for (const asset of this.asset2) {
       if (!this.validateAsset(asset)) return;
     }
-
+  
     const sanitizedAssets = this.asset2.map(row => ({
+      AssetId: 0, // ✅ สำหรับ backend ที่ต้องการ AssetId เสมอ
       AssetCode: row.AssetCode,
       AssetName: row.AssetName,
       PurchasePrice: Number(row.PurchasePrice),
       PurchaseDate: row.PurchaseDate,
       CategoryId: row.CategoryId,
       TypeId: row.TypeId,
-      DepartmentId: row.DeptId, // ✅ แก้ตรงนี้
+      DepartmentId: row.DeptId,
       FactionId: row.FactionId,
       ResponsibleEmployee: row.ResponsibleEmployee,
       Unit: row.Unit,
@@ -104,21 +128,26 @@ export class UploadDialogComponent {
       StatusId: 4,
       CreatedBy: row.CreatedBy,
       SubAssets: row.SubAssets || [],
+      ReceiptDate: row.ReceiptDate,
+      DepreciationRate: row.DepreciationRate,
+      AssetAge: row.AssetAge,
+      DepreciationValue: row.DepreciationValue,
+      AccumulatedDepreciation: row.AccumulatedDepreciation,
+      BookValue: row.BookValue
     }));
-    
+  
     try {
-      console.log('sanitizedAssets', sanitizedAssets);
-      await this.ap.assetService.postData('AssetDetails/bulk', sanitizedAssets); // ← array ตรงๆ
-
+      console.log('🚀 sanitizedAssets', sanitizedAssets);
+      await this.ap.assetService.postData('AssetDetails/bulk', sanitizedAssets);
+  
       await Swal.fire({
         title: '✅ สำเร็จ',
         text: 'บันทึกข้อมูลครุภัณฑ์เรียบร้อยแล้ว',
         icon: 'success',
         confirmButtonText: 'ตกลง'
       });
-
-      this.dialogRef?.close(); // ✅ ปิด dialog หลังจาก alert จบ
-
+  
+      this.dialogRef?.close(); // ✅ ปิด dialog
     } catch (error: any) {
       if (error.status === 409) {
         Swal.fire({
@@ -135,6 +164,7 @@ export class UploadDialogComponent {
       }
     }
   }
+  
 
 
   validateAsset(asset: any): boolean {

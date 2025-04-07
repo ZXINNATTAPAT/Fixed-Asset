@@ -139,7 +139,6 @@ export class ExcelPreviewHelper {
     };
   }
 
-
   // ✅ แปลงข้อมูลที่พร้อมจะส่ง backend
   static translateToEnglish(row: any): any {
     return {
@@ -154,6 +153,7 @@ export class ExcelPreviewHelper {
       Note: row['หมายเหตุ'] ?? '',
       ResponsibleEmployee: row['ผู้ใช้งาน'] || '',
       PurchaseDate: this.convertToDate(row['วันเดือนปี'])?.toISOString(),
+      ReceiptDate: this.convertToDate(row['วันเดือนปีที่ได้มา'])?.toISOString(),
       Unit: row['หน่วยนับ'] || '',
       CategoryId: row.CategoryId || null,
       TypeId: row.TypeId || null,
@@ -165,9 +165,12 @@ export class ExcelPreviewHelper {
       Department: row['สำนัก'],
       Faction: row['ฝ่าย'],
       rawPurchaseDate: row['วันเดือนปี'],
+      rawReceiptDate: row['วันเดือนปีที่ได้มา'],
       rawStatus: row['สถานะ'],
       rawPurchasePrice: row['ราคาต่อหน่วย'],
     };
   }
+
+  
   
 }

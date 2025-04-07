@@ -33,7 +33,7 @@
     <!-- ✅ ทำให้ scroll แนวนอนอยู่ด้านนอกสุด -->
     <div style="overflow-x: auto; max-width: 100%;">
       <div style="max-height: 300px; overflow-y: auto;">
-        <table class="table table-bordered table-sm mt-2 text-center align-middle" style="min-width: 1800px; width: 100%;">
+        <table class="table table-bordered table-sm mt-2 text-center align-middle" style="min-width: 2200px; width: 100%;">
           <thead class="table-light">
             <tr>
               <th>#</th>
@@ -42,24 +42,41 @@
               <th>ราคาต่อหน่วย</th>
               <th>สำนัก</th>
               <th>ฝ่าย</th>
-              <th>สถานะ</th>
               <th>หมายเหตุ</th>
               <th>วันเดือนปี</th>
+              <th>วันเดือนปีที่ได้มา</th>
               <th>ผู้ใช้งาน</th>
+              <th>ค่าเสื่อมปีแรก</th>
+              <th>ค่าเสื่อมสะสม</th>
+              <th>มูลค่าตามบัญชี</th>
+              <th>อัตราเสื่อม (%)</th>
+              <th>อายุการใช้งาน (ปี)</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of asset2; let i = index" [class.table-warning]="validationFlags[i].departmentError || validationFlags[i].factionError">
+            <tr *ngFor="let row of asset2; let i = index" 
+                [class.table-warning]="validationFlags[i].departmentError || validationFlags[i].factionError">
               <td>{{ i + 1 }}</td>
               <td>{{ row.AssetCode }}</td>
               <td>{{ row.AssetName }}</td>
               <td>{{ row.rawPurchasePrice }}</td>
-              <td>{{ row.Department }}<span *ngIf="validationFlags[i]?.departmentError" class="text-danger" title="ไม่พบสำนัก">⚠️</span></td>
-              <td>{{ row.Faction }}<span *ngIf="validationFlags[i]?.factionError" class="text-danger" title="ฝ่ายไม่ตรงกับสำนัก">⚠️</span></td>
-              <td>{{ row.rawStatus }}</td>
+              <td>
+                {{ row.Department }}
+                <span *ngIf="validationFlags[i]?.departmentError" class="text-danger" title="ไม่พบสำนัก">⚠️</span>
+              </td>
+              <td>
+                {{ row.Faction }}
+                <span *ngIf="validationFlags[i]?.factionError" class="text-danger" title="ฝ่ายไม่ตรงกับสำนัก">⚠️</span>
+              </td>
               <td>{{ row.Note }}</td>
               <td>{{ row.rawPurchaseDate }}</td>
+              <td>{{ row.rawReceiptDate }}</td>
               <td>{{ row.User }}</td>
+              <td>{{ row.DepreciationValue | number:'1.2-2' }}</td>
+              <td>{{ row.AccumulatedDepreciation | number:'1.2-2' }}</td>
+              <td>{{ row.BookValue | number:'1.2-2' }}</td>
+              <td>{{ row.DepreciationRate }}%</td>
+              <td>{{ row.AssetAge }}</td>
             </tr>
           </tbody>
         </table>

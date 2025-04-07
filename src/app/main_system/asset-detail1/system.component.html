@@ -283,7 +283,7 @@
                   </mat-select>
                 </div>
               </div>
-            </div>
+            </div></div>
 
             <h3>
               <a class="bt" (click)="toggleForm()">
@@ -296,7 +296,48 @@
                   เพิ่มข้อมูลเพิ่มเติม
                 </span>
               </a>
-            </h3>
+            </h3> 
+            
+            <div *ngIf="showForm"  class="mb-4 card shadow-sm" style="border: none;" >
+              <div class="card-body">
+               
+              <div class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-3">
+
+                <div class="col">
+
+                  <label class="form-label" style="font-weight: bold;" for="purchasedFromInput">ซื้อจาก
+                  </label>
+
+                  <!-- ปรับเป็นยัง Form แบบ บันทึก สอง แบบ แบบ id กับ แบบ string อัตโนมัติ -->
+                  <input class="form-control" cFormControl id="purchasedFromInput" placeholder="ระบุสถานที่ที่ซื้อ"
+                    formControlName="PropertySeller" type="text" (keypress)="handleKeyPress($event,'assetTypeInput')" />
+
+                </div>
+
+                <div class="col">
+
+                  <label class="form-label" style="font-weight: bold;" for="taxInvoiceNumberInput">เลขที่ใบกำกับภาษี
+                    <span style="opacity: 50%">(ถ้ามี)</span></label>
+
+                  <input class="form-control " cFormControl id="taxInvoiceNumberInput" placeholder="ระบุเลขที่ใบกำกับภาษี"
+                    type="text" formControlName="TaxInvoiceNumber" />
+
+                </div>
+
+                <div class="col">
+
+                  <label class="form-label" style="font-weight: bold;" for="annotationInput">
+                    หมายเหตุ <span style="opacity: 50%">(ถ้ามี)</span>
+                  </label>
+
+                  <input class="form-control" cFormControl id="annotationInput" placeholder="ระบุหมายเหตุ"
+                    formControlName="Note" type="text" />
+
+                </div>
+
+              </div>
+              </div>
+            </div>
 
             <h3>
               <a class="bt2" (click)="addSubAsset()">
@@ -311,41 +352,7 @@
               </a>
             </h3>
 
-            <div *ngIf="showForm" class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-3">
-
-              <div class="col">
-
-                <label class="form-label" style="font-weight: bold;" for="purchasedFromInput">ซื้อจาก
-                </label>
-
-                <!-- ปรับเป็นยัง Form แบบ บันทึก สอง แบบ แบบ id กับ แบบ string อัตโนมัติ -->
-                <input class="form-control" cFormControl id="purchasedFromInput" placeholder="ระบุสถานที่ที่ซื้อ"
-                  formControlName="PropertySeller" type="text" (keypress)="handleKeyPress($event,'assetTypeInput')" />
-
-              </div>
-
-              <div class="col">
-
-                <label class="form-label" style="font-weight: bold;" for="taxInvoiceNumberInput">เลขที่ใบกำกับภาษี
-                  <span style="opacity: 50%">(ถ้ามี)</span></label>
-
-                <input class="form-control " cFormControl id="taxInvoiceNumberInput" placeholder="ระบุเลขที่ใบกำกับภาษี"
-                  type="text" formControlName="TaxInvoiceNumber" />
-
-              </div>
-
-              <div class="col">
-
-                <label class="form-label" style="font-weight: bold;" for="annotationInput">
-                  หมายเหตุ <span style="opacity: 50%">(ถ้ามี)</span>
-                </label>
-
-                <input class="form-control" cFormControl id="annotationInput" placeholder="ระบุหมายเหตุ"
-                  formControlName="Note" type="text" />
-
-              </div>
-
-            </div>
+           
 
             <div formArrayName="SubAssets">
               <div
@@ -359,7 +366,7 @@
                 ></app-sub-asset-form>
               </div>
             </div>
-          </div>
+          
 
           <app-depreciation-preview [formGroup]="asset"></app-depreciation-preview>
 
