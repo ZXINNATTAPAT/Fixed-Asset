@@ -10,11 +10,9 @@
 
       </div>
 
-      <p>
-        นำเข้าข้อมูล :
+      <p>นำเข้าข้อมูล :
         <button class="btn btn-sm btn-outline-success anuphan-600" type="button" (click)="openUploadDialog()">
-
-          <div class="icon-excel"></div> Excel
+          <div class="icon-excel"></div> 
         </button>
       </p>
 
@@ -26,16 +24,18 @@
 
         <h3><span class="anuphan-700">ข้อมูลครุภัณฑ์</span></h3>
 
-        <form *ngIf="asset" cForm [formGroup]="asset" (ngSubmit)="autoInput(); onSubmit()">
+        <form *ngIf="asset" cForm [formGroup]="asset" (ngSubmit)="autoInput(); onSubmit($event)">
 
           <div class="p-2">
 
             <div class="row mb-3 row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-lg-3">
 
               <div class="col">
+
                 <label class="form-label" style="font-weight: bold;" for="assetTypeInput">
                   <span class="text-danger">*</span> ประเภทครุภัณฑ์
                 </label>
+
                 <div class="form-control">
                   <mat-select formControlName="TypeId" panelClass="mat-select-panel" placeholder="เลือกประเภทครุภัณฑ์"
                     style="font-family: 'Anuphan', sans-serif; font-weight: 600">
@@ -46,6 +46,7 @@
                     </mat-option>
                   </mat-select>
                 </div>
+                
               </div>
 
               <!-- หมวดหมู่ครุภัณฑ์ -->

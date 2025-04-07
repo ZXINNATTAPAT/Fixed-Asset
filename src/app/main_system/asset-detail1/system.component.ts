@@ -99,16 +99,24 @@ const formFieldOptions: MatFormFieldDefaultOptions = {
     MatCommonModule
   ],
 })
-
 export class SystemComponent implements OnInit, OnDestroy {
+
   assetDetails: any[] = [];
+
   @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
+
   asset!: FormGroup;
+
   userinfo: any = {};
+
   assetTypes: any[] = [];
+
   assetCategory: any[] = [];
+
   departments: any[] = [];
+
   depreciationSchedule: any[] = [];
+
   unit: any[] = [];
 
   unitCtrl = new FormControl();
@@ -127,6 +135,9 @@ export class SystemComponent implements OnInit, OnDestroy {
   options = Array.from({ length: 25 }, (_, i) => i + 1);
   selectedFaction: string | null = null;
   displayDate = '';
+
+  generatedCodes: string[] = [];
+
 
   private _onDestroy = new Subject<void>();
 
@@ -150,63 +161,164 @@ export class SystemComponent implements OnInit, OnDestroy {
     });
   }
 
-  get subAssets(): FormArray {
-    return this.asset.get('SubAssets') as FormArray;
-  }
-  
+  get subAssets(): FormArray {return this.asset.get('SubAssets') as FormArray;}
 
-  generateAssetCode(): void {
-    this.formService.generateAssetCode(
-      this.asset,
-      this.assetCategory,
-      this.assetDetails,
-      this.api,
-      () => this.showAlert(),
-      (msg) => this.showError(msg),
-      () => console.log('Asset code generated & validated ✅')
+  // generateAssetCode(): void {
+  //   this.formService.generateAssetCode(
+  //     this.asset,
+  //     this.assetCategory,
+  //     this.assetDetails,
+  //     this.api,
+  //     () => this.showAlert(),
+  //     (msg) => this.showError(msg),
+  //     () => console.log('Asset code generated & validated ✅')
+  //   );
+  // }
+
+  // Generate a unique asset code based on form values
+  private generateAssetCode(): void {
+    const category = this.assetCategory.find(
+      (type) => type.CategoryId === this.asset.get('CategoryId')?.value
     );
-  }
+    const purchaseDate = this.asset.get('PurchaseDate')?.value;
+    const year = purchaseDate ? new Date(purchaseDate).getFullYear() + 543 : '';
+    if (!category || !year) return;
 
-  private showError(message: string): void {
-    Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: message,
+    const payload = {
+      Affiliation: 'กกต',
+      AssetCategory: category.CategoryCode,
+      Year: year.toString(),
+    };
+
+    this.api.assetService.generateAssetCode(payload).subscribe({
+      next: (response) => {
+        if (response && response.assetCode) {
+          const code = this.handleGeneratedAssetCode(response.assetCode, year.toString());
+          this.asset.patchValue({ AssetCode: code });
+          this.validateAssetCode(code);
+        } else {
+          console.error('Response does not contain assetCode.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Asset code generation failed. Please try again.',
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error generating asset code:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to generate asset code. Please check your connection or try again later.',
+        });
+      },
     });
   }
 
-  autoInput(): void {
-    this.formService.autoInputFields(this.asset, this.userinfo, this.assetTypes);
-  }
-
-  toggleForm(): void {
-    this.showForm = !this.showForm;
-  }
-
-  onDateChange(event: any): void {
-    this.displayDate = this.formService.onReceiptDateChange(event, this.asset);
-  }
-
-  onDateChange2(event: any): void {
-    this.formService.onPurchaseDateChange(event, this.asset);
-    this.generateAssetCode(); // 👈 เพิ่มบรรทัดนี้
+  private async generateMultipleAssetCodes(): Promise<void> {
+    const category = this.assetCategory.find(
+      (type) => type.CategoryId === this.asset.get('CategoryId')?.value
+    );
+    const purchaseDate = this.asset.get('PurchaseDate')?.value;
+    const year = purchaseDate ? new Date(purchaseDate).getFullYear() + 543 : '';
+    const copies = this.asset.get('numberOfCopies')?.value || 1;
+  
+    if (!category || !year) return;
+  
+    const payload = {
+      Affiliation: 'กกต',
+      AssetCategory: category.CategoryCode,
+      Year: year.toString(),
+      Copies: copies
+    };
+  
+    this.api.assetService.postData('AssetDetails/generate-multiple-codes', payload)
+      .then((res: any) => {
+        if (res?.assetCodes?.length) {
+          this.generatedCodes = res.assetCodes; // ✅ ต้องมีบรรทัดนี้!!
+          this.asset.patchValue({ AssetCode: this.generatedCodes[0] });
+          this.validateAssetCode(this.generatedCodes[0]);
+        }
+      })
+      .catch(() => {
+        this.showError('ไม่สามารถสร้างรหัสได้');
+      });
   }
   
-  handleInput(event: Event): void {
-    this.formService.handleAssetCodeInput(event, this.asset);
+  private handleGeneratedAssetCode(generatedCode: string, year: string): string {
+    const base = generatedCode.split('-')[0];
+    let suffix = 1;
+    let finalCode = generatedCode;
+
+    while (this.assetDetails.some(asset => asset.AssetCode === `${base}-${suffix}-${year}`)) {
+      suffix++;
+    }
+
+    if (suffix > 1) {
+      finalCode = `${base}-${suffix}-${year}`;
+    }
+
+    return finalCode;
   }
 
-  handleKeyDown(event: KeyboardEvent): void {
-    this.formService.preventEditingFixedPart(event);
+  private validateAssetCode(code: string): void {
+    const isDuplicate = this.assetDetails.some(asset => asset.AssetCode === code);
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: isDuplicate ? 'error' : 'success',
+      html: `<span style="font-family: 'Anuphan'; font-weight: 700; color: ${isDuplicate ? 'red' : 'green'};">
+        ${isDuplicate ? 'รหัสครุภัณฑ์ซ้ำ' : 'รหัสครุภัณฑ์ใช้ได้'}
+      </span>`,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    });
   }
 
-  handleKeyPress(event: KeyboardEvent, nextInputId: string): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      const nextInput = document.getElementById(nextInputId);
-      if (nextInput) {
-        nextInput.focus();
+  async onSubmit(event?: Event): Promise<void> {
+    event?.preventDefault();
+  
+    try {
+      if (!this.userinfo?.userId) throw new Error('ไม่พบข้อมูลผู้ใช้งาน');
+
+      const copies = this.asset.get("numberOfCopies")?.value || 0;
+      
+      if (copies <= 0) throw new Error('จำนวนที่ต้องการสร้างต้องมากกว่า 0');
+  
+      const payload = { ...this.asset.value, CreatedBy: this.userinfo.userId };
+  
+      if (this.generatedCodes.length < copies) {
+        throw new Error('ยังไม่ได้สร้างรหัสเพียงพอ กรุณาเลือกวันที่ซื้อและจำนวนใหม่');
       }
+  
+      const dataToSend: any[] = [];
+      for (let i = 0; i < copies; i++) {
+        dataToSend.push({
+          ...payload,
+          AssetCode: this.generatedCodes[i],
+          uniqueKey: `${payload.AssetName}-${i + 1}`
+        });
+      }
+      console.log('Data to send:', dataToSend);
+      await this.api.assetService.postData('AssetDetails', dataToSend);
+  
+      Swal.fire({
+        html: `<h1><span style="font-family: 'Anuphan'; font-weight: 600; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
+        icon: 'success',
+        confirmButtonText: 'OK',
+      }).then(() => {
+        this.asset.reset();
+        this.generatedCodes = [];
+        this.assetCategoryFilterCtrl.reset();
+      });
+  
+    } catch (error: any) {
+      Swal.fire({
+        html: `<h1><span style="font-family: 'Anuphan'; font-weight: 600; color: red;">${error.message || 'เกิดข้อผิดพลาด'}</span></h1>`,
+        icon: 'error',
+      });
     }
   }
 
@@ -280,23 +392,15 @@ export class SystemComponent implements OnInit, OnDestroy {
       );
       this.filteredUnits.next(filtered);
     });
-  }
 
-  addSubAsset(): void {
-    const responsible = this.asset.get('ResponsibleEmployee')?.value || '';
-    const assetCode = this.asset.get('AssetCode')?.value || '';
-    this.subAssetService.addSubAsset(this.asset, this.assetTypes, assetCode, responsible);
-  }
-  
-  getSubAssetForm(index: number): FormGroup {
-    return this.subAssets.at(index) as FormGroup;
-  }
-  
-  removeSubAsset = (index: number): void => {
-    this.subAssetService.removeSubAsset(this.asset, index);
-  };
-  
+    this.asset.get('numberOfCopies')?.valueChanges
+    .pipe(takeUntil(this._onDestroy))
+    .subscribe(() => {
+      this.generateMultipleAssetCodes(); // ✅ generate ใหม่เมื่อจำนวนเปลี่ยน
+    });
 
+  }
+  
   private loadInitialData(): void {
     this.api.assetService.fetchData('Assettype').subscribe(types => this.assetTypes = types);
     this.api.assetService.fetchData('Assetcategories').subscribe(cats => this.assetCategory = cats);
@@ -336,6 +440,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     this.dialog.open(UploadDialogComponent, {
       width: '1000px',
       data: {
+        userId: Number(this.userinfo.userId), // ✅ ตรงกับที่อ่านด้านใน
         departments: this.departments,
         assetCategory: this.assetCategory,
         assetTypes: this.assetTypes,
@@ -343,23 +448,10 @@ export class SystemComponent implements OnInit, OnDestroy {
     });
   }
 
-  showAlert(): void {
-    Swal.fire({
-      icon: 'info',
-      title: 'กรุณาเลือกประเภทครุภัณฑ์ก่อน',
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 2500
-    });
-  }
-
-  onUnitChange(event: any): void {
-    this.asset.patchValue({ Unit: event.value });
-  }
-
-  onFactionChange(event: any): void {
-    this.asset.patchValue({ FactionId: event.value });
+  addSubAsset(): void {
+    const responsible = this.asset.get('ResponsibleEmployee')?.value || '';
+    const assetCode = this.asset.get('AssetCode')?.value || '';
+    this.subAssetService.addSubAsset(this.asset, this.assetTypes, assetCode, responsible);
   }
 
   onDepartmentChange(event: any): void {
@@ -368,35 +460,43 @@ export class SystemComponent implements OnInit, OnDestroy {
     this.filteredFactions.next(department ? department.Factions || [] : []);
   }
 
-  async onSubmit(): Promise<void> {
-    try {
-      if (!this.userinfo || !this.userinfo.userId) throw new Error('ไม่พบข้อมูลผู้ใช้งาน');
-      const payload = { ...this.asset.value, CreatedBy: this.userinfo.userId };
-      const count = this.asset.get("numberOfCopies")?.value || 1;
-      const dataToSend = Array.from({ length: count }, (_, i) => ({
-        ...payload,
-        uniqueKey: `${payload.assetName}-${i + 1}`
-      }));
+  autoInput(): void {this.formService.autoInputFields(this.asset, this.userinfo, this.assetTypes);}
 
-      await this.api.assetService.postData('AssetDetails', dataToSend);
+  onDateChange(event: any): void {this.displayDate = this.formService.onReceiptDateChange(event, this.asset);}
 
-      Swal.fire({
-        html: `<h1><span style="font-family: 'Anuphan'; color: green;">บันทึกเสร็จสิ้น</span></h1>`,
-        icon: 'success',
-        confirmButtonText: 'OK'
-      });
+  onDateChange2(event: any): void {
+    this.formService.onPurchaseDateChange(event, this.asset);
+    this.generateAssetCode();
+    // this.generateMultipleAssetCodes(); // ✅
+  }
+  
+  showAlert(): void {Swal.fire({icon: 'info',title: 'กรุณาเลือกประเภทครุภัณฑ์ก่อน',toast: true,position: 'top-end',showConfirmButton: false,timer: 2500});}
 
-      this.asset.reset();
-    } catch (error) {
-      Swal.fire({
-        html: `<h1><span style="font-family: 'Anuphan'; color: red;">กรุณากรอกข้อมูลให้ครบ</span></h1>`,
-        icon: 'error'
-      });
+  getSubAssetForm(index: number): FormGroup {return this.subAssets.at(index) as FormGroup;}
+
+  removeSubAsset = (index: number): void => {this.subAssetService.removeSubAsset(this.asset, index);};
+  
+  private showError(message: string): void {Swal.fire({icon: 'error',title: 'เกิดข้อผิดพลาด',text: message,});}
+  
+  onUnitChange(event: any): void {this.asset.patchValue({ Unit: event.value });}
+  
+  onFactionChange(event: any): void {this.asset.patchValue({ FactionId: event.value });}
+  
+  toggleForm(): void {this.showForm = !this.showForm;}
+  
+  handleInput(event: Event): void {this.formService.handleAssetCodeInput(event, this.asset);}
+  
+  handleKeyDown(event: KeyboardEvent): void {this.formService.preventEditingFixedPart(event);} 
+
+  handleKeyPress(event: KeyboardEvent, nextInputId: string): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const nextInput = document.getElementById(nextInputId);
+      if (nextInput) {
+        nextInput.focus();
+      }
     }
   }
-
-  ngOnDestroy(): void {
-    this._onDestroy.next();
-    this._onDestroy.complete();
-  }
+  
+  ngOnDestroy(): void {this._onDestroy.next();this._onDestroy.complete();}
 }

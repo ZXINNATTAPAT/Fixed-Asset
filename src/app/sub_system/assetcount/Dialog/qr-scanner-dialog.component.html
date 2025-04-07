@@ -1,26 +1,37 @@
-<h2 mat-dialog-title>สแกน QR Code</h2>
+<h2 mat-dialog-title class="text-center">📷 สแกน QR Code</h2>
+
 <mat-dialog-content>
-  <div *ngIf="availableDevices.length === 0">
-    <p class="text-danger">ไม่พบอุปกรณ์กล้อง</p>
+
+  <div *ngIf="availableDevices.length === 0" class="text-danger text-center my-3">
+    🚫 ไม่พบอุปกรณ์กล้อง กรุณาอนุญาตการเข้าถึงกล้อง
   </div>
 
-  <div *ngIf="availableDevices.length > 0">
-    <!-- <label>เลือกกล้อง:</label> -->
-    <!-- <mat-select [(value)]="selectedDevice">
-      <mat-option *ngFor="let device of availableDevices" [value]="device">
-        {{ device.label || 'กล้องไม่มีชื่อ' }}
-      </mat-option>
-    </mat-select> -->
+  <div *ngIf="availableDevices.length > 0" class="d-flex flex-column gap-3">
 
-    <zxing-scanner 
-      class="qr-scanner-container" 
-      [device]="selectedDevice" 
-      (scanSuccess)="onScanSuccess($event)" 
-      [formats]="allowedFormats" 
-      [autostart]="true">
+    <!-- 🔽 เลือกกล้อง -->
+    <mat-form-field appearance="outline">
+      <mat-label>เลือกกล้อง</mat-label>
+      <mat-select [(value)]="selectedDevice">
+        <mat-option *ngFor="let device of availableDevices" [value]="device">
+          {{ device.label || 'กล้องไม่มีชื่อ' }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- 📷 QR Scanner -->
+    <zxing-scanner [device]="selectedDevice" [autostart]="true" [formats]="allowedFormats"
+      [videoConstraints]="{ facingMode: 'environment' }" (scanSuccess)="onScanSuccess($event)">
     </zxing-scanner>
+
+
+    <div class="text-center text-muted" style="font-size: 0.9rem;">
+      📌 กรุณานำ QR Code มาไว้ในกรอบ
+    </div>
+
   </div>
+
 </mat-dialog-content>
+
 <mat-dialog-actions align="end">
-  <button mat-button (click)="closeDialog()">ยกเลิก</button>
+  <button mat-button color="warn" (click)="closeDialog()">❌ ยกเลิก</button>
 </mat-dialog-actions>

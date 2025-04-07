@@ -7,90 +7,120 @@ import { MatCommonModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ExcelPreviewHelper } from '../../Service/excel-preview.helper';
 import Swal from 'sweetalert2';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-upload-dialog',
   templateUrl: './upload-dialog.component.html',
   styleUrls: ['./upload-dialog.component.scss'],
   standalone: true,
-  imports: [
-    MatDialogModule, 
-    MatButtonModule, 
-    MatDialogActions, 
-    MatDialogContent, 
-    MatCommonModule, 
+  imports: [MatDialogModule,MatButtonModule, MatDialogActions,
+    MatDialogContent,
+    MatCommonModule,
     MatButtonModule,
-    CommonModule], 
+    ReactiveFormsModule,
+    FormsModule,
+    CommonModule],
 })
 export class UploadDialogComponent {
+
   selectedFile: File | null = null;
+
+  userId: any = 0;
+
   asset2: any[] = [];
+
   assetCategory: any[] = [];
+
   assetTypes: any[] = [];
+
   departments: any[] = [];
+
   validationFlags: { departmentError: boolean; factionError: boolean }[] = [];
 
   public data = inject(MAT_DIALOG_DATA);  // ✅ inject data แบบใหม่
+
   private dialogRef = inject(MatDialogRef<UploadDialogComponent>);
+
   private ap = inject(ApiService);
 
   ngOnInit() {
+
     // ✅ ดึงค่าจาก data ที่ inject มา
     this.assetCategory = this.data.assetCategory || [];
+
     this.assetTypes = this.data.assetTypes || [];
+
     this.departments = this.data.departments || [];
+
+    this.userId = this.data.userId || 0;
   }
 
   onFileChange(event: any): void {
     const file: File = event.target.files[0];
-  
+
     if (file) {
       ExcelPreviewHelper.parseExcel(file)
-        .then((rows) => {
-          const result = ExcelPreviewHelper.validateDataAgainstMaster(rows, this.departments);
-          
-          // ✅ แปลงชื่อ field ภาษาไทย → ภาษาอังกฤษ
-          this.asset2 = result.data.map(row => ExcelPreviewHelper.translateToEnglish(row));
-  
-          this.validationFlags = result.validationFlags;
-          console.log(' validationFlags:', this.validationFlags);
-          console.log('🔎 Preview Row 0:', this.asset2[0]);
-        })
-        .catch((error) => {
-          Swal.fire({
-            title: 'Error importing Excel',
-            text: 'Please check your file and try again.',
-            icon: 'error',
-          });
+      .then((rows) => {
+        console.log(this.userId);
+        const result = ExcelPreviewHelper.validateDataAgainstMaster(rows, this.departments, this.assetCategory, this.userId);
+
+        // ✅ แปลงชื่อ field ภาษาไทย → ภาษาอังกฤษ
+        this.asset2 = result.data.map(row => ExcelPreviewHelper.translateToEnglish(row));
+
+        this.validationFlags = result.validationFlags;
+      })
+      .catch((error) => {
+        Swal.fire({
+          title: 'Error importing Excel',
+          text: 'Please check your file and try again.',
+          icon: 'error',
         });
+      });
     }
   }
 
-  async onSubmit(): Promise<void> {
+  async onSubmit(event: Event): Promise<void> {
+    event.preventDefault();
+
     if (!this.validateUniqueAssetCodes(this.asset2)) return;
-  
+
     for (const asset of this.asset2) {
       if (!this.validateAsset(asset)) return;
     }
-  
-    // 👉 ส่งข้อมูลแบบรวมทั้งหมดในครั้งเดียว
+
+    const sanitizedAssets = this.asset2.map(row => ({
+      AssetCode: row.AssetCode,
+      AssetName: row.AssetName,
+      PurchasePrice: Number(row.PurchasePrice),
+      PurchaseDate: row.PurchaseDate,
+      CategoryId: row.CategoryId,
+      TypeId: row.TypeId,
+      DepartmentId: row.DeptId, // ✅ แก้ตรงนี้
+      FactionId: row.FactionId,
+      ResponsibleEmployee: row.ResponsibleEmployee,
+      Unit: row.Unit,
+      Note: row.Note,
+      StatusId: 4,
+      CreatedBy: row.CreatedBy,
+      SubAssets: row.SubAssets || [],
+    }));
+    
     try {
-      const response = await firstValueFrom(
-        await this.ap.assetService.postData('AssetDetails/bulk', this.asset2)
-      );
-  
-      Swal.fire({
+      console.log('sanitizedAssets', sanitizedAssets);
+      await this.ap.assetService.postData('AssetDetails/bulk', sanitizedAssets); // ← array ตรงๆ
+
+      await Swal.fire({
         title: '✅ สำเร็จ',
         text: 'บันทึกข้อมูลครุภัณฑ์เรียบร้อยแล้ว',
         icon: 'success',
+        confirmButtonText: 'ตกลง'
       });
-  
-      if (this.dialogRef) {
-        this.dialogRef.close();
-      }
+
+      this.dialogRef?.close(); // ✅ ปิด dialog หลังจาก alert จบ
+
     } catch (error: any) {
       if (error.status === 409) {
-        // รหัสครุภัณฑ์ซ้ำ (AssetCode duplicated)
         Swal.fire({
           title: '🚫 รหัสครุภัณฑ์ซ้ำ',
           text: error.error?.Message || 'มีรหัสครุภัณฑ์ซ้ำในระบบ',
@@ -105,23 +135,21 @@ export class UploadDialogComponent {
       }
     }
   }
-  
+
 
   validateAsset(asset: any): boolean {
-    if (typeof asset.note === 'number') {
-      asset.note = asset.note.toString();
-    }
-    if (
-      asset.purchaseDate &&
-      asset.assetCode &&
-      asset.assetName &&
-      asset.purchasePrice > 0
-    ) {
+
+    if (typeof asset.Note === 'number') { asset.Note = asset.Note.toString() || ''; }
+
+    if (asset.PurchaseDate && asset.AssetCode && asset.AssetName && asset.PurchasePrice > 0) {
       return true;
-    } else {
+    }
+
+    else {
+      console.log('Invalid asset:', asset);
       Swal.fire({
         title: 'Invalid Data',
-        text: `Asset Code: ${asset.assetCode} is incomplete or invalid.`,
+        text: `Asset Code: ${asset.AssetCode} is incomplete or invalid.`,
         icon: 'error',
       });
       return false;
@@ -131,15 +159,15 @@ export class UploadDialogComponent {
   validateUniqueAssetCodes(assets: any[]): boolean {
     const assetCodeSet = new Set();
     for (const asset of assets) {
-      if (assetCodeSet.has(asset.assetCode)) {
+      if (assetCodeSet.has(asset.AssetCode)) {
         Swal.fire({
           title: 'Duplicate Data',
-          text: `Asset Code: ${asset.assetCode} is duplicated in the imported file.`,
+          text: `Asset Code: ${asset.AssetCode} is duplicated in the imported file.`,
           icon: 'error',
         });
         return false;
       }
-      assetCodeSet.add(asset.assetCode);
+      assetCodeSet.add(asset.AssetCode);
     }
     return true;
   }

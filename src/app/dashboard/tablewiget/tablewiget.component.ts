@@ -97,7 +97,6 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
         filter((userInfo: any) => !!userInfo && !!userInfo.claims), // ตรวจสอบว่ามีค่า userInfo
         tap((userInfo: any) => {
           this.userinfo = userInfo.claims || {}; // กำหนดค่าเริ่มต้นเป็นว่าง
-          // console.log('DefaultHeader UserInfo:', this.userinfo);
         }),
         switchMap((userInfo: any) => {
           if (userInfo.claims.DeptId) {
@@ -119,7 +118,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   getAssetDetails(page: number = 1, pageSize: number = 20): void {
     if (this.userinfo?.DeptId) {
       this.dataSubscription = this.apiService.assetService
-        .fetchData(`AssetDetails?deptId=${this.userinfo.DeptId}&page=${page}&pageSize=${pageSize}`)
+        .fetchData(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}&page=${page}&pageSize=${pageSize}`)
         .subscribe((data) => {
           this.processAssetData(data);
         });
@@ -128,10 +127,7 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
   
   processAssetData(data: any[]): void {
     try {
-      // ตรวจสอบ Affiliation
-      const userAffiliation = this.userinfo?.Affiliation || 'ส่วนกลาง';
-      // console.log('User Affiliation:', userAffiliation);
-      // กรองข้อมูลตามเงื่อนไขของผู้ใช้
+      const userAffiliation = this.userinfo?.Affiliation || 'ส่วนกลาง'; // ตรวจสอบ Affiliation
       const filteredAssets = data.filter((asset: any) => {
         const assetCode = asset.AssetCode || '';
         if (userAffiliation === 'ส่วนกลาง') {
@@ -255,45 +251,6 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  async deleteAsset(asset: any): Promise<void> {
-    // const result = await Swal.fire({
-    //   title: 'คุณแน่ใจหรือไม่?',
-    //   text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
-    //   icon: 'warning',
-    //   showCancelButton: true,
-    //   confirmButtonText: 'ใช่',
-    //   cancelButtonText: 'ไม่',
-    // });
-
-    // if (result.isConfirmed) {
-    //   try {
-    //     // Call API to delete asset
-    //     await this.apiService.deleteData(`AssetDetails/${asset.assetId}`);
-
-    //     // Ensure assetDetails is an array
-    //     if (!Array.isArray(this.assetDetails)) {
-    //       console.error('assetDetails is not an array:', this.assetDetails);
-    //       Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์', 'error');
-    //       return;
-    //     }
-
-    //     // Remove the asset from the list
-    //     const index = this.assetDetails.findIndex((a) => a.assetId === asset.assetId);
-    //     if (index !== -1) {
-    //       this.assetDetails.splice(index, 1);
-    //       this.dataSource.data = [...this.assetDetails]; // Update data source
-    //     }
-
-    //     Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
-    //   } catch (error) {
-    //     console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-    //     Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบสินทรัพย์', 'error');
-    //   }
-    // } else if (result.dismiss === Swal.DismissReason.cancel) {
-    //   Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
-    // }
-  }
-
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
 
@@ -344,7 +301,5 @@ export class TablewigetComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  goToAssetDetails(): void {
-    this.router.navigate(['/system/main/assetDetails']);
-  }
+  goToAssetDetails(): void {this.router.navigate(['/system/main/assetDetails']);}
 }

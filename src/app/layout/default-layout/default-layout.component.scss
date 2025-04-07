@@ -8,6 +8,17 @@
   }
 }
 
+@media (max-width: 767px) {
+  .sidebar.sidebar-fixed {
+    z-index: 1040; /* อยู่ด้านบน */
+  }
+
+  .sidebar {
+    width: 250px !important;
+  }
+}
+
+
 // ng-scrollbar css variables
 //.cui-scrollbar {
 //  --scrollbar-border-radius: 7px;

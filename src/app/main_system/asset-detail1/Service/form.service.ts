@@ -46,20 +46,30 @@ export class FormService {
   }
 
   autoInputFields(assetForm: FormGroup, userinfo: any, assetTypes: any[]): void {
+    
     assetForm.get('Quantity')?.setValue(1);
+
     assetForm.get('CalculatedPrice')?.setValue(assetForm.get('PurchasePrice')?.value);
+
     assetForm.get('DepreciationCalculationStartDate')?.setValue(assetForm.get('ReceiptDate')?.value);
+
     assetForm.get('DepreciationStartDate')?.setValue(assetForm.get('ReceiptDate')?.value);
   
     const typeId = assetForm.get('TypeId')?.value;
+
     const matchingAssetType = assetTypes.find(asset => asset.TypeId === typeId);
+
     if (matchingAssetType) {
+
       assetForm.get('DepreciationRate')?.setValue(matchingAssetType.Rate_dep, { emitEvent: false });
+
       assetForm.get('AssetAge')?.setValue(matchingAssetType.Servicelife, { emitEvent: false });
     }
   
     if (userinfo.Affiliation === 'ส่วนกลาง') {
+
       assetForm.get('DepartmentId')?.setValue(userinfo.DepartmentId);
+
       assetForm.get('FactionId')?.setValue(userinfo.FactionId);
     }
   

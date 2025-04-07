@@ -129,6 +129,9 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   
   selectedDevice: MediaDeviceInfo | undefined;
 
+  isMobile: boolean = false;
+  showMobileScanner: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -136,11 +139,33 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,) { }
 
   ngOnInit(): void {
+    this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     this.initForm();
-    // this.loadUserInfo();
     this.loadDepartments();
     this.loadInspectors();
-    // this.loadAssets();
+    this.getAvailableDevices(); // ✅ เพิ่ม
+  }
+
+  private getAvailableDevices(): void {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        stream.getTracks().forEach(track => track.stop()); // ปิด stream ทันที
+        return navigator.mediaDevices.enumerateDevices();
+      })
+      .then(devices => {
+        this.availableDevices = devices.filter(d => d.kind === 'videoinput');
+        if(this.isMobile){
+          this.selectedDevice = this.availableDevices[1]; 
+        }
+        else{
+          this.selectedDevice = this.availableDevices[0];
+        }
+        
+        console.log('📷 กล้องใน AssetcountComponent:', this.availableDevices);
+      })
+      .catch(err => {
+        console.error('❌ ไม่สามารถดึงกล้องใน assetcount ได้:', err);
+      });
   }
 
   /** ตั้งค่า Form */
@@ -159,9 +184,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     this.formArray = this.assetForm.get('formArray') as FormArray;
     this.addForm(); // เพิ่มรายการแรก
   }
-
-  /** โหลดข้อมูลผู้ใช้ */
-  // private loadUserInfo() { this.userinfo = { affiliation: 'กกต' }; }
 
   /** โหลดข้อมูลผู้ตรวจสอบ */
   private async loadInspectors() {
@@ -342,8 +364,8 @@ export class AssetcountComponent implements OnInit, OnDestroy {
       }
     });
 
-    console.log('this.availableDevices', this.availableDevices);
-    console.log('this.selectedDevice', this.selectedDevice);
+    // console.log('this.availableDevices', this.availableDevices);
+    // console.log('this.selectedDevice', this.selectedDevice);
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -371,6 +393,22 @@ extractAssetIdFromUrl(url: string): string | null {
   const match = url.match(/\/infoasset\/(\d+)$/); // ✅ ใช้ Regex เพื่อดึง ID
   return match ? match[1] : null;
 }
+
+openQrScannerMobile(rowIndex: number) {
+  this.currentScanIndex = rowIndex;
+  this.showMobileScanner = true;
+}
+
+onQrCodeScanned(result: string) {
+  this.showMobileScanner = false;
+  const id = this.extractAssetIdFromUrl(result);
+  if (id) {
+    this.fetchAssetById(id);
+  } else {
+    console.warn('❌ QR Format ไม่ถูกต้อง');
+  }
+}
+
 
 /** 🔍 ดึงข้อมูลครุภัณฑ์จาก QR Code */
 fetchAssetById(id: string) {

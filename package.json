@@ -52,6 +52,8 @@
     "axios": "^1.6.8",
     "bootstrap": "^4.6.0",
     "chart.js": "^4.4.8",
+    "dateformat": "^5.0.3",
+    "excel-date-to-js": "^1.1.5",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "jquery": "^3.7.1",

@@ -115,14 +115,9 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
   }
   
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator; 
-    this.dataSource.sort = this.sort;
-  } 
+  ngAfterViewInit() {this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort;} 
 
-  onAssetTypeChange(): void {
-    this.filterAssets();
-  }// เรียกเมื่อประเภท Asset เปลี่ยน
+  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
 
   ngOnDestroy(): void {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
@@ -166,7 +161,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
-    this.apiService.assetService.fetchData(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}`).subscribe({
+    // this.apiService.assetService.fetchData(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}`).subscribe({
+    this.apiService.assetService.fetchData(`AssetDetails/GetForTable`).subscribe({
       next: (data) => this.handleAssetDetails(data),
       error: (err) => console.error('Error loading Asset Details:', err),
     });
@@ -332,35 +328,72 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // ลบสินทรัพย์แบบ Soft Delete
+  // async deleteAsset(asset: any): Promise<void> {
+  //   const result = await Swal.fire({
+  //     title: 'คุณแน่ใจหรือไม่?',
+  //     text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
+  //     icon: 'warning',
+  //     showCancelButton: true,
+  //     confirmButtonText: 'ใช่',
+  //     cancelButtonText: 'ไม่',
+  //   });
+
+  //   if (result.isConfirmed) {
+  //     try {
+  //       await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`); // soft delete endpoint
+  //       const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
+  //       if (index !== -1) {
+  //         this.assetDetails.splice(index, 1); // เอาออกจากหน้าแสดงผล (ไม่ลบจริง)
+  //         this.dataSource.data = this.assetDetails; // อัปเดตตาราง
+  //       }
+  //       Swal.fire('ลบแล้ว!', 'สินทรัพย์ถูกย้ายไปถังขยะแล้ว', 'success');
+  //     } catch (error) {
+  //       console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+  //       Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถลบสินทรัพย์ได้', 'error');
+  //     }
+  //   } else if (result.dismiss === Swal.DismissReason.cancel) {
+  //     Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณยังคงอยู่', 'info');
+  //   }
+  // }
+
+  //ลบสินทรัพย์
   async deleteAsset(asset: any): Promise<void> {
     const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
       text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'ใช่',
-      cancelButtonText: 'ไม่',
+      confirmButtonText: 'ใช่ ลบเลย',
+      cancelButtonText: 'ยกเลิก',
     });
-
+  
     if (result.isConfirmed) {
       try {
-        await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`); // soft delete endpoint
+        await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`);
+  
+        // ลบออกจาก list ในตาราง
         const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
         if (index !== -1) {
-          this.assetDetails.splice(index, 1); // เอาออกจากหน้าแสดงผล (ไม่ลบจริง)
-          this.dataSource.data = this.assetDetails; // อัปเดตตาราง
+          this.assetDetails.splice(index, 1);
+          this.dataSource.data = [...this.assetDetails]; // trigger data update
         }
-        Swal.fire('ลบแล้ว!', 'สินทรัพย์ถูกย้ายไปถังขยะแล้ว', 'success');
-      } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-        Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถลบสินทรัพย์ได้', 'error');
+  
+        Swal.fire('✅ ลบสำเร็จ!', 'สินทรัพย์ถูกลบออกเรียบร้อยแล้ว', 'success');
+      } catch (error: any) {
+        console.error('❌ Error while deleting asset:', error);
+  
+        if (error.code === 'ERR_NETWORK') {
+          Swal.fire('🌐 ข้อผิดพลาดเครือข่าย', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+        } else {
+          Swal.fire('❌ เกิดข้อผิดพลาด', error.message || 'ไม่สามารถลบสินทรัพย์ได้', 'error');
+        }
       }
-    } else if (result.dismiss === Swal.DismissReason.cancel) {
-      Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณยังคงอยู่', 'info');
+    } else {
+      Swal.fire('ยกเลิกแล้ว', 'ยังไม่มีการลบสินทรัพย์ใด ๆ', 'info');
     }
   }
-
   
+
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Assets');

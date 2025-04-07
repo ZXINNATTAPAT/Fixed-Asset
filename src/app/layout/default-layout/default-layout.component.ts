@@ -36,12 +36,17 @@ export class DefaultLayoutComponent implements OnInit {
 
   public navItems: ICustomNavData[] = []; // ✅ ใช้ Custom Interface
   public navItemsFiltered: ICustomNavData[] = [];
+  isSidebarVisible = true;
 
   constructor(private dataService: DataService ,private cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.navItems = staticNavItems; // ✅ โหลดค่า navItems ก่อน
+
     this.initializeUserData();
+
+    this.checkMobile();
+    window.addEventListener('resize', () => this.checkMobile());
   }
   ngAfterViewInit() {
     // sync state ครั้งแรก (ป้องกัน error)
@@ -56,6 +61,22 @@ export class DefaultLayoutComponent implements OnInit {
       this.cdRef.detectChanges();
     }, 100); // รอให้ toggle ทำงานก่อนนิดนึง
   }
+
+  toggleSidebar() {
+    this.isSidebarVisible = !this.isSidebarVisible;
+  }
+  isMobile = false;
+
+  checkMobile() {
+    this.isMobile = window.innerWidth < 992;
+    this.isSidebarVisible = !this.isMobile;
+  }
+ 
+  toggleSidebarFromHeader() {
+    this.isSidebarVisible = !this.isSidebarVisible;
+    console.log("📱 Toggle Sidebar: ", this.isSidebarVisible);
+  }
+  
 
   private async initializeUserData(): Promise<void> {
     try {
@@ -115,6 +136,11 @@ export class DefaultLayoutComponent implements OnInit {
   onScrollbarUpdate(event: any): void {
     // console.log("🖱️ Scrollbar updated:", event);
   }
+
+  
+
+  
+
 
   
   

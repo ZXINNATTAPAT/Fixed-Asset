@@ -82,6 +82,8 @@ interface povice {
 
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   @Input() sidebarId: string = 'sidebar1';
+  @Input() onToggleSidebar!: () => void;
+
 
   icons = { cilAccountLogout, cilUser };
   navItemsFiltered: INavData[] = [];

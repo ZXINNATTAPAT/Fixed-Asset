@@ -1,24 +1,26 @@
-<!--sidebar-->
+
+<!-- Sidebar Wrapper -->
 <c-sidebar
   #sidebar1="cSidebar"
   class="d-print-none sidebar sidebar-fixed border-end anuphan-700"
   id="sidebar1"
   colorScheme="light"
-  visible
+  [visible]="isSidebarVisible"
+  [narrow]="isMobile"
+  [overlaid]="isMobile"
 >
+
+
   <!-- ✅ โลโก้ + ข้อมูลผู้ใช้ ซ่อนเมื่อย่อ -->
   <ng-container *ngIf="isSidebarNarrow !== true">
     <!-- โลโก้ -->
     <c-sidebar-header class="border-bottom bg-transparent text-center py-3">
       <c-sidebar-brand [routerLink]="[]" class="d-flex justify-content-center">
         <div class="container">
-          <div class="d-flex flex-column flex-md-row align-items-center justify-content-center text-center text-md-start gap-3">
-            <img
-              src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png"
-              alt="สำนักงานคณะกรรมการการเลือกตั้ง"
-              class="img-fluid"
-              style="max-width: 60px;"
-            />
+          <div
+            class="d-flex flex-column flex-md-row align-items-center justify-content-center text-center text-md-start gap-3">
+            <img src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png"
+              alt="สำนักงานคณะกรรมการการเลือกตั้ง" class="img-fluid" style="max-width: 60px;" />
             <div>
               <h5 class="fw-bold text-dark mb-1">
                 <span class="anuphan-700">สำนักงานคณะกรรมการการเลือกตั้ง</span>
@@ -36,9 +38,10 @@
     <div class="m-2 p-3 rounded text-white" style="background-color: rgba(48, 144, 106, 0.95);">
       <div class="row align-items-center">
         <div class="col-auto">
-          <div class="d-flex justify-content-center align-items-center bg-white bg-opacity-10 rounded-circle" style="width: 50px; height: 50px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
-              class="bi bi-person-fill" viewBox="0 0 16 16">
+          <div class="d-flex justify-content-center align-items-center bg-white bg-opacity-10 rounded-circle"
+            style="width: 50px; height: 50px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-person-fill"
+              viewBox="0 0 16 16">
               <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
             </svg>
           </div>
@@ -56,30 +59,15 @@
   </ng-container>
 
   <!-- เมนูหลัก -->
-  <ng-scrollbar
-    #scrollbar="ngScrollbar"
-    (updated)="onScrollbarUpdate(scrollbar.state)"
-    class="overflow"
-    pointerEventsMethod="scrollbar"
-    visibility="hover"
-  >
-    <c-sidebar-nav
-      #overflow
-      [navItems]="navItemsFiltered"
-      dropdownMode="close"
-      compact
-    />
+  <ng-scrollbar #scrollbar="ngScrollbar" (updated)="onScrollbarUpdate(scrollbar.state)" class="overflow"
+    pointerEventsMethod="scrollbar" visibility="hover">
+    <c-sidebar-nav #overflow [navItems]="navItemsFiltered" dropdownMode="close" compact />
   </ng-scrollbar>
 
-  <c-sidebar-footer
-  *ngIf="!sidebar1?.narrow"
-  cSidebarToggle="sidebar1"
-  class="border-top d-none d-lg-flex"
-  toggle="visible"
-  style="cursor: pointer"
->
-  <button cSidebarToggler></button>
-</c-sidebar-footer>
+  <c-sidebar-footer *ngIf="!sidebar1?.narrow" cSidebarToggle="sidebar1" class="border-top d-none d-lg-flex"
+    toggle="visible" style="cursor: pointer">
+    <button cSidebarToggler></button>
+  </c-sidebar-footer>
 
 </c-sidebar>
 
@@ -87,12 +75,10 @@
 <!--main-->
 <div class="wrapper d-flex flex-column min-vh-100">
   <!--app-header-->
-  <app-default-header
-    [cShadowOnScroll]="'lg'"
-    class="mb-3 d-print-none header header-sticky p-0 shadow-sm"
-    position="sticky"
-    sidebarId="sidebar1"
-  />
+  <app-default-header [cShadowOnScroll]="'lg'" class="mb-3 d-print-none header header-sticky p-0 shadow-sm"
+    position="sticky" sidebarId="sidebar1"  [onToggleSidebar]="toggleSidebarFromHeader.bind(this)" />
+
+
   <!--app-body-->
   <div class="body flex-grow-1">
     <c-container fluid class="anuphan-700">

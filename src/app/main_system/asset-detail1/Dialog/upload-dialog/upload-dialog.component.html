@@ -1,21 +1,26 @@
 <mat-dialog-content>
-  <form (ngSubmit)="onSubmit()">
+
+  <form (ngSubmit)="onSubmit($event)">
+
     <div class="row align-items-end">
       <!-- ส่วน Upload (ซ้าย) -->
       <div class="col-8 mb-2">
-        <label class="m-2" for="file-upload">✨ Upload File</label>
+        <label class="m-2" for="file-upload">Upload File</label>
         <input id="file-upload" class="form-control" type="file" (change)="onFileChange($event)" accept=".xls,.xlsx" />
       </div>
     
       <!-- ปุ่ม Import / Cancel (ขวา) -->
       <div class="col-4 text-end mb-2">
+
         <button class="btn btn-success text-white me-2" type="submit" [disabled]="!asset2.length">
           นำเข้า 
         </button>
+
         <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
           ยกเลิก
         </button>
       </div>
+
     </div>
     
   </form>
@@ -28,7 +33,7 @@
     <!-- ✅ ทำให้ scroll แนวนอนอยู่ด้านนอกสุด -->
     <div style="overflow-x: auto; max-width: 100%;">
       <div style="max-height: 300px; overflow-y: auto;">
-        <table class="table table-bordered table-sm mt-2 text-center align-middle" style="min-width: 2000px; width: 100%;">
+        <table class="table table-bordered table-sm mt-2 text-center align-middle" style="min-width: 1800px; width: 100%;">
           <thead class="table-light">
             <tr>
               <th>#</th>
@@ -46,25 +51,20 @@
           <tbody>
             <tr *ngFor="let row of asset2; let i = index" [class.table-warning]="validationFlags[i].departmentError || validationFlags[i].factionError">
               <td>{{ i + 1 }}</td>
-              <td>{{ row.assetCode }}</td>
-              <td>{{ row.assetName }}</td>
-              <td>{{ row.assetPrice }}</td>
-              <td>
-                {{ row.department }}
-                <span *ngIf="validationFlags[i]?.departmentError" class="text-danger" title="ไม่พบสำนัก">⚠️</span>
-              </td>
-              <td>
-                {{ row.faction }}
-                <span *ngIf="validationFlags[i]?.factionError" class="text-danger" title="ฝ่ายไม่ตรงกับสำนัก">⚠️</span>
-              </td>
-              <td>{{ row.status }}</td>
-              <td>{{ row.note }}</td>
-              <td>{{ row.purchaseDate }}</td>
-              <td>{{ row.user }}</td>
+              <td>{{ row.AssetCode }}</td>
+              <td>{{ row.AssetName }}</td>
+              <td>{{ row.rawPurchasePrice }}</td>
+              <td>{{ row.Department }}<span *ngIf="validationFlags[i]?.departmentError" class="text-danger" title="ไม่พบสำนัก">⚠️</span></td>
+              <td>{{ row.Faction }}<span *ngIf="validationFlags[i]?.factionError" class="text-danger" title="ฝ่ายไม่ตรงกับสำนัก">⚠️</span></td>
+              <td>{{ row.rawStatus }}</td>
+              <td>{{ row.Note }}</td>
+              <td>{{ row.rawPurchaseDate }}</td>
+              <td>{{ row.User }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
+  
 </mat-dialog-content>
