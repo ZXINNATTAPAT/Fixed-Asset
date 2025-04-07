@@ -1,0 +1,6 @@
+services:
+  - type: static
+    name: fixed-asset
+    env: static
+    buildCommand: npm install --legacy-peer-deps && npm run build -- --configuration=production --base-href=/
+    staticPublishPath: dist/ETC-ASSET-SYSTEM
