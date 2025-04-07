@@ -7,8 +7,9 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 COPY . .
-RUN npm run build -- --configuration=production --base-href=/
 
+# Build Angular and output to dist/ETC-ASSET-SYSTEM
+RUN npm run build -- --configuration=production --base-href=/
 
 # Step 2: Serve with NGINX
 FROM nginx:alpine
