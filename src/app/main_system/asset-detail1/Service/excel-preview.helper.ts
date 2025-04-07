@@ -116,8 +116,6 @@ export class ExcelPreviewHelper {
         }
       }
 
-      // console.log(createdByUserId);
-
       // ✅ ใส่ CreatedBy (userId) ถ้ามี
       if (createdByUserId) {
         row.CreatedBy = createdByUserId;

@@ -1,14 +1,13 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, } from '@angular/core';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatCommonModule, MatNativeDateModule, MatOption } from '@angular/material/core';
-import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormBuilder, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, FormArray } from '@angular/forms';
 import { MatFormField, MatFormFieldModule, MatLabel, MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions, } from '@angular/material/form-field';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter, MomentDateModule, provideMomentDateAdapter, } from '@angular/material-moment-adapter';
 import { MatDatepicker, MatDatepickerToggle, MatDatepickerInput } from '@angular/material/datepicker';
 import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, } from '@coreui/angular';
 import { CommonModule, NgIf, NgStyle } from '@angular/common';
-import { MatSelect, MatSelectChange } from '@angular/material/select';
+import { MatSelect } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
-import { cilDataTransferUp } from '@coreui/icons';
 import { MatDialog, MatDialogActions, MatDialogContent, MatDialogModule } from '@angular/material/dialog';
 import { AssetDetails2Component } from '../asset-details2/asset-details2.component';
 import { AssetDetails3Component } from '../asset-details3/asset-details3.component';
