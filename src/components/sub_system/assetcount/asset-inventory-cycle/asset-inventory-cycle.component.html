@@ -1,0 +1,84 @@
+<!-- 🔹 แบบฟอร์มเพิ่มรอบ -->
+<div class="card mb-4 shadow-sm" style="border: none;">
+
+  <div class="card-body" >
+    <h1><span class="anuphan-700">📋 สร้างรอบการตรวจนับครุภัณฑ์</span></h1>
+    <hr />
+    <form (ngSubmit)="addCycle()" #cycleForm="ngForm">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="cycleName" class="form-label">ชื่อรอบ</label>
+          <input type="text" id="cycleName" [(ngModel)]="newCycle.CycleName" name="CycleName" class="form-control"
+            required />
+        </div>
+
+        <div class="col-md-4">
+          <label for="dateStart" class="form-label">วันที่เริ่ม</label>
+          <input type="date" id="dateStart" [(ngModel)]="newCycle.DateStart" name="DateStart" class="form-control"
+            required />
+        </div>
+
+        <div class="col-md-4">
+          <label for="dateEnd" class="form-label">วันที่สิ้นสุด</label>
+          <input type="date" id="dateEnd" [(ngModel)]="newCycle.DateEnd" name="DateEnd" class="form-control" required />
+        </div>
+
+        <div class="col-12">
+          <label for="note" class="form-label">หมายเหตุ</label>
+          <textarea id="note" [(ngModel)]="newCycle.Note" name="Note" rows="2" class="form-control"
+            placeholder="ใส่หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+        </div>
+
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary" [disabled]="cycleForm.invalid">
+            ➕ เพิ่มรอบ
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 🔸 ตารางแสดงรอบ -->
+<div class="card shadow-sm" style="border: none;">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered align-middle">
+        <thead >
+          <tr>
+            <th class="text-center">จัดการ</th>
+            <th>ชื่อรอบ</th>
+            <th>วันที่เริ่ม</th>
+            <th>วันที่สิ้นสุด</th>
+            <th>หมายเหตุ</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cycle of cycles">
+            <td >
+              <button class="btn btn-sm btn-success m-1" (click)="toInventoryCount(cycle.CycleId)">
+                <svg [cIcon]="this.icons.cibAddthis"style="color: white; width: 16px; height: 16px;"></svg>
+              </button>
+
+              <button class="btn btn-sm btn-success m-1" (click)="toInventoryCount(cycle.CycleId)">
+                <svg [cIcon]="this.icons.cilSearch"style="color: white; width: 16px; height: 16px;"></svg>
+              </button>
+              
+              <button class="btn btn-sm btn-danger m-1" (click)="deleteCycle(cycle.CycleId!)">
+                <svg [cIcon]="this.icons.cilTrash"style="color: white; width: 16px; height: 16px;"></svg>
+              </button>
+              
+            </td>
+            
+            <td>{{ cycle.CycleName }}</td>
+            <td>{{ cycle.DateStart | date: 'yyyy-MM-dd' }}</td>
+            <td>{{ cycle.DateEnd | date: 'yyyy-MM-dd' }}</td>
+            <td>{{ cycle.Note || '-' }}</td>
+            
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

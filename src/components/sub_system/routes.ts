@@ -8,6 +8,12 @@ export const routes: Routes = [
         data: { title: 'inventorysession' }
     },
     {
+        path: 'inventorycycle', // เปลี่ยนเป็นตัวพิมพ์เล็กทั้งหมด
+        loadComponent: () => import('./assetcount/asset-inventory-cycle/asset-inventory-cycle.component')
+        .then(m => m.AssetInventoryCycleComponent),
+        data: { title: 'inventorycycle' }
+    },
+    {
         path: 'receive', // เปลี่ยนเป็นตัวพิมพ์เล็กทั้งหมด
         loadComponent: () => import('./receive/receive.component')
         .then(m => m.ReceiveComponent),

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { IconDirective } from '@coreui/icons-angular';
 import { CommonModule } from '@angular/common';
@@ -14,33 +14,59 @@ import { AssetInventoryComponent } from '../asset-inventory/asset-inventory.comp
 import { TextColorDirective, FormDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 import Swal from 'sweetalert2';
 import { EditSessionDialogComponent } from './Dialog/edit-session-dialog/edit-session-dialog.component';
-import { AssetInventorySession } from 'src/ApiController/apiservice/inventory/inventory.service';
+import { AssetInventoryCycle, AssetInventorySession } from 'src/ApiController/apiservice/inventory/inventory.service';
+import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
+import { MatIcon } from '@angular/material/icon';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-asset-inventory-session',
   standalone: true,
   imports: [
     CommonModule,ReactiveFormsModule,FormsModule,MatPaginatorModule,MatTableModule,MatFormFieldModule,MatSelectModule,
-    AssetInventoryComponent,TextColorDirective,FormControlDirective,FormDirective,ButtonDirective,IconDirective
+    AssetInventoryComponent,TextColorDirective,FormControlDirective,FormDirective,ButtonDirective,IconDirective,MatTabsModule,
+    MatTabGroup,MatIcon,MatSort,MatTable
   ],
   templateUrl: './asset-inventory-session.component.html',
   styleUrl: './asset-inventory-session.component.scss'
 })
 export class AssetInventorySessionComponent implements OnInit {
+  
+  @ViewChild('tabGroup') tabGroup: any;
 
-  displayedColumns: string[] = ['SessionId', 'SessionName', 'Date', 'InspectorsList', 'VerifierName', 'actions'];
-  displayedColumnsDetails: string[] = ['AssetCode', 'AssetName', 'SystemQuantity', 'CountedQuantity', 'Note'];
-
-  selectedSessionId: number | null = null;
-  assetDetails: AssetInventorySession[] = [];
-  inventoryDetails: any[] = [];
-  dataSource: MatTableDataSource<AssetInventorySession>;
-
-  myFunctionInstance: AssetInventorySessionHelper;
-  instan = { icons: { cilPencil, cilTrash, cilInfo, cilSearch } };
+  @ViewChild(MatSort) sort!: MatSort;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  displayedColumns: string[] = ['actions', 'SessionName', 'Date', 'InspectorsList', 'VerifierName'];
+
+  displayedColumnsDetails: string[] = ['AssetCode', 'AssetName', 'SystemQuantity', 'CountedQuantity', 'Note'];
+
+  selectedSessionId: number | null = null;
+
+  assetDetails: AssetInventorySession[] = [];
+
+  inventoryDetails: any[] = [];
+
+  dataSource: MatTableDataSource<AssetInventorySession>;
+
+  displayedColumnscycle: string[] = ['select', 'CycleName', 'DateStart', 'DateEnd', 'Note'];
+
+  dataSourcecycle = new MatTableDataSource<AssetInventoryCycle>([]);
+
+  displayedColumnsasset: string[] = ['action', 'AssetCode', 'AssetName', 'SystemQuantity', 'Note'];
+  dataSourceasset = new MatTableDataSource<any>([]);
+  
+  myFunctionInstance: AssetInventorySessionHelper; 
+
+  filters = {SessionName: '',Date: '',Inspector: '',Verifier: ''}; // ✅ กรองตามช่อง input เฉพาะคอลัมน์
+
+  selectedCycleId: number | null = null;
+
+  instan = { cilPencil, cilTrash, cilInfo, cilSearch };
+  
+  cycles: any[] = [];
+  
   constructor(private apiService: ApiService, public dialog: MatDialog) {
     this.myFunctionInstance = new AssetInventorySessionHelper();
     this.dataSource = new MatTableDataSource<AssetInventorySession>([]);
@@ -49,10 +75,40 @@ export class AssetInventorySessionComponent implements OnInit {
 
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
+    this.loadCycles();
   }
 
-  // ✅ กรองตามช่อง input เฉพาะคอลัมน์
-  filters = {SessionName: '',Date: '',Inspector: '',Verifier: ''};
+  loadCycles() {
+    this.apiService.assetService.fetchData('AssetInventoryCycle').subscribe({
+      next: (data) => {
+        this.dataSourcecycle = new MatTableDataSource(data);
+        this.dataSourcecycle.paginator = this.paginator;
+        this.dataSourcecycle.sort = this.sort;
+      },
+      error: (err) => console.error('Error fetching cycles:', err)
+    });
+  }
+
+  selectCycle(cycleId: number) {
+    this.selectedCycleId = cycleId;
+
+    // โหลด session ตามรอบ
+    this.apiService.assetService.fetchData(`AssetInventorySession/byCycle/${cycleId}`).subscribe({
+      next: (data) => {
+        this.assetDetails = data.map((session: { Date: string; Inspectors: any; VerifierName: any; }) => ({
+          ...session,
+          Date: this.convertDate(session.Date),
+          InspectorsList: (session.Inspectors ?? []).map((i: { InspectorName: any; }) => i.InspectorName).join(', ') || 'ไม่ระบุ',
+          VerifierName: session.VerifierName || 'ไม่ระบุ'
+        }));
+        this.dataSource = new MatTableDataSource<AssetInventorySession>(this.assetDetails);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.filterPredicate = this.customFilterPredicate();
+      },
+      error: (err) => console.error('Error loading session:', err)
+    });
+    this.tabGroup.selectedIndex = 1;
+  }
 
   applyFilters() {
     this.dataSource.filter = JSON.stringify({
@@ -86,7 +142,6 @@ export class AssetInventorySessionComponent implements OnInit {
     });
   }
 
-
   // ✅ เรียงตามวันที่
   private sortByDate(a: AssetInventorySession, b: AssetInventorySession): number {
     return new Date(b.Date).getTime() - new Date(a.Date).getTime();
@@ -115,13 +170,11 @@ export class AssetInventorySessionComponent implements OnInit {
       );
     };
   }
-
   // เพิ่มตัวแปรเก็บชื่อรอบการตรวจนับ
   selectedSessionName: string | null = null;
 
   // 🔹 เมื่อกดปุ่ม "ดูรายละเอียด"
   viewSession(sessionId: number) {
-    console.log('View session:', sessionId);
     this.selectedSessionId = sessionId;
 
     // ค้นหาชื่อของ Session ตาม SessionId
@@ -132,11 +185,15 @@ export class AssetInventorySessionComponent implements OnInit {
     this.apiService.assetService.fetchData(`AssetInventorySession/${sessionId}`).subscribe({
       next: (data) => {
         this.inventoryDetails = data.InventoryDetails || []; // ถ้าไม่มีข้อมูลให้กำหนดเป็นอาร์เรย์ว่าง
+        this.dataSourceasset = new MatTableDataSource(this.inventoryDetails);
+        this.dataSourceasset.paginator = this.paginator;
+        this.dataSourceasset.sort = this.sort;
       },
       error: (err) => console.error('Error fetching inventory details:', err),
     });
-  }
 
+    this.tabGroup.selectedIndex = 2;
+  }
   // 🔹 เมื่อกด "ย้อนกลับ"
   backToSessions() {this.selectedSessionId = null; this.selectedSessionName = null; this.inventoryDetails = [];}
 

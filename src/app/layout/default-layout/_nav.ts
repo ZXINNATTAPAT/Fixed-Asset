@@ -26,12 +26,12 @@ export const navItems: ICustomNavData[] = [
       // }
     ]
   },
-  // {
-  //   name: 'รายการที่ต้องรับมอบ',
-  //   url: '/table/receive',
-  //   iconComponent: { name: 'cil-pencil' },
-  //   roles: ['Admin'] // ✅ เฉพาะผู้ดูแลระบบ
-  // },
+  {
+    name: 'การตรวจนับประจำปี',
+    url: '/inventorycycle',
+    iconComponent: { name: 'cil-pencil' },
+    roles: ['Admin'] // ✅ เฉพาะผู้ดูแลระบบ
+  },
   {
     name: 'บันทึกรายการรายวัน',
     url: '/system',

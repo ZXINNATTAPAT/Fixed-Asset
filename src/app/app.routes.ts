@@ -38,6 +38,14 @@ export const routes: Routes = [
         data: { title: 'usersmanagement', roles: ['Admin'] }
       },
       {
+        path: 'inventorycycle',
+        loadComponent: () =>
+          import('../components/sub_system/assetcount/asset-inventory-cycle/asset-inventory-cycle.component')
+            .then((m) => m.AssetInventoryCycleComponent),
+        canActivate: [AuthGuard],
+        data: { title: 'inventorycycle', roles: ['Admin'] }
+      },
+      {
         path: 'defaultdata',
         loadChildren: () => import('../components/defaultdata/routes').then((m) => m.routes),
         canActivate: [AuthGuard],

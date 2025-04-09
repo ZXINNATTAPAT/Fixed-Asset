@@ -25,6 +25,7 @@ import { DataService } from '../../../data-service/data-service.component';
 import { HttpClient } from '@angular/common/http';
 import { QrScannerDialogComponent } from './Dialog/qr-scanner-dialog.component';
 import { AssetInventoryComponent } from './asset-inventory/asset-inventory.component'
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface AssetDetails {
   assetId: any;
@@ -122,20 +123,22 @@ export class AssetcountComponent implements OnInit, OnDestroy {
   verifiers: any[] = []; // ✅ เพิ่มตัวแปร verifiers
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  
+
   @ViewChild(MatSort) sort!: MatSort;
 
   availableDevices: MediaDeviceInfo[] = [];
-  
+
   selectedDevice: MediaDeviceInfo | undefined;
 
   isMobile: boolean = false;
   showMobileScanner: boolean = false;
+  CycleId:number = 0 ;
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private ap: ApiService,
+    private router: Router,
+    private route: ActivatedRoute,
     private dialog: MatDialog,) { }
 
   ngOnInit(): void {
@@ -143,8 +146,32 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     this.initForm();
     this.loadDepartments();
     this.loadInspectors();
-    this.getAvailableDevices(); // ✅ เพิ่ม
+    this.getAvailableDevices();
+
+    // ✅ ดึง cycleId จาก query param (หรือ param ถ้าใช้ path param ก็ปรับเอาน้า)
+    const cycleId = this.route.snapshot.queryParamMap.get('cycleId');
+    if (cycleId) {
+      this.CycleId = parseInt(cycleId, 10);
+      console.log('🔍 ได้รับ cycleId จาก URL:', cycleId);
+      this.handleCycleId(parseInt(cycleId, 10));
+    }
   }
+
+  private handleCycleId(cycleId: number) {
+    // 👇 ดึงข้อมูลรอบจาก API เพื่อเติม Form ก็ได้
+    this.ap.inventoryService.getCycles().subscribe({
+      next: (cycles) => {
+        const selectedCycle = cycles.find(c => c.CycleId === cycleId);
+        if (selectedCycle) {
+          
+          console.log('📌 ตั้งค่าจาก Cycle:', selectedCycle);
+        }
+      },
+      error: (err) => console.error('❌ โหลดข้อมูล Cycle ไม่สำเร็จ:', err)
+    });
+  }
+
+
 
   private getAvailableDevices(): void {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -154,13 +181,13 @@ export class AssetcountComponent implements OnInit, OnDestroy {
       })
       .then(devices => {
         this.availableDevices = devices.filter(d => d.kind === 'videoinput');
-        if(this.isMobile){
-          this.selectedDevice = this.availableDevices[1]; 
+        if (this.isMobile) {
+          this.selectedDevice = this.availableDevices[1];
         }
-        else{
+        else {
           this.selectedDevice = this.availableDevices[0];
         }
-        
+
         console.log('📷 กล้องใน AssetcountComponent:', this.availableDevices);
       })
       .catch(err => {
@@ -193,16 +220,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
       });
     } catch (error) {
       console.error('Error loading inspectors:', error);
-    }
-  }
-
-  /** โหลดข้อมูลครุภัณฑ์ */
-  private async loadAssets() {
-    try {
-      this.assetData = await firstValueFrom(this.http.get<any[]>('assets')) || [];
-      this.filteredAssetData.next(this.assetData);
-    } catch (error) {
-      console.error('Error loading assets:', error);
     }
   }
 
@@ -348,7 +365,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     // ✅ แปลงทั้ง assetId และ assetData.assetId เป็น string เพื่อให้ค้นหาเจอ
     const foundAsset = this.assetData?.find((data) => String(data.AssetId) === String(assetId));
 
-    // console.log('✅ พบข้อมูล:', foundAsset);
     return foundAsset?.AssetName ?? 'ไม่พบข้อมูล';
   }
 
@@ -364,9 +380,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
       }
     });
 
-    // console.log('this.availableDevices', this.availableDevices);
-    // console.log('this.selectedDevice', this.selectedDevice);
-
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.onScanSuccess(result, this.currentScanIndex);
@@ -374,69 +387,68 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     });
   }
 
- /** 📷 เมื่อสแกน QR Code สำเร็จ */
- onScanSuccess(data: string, rowIndex: number) {
-  console.log(`✅ QR Code Data (Row ${rowIndex}):`, data);
+  /** 📷 เมื่อสแกน QR Code สำเร็จ */
+  onScanSuccess(data: string, rowIndex: number) {
+    console.log(`✅ QR Code Data (Row ${rowIndex}):`, data);
 
-  const id = this.extractAssetIdFromUrl(data);
-  if (id) {
-    this.currentScanIndex = rowIndex; // ระบุแถวที่กำลังจะอัปเดต
-    this.fetchAssetById(id);
-  } else {
-    console.warn('⚠️ Invalid QR Code format');
-  }
-}
-
-
-/** 🔍 ฟังก์ชันแยก ID จาก URL */
-extractAssetIdFromUrl(url: string): string | null {
-  const match = url.match(/\/infoasset\/(\d+)$/); // ✅ ใช้ Regex เพื่อดึง ID
-  return match ? match[1] : null;
-}
-
-openQrScannerMobile(rowIndex: number) {
-  this.currentScanIndex = rowIndex;
-  this.showMobileScanner = true;
-}
-
-onQrCodeScanned(result: string) {
-  this.showMobileScanner = false;
-  const id = this.extractAssetIdFromUrl(result);
-  if (id) {
-    this.fetchAssetById(id);
-  } else {
-    console.warn('❌ QR Format ไม่ถูกต้อง');
-  }
-}
-
-
-/** 🔍 ดึงข้อมูลครุภัณฑ์จาก QR Code */
-fetchAssetById(id: string) {
-  this.ap.assetService.fetchDataById(`AssetDetails`,id).subscribe({
-    next: (assetData) => {
-      console.log('✅ Asset Data:', assetData);
-      
-      if (assetData) {
-        // ✅ อัปเดตข้อมูลในแถวที่ถูกต้อง
-        this.formArray.at(this.currentScanIndex).patchValue({
-          assetId: assetData.AssetId,
-          assetName: assetData.AssetName
-        });
-
-        // ✅ อัปเดตค่าที่ใช้แสดงใน Input (ตรงกับแถวที่สแกน)
-        this.assetNames[this.currentScanIndex] = assetData.AssetName;
-        this.searchTerms[this.currentScanIndex] = assetData.AssetCode;
-
-        this.currentScanIndex ++;
-      } else {
-        console.warn('⚠️ Asset not found');
-      }
-    },
-    error: (error) => {
-      console.error('❌ Error fetching asset data:', error);
+    const id = this.extractAssetIdFromUrl(data);
+    if (id) {
+      this.currentScanIndex = rowIndex; // ระบุแถวที่กำลังจะอัปเดต
+      this.fetchAssetById(id);
+    } else {
+      console.warn('⚠️ Invalid QR Code format');
     }
-  });
-}
+  }
+
+
+  /** 🔍 ฟังก์ชันแยก ID จาก URL */
+  extractAssetIdFromUrl(url: string): string | null {
+    const match = url.match(/\/infoasset\/(\d+)$/); // ✅ ใช้ Regex เพื่อดึง ID
+    return match ? match[1] : null;
+  }
+
+  openQrScannerMobile(rowIndex: number) {
+    this.currentScanIndex = rowIndex;
+    this.showMobileScanner = true;
+  }
+
+  onQrCodeScanned(result: string) {
+    this.showMobileScanner = false;
+    const id = this.extractAssetIdFromUrl(result);
+    if (id) {
+      this.fetchAssetById(id);
+    } else {
+      console.warn('❌ QR Format ไม่ถูกต้อง');
+    }
+  }
+
+  /** 🔍 ดึงข้อมูลครุภัณฑ์จาก QR Code */
+  fetchAssetById(id: string) {
+    this.ap.assetService.fetchDataById(`AssetDetails`, id).subscribe({
+      next: (assetData) => {
+        console.log('✅ Asset Data:', assetData);
+
+        if (assetData) {
+          // ✅ อัปเดตข้อมูลในแถวที่ถูกต้อง
+          this.formArray.at(this.currentScanIndex).patchValue({
+            assetId: assetData.AssetId,
+            assetName: assetData.AssetName
+          });
+
+          // ✅ อัปเดตค่าที่ใช้แสดงใน Input (ตรงกับแถวที่สแกน)
+          this.assetNames[this.currentScanIndex] = assetData.AssetName;
+          this.searchTerms[this.currentScanIndex] = assetData.AssetCode;
+
+          this.currentScanIndex++;
+        } else {
+          console.warn('⚠️ Asset not found');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error fetching asset data:', error);
+      }
+    });
+  }
 
   /** 🔄 ส่งข้อมูลไปยัง API */
   async onSubmit() {
@@ -445,7 +457,7 @@ fetchAssetById(id: string) {
       console.error('❌ Form is invalid.');
       return;
     }
-  
+
     // ตรวจสอบว่า Inspectors มีค่าหรือไม่
     const inspectors = this.assetForm.get('inspectors')?.value.map((item: any) => ({
       Id: 0, // ✅ ใส่ค่าเริ่มต้นเป็น 0 ถ้าเป็นการสร้างใหม่
@@ -453,11 +465,11 @@ fetchAssetById(id: string) {
       // AssetInventorySession: null, // ✅ API อาจไม่ต้องการ Object ซ้อน
       InspectorId: Number(item.inspectorId),
     })) || [];
-  
+
     //  ตรวจสอบค่า `InventoryDetails`
     const inventoryDetails = this.formArray.value ? this.formArray.value.map((item: any) => ({
-      InventoryDetailId: 0, 
-      SessionId: 0, 
+      InventoryDetailId: 0,
+      SessionId: 0,
       // AssetInventorySession: null,
       AssetId: Number(item.assetId),
       // AssetDetails: null, 
@@ -465,11 +477,11 @@ fetchAssetById(id: string) {
       CountedQuantity: Number(item.countedQuantity),
       Note: item.note || "",
     })) : [];
-  
+
     // ✅ ตรวจสอบค่า `session`
     const sessionRequest = {
       SessionId: 0, // ✅ ใช้ 0 สำหรับการสร้างใหม่
-      Date: this.assetForm.get('date')?.value ,
+      Date: this.assetForm.get('date')?.value,
       SessionName: this.assetForm.get('sessionName')?.value || "ไม่ระบุ",
       DepartmentId: this.assetForm.get('DepartmentId')?.value ? Number(this.assetForm.get('DepartmentId')?.value) : null,
       // Department: null,
@@ -478,12 +490,11 @@ fetchAssetById(id: string) {
       VerifierId: this.assetForm.get('verifierId')?.value ? Number(this.assetForm.get('verifierId')?.value) : null,
       // Verifier: null,
       Note: this.assetForm.get('note')?.value || null,
+      CycleId:this.CycleId,
       InventoryDetails: inventoryDetails,
       Inspectors: inspectors
     };
-  
-    console.log('📤 ส่งข้อมูลไปที่ API:', sessionRequest);
-  
+
     try {
       await this.ap.assetService.postData('AssetInventorySession', sessionRequest);
 
@@ -494,6 +505,7 @@ fetchAssetById(id: string) {
         confirmButtonText: 'ตกลง'
       }).then(() => {
         this.assetForm.reset();
+        this.router.navigate(['table', 'inventorysession']);
       });
 
     } catch (error) {
@@ -507,14 +519,14 @@ fetchAssetById(id: string) {
       });
     }
   }
-  
+
   /** 🚀 Cleanup */
   ngOnDestroy(): void {
     this._onDestroy.next();
     this._onDestroy.complete();
   }
 
-  
+
 
 
 }
