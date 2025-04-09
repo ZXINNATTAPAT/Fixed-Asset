@@ -19,7 +19,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard/ส่วนกลาง',
-        loadChildren: () => import('./dashboard/routes').then((m) => m.routes),
+        loadChildren: () => import('../components/dashboard/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
         data: { roles: adminAndDirectorRoles }
       },
@@ -32,26 +32,26 @@ export const routes: Routes = [
       {
         path: 'usersmanagement',
         loadComponent: () =>
-          import('./main_system/user-management/user-management.component')
+          import('../components/main_system/user-management/user-management.component')
             .then((m) => m.UserManagementComponent),
         canActivate: [AuthGuard],
         data: { title: 'usersmanagement', roles: ['Admin'] }
       },
       {
         path: 'defaultdata',
-        loadChildren: () => import('./defaultdata/routes').then((m) => m.routes),
+        loadChildren: () => import('../components/defaultdata/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
         data: { roles: dataManagerRoles }
       },
       {
         path: 'system/main',
-        loadChildren: () => import('./main_system/routes').then((m) => m.routes),
+        loadChildren: () => import('../components/main_system/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
         data: { roles: fullAccessRoles.concat(adminAndDirectorRoles) }
       },
       {
         path: 'system/sub',
-        loadChildren: () => import('./sub_system/routes').then((m) => m.routes),
+        loadChildren: () => import('../components/sub_system/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
         data: { roles: fullAccessRoles.concat(adminAndDirectorRoles) }
       },
@@ -59,8 +59,8 @@ export const routes: Routes = [
         path: 'table',
         loadChildren: () =>
           Promise.all([
-            import('./main_system/routes'),
-            import('./sub_system/routes')
+            import('../components/main_system/routes'),
+            import('../components/sub_system/routes')
           ]).then(([m1, m2]) => [...m1.routes, ...m2.routes]),
         canActivate: [AuthGuard],
         data: { roles: fullAccessRoles.concat(adminAndDirectorRoles) } // ⛔ ไม่มี 'เจ้าหน้าที่ทั่วไป'
@@ -70,7 +70,7 @@ export const routes: Routes = [
       {
         path: 'table/assettable',
         loadComponent: () =>
-          import('./main_system/asset-table/asset-table.component')
+          import('../components/main_system/asset-table/asset-table.component')
             .then((m) => m.AssetTableComponent),
         canActivate: [AuthGuard],
         data: {
@@ -80,28 +80,28 @@ export const routes: Routes = [
       },
       {
         path: 'pages',
-        loadChildren: () => import('./views/pages/routes').then((m) => m.routes),
+        loadChildren: () => import('../components/views/pages/routes').then((m) => m.routes),
       }
     ]
   },
   {
     path: 'login',
     loadComponent: () =>
-      import('./views/pages/login/login.component')
+      import('../components/views/pages/login/login.component')
         .then((m) => m.LoginComponent),
     data: { title: 'Login' },
   },
   {
     path: '404',
     loadComponent: () =>
-      import('./views/pages/page404/page404.component')
+      import('../components/views/pages/page404/page404.component')
         .then((m) => m.Page404Component),
     data: { title: 'Page 404' },
   },
   {
     path: '500',
     loadComponent: () =>
-      import('./views/pages/page500/page500.component')
+      import('../components/views/pages/page500/page500.component')
         .then((m) => m.Page500Component),
     data: { title: 'Page 500' },
   },

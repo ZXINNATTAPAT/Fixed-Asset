@@ -15,7 +15,7 @@ import { UserService } from '../data-service/user.service';
 })
 export class AppComponent implements OnInit {
 
-  title = 'ETC-ASE';
+  title = 'ETC-ASSET';
 
   constructor(
     private router: Router,
@@ -37,7 +37,9 @@ export class AppComponent implements OnInit {
     });
   }
   version = VERSION;
+
   // matSelectSearchVersion = MatSelectSearchVersion;
+  
   private rightToLeft = false;
   toggleRightToLeft() {
     this.rightToLeft = !this.rightToLeft;

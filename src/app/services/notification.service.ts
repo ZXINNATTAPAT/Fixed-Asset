@@ -26,4 +26,12 @@ export class NotificationService {
     return this.http.delete(`${this.baseUrl}/notifications/${notificationId}`, { withCredentials: true });
   }
 
+  // 📌 อัปเดตสถานะแจ้งเตือนทั้งหมด (Mark all as read)
+  markAllAsRead(notificationIds: number[], userId: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/notificationrecipient/mark-all-as-read/${userId}`, notificationIds, {
+      withCredentials: true
+    });
+  }
+
+
 }

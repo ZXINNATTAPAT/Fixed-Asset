@@ -1,0 +1,123 @@
+<div class="card shadow-sm" style="border: none">
+  <div class="card-body">
+
+    <div class="border-bottom mb-3 d-flex justify-content-between align-items-center">
+      <h1 style="font-family: 'Anuphan', sans-serif; font-weight: 700">
+        {{ selectedSessionId ? 'รายละเอียดการตรวจนับครุภัณฑ์' : 'รายการการตรวจนับครุภัณฑ์' }}
+      </h1>
+      <button *ngIf="selectedSessionId" class="btn btn-sm btn-secondary" (click)="backToSessions()">ย้อนกลับ</button>
+    </div>
+
+    <!-- 🔹 ตารางแสดงรายละเอียดสินทรัพย์ (Inventory Details) -->
+    <div *ngIf="selectedSessionId; else sessionList">
+
+      <h2 style="font-family: 'Anuphan', sans-serif; font-weight: 700">
+        {{ selectedSessionName }}
+      </h2>
+
+      <table class="table table-striped table-hover ">
+        <thead >
+          <tr class="border">
+            <th class="anuphan-700 border">
+              #
+            </th>
+
+            <th class="anuphan-700 border">รหัสครุภัณฑ์</th>
+
+            <th class="anuphan-700 border">ชื่อครุภัณฑ์</th>
+
+            <th class="anuphan-700 border">จำนวนในระบบ</th>
+
+            <th class="anuphan-700 border">จำนวนที่ตรวจนับ</th>
+
+            <th class="anuphan-700 border">หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border" *ngFor="let item of inventoryDetails">
+            <td class="border" style="width: 10%;">
+              <button class="btn btn-sm btn-primary" >
+                🔍 
+              </button>
+            </td>
+            <td class="anuphan-500 border">{{ item.AssetCode }}</td>
+
+            <td class="anuphan-500 border">{{ item.AssetName }}</td>
+
+            <td class="anuphan-500 border">{{ item.SystemQuantity === 1 ? 'มีอยู่' : 'สูญหาย' }}</td>
+
+            <td class="anuphan-500 border">{{ item.CountedQuantity === 1 ? 'มีอยู่' : 'สูญหาย' }}</td>
+
+            <td class="anuphan-500 border">{{ item.Note || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 🔹 ตารางแสดงรอบการตรวจนับ (Session List) -->
+    <ng-template #sessionList>
+      <table class="table table-striped table-hover ">
+        <thead class="border">
+          <tr>
+            <th class="border">
+              ดำเนินการ
+              <input class="form-control form-control-sm mt-1" disabled/>
+            </th>
+            <th class="border">
+              ชื่อรอบการตรวจนับ
+              <input class="form-control form-control-sm mt-1" [(ngModel)]="filters.SessionName" (ngModelChange)="applyFilters()" placeholder="ค้นหา..." />
+            </th>
+            <th class="border">
+              วันที่
+              <input class="form-control form-control-sm mt-1" [(ngModel)]="filters.Date" (ngModelChange)="applyFilters()" placeholder="ค้นหา..." />
+            </th>
+            <th class="border">
+              เจ้าหน้าที่ตรวจนับ
+              <input class="form-control form-control-sm mt-1" [(ngModel)]="filters.Inspector" (ngModelChange)="applyFilters()" placeholder="ค้นหา..." />
+            </th>
+            <th class="border">
+              ผู้ตรวจสอบการตรวจนับ
+              <input class="form-control form-control-sm mt-1" [(ngModel)]="filters.Verifier" (ngModelChange)="applyFilters()" placeholder="ค้นหา..." />
+            </th>
+          </tr>
+        </thead>
+        
+        <tbody class="border">
+          <tbody class="border">
+            <tr class="border" *ngFor="let session of dataSource.filteredData">
+              <!-- ดำเนินการ -->
+              <td class="border" style="width: 12%;">
+                <button class="btn btn-sm btn-primary m-1" (click)="viewSession(session.SessionId)">
+                  <svg [cIcon]="instan.icons.cilSearch" style="color: white; width: 16px; height: 16px;"></svg>
+                </button>
+                <button class="btn btn-sm btn-warning m-1" (click)="editSession(session.SessionId)">
+                  <svg [cIcon]="instan.icons.cilPencil" style="color: white; width: 16px; height: 16px;"></svg>
+                </button>
+                <button class="btn btn-sm btn-danger m-1" (click)="deleteSession(session)">
+                  <svg [cIcon]="instan.icons.cilTrash" style="color: white; width: 16px; height: 16px;"></svg>
+                </button>
+              </td>
+          
+              <!-- ข้อมูลอื่น ๆ -->
+              <td class="border anuphan-500" style="font-size: 16px;">{{ session.SessionName || 'ไม่ระบุ' }}</td>
+              <td class="border anuphan-500" style="font-size: 16px;">{{ session.Date }}</td>
+              <td class="border anuphan-500" style="font-size: 16px;">{{ session.InspectorsList }}</td>
+              <td class="border anuphan-500" style="font-size: 16px;">{{ session.VerifierName }}</td>
+            </tr>
+          
+            <!-- ถ้าไม่มีข้อมูลหลังกรอง -->
+            <tr *ngIf="dataSource.filteredData.length === 0">
+              <td colspan="5" class="text-center text-danger">❌ ไม่พบข้อมูลที่ค้นหา</td>
+            </tr>
+        
+          <!-- ✅ แสดงข้อความถ้าไม่มีข้อมูล -->
+          <tr *ngIf="dataSource.data.length === 0">
+            <td colspan="5" class="text-center text-danger">❌ ยังไม่มีการตรวจนับครุภัณฑ์</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-template>
+    
+
+  </div>
+</div>

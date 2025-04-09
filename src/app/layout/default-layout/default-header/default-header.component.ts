@@ -118,14 +118,16 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     // ✅ รอให้ userInfo โหลดเสร็จ ก่อนจะโหลดแจ้งเตือน
     this.dataService.userInfo$.subscribe((userInfo) => {
       if (userInfo?.claims) {
-        this.userinfo = userInfo.claims;
-        this.userRoles = Array.isArray(userInfo.claims.Role) ? userInfo.claims.Role : [userInfo.claims.Role]; // ✅ เก็บ roles ของ user
-        this.userId = userInfo?.userId || '';
 
+        this.userinfo = userInfo.claims;
+
+        this.userRoles = Array.isArray(userInfo.claims.Role) ? userInfo.claims.Role : [userInfo.claims.Role]; // ✅ เก็บ roles ของ user
+
+        this.userId = userInfo?.userId || '';
 
         // ✅ โหลดแจ้งเตือนหลังจากที่ userId ได้รับค่าแล้ว
         if (this.userId) {
-          console.log(`✅ User ID Loaded: ${this.userId} ${this.userRoles}`);
+          // console.log(`✅ User ID Loaded: ${this.userId} ${this.userRoles}`);
           this.loadNotifications();
         } else {
           console.warn('⚠️ User ID is empty, skipping notification load.');
@@ -160,7 +162,8 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     this.notificationService.getNotifications(Number(this.userId)).subscribe({
       next: (data) => {
         this.notifications = data;
-        this.unreadCount = data.filter(n => !n.IsRead).length; // ✅ ใช้ IsRead แทน Status === 'new'
+        this.unreadCount = data.filter(n => !n.IsRead).length; 
+        console.log('✅ Notification marked as read:',data );
       },
       error: (err) => {
         console.error('❌ Error loading notifications:', err);
@@ -178,12 +181,47 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
           notification.NotificationId === notificationId ? { ...notification, IsRead: true } : notification
         );
         this.unreadCount = this.notifications.filter(n => !n.IsRead).length; // ✅ อัปเดต unreadCount
+        
       },
       error: (err) => {
         console.error('❌ Error marking notification as read:', err);
       }
     });
   }
+
+
+  markAllAsRead(): void {
+    if (!this.userId) return;
+  
+    const unreadIds = this.notifications
+      .filter(n => !n.IsRead)
+      .map(n => n.NotificationId);
+  
+    if (unreadIds.length === 0) return;
+  
+    this.notificationService.markAllAsRead(unreadIds, +this.userId).subscribe({
+      next: () => {
+        this.notifications = this.notifications.map(n => ({
+          ...n,
+          IsRead: true
+        }));
+        this.updateUnreadCount();
+      },
+      error: err => {
+        console.error('❌ Error marking all notifications as read:', err);
+      }
+    });
+  
+  
+  }
+  
+
+  private updateUnreadCount(): void {
+    this.unreadCount = this.notifications.filter(n => !n.IsRead).length;
+  }
+  
+  
+  
 
   // ✅ เปิด/ปิด dropdown แจ้งเตือน
   toggleDropdown(): void {

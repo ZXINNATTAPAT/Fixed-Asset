@@ -5,6 +5,7 @@ import { AssetService } from './asset/asset.service';
 import { InventoryService } from './inventory/inventory.service';
 import { UserService } from './users/user.service';
 import { ExternalDataService } from './external-data/external-data.service';
+import { RoleService } from './users/role.service';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +17,8 @@ export class ApiService {
     public assetService: AssetService,
     public inventoryService: InventoryService,
     public userService: UserService,
-    public externalDataService: ExternalDataService
+    public externalDataService: ExternalDataService,
+    public role : RoleService
   ) {}
 
   // public apiUrl_link = 'https://localhost:7204/api/'; // URL ของ API

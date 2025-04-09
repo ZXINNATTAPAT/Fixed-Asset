@@ -19,13 +19,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 
 // Components
-import { AssetcountComponent } from './sub_system/assetcount/assetcount.component';
-import { RoleDialogComponent } from './main_system/user-management/dialog/role-dialog.component';
-import { UserEditDialogComponent } from './main_system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
+import { AssetcountComponent } from '../components/sub_system/assetcount/assetcount.component';
+import { RoleDialogComponent } from '../components/main_system/user-management/dialog/role-dialog.component';
+import { UserEditDialogComponent } from '../components/main_system/user-management/dialog/user-edit-dialog/user-edit-dialog.component';
 
 
 // Config
 import { appConfig } from './app.config';
+import { CommonModule } from '@angular/common';
 
 
 // สร้าง InjectionToken เพื่อใช้ในการให้ค่า appConfig
@@ -38,6 +39,7 @@ export const APP_CONFIG = new InjectionToken<any>('app.config');
     UserEditDialogComponent,
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     HttpClientModule,
     ResizableModule,

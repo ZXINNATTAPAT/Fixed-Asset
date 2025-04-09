@@ -26,6 +26,12 @@ export const navItems: ICustomNavData[] = [
       // }
     ]
   },
+  // {
+  //   name: 'รายการที่ต้องรับมอบ',
+  //   url: '/table/receive',
+  //   iconComponent: { name: 'cil-pencil' },
+  //   roles: ['Admin'] // ✅ เฉพาะผู้ดูแลระบบ
+  // },
   {
     name: 'บันทึกรายการรายวัน',
     url: '/system',
@@ -55,8 +61,9 @@ export const navItems: ICustomNavData[] = [
     name: 'ทะเบียนผู้ใช้งาน',
     url: '/usersmanagement',
     iconComponent: { name: 'cil-pencil' },
-    roles: ['Admin'] // ✅ เฉพาะผู้ดูแลระบบ
+    roles: ['Admin','เจ้าหน้าที่ฝ่ายพัสดุ'] // ✅ เฉพาะผู้ดูแลระบบ
   },
+  
   {
     name: 'กำหนดข้อมูลตั้งต้น',
     url: '/defaultdata',
