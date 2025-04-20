@@ -5,7 +5,6 @@ import { MatFormField, MatLabel, MatOption, MatSelect } from '@angular/material/
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCommonModule } from '@angular/material/core';
-import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../../../ApiController/apiservice/api-service.service';
 
 @Component({
@@ -26,7 +25,6 @@ export class UserEditDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<UserEditDialogComponent>,
     private fb: FormBuilder,
-    private http: HttpClient ,// Inject HttpClient
     private ap: ApiService // Inject HttpClient
   ) {
     this.userForm = this.fb.group({

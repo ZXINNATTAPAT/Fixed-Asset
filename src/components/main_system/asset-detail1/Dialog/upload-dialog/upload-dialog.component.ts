@@ -82,8 +82,8 @@ export class UploadDialogComponent {
                 BookValue: summary.bookValue
               };
             } catch (e) {
-              console.warn(`❌ ไม่สามารถดึง Depreciation ของ TypeId: ${asset.TypeId}`);
-              return asset;
+              console.error(`❌ Error fetching Depreciation for TypeId: ${asset.TypeId}`, e);
+              throw e;
             }
           }));
   

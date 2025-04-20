@@ -105,7 +105,11 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
   private dataSubscription!: Subscription;
 
-  constructor(private apiService: ApiService, private dataService: DataService, public dialog: MatDialog, private route: Router, private activatedRoute: ActivatedRoute) {
+  constructor(private apiService: ApiService, 
+    private dataService: DataService, 
+    public dialog: MatDialog, 
+    private route: Router, 
+    private activatedRoute: ActivatedRoute) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -159,7 +163,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
   
-
   // โหลดข้อมูล UserInfo
   private async initializeUserInfo(): Promise<void> {
     this.dataService.userInfo$.subscribe(userInfo => {
@@ -175,9 +178,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // ✅ ช่วยเช็กว่าเป็นเจ้าหน้าที่ทั่วไปหรือไม่
-  isGeneralStaffOnly(): boolean {
-    return this.userRoles.includes('เจ้าหน้าที่ทั่วไป') && this.userRoles.length === 1;
-  }
+  isGeneralStaffOnly(): boolean {return this.userRoles.includes('เจ้าหน้าที่ทั่วไป') && this.userRoles.length === 1;}
 
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
@@ -204,8 +205,6 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   
-
-
   private loadAssetCategory(): void {
     this.apiService.assetService.fetchData('Assetcategories').subscribe({
       next: (data) => {
@@ -523,6 +522,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
         console.error('Error generating QR codes for Excel:', error);
       });
   }
+
   // Method สำหรับให้ผู้ใช้เลือกว่าจะ Export เป็น PDF หรือ Excel
   exportQrCodes(): void {
     Swal.fire({
@@ -703,12 +703,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     return grouped;
   }
 
-  openTrashDialog() {
-    this.dialog.open(TrashDialogWrapper, {
-      width: '800px',
-      height: '600px',
-    });
-  }
+  openTrashDialog() {this.dialog.open(TrashDialogWrapper, {width: '800px',height: '600px',});}
 
 
 }

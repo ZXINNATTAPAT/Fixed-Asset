@@ -10,6 +10,7 @@ import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/fo
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
+import Swal from 'sweetalert2';
 
 
 interface Role {
@@ -116,10 +117,22 @@ export class AddUserDialogComponent {
   
       this.ap.assetService.postData('Users', userData).then((res) => {
         console.log("🎉 POST สำเร็จ:", res);
-        this.dialogRef.close(res); // ปิด dialog พร้อมส่งข้อมูลกลับ
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'เพิ่มผู้ใช้สำเร็จ',
+        }).then(() => {
+          this.dialogRef.close(res); // ปิด dialog พร้อมส่งข้อมูลกลับ
+        });
+  
       }).catch((err) => {
         console.error("❌ POST ล้มเหลว:", err);
-        // คุณอาจแจ้งเตือนผู้ใช้ด้วย SweetAlert หรือ Snackbar ก็ได้
+  
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถเพิ่มผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง',
+        });
       });
     }
   }

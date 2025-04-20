@@ -15,7 +15,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 export class DisassetDonationComponent implements OnInit {
 
   dataSource = new MatTableDataSource<any>();
-  displayedColumns: string[] = ['assetCode', 'assetDetails', 'recipientName', 'contactNumber', 'donationDate', 'notes', 'actions'];
+  displayedColumns: string[] = ['actions','assetCode', 'assetDetails', 'recipientName', 'contactNumber', 'donationDate', 'notes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -66,20 +66,27 @@ export class DisassetDonationComponent implements OnInit {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
       return;
     }
-
+  
+    const raw = this.donationForm.getRawValue();
+  
     const payload = {
-      statusId: 2, // 2 = บริจาค
-      ...this.donationForm.value,
+      ...raw,
+      statusId: 5, // บริจาค
+      donationDate: new Date(raw.donationDate + 'T00:00:00').toISOString(), // ✅ แปลงให้เป็น UTC ISO
     };
-
-    this.ap.assetService.postData('AssetSharing', payload).then(() => {
-      alert('บันทึกข้อมูลบริจาคสำเร็จ');
-      this.donationForm.reset();
-    }).catch((err) => {
-      alert('เกิดข้อผิดพลาด');
-      console.error(err);
-    });
+  
+    this.ap.assetService.postData('AssetSharing', payload)
+      .then(() => {
+        alert('บันทึกข้อมูลบริจาคสำเร็จ');
+        this.donationForm.reset();
+        this.dataSource.data = [];
+      })
+      .catch((err) => {
+        alert('เกิดข้อผิดพลาด');
+        console.error('🔥 Donation Submit Error:', err);
+      });
   }
+  
 
   deleteRow(row: any): void {
     this.dataSource.data = this.dataSource.data.filter(item => item !== row);

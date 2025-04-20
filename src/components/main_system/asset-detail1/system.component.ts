@@ -271,7 +271,6 @@ export class SystemComponent implements OnInit, OnDestroy {
       });
   }
   
-  
   private handleGeneratedAssetCode(generatedCode: string, year: string): string {
     const base = generatedCode.split('-')[0];
     let suffix = 1;
@@ -364,7 +363,6 @@ export class SystemComponent implements OnInit, OnDestroy {
     }
   }
   
-
   private setupFormListeners(): void {
     this.asset.get('PurchasePrice')?.valueChanges.subscribe(() => {
       this.formService.syncCalculatedPrice(this.asset);

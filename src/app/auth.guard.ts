@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { ApiService } from '../ApiController/apiservice/api-service.service';
@@ -38,30 +38,36 @@ export class AuthGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     return this.authService.authService.getAuthStatus().pipe(
       map(response => {
-  
-        // ป้องกันกรณี `route.data.roles` เป็น undefined
         const allowedRoles = (route.data?.['roles'] as string[]) || [];
-  
-        if (allowedRoles.length === 0) {return true;}
-  
-        // แปลง Role เป็น lowercase เพื่อป้องกัน Case-Sensitive ปัญหา
+
+        if (allowedRoles.length === 0) {
+          return true;
+        }
+
         const userRoles = (Array.isArray(response.roles) ? response.roles : [response.roles])
-        .map((role: string) => role.toLowerCase());
+          .map((role: string) => role.toLowerCase());
         const requiredRoles = allowedRoles.map(role => role.toLowerCase());
-  
-        if (response.isAuthenticated && userRoles.some(role => requiredRoles.includes(role))) {
+
+        const hasPermission = response.isAuthenticated && userRoles.some(role => requiredRoles.includes(role));
+
+        if (hasPermission) {
           console.log("✅ Access Granted!");
           return true;
         } else {
-          console.warn("❌ Access Denied! Redirecting to login...");
-          this.router.navigate(['/login']);
+          console.warn("❌ Access Denied! Redirecting...");
+          // เพิ่มกรณี dashboard ให้ redirect ไป assettable
+          if (route.routeConfig?.path?.startsWith('dashboard')) {
+            this.router.navigate(['/table/assettable']);
+          } else {
+            this.router.navigate(['/login']);
+          }
           return false;
         }
       }),
       catchError(error => {
         console.error("❌ Auth Error:", error);
         this.router.navigate(['/login']);
-        return [false];
+        return of(false);
       })
     );
   }

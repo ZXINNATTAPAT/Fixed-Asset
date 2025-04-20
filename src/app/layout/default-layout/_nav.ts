@@ -10,7 +10,7 @@ export const navItems: ICustomNavData[] = [
     name: 'แดชบอร์ด',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
-    roles: ['Admin', 'เจ้าหน้าที่ฝ่ายพัสดุ', 'เจ้าหน้าที่ทั่วไป', 'เจ้าหน้าที่ฝ่ายอำนวยการ'],
+    roles: ['Admin', 'เจ้าหน้าที่พัสดุ', 'เจ้าหน้าที่ทั่วไป', 'เจ้าหน้าที่ฝ่ายอำนวยการ', 'ผู้อำนวยการ'],
     children: [
       {
         name: 'แดชบอร์ดสรุปภาพรวม (ส่วนกลาง)',
@@ -36,7 +36,7 @@ export const navItems: ICustomNavData[] = [
     name: 'บันทึกรายการรายวัน',
     url: '/system',
     iconComponent: { name: 'cil-pencil' },
-    roles: ['Admin', 'เจ้าหน้าที่ฝ่ายพัสดุ'],
+    roles: ['Admin', 'เจ้าหน้าที่พัสดุ'],
     children: [
       { name: 'เพิ่มครุภัณฑ์', url: '/system/main/assetDetails', icon: 'nav-icon-bullet' },
       // { name: 'ตรวจนับครุภัณฑ์', url: '/system/sub/assetcount', icon: 'nav-icon-bullet' },
@@ -52,7 +52,7 @@ export const navItems: ICustomNavData[] = [
     name: 'รายการบันทึก',
     url: '/table',
     iconComponent: { name: 'cil-pencil' },
-    roles: ['Admin', 'เจ้าหน้าที่ฝ่ายพัสดุ', 'เจ้าหน้าที่ฝ่ายอำนวยการ'],
+    roles: ['Admin', 'เจ้าหน้าที่พัสดุ', 'เจ้าหน้าที่ฝ่ายอำนวยการ'],
     children: [
       { name: 'รายการที่ต้องรับมอบ', url: '/table/receive', icon: 'nav-icon-bullet' },
       { name: 'รายการครุภัณฑ์', url: '/table/assettable', icon: 'nav-icon-bullet' },
@@ -64,14 +64,14 @@ export const navItems: ICustomNavData[] = [
     name: 'ทะเบียนผู้ใช้งาน',
     url: '/usersmanagement',
     iconComponent: { name: 'cil-pencil' },
-    roles: ['Admin','เจ้าหน้าที่ฝ่ายพัสดุ'] // ✅ เฉพาะผู้ดูแลระบบ
+    roles: ['Admin','เจ้าหน้าที่พัสดุ'] // ✅ เฉพาะผู้ดูแลระบบ
   },
   
   {
     name: 'กำหนดข้อมูลตั้งต้น',
     url: '/defaultdata',
     iconComponent: { name: 'cil-pencil' },
-    roles: ['Admin', 'เจ้าหน้าที่จัดการข้อมูล'],
+    roles: ['Admin', 'เจ้าหน้าที่จัดการข้อมูล' ,'เจ้าหน้าที่พัสดุ'],
     children: [
       { name: 'รหัสประเภทครุภัณฑ์', url: '/defaultdata/Assettypecode', icon: 'nav-icon-bullet' },
       { name: 'หมวดหมู่ครุภัณฑ์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },

@@ -3,12 +3,15 @@ import { DefaultLayoutComponent } from './layout';
 import { AuthGuard } from './auth.guard';
 import { NgModule } from '@angular/core';
 
-// 🔐 กลุ่มบทบาท (ภาษาไทย)
-const fullAccessRoles = ['Admin', 'เจ้าหน้าที่ฝ่ายพัสดุ'];
-const adminAndDirectorRoles = ['Admin', 'เจ้าหน้าที่ฝ่ายอำนวยการ'];
-const regionalRoles = ['Admin', 'เจ้าหน้าที่ฝ่ายภูมิภาค'];
-const dataManagerRoles = ['Admin', 'เจ้าหน้าที่จัดการข้อมูล'];
-const generalStaffRoles = ['Admin', 'เจ้าหน้าที่ทั่วไป'];
+// 🔐 กำหนดกลุ่มบทบาท
+const fullAccessRoles = ['Admin', 'เจ้าหน้าที่พัสดุ'];
+const dashboardRoles = ['Admin', 'เจ้าหน้าที่พัสดุ', 'ผู้อำนวยการ'];
+const mainSystemRoles = ['Admin', 'เจ้าหน้าที่พัสดุ'];
+const subSystemRoles = ['Admin', 'เจ้าหน้าที่พัสดุ', 'เจ้าหน้าที่ทั่วไป', 'เจ้าหน้าที่ฝ่ายอำนวยการ'];
+const inventoryCycleRoles = ['Admin', 'เจ้าหน้าที่พัสดุ', 'เจ้าหน้าที่ตรวจนับ'];
+const userManagementRoles = ['Admin', 'เจ้าหน้าที่พัสดุ'];
+const assetTableRoles = ['Admin', 'เจ้าหน้าที่พัสดุ', 'เจ้าหน้าที่ทั่วไป', 'เจ้าหน้าที่ฝ่ายอำนวยการ', 'ผู้อำนวยการ', 'เจ้าหน้าที่ตรวจนับ'];
+const dataManagerRoles = ['Admin', 'เจ้าหน้าที่จัดการข้อมูล', 'เจ้าหน้าที่พัสดุ'];
 
 export const routes: Routes = [
   {
@@ -21,21 +24,15 @@ export const routes: Routes = [
         path: 'dashboard/ส่วนกลาง',
         loadChildren: () => import('../components/dashboard/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
-        data: { roles: adminAndDirectorRoles }
+        data: { roles: dashboardRoles }
       },
-      // {
-      //   path: 'dashboard/ส่วนภูมิภาค',
-      //   loadChildren: () => import('./dashboard/routes').then((m) => m.routes),
-      //   canActivate: [AuthGuard],
-      //   // data: { roles: regionalRoles }
-      // },
       {
         path: 'usersmanagement',
         loadComponent: () =>
           import('../components/main_system/user-management/user-management.component')
             .then((m) => m.UserManagementComponent),
         canActivate: [AuthGuard],
-        data: { title: 'usersmanagement', roles: ['Admin'] }
+        data: { title: 'usersmanagement', roles: userManagementRoles }
       },
       {
         path: 'inventorycycle',
@@ -43,7 +40,7 @@ export const routes: Routes = [
           import('../components/sub_system/assetcount/asset-inventory-cycle/asset-inventory-cycle.component')
             .then((m) => m.AssetInventoryCycleComponent),
         canActivate: [AuthGuard],
-        data: { title: 'inventorycycle', roles: ['Admin'] }
+        data: { title: 'inventorycycle', roles: inventoryCycleRoles }
       },
       {
         path: 'defaultdata',
@@ -55,13 +52,13 @@ export const routes: Routes = [
         path: 'system/main',
         loadChildren: () => import('../components/main_system/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
-        data: { roles: fullAccessRoles.concat(adminAndDirectorRoles) }
+        data: { roles: mainSystemRoles }
       },
       {
         path: 'system/sub',
         loadChildren: () => import('../components/sub_system/routes').then((m) => m.routes),
         canActivate: [AuthGuard],
-        data: { roles: fullAccessRoles.concat(adminAndDirectorRoles) }
+        data: { roles: subSystemRoles }
       },
       {
         path: 'table',
@@ -71,20 +68,15 @@ export const routes: Routes = [
             import('../components/sub_system/routes')
           ]).then(([m1, m2]) => [...m1.routes, ...m2.routes]),
         canActivate: [AuthGuard],
-        data: { roles: fullAccessRoles.concat(adminAndDirectorRoles) } // ⛔ ไม่มี 'เจ้าหน้าที่ทั่วไป'
+        data: { roles: fullAccessRoles } // ไม่รวมเจ้าหน้าที่ทั่วไป
       },
-      
-      // ✅ แยก route เฉพาะหน้า Asset Table ให้เจ้าหน้าที่ทั่วไปเข้าถึงได้
       {
         path: 'table/assettable',
         loadComponent: () =>
           import('../components/main_system/asset-table/asset-table.component')
             .then((m) => m.AssetTableComponent),
         canActivate: [AuthGuard],
-        data: {
-          title: 'Asset Table',
-          roles: ['Admin', 'เจ้าหน้าที่ฝ่ายพัสดุ', 'เจ้าหน้าที่ทั่วไป', 'เจ้าหน้าที่ฝ่ายอำนวยการ']
-        }
+        data: { title: 'Asset Table', roles: assetTableRoles }
       },
       {
         path: 'pages',
@@ -118,7 +110,6 @@ export const routes: Routes = [
     redirectTo: '404',
   },
 ];
-
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

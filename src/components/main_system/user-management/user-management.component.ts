@@ -87,7 +87,7 @@ export class UserManagementComponent implements OnInit {
     "บทบาท"
   ];
 
-  constructor(private http: HttpClient,private dialog: MatDialog,private ap :ApiService) { }
+  constructor(private dialog: MatDialog,private ap :ApiService) { }
 
   ngOnInit(): void {this.getUsers();}
   
@@ -100,7 +100,7 @@ export class UserManagementComponent implements OnInit {
   
     dialogRef.afterClosed().subscribe((updatedUser) => {
       if (updatedUser) {
-        this.ap.assetService.updateData(`https://localhost:7204/api/Users/${user.id}`, updatedUser)
+        this.ap.assetService.updateData(`https://localhost:7204/api/Users/${user.userId}`, updatedUser)
           .then(() => {
             Swal.fire({
               icon: 'success',
@@ -164,21 +164,21 @@ export class UserManagementComponent implements OnInit {
   }
 
   // Function to update the user role with confirmation
-  updateUserRole(userId: number, role: string): void {
+  updateUserRole(userId: number, roleObj: { roleId: number, roleName: string }): void {
     Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
-      text: `คุณต้องการเปลี่ยนบทบาทผู้ใช้นี้เป็น "${role}" หรือไม่?`,
+      text: `คุณต้องการเปลี่ยนบทบาทผู้ใช้นี้เป็น "${roleObj.roleName}" หรือไม่?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'ยืนยัน',
       cancelButtonText: 'ยกเลิก',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.ap.assetService.updateData(`Users/${userId}/role`, JSON.stringify(role))
+        this.ap.assetService.updateData2(`Roles/${userId}/role/${roleObj.roleId}`, null)
           .then(() => {
             const userIndex = this.userDetails.findIndex(user => user.id === userId);
             if (userIndex !== -1) {
-              this.userDetails[userIndex].roles = role;
+              this.userDetails[userIndex].roles = roleObj.roleName;
             }
             this.dataSource.data = [...this.userDetails]; // Refresh the table
             Swal.fire({
@@ -201,6 +201,27 @@ export class UserManagementComponent implements OnInit {
         });
       }
     });
+  }
+  
+  
+  openRoleDialog(user: any): void {
+    const dialogRef = this.dialog.open(RoleDialogComponent, {
+      width: '600px',
+      height: '400px',
+      data: {
+        availableRoles: this.availableRoles,
+        currentRole: user.roles
+      }
+    });
+  
+    dialogRef.afterClosed().subscribe((selectedRole: any) => {
+      const currentRoleName = typeof user.roles === 'string' ? user.roles : user.roles?.roleName;
+      if (selectedRole && selectedRole.roleName !== currentRoleName) {
+        this.updateUserRole(user.UserId, selectedRole);
+      }
+    });
+    
+    
   }
 
   deleteUser(user: any): void {
@@ -225,23 +246,6 @@ export class UserManagementComponent implements OnInit {
           });
       } else {
         Swal.fire('ยกเลิกแล้ว', 'ข้อมูลผู้ใช้ของคุณปลอดภัย :)', 'info');
-      }
-    });
-  }
-
-  openRoleDialog(user: any): void {
-    const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '600px',
-      height: '400px',
-      data: {
-        availableRoles: this.availableRoles,
-        currentRole: user.roles
-      }
-    });
-  
-    dialogRef.afterClosed().subscribe((selectedRole: string) => {
-      if (selectedRole && selectedRole !== user.roles) {
-        this.updateUserRole(user.id, selectedRole);
       }
     });
   }

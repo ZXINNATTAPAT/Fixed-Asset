@@ -69,6 +69,11 @@ export class AssetService {
     return response.data;
   }
 
+  async updateData2(endpoint: string, data: any): Promise<any> {
+    const response = await axios.put(`${this.baseUrl}${endpoint}`, data, { withCredentials: true });
+    return response.data;
+  }
+
   // ✅ UPDATE ข้อมูลตาม ID แบบ Promise
   async updateDataById(endpoint: string, id: number, data: any): Promise<any> {
     const response = await axios.put(`${this.baseUrl}${endpoint}/${id}`, data, { withCredentials: true });

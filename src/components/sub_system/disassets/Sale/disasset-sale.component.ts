@@ -27,19 +27,12 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 })
 export class DisassetSaleComponent implements OnInit {
   saleForm!: FormGroup;
-  searchTerm: string = ''; // ✅ แก้ error [(ngModel)]="searchTerm"
+  searchTerm: string = '';
+  displayedColumns: string[] = ['actions','assetCode', 'assetName', 'saleDate', 'sellingprice', 'bookValue', 'profit'];
+  dataSource = new MatTableDataSource<any>();
 
-   // 🔧 MatTable
-   displayedColumns: string[] = ['assetCode', 'assetName', 'saleDate', 'sellingprice', 'bookValue', 'profit', 'actions'];
-   dataSource = new MatTableDataSource<any>();
- 
-   @ViewChild(MatPaginator) paginator!: MatPaginator;
-   @ViewChild(MatSort) sort!: MatSort;
- 
-   ngAfterViewInit(): void {
-     this.dataSource.paginator = this.paginator;
-     this.dataSource.sort = this.sort;
-   }
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private fb: FormBuilder, private ap: ApiService) {}
 
@@ -56,9 +49,24 @@ export class DisassetSaleComponent implements OnInit {
 
     this.saleForm.get('bookValue')?.valueChanges.subscribe(() => this.calculateProfit());
     this.saleForm.get('sellingprice')?.valueChanges.subscribe(() => this.calculateProfit());
+
+    // ✅ โหลดข้อมูลใส่ตารางเมื่อเริ่มหน้า
+    this.getAssetSales();
   }
 
-  // ✅ แก้ error (click)="onSearch()"
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  getAssetSales(): void {
+    this.ap.assetService.fetchData('AssetSales').subscribe((data: any[]) => {
+      this.dataSource.data = data || [];
+    }, (err) => {
+      console.error('🚨 Error loading asset sales:', err);
+    });
+  }
+
   onSearch(): void {
     const search = this.searchTerm.trim();
     if (!search) return;
@@ -78,7 +86,6 @@ export class DisassetSaleComponent implements OnInit {
     });
   }
 
-  // ✅ ฟังก์ชันแปลงวันที่ให้ใส่ input type="date"
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
@@ -96,22 +103,34 @@ export class DisassetSaleComponent implements OnInit {
       return;
     }
 
+    const raw = this.saleForm.getRawValue();
+
     const payload = {
-      statusId: 1, // 1 = ขาย
-      ...this.saleForm.getRawValue()
+      statusId: 7,
+      assetId: raw.assetId,
+      purchaseDate: new Date(raw.purchaseDate + 'T00:00:00').toISOString(),
+      saleDate: new Date(raw.saleDate + 'T00:00:00').toISOString(),
+      sellingprice: +raw.sellingprice,
+      bookValue: +raw.bookValue,
+      profit: +raw.profit,
+      description: raw.description || '-'
     };
 
-    this.ap.assetService.postData('AssetSales', payload).then(() => {
-      alert('บันทึกข้อมูลสำเร็จ');
-      this.saleForm.reset();
-    }).catch((err) => {
-      alert('เกิดข้อผิดพลาด');
-      console.error(err);
-    });
+    this.ap.assetService.postData('AssetSales', payload)
+      .then(() => {
+        alert('บันทึกข้อมูลสำเร็จ');
+        this.saleForm.reset();
+        this.getAssetSales(); // ✅ โหลดใหม่หลังบันทึก
+      })
+      .catch((err) => {
+        alert('เกิดข้อผิดพลาดในการบันทึก');
+        console.error('🔥 Error:', err);
+      });
   }
 
   deleteRow(row: any): void {
     this.dataSource.data = this.dataSource.data.filter(item => item !== row);
   }
 }
+
 

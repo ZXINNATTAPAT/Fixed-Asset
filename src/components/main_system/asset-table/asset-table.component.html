@@ -186,7 +186,7 @@
                 <span class="badge text-light" [ngClass]="{
                     'text-bg-success': asset[column] !== 'โอนย้าย' && asset[column] !== 'ซ่อมแซม' && asset[column] !== 'ส่งมอบ' && asset[column] !== '',
                     'text-bg-warning': asset[column] === 'โอนย้าย' || asset[column] === 'รับมอบ',
-                    'text-bg-danger': asset[column] === 'ซ่อมแซม'
+                    'text-bg-danger': asset[column] === 'ซ่อมแซม' || asset[column] === 'จำหน่าย' 
                   }" style="color: black; font-size: 16px;">
                   {{ asset[column] || 'ปกติ' }}
                 </span>
