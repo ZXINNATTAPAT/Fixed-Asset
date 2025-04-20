@@ -1,26 +1,41 @@
-<div class="card shadow-sm" style="border:none;">
-  <div class="card-body">
+<div class="container p-4 bg-white shadow rounded">
+  
     <mat-tab-group #tabGroup>
       <!-- 📆 รอบการตรวจนับ -->
       <mat-tab>
-
         <ng-template mat-tab-label>
           <h2><span class="anuphan-700">📆 รอบการตรวจนับ</span></h2>
         </ng-template>
 
         <div class="mb-3"><br />
+          
+          <h1><span class="anuphan-700">รอบการตรวจนับประจำปี</span></h1><hr />
 
-          <h1><span class="anuphan-700">รอบการตรวจนับประจำปี</span></h1>
-          <hr />
+          <!-- 🔹 Filter by Year -->
+          <div class="row">
 
-          <mat-paginator class="m-1" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+            <div class="col-3">
+              <mat-form-field appearance="fill" class="w-100">
+                <mat-label>กรองตามปี</mat-label>
+                <mat-select [(ngModel)]="selectedYear" (selectionChange)="applyYearFilter()" name="yearFilter">
+                  <mat-option [value]="''">ทั้งหมด</mat-option>
+                  <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-          <table class="table table-striped table-hover" mat-table [dataSource]="dataSourcecycle" matSort>
+            <div class="col">
+                <mat-paginator class="m-1" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+            </div>
+          </div>
+
+        </div>
+        <table class="table table-striped table-hover" mat-table [dataSource]="dataSourcecycle" matSort>
             <!-- เลือกรอบ -->
             <ng-container matColumnDef="select">
               <th class="border anuphan-700" mat-header-cell *matHeaderCellDef> เลือก </th>
               <td class="border anuphan-500" mat-cell *matCellDef="let cycle">
-                <button class="btn btn-sm btn-success" (click)="selectCycle(cycle.CycleId)">
+                <button class="btn btn-sm btn-primary" (click)="selectCycle(cycle.CycleId)">
                   <svg [cIcon]="instan.cilSearch" style="color: white; width: 16px; height: 16px;"></svg>
                 </button>
               </td>
@@ -35,8 +50,8 @@
             <!-- วันที่เริ่ม -->
             <ng-container matColumnDef="DateStart">
               <th class="border anuphan-700" mat-header-cell *matHeaderCellDef mat-sort-header> วันที่เริ่ม </th>
-              <td class="border anuphan-500" mat-cell *matCellDef="let cycle"> {{ cycle.DateStart | date: 'yyyy-MM-dd'
-                }} </td>
+              <td class="border anuphan-500" mat-cell *matCellDef="let cycle"> {{ cycle.DateStart | date: 'yyyy-MM-dd' }}
+              </td>
             </ng-container>
 
             <!-- วันที่สิ้นสุด -->
@@ -54,18 +69,15 @@
 
             <!-- Header & Row -->
             <tr mat-header-row *matHeaderRowDef="displayedColumnscycle"></tr>
-            <tr mat-row *matRowDef="let row; columns:  displayedColumnscycle"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnscycle"></tr>
 
             <!-- ไม่มีข้อมูล -->
-            <tr *ngIf="dataSource.data.length === 0">
+            <tr *ngIf="dataSourcecycle.data.length === 0">
               <td colspan="5" class="text-center text-danger">❌ ยังไม่มีรอบการตรวจนับ</td>
             </tr>
+
           </table>
-
-        </div>
-
       </mat-tab>
-
 
       <!-- 🗂️ รายการรอบการตรวจนับ -->
       <mat-tab [disabled]="!selectedCycleId">
@@ -75,16 +87,21 @@
             <h2><span class="anuphan-700">🗂️ รายการรอบตรวจนับประจำปี</span></h2>
           </ng-template>
 
-
           <h1><span class="anuphan-700">รายการรอบตรวจนับประจำปี</span></h1>
           <hr />
           <!-- วางตาราง Session ของออมสินตรงนี้ได้เลย -->
           <!-- ปุ่มค้นหา, ดู, แก้ไข, ลบ ยังใช้ได้เหมือนเดิม -->
           <div *ngIf="!selectedCycleId" class="alert alert-warning">⚠️ กรุณาเลือกรอบก่อนจากแท็บแรก</div>
 
+          <mat-form-field appearance="fill">
+            <mat-label>วันที่</mat-label>
+            <input matInput [matDatepicker]="picker" (dateChange)="onDateFilter($event)" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
           <!-- ✅ Paginator -->
-          <mat-paginator class="p-1" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"
-            showFirstLastButtons></mat-paginator>
+          <mat-paginator class="p-1" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
 
           <ng-container *ngIf="selectedCycleId">
 
@@ -155,15 +172,15 @@
 
           <div *ngIf="!selectedCycleId" class="alert alert-warning">⚠️ กรุณาเลือกรอบก่อนจากแท็บแรก</div>
 
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>ค้นหา</mat-label>
+            <input matInput (keyup)="dataSourceasset.filter = $any($event.target).value.trim().toLowerCase()" />
+          </mat-form-field>
+          
+
           <ng-container *ngIf="selectedCycleId">
 
             <ng-container *ngIf="selectedSessionId; else noSession">
-
-              <h3 class="mb-3"><span class="anuphan-700">{{ selectedSessionName }}</span></h3>
-
-              <!-- Paginator -->
-              <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
-
               <table mat-table [dataSource]="dataSourceasset" matSort class="table table-striped table-hover">
 
                 <!-- คอลัมน์: ปุ่มดูรายละเอียด -->
@@ -213,18 +230,17 @@
                   <td colspan="5" class="text-center text-danger">❌ ไม่มีข้อมูลครุภัณฑ์ในรอบนี้</td>
                 </tr>
               </table>
-
-
-
             </ng-container>
+
             <ng-template #noSession>
               <div class="alert alert-warning mt-3">⚠️ กรุณาเลือก Session เพื่อดูรายละเอียดการตรวจนับ</div>
             </ng-template>
+
           </ng-container>
 
         </div>
+
       </mat-tab>
     </mat-tab-group>
 
-  </div>
 </div>

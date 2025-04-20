@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
@@ -85,7 +84,7 @@ export class CountingunitComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient,private ap :ApiService,private dialog: MatDialog) { }
+  constructor(private ap :ApiService,private dialog: MatDialog) { }
 
   displayedColumns2: string[] = [
     "รหัสหน่วยนับ",

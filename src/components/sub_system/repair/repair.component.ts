@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import {ReactiveFormsModule,FormsModule,FormControl,} from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, } from '@angular/forms';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { CommonModule, NgStyle } from '@angular/common';
-import { MatPaginatorModule,MatPaginator } from '@angular/material/paginator';
-import {FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective,TextColorDirective,TableModule,UtilitiesModule} from '@coreui/angular';
+import { CommonModule, NgIf, NgStyle } from '@angular/common';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective, TextColorDirective, TableModule, UtilitiesModule } from '@coreui/angular';
 import { cilMagnifyingGlass, cilPencil, cilTrash } from '@coreui/icons';
 import { IconDirective } from '@coreui/icons-angular';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,10 +41,10 @@ interface AssetDetails {
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
-    MatButtonModule, // Example: Add any other required Angular Material modules here
+    MatButtonModule,
     UtilitiesModule,
     ButtonDirective,
-    NgStyle,
+    NgStyle, NgIf,
     IconDirective,
     FormDirective,
     FormLabelDirective,
@@ -55,17 +55,17 @@ interface AssetDetails {
 })
 export class RepairComponent implements OnInit, OnDestroy {
 
-  constructor(private http: HttpClient, private ap: ApiService) { }
+  constructor(private ap: ApiService) { }
 
   assetCode: string = ''; //for input
-  
+
   assetDetails: AssetDetails[] = [];
 
   assetDetails2: any[] = [];
 
   assetDetailsset: any[] = [];
-  
-  asset: any = {AssetName:""};
+
+  asset: any = { AssetName: "", Date: "" };
 
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
 
@@ -81,11 +81,13 @@ export class RepairComponent implements OnInit, OnDestroy {
   icons = { cilPencil, cilTrash, cilMagnifyingGlass };
 
   displayedColumns2: string[] = [
+    'actions',
     'รหัสครุภัณฑ์',
     'รายการครุภัณฑ์',
     'เลขที่เอกสาร',
     'รายละเอียด',
     'จำนวนเงิน',
+    'วันที่ซ่อม', // เพิ่มตรงนี้
   ];
 
   assetDataCtrl: FormControl = new FormControl();
@@ -105,22 +107,21 @@ export class RepairComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.filterAsset();
       });
-      
+
     this.setInitialValue();
-    // console.log(this.asset);
   }
-  
+
   onSearch(): void {
 
     // ใช้ searchTerm เก็บค่าจาก input
-    const search = this.searchTerm.trim(); 
-    
+    const search = this.searchTerm.trim();
+
     if (!search) {
       // ถ้าไม่มีคำค้นหา แสดงข้อมูลทั้งหมด
       this.filteredAssetData.next(this.assetDetails2.slice());
       return;
     }
-  
+
     // เรียก API พร้อมส่งคำค้นหา
     this.ap.assetService.fetchData(`AssetDetails?search=${'กกต ' + search}`).subscribe((data) => {
       const assets = data.map((asset: any) => ({
@@ -128,12 +129,12 @@ export class RepairComponent implements OnInit, OnDestroy {
         AssetCode: asset.AssetCode,
         AssetName: asset.AssetName, //เพิ่มมูลค่าสินทรัพย์ วันที่ ได้มา bookvalue 
       }));
-  
+
       // อัปเดตตัวเลือกที่กรองแล้ว
       this.filteredAssetData.next(assets);
 
       this.asset = assets[0];//เซตค่าที่ได้ไว้ก่อน
-      
+
       console.log(assets);
 
       // กรณีไม่พบข้อมูล
@@ -186,64 +187,87 @@ export class RepairComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-      this.http
-        .post<any>('https://localhost:7204/api/RepairAsset/', this.asset, { withCredentials: true })
-        .subscribe(
-          (response) => {
+    if (this.asset.Date && this.asset.Date.length === 10) {
+      this.asset.Date = this.asset.Date + 'T00:00:00';
+    }
 
-            const newAsset = response;
+    // ✅ แปลง Amount เป็นตัวเลข
+    const assetToSend = {
+      AssetId: this.asset.AssetId,
+      Date: this.asset.Date,
+      SerialNumber: this.asset.SerialNumber,
+      Description: this.asset.Description,
+      Amount: parseFloat(this.asset.Amount),
+    };
 
-            this.assetDetails.push(this.translateToThai(newAsset));
+    this.ap.assetService.postData('RepairAsset', assetToSend)
+      .then((response: any) => {
+        const newAsset = response;
 
-            this.dataSource.data = this.assetDetails;
+        this.assetDetails.push(this.translateToThai(newAsset));
+        this.dataSource.data = this.assetDetails;
 
-            this.getAssetType();
+        this.getAssetType();
 
-            // อัปเดตสถานะเป็น "ซ่อมแซม" หลังจากบันทึกสำเร็จ
-            // this.updateAssetStatus(newAsset.assetId, 'ซ่อมแซม');
-  
-            Swal.fire({
-              title: 'บันทึกเสร็จสิ้น',
-              icon: 'success',
-            });
-          },
-          (error) => {
-            console.error(error);
-            Swal.fire({
-              title: 'มีข้อมูลในระบบอยู่แล้ว',
-              icon: 'error',
-            });
-          }
-        );
-  }
-  getAssetType(): void {
-    this.http
-      .get<any[]>('https://localhost:7204/api/RepairAsset', { withCredentials: true })
-      .subscribe((data) => {
-        this.assetDetails = data.map((asset) => {
-          const foundAsset = this.assetDetails2.find(
-            (asset2) => asset2.assetId === asset.assetId
-
-          );
-          if (foundAsset) {
-            asset.assetCode = foundAsset.assetCode; // เพิ่ม property assetCode เข้าไปในข้อมูล asset
-            asset.assetName = foundAsset.assetName;
-          } else {
-            console.log('Asset code not found for assetId:', asset.assetId);
-          }
-          asset = this.translateToThai(asset); // แปลงข้อมูลเป็นภาษาไทย
-          return asset;
+        Swal.fire({
+          title: 'บันทึกเสร็จสิ้น',
+          icon: 'success',
         });
-
-        this.assetDetailsset = this.assetDetails;
-
-        this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
-
-        this.dataSource.paginator = this.paginator;
-
-        this.dataSource.sort = this.sort;
+      })
+      .catch((error: any) => {
+        console.error(error);
+        Swal.fire({
+          title: 'มีข้อมูลในระบบอยู่แล้ว',
+          icon: 'error',
+        });
       });
   }
+
+  convertToThaiFullDate(dateString: string): string {
+    if (!dateString) return '';
+  
+    const thaiMonths = [
+      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน',
+      'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม',
+      'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+  
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = thaiMonths[date.getMonth()];
+    const year = date.getFullYear() + 543;
+  
+    return `${day} ${month} ${year}`;
+  }
+  
+
+
+
+
+  getAssetType(): void {
+    this.ap.assetService.fetchData('RepairAsset').subscribe((data) => {
+      this.assetDetails = data.map((asset: { assetId: any; assetCode: any; assetName: any; }) => {
+        const foundAsset = this.assetDetails2.find(
+          (asset2) => asset2.assetId === asset.assetId
+        );
+
+        if (foundAsset) {
+          asset.assetCode = foundAsset.assetCode;
+          asset.assetName = foundAsset.assetName;
+        } else {
+          console.log('Asset code not found for assetId:', asset.assetId);
+        }
+
+        return this.translateToThai(asset);
+      });
+
+      this.assetDetailsset = this.assetDetails;
+      this.dataSource = new MatTableDataSource<any>(this.assetDetailsset);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    });
+  }
+
 
   getAssetdata(): void {
     this.ap.assetService.fetchData('AssetDetails')
@@ -273,7 +297,9 @@ export class RepairComponent implements OnInit, OnDestroy {
       SerialNumber: 'เลขที่เอกสาร',
       Description: 'รายละเอียด',
       Amount: 'จำนวนเงิน',
+      Date: 'วันที่ซ่อม', // เพิ่มตรงนี้
     };
+
     const translatedAsset: { [key: string]: any } = {};
     for (const key in asset) {
       if (asset.hasOwnProperty(key)) {
@@ -288,7 +314,7 @@ export class RepairComponent implements OnInit, OnDestroy {
       await Swal.fire('ข้อผิดพลาด!', 'ไม่พบสินทรัพย์ที่ต้องการลบ', 'error');
       return;
     }
-  
+
     const result = await Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
       text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
@@ -297,20 +323,20 @@ export class RepairComponent implements OnInit, OnDestroy {
       confirmButtonText: 'ใช่, ลบเลย!',
       cancelButtonText: 'ไม่',
     });
-  
+
     if (!result.isConfirmed) {
       await Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณปลอดภัย :)', 'info');
       return;
     }
-  
+
     try {
       // ใช้ lastValueFrom() เพื่อแปลง Observable เป็น Promise
       await this.ap.assetService.deleteData(`RepairAsset/${asset.RepairAssetId}`);
-  
+
       // ลบข้อมูลออกจาก array และอัปเดต dataSource
       this.assetDetails = this.assetDetails.filter(a => a.RepairAssetId !== asset.RepairAssetId);
       this.dataSource.data = [...this.assetDetails]; // Refresh dataSource
-  
+
       await Swal.fire('ลบแล้ว!', 'สินทรัพย์ของคุณถูกลบแล้ว', 'success');
     } catch (error) {
       console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);

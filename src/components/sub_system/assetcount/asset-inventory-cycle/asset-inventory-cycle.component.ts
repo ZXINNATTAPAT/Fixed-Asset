@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSort } from '@angular/material/sort';
 import { IconDirective } from '@coreui/icons-angular';
 import { ButtonDirective, FormDirective, TextColorDirective } from '@coreui/angular';
-import { ApiService } from 'src/ApiController/apiservice/api-service.service';
-import { AssetInventoryCycle } from 'src/ApiController/apiservice/inventory/inventory.service';
+import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
+import { AssetInventoryCycle } from '../../../../ApiController/apiservice/inventory/inventory.service';
 import { Router } from '@angular/router';
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash,cilSearch } from '@coreui/icons';
 
@@ -16,12 +17,13 @@ import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash,cilSearch
 @Component({
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, FormsModule,
+    CommonModule, ReactiveFormsModule, FormsModule,NgFor,
     MatPaginatorModule, MatTableModule, MatFormFieldModule, MatSelectModule,
-    TextColorDirective, FormDirective, ButtonDirective, IconDirective
+    TextColorDirective, FormDirective, ButtonDirective, IconDirective,
   ],
   selector: 'app-asset-inventory-cycle',
   templateUrl: './asset-inventory-cycle.component.html',
+  styleUrls: ['./asset-inventory-cycle.component.scss']
 })
 export class AssetInventoryCycleComponent implements OnInit {
 
@@ -36,18 +38,49 @@ export class AssetInventoryCycleComponent implements OnInit {
     CycleId: 0
   };
 
+  displayedColumns: string[] = ['add','actions', 'CycleName', 'DateStart', 'DateEnd', 'Note'];
+  dataSource = new MatTableDataSource<AssetInventoryCycle>();
+  availableYears: string[] = [];
+  selectedYear: string = '';
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   constructor(private apiService: ApiService,private router: Router) {}
   
   ngOnInit(): void {
     this.loadCycles();
   }
 
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
   loadCycles() {
     this.apiService.inventoryService.getCycles()
       .subscribe({
-        next: (data) => this.cycles = data,
+        next: (data) => {
+          this.dataSource.data = data;
+          this.extractYears(data);
+        },
         error: (err) => console.error('Error fetching cycles:', err)
       });
+  }
+
+  extractYears(cycles: AssetInventoryCycle[]) {
+    const years = cycles.map((cycle) => new Date(cycle.DateStart).getFullYear().toString());
+    this.availableYears = Array.from(new Set(years)).sort(); // Remove duplicates and sort
+  }
+
+  applyYearFilter() {
+    if (this.selectedYear) {
+      this.dataSource.data = this.dataSource.data.filter(
+        (cycle) => new Date(cycle.DateStart).getFullYear().toString() === this.selectedYear
+      );
+    } else {
+      this.loadCycles(); // Reset filter
+    }
   }
 
   addCycle() {
@@ -80,8 +113,8 @@ export class AssetInventoryCycleComponent implements OnInit {
     this.router.navigate(['system/sub/assetcount'], { queryParams: { cycleId } });
   }
 
-  toInventorytable() {
-    this.router.navigate(['table/inventorysession']);
+  toInventorytable(cycleId: number) {
+    this.router.navigate(['table/inventorysession'], { queryParams: { cycleId } });
   }
   
 

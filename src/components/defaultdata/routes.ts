@@ -48,14 +48,14 @@ export const routes: Routes = [
             title: 'กำหนดผู้ขายทรัพย์สิน'
           }
         },
-        {
-          path: 'rp',
-          loadComponent: () => import('./responsibleperson/responsibleperson.component')
-          .then(m => m.ResponsiblepersonComponent), // เปลี่ยน loadComponent เป็น component
-          data: {
-            title: 'กำหนดผู้รับผิดชอบ'
-          }
-        },
+        // {
+        //   path: 'rp',
+        //   loadComponent: () => import('./responsibleperson/responsibleperson.component')
+        //   .then(m => m.ResponsiblepersonComponent), // เปลี่ยน loadComponent เป็น component
+        //   data: {
+        //     title: 'กำหนดผู้รับผิดชอบ'
+        //   }
+        // },
         {
           path: 'asc',
           loadComponent: () => import('./assetcategory/assetcategory.component')

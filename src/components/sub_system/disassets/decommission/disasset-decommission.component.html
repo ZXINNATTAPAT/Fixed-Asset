@@ -1,0 +1,81 @@
+<div class="container p-4 bg-white shadow rounded">
+
+  <h2 class=""><span class="anuphan-700">🛠 ฟอร์มเลิกใช้ครุภัณฑ์</span></h2>
+  <hr/>
+  <form [formGroup]="decommissionForm" (ngSubmit)="onSubmit()">
+
+    <!-- 🔍 ค้นหาครุภัณฑ์ -->
+    <div class="mb-3">
+      <label class="form-label">ค้นหาครุภัณฑ์</label>
+      <div class="input-group">
+        <span class="input-group-text">กกต</span>
+        <input type="text" class="form-control" [(ngModel)]="searchTerm" [ngModelOptions]="{standalone: true}"
+          placeholder="พิมพ์รหัสครุภัณฑ์">
+        <button type="button" class="btn btn-success text-white" (click)="onSearch()">ค้นหา</button>
+      </div>
+    </div>
+
+    <!-- 📝 รายละเอียด (ดึงอัตโนมัติ/ใส่เองได้) -->
+    <div class="mb-3">
+      <label class="form-label">รายละเอียด</label>
+      <input type="text" class="form-control" formControlName="description" placeholder="รายละเอียดทรัพย์สินที่เลิกใช้">
+    </div>
+
+    <!-- 🗓 วันที่เลิกใช้ -->
+    <div class="mb-3">
+      <label class="form-label">วันที่เลิกใช้</label>
+      <input type="date" class="form-control" formControlName="saleDate">
+    </div>
+
+    <!-- ✅ ปุ่ม -->
+    <div class="text-end">
+      <button type="submit" class="btn btn-danger px-4" style="color: white;">ดำเนินการ</button>
+    </div>
+
+  </form>
+
+  <h4 class="mb-3"><span class="anuphan-700">📋 รายการเลิกใช้ครุภัณฑ์</span></h4>
+
+  <table mat-table [dataSource]="dataSource" matSort class="table table table-hover">
+
+    <!-- รหัสครุภัณฑ์ -->
+    <ng-container matColumnDef="assetCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รหัส</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.assetCode }}</td>
+    </ng-container>
+
+    <!-- รายการ -->
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รายละเอียด</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.description }}</td>
+    </ng-container>
+
+    <!-- วันที่เลิกใช้ -->
+    <ng-container matColumnDef="saleDate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่เลิกใช้</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.saleDate | date:'dd/MM/yyyy' }}</td>
+    </ng-container>
+
+    <!-- การกระทำ -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="border">#</th>
+      <td mat-cell *matCellDef="let element" class="border">
+        <button mat-button color="warn" (click)="deleteRow(element)">ลบ</button>
+      </td>
+    </ng-container>
+
+    <!-- Header & Row -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <tr *matNoDataRow>
+      <td class="text-center border" [attr.colspan]="displayedColumns.length">
+        ยังไม่มีข้อมูลในขณะนี้
+      </td>
+    </tr>
+    
+  </table>
+
+  <!-- Paginator -->
+  <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+</div>

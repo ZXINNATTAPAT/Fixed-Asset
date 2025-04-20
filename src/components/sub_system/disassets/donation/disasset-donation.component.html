@@ -1,0 +1,127 @@
+<div class="container p-4 bg-white shadow rounded">
+
+  <h2 class=""><span class="anuphan-700">📦 ฟอร์มบริจาคครุภัณฑ์</span></h2>
+  <hr/>
+
+  <form [formGroup]="donationForm" (ngSubmit)="onSubmit()">
+
+    <!-- 🔍 ค้นหารหัสครุภัณฑ์ -->
+    <div class="mb-3">
+      <label class="form-label">ค้นหาครุภัณฑ์</label>
+      <div class="input-group">
+        <span class="input-group-text">กกต</span>
+        <input type="text" class="form-control" [(ngModel)]="searchTerm" [ngModelOptions]="{standalone: true}"
+          placeholder="พิมพ์รหัสครุภัณฑ์">
+        <button type="button" class="btn btn-success text-white" (click)="onSearch()">ค้นหา</button>
+      </div>
+    </div>
+
+    <!-- 📋 รายละเอียดที่เติมอัตโนมัติ -->
+    <div class="mb-3">
+      <label class="form-label">รายละเอียดครุภัณฑ์</label>
+      <input type="text" class="form-control" formControlName="assetDetails" readonly>
+    </div>
+
+    <!-- 👤 ชื่อผู้รับ -->
+    <div class="mb-3">
+      <div class="row">
+        <div class="col">
+          <label class="form-label">ชื่อผู้รับ</label>
+          <input type="text" class="form-control" formControlName="recipientName" placeholder="ระบุชื่อผู้รับ">
+        </div>
+        <div class="col">
+          <!-- ☎ เบอร์ติดต่อ -->
+          <label class="form-label">เบอร์ติดต่อ</label>
+          <input type="tel" class="form-control" formControlName="contactNumber" placeholder="ระบุเบอร์โทร (10 หลัก)">
+        </div>
+      </div>
+    </div>
+
+    <!-- 🏠 ที่อยู่ -->
+    <div class="mb-3">
+      <label class="form-label">ที่อยู่</label>
+      <textarea class="form-control" rows="3" formControlName="address" placeholder="ระบุที่อยู่ผู้รับ"></textarea>
+    </div>
+
+    <!-- 📅 วันที่บริจาค -->
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label">วันที่บริจาค</label>
+        <input type="date" class="form-control" formControlName="donationDate">
+      </div>
+
+      <!-- 📝 หมายเหตุ -->
+      <div class="col">
+        <label class="form-label">หมายเหตุ (ถ้ามี)</label>
+        <input type="text" class="form-control" formControlName="notes" placeholder="ระบุหมายเหตุเพิ่มเติม">
+      </div>
+    </div>
+
+    <!-- ✅ ปุ่ม -->
+    <div class="text-end">
+      <button type="submit" class="btn btn-success px-4" style="color: white;">ดำเนินการ</button>
+    </div>
+
+  </form>
+
+  <h4 class="mb-3"><span class="anuphan-700">📋 รายการบริจาคครุภัณฑ์</span></h4>
+
+  <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover">
+
+    <!-- 🔢 รหัส -->
+    <ng-container matColumnDef="assetCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รหัส</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.assetCode }}</td>
+    </ng-container>
+
+    <!-- 📌 รายการ -->
+    <ng-container matColumnDef="assetDetails">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รายการ</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.assetDetails }}</td>
+    </ng-container>
+
+    <!-- 👤 ผู้รับ -->
+    <ng-container matColumnDef="recipientName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ชื่อผู้รับ</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.recipientName }}</td>
+    </ng-container>
+
+    <!-- ☎ เบอร์โทร -->
+    <ng-container matColumnDef="contactNumber">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">เบอร์โทร</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.contactNumber }}</td>
+    </ng-container>
+
+    <!-- 📅 วันที่บริจาค -->
+    <ng-container matColumnDef="donationDate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่บริจาค</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.donationDate | date:'dd/MM/yyyy' }}</td>
+    </ng-container>
+
+    <!-- 📝 หมายเหตุ -->
+    <ng-container matColumnDef="notes">
+      <th mat-header-cell *matHeaderCellDef class="border">หมายเหตุ</th>
+      <td mat-cell *matCellDef="let element" class="border">{{ element.notes }}</td>
+    </ng-container>
+
+    <!-- 🛠 การกระทำ -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="border">#</th>
+      <td mat-cell *matCellDef="let element" class="border">
+        <button mat-button color="warn" (click)="deleteRow(element)">ลบ</button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr *matNoDataRow>
+      <td class="text-center border" [attr.colspan]="displayedColumns.length">
+        ยังไม่มีข้อมูลในขณะนี้
+      </td>
+    </tr>
+
+  </table>
+
+  <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+
+</div>

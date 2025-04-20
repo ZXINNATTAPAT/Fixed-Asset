@@ -1,20 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {ContainerComponent,RowComponent,ColComponent,CardGroupComponent,TextColorDirective,CardComponent,CardBodyComponent,FormDirective,InputGroupComponent,InputGroupTextDirective,FormControlDirective,ButtonDirective,} from '@coreui/angular';
 import { NgIf, NgStyle } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
-import {
-  ContainerComponent,
-  RowComponent,
-  ColComponent,
-  CardGroupComponent,
-  TextColorDirective,
-  CardComponent,
-  CardBodyComponent,
-  FormDirective,
-  InputGroupComponent,
-  InputGroupTextDirective,
-  FormControlDirective,
-  ButtonDirective,
-} from '@coreui/angular';
+import { Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
@@ -63,8 +50,10 @@ export class LoginComponent implements OnInit {
       (response: any) => {
         Swal.fire({
           icon: 'success',
-          title: 'Login Successful',
-          text: 'You have successfully logged in!',
+          title: '<span style="font-family: Anuphan; font-weight: 700;">เข้าสู่ระบบสำเร็จ</span>',
+          html: `<span style="font-family: Anuphan; font-weight: 500;">
+            คุณได้เข้าสู่ระบบเรียบร้อยแล้ว!
+          </span>`,
           timer: 1000,
           showConfirmButton: false,
         }).then(() => {

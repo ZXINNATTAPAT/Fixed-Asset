@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { IconDirective } from '@coreui/icons-angular';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgFor } from '@angular/common';
 import { ApiService } from '../../../../ApiController/apiservice/api-service.service';
 import { AssetInventorySessionHelper } from './utils';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,18 +14,21 @@ import { AssetInventoryComponent } from '../asset-inventory/asset-inventory.comp
 import { TextColorDirective, FormDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 import Swal from 'sweetalert2';
 import { EditSessionDialogComponent } from './Dialog/edit-session-dialog/edit-session-dialog.component';
-import { AssetInventoryCycle, AssetInventorySession } from 'src/ApiController/apiservice/inventory/inventory.service';
+import { AssetInventoryCycle, AssetInventorySession } from '../../../../ApiController/apiservice/inventory/inventory.service';
 import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { MatIcon } from '@angular/material/icon';
 import { MatSort } from '@angular/material/sort';
+import { MatInputModule } from '@angular/material/input'; // Ensure matInput is available
+import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker'; // Add this import
+import { MatNativeDateModule } from '@angular/material/core'; // Add this import
 
 @Component({
   selector: 'app-asset-inventory-session',
   standalone: true,
   imports: [
-    CommonModule,ReactiveFormsModule,FormsModule,MatPaginatorModule,MatTableModule,MatFormFieldModule,MatSelectModule,
-    AssetInventoryComponent,TextColorDirective,FormControlDirective,FormDirective,ButtonDirective,IconDirective,MatTabsModule,
-    MatTabGroup,MatIcon,MatSort,MatTable
+    CommonModule, ReactiveFormsModule, FormsModule, MatPaginatorModule, MatTableModule, MatFormFieldModule, MatSelectModule,
+    AssetInventoryComponent, TextColorDirective, FormControlDirective, FormDirective, ButtonDirective, IconDirective, MatTabsModule,
+    MatTabGroup, MatIcon, MatSort, MatTable, NgFor, MatInputModule, MatDatepickerModule, MatNativeDateModule, // Add these modules
   ],
   templateUrl: './asset-inventory-session.component.html',
   styleUrl: './asset-inventory-session.component.scss'
@@ -37,35 +40,41 @@ export class AssetInventorySessionComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  
+  myFunctionInstance: AssetInventorySessionHelper; 
 
   displayedColumns: string[] = ['actions', 'SessionName', 'Date', 'InspectorsList', 'VerifierName'];
 
   displayedColumnsDetails: string[] = ['AssetCode', 'AssetName', 'SystemQuantity', 'CountedQuantity', 'Note'];
 
-  selectedSessionId: number | null = null;
+  displayedColumnsasset: string[] = ['action', 'AssetCode', 'AssetName', 'SystemQuantity', 'Note'];
+  
+  displayedColumnscycle: string[] = ['select', 'CycleName', 'DateStart', 'DateEnd', 'Note'];
+
+  selectedSessionId: number | null = null; 
+  
+  selectedCycleId: number | null = null;
 
   assetDetails: AssetInventorySession[] = [];
 
   inventoryDetails: any[] = [];
+  
+  cycles: any[] = [];
+  
+  selectedSessionName: string | null = null;// เพิ่มตัวแปรเก็บชื่อรอบการตรวจนับ
 
   dataSource: MatTableDataSource<AssetInventorySession>;
 
-  displayedColumnscycle: string[] = ['select', 'CycleName', 'DateStart', 'DateEnd', 'Note'];
-
   dataSourcecycle = new MatTableDataSource<AssetInventoryCycle>([]);
-
-  displayedColumnsasset: string[] = ['action', 'AssetCode', 'AssetName', 'SystemQuantity', 'Note'];
+  
   dataSourceasset = new MatTableDataSource<any>([]);
   
-  myFunctionInstance: AssetInventorySessionHelper; 
-
-  filters = {SessionName: '',Date: '',Inspector: '',Verifier: ''}; // ✅ กรองตามช่อง input เฉพาะคอลัมน์
-
-  selectedCycleId: number | null = null;
+  filters = { SessionName: '', Date: '', Inspector: '', Verifier: '' }; // ✅ กรองตามช่อง input เฉพาะคอลัมน์
 
   instan = { cilPencil, cilTrash, cilInfo, cilSearch };
-  
-  cycles: any[] = [];
+  availableYears: string[] = [];
+  selectedYear: any;
+
   
   constructor(private apiService: ApiService, public dialog: MatDialog) {
     this.myFunctionInstance = new AssetInventorySessionHelper();
@@ -81,6 +90,8 @@ export class AssetInventorySessionComponent implements OnInit {
   loadCycles() {
     this.apiService.assetService.fetchData('AssetInventoryCycle').subscribe({
       next: (data) => {
+        this.cycles = data;
+        this.availableYears = [...new Set((data as AssetInventoryCycle[]).map((cycle) => new Date(cycle.DateStart).getFullYear().toString()))];
         this.dataSourcecycle = new MatTableDataSource(data);
         this.dataSourcecycle.paginator = this.paginator;
         this.dataSourcecycle.sort = this.sort;
@@ -110,13 +121,20 @@ export class AssetInventorySessionComponent implements OnInit {
     this.tabGroup.selectedIndex = 1;
   }
 
+  applyYearFilter(): void {
+    if (this.selectedYear) {
+      this.dataSourcecycle.data = this.cycles.filter(
+        cycle => cycle.DateStart && new Date(cycle.DateStart).getFullYear().toString() === this.selectedYear
+      );
+    } else {
+      this.dataSourcecycle.data = [...this.cycles]; // Reset to all cycles if no year is selected
+    }
+  }
+  
+
   applyFilters() {
-    this.dataSource.filter = JSON.stringify({
-      sessionName: this.filters.SessionName || '',
-      date: this.filters.Date || '',
-      inspector: this.filters.Inspector || '',
-      verifier: this.filters.Verifier || ''
-    });
+    const filterValue = JSON.stringify(this.filters).toLowerCase();
+    this.dataSource.filter = filterValue;
   }
 
   // ✅ โหลดข้อมูล session พร้อมแปลงวันที่และชื่อ
@@ -163,16 +181,14 @@ export class AssetInventorySessionComponent implements OnInit {
       const searchTerms = JSON.parse(filter);
 
       return (
-        (data.SessionName ?? '').toLowerCase().includes(searchTerms.sessionName.toLowerCase()) &&
-        (data.Date ?? '').toLowerCase().includes(searchTerms.date.toLowerCase()) &&
-        (data.InspectorsList ?? '').toLowerCase().includes(searchTerms.inspector.toLowerCase()) &&
-        (data.VerifierName ?? '').toLowerCase().includes(searchTerms.verifier.toLowerCase())
+        (data.SessionName ?? '').toLowerCase().includes(searchTerms.SessionName) &&
+        (data.Date ?? '').toLowerCase().includes(searchTerms.Date) &&
+        (data.InspectorsList ?? '').toLowerCase().includes(searchTerms.Inspector) &&
+        (data.VerifierName ?? '').toLowerCase().includes(searchTerms.Verifier)
       );
     };
   }
-  // เพิ่มตัวแปรเก็บชื่อรอบการตรวจนับ
-  selectedSessionName: string | null = null;
-
+  
   // 🔹 เมื่อกดปุ่ม "ดูรายละเอียด"
   viewSession(sessionId: number) {
     this.selectedSessionId = sessionId;
@@ -194,15 +210,10 @@ export class AssetInventorySessionComponent implements OnInit {
 
     this.tabGroup.selectedIndex = 2;
   }
-  // 🔹 เมื่อกด "ย้อนกลับ"
-  backToSessions() {this.selectedSessionId = null; this.selectedSessionName = null; this.inventoryDetails = [];}
 
   // 🔹 อัปเดตรายการตรวจนับครุภัณฑ์
   editSession(sessionId: number) {
-    // console.log("Opening edit dialog for sessionId:", sessionId);
-
     const session = this.dataSource.data.find(s => s.SessionId === sessionId);
-    // console.log("Session data:", session); // ✅ Debug ตรวจสอบค่า session
 
     if (!session) {
       Swal.fire('เกิดข้อผิดพลาด', 'ไม่พบข้อมูลที่ต้องแก้ไข', 'error');
@@ -279,4 +290,25 @@ export class AssetInventorySessionComponent implements OnInit {
       }
     }
   }
+  
+  // 🔹 เมื่อกด "ย้อนกลับ"
+  backToSessions() {this.selectedSessionId = null; this.selectedSessionName = null; this.inventoryDetails = [];}
+  
+
+  onDateFilter(event: MatDatepickerInputEvent<Date>): void {
+    const selectedDate = event.value; // Use the `value` property of MatDatepickerInputEvent
+    if (selectedDate) {
+      this.filters.Date = selectedDate.toISOString().split('T')[0]; // Format the date as 'yyyy-MM-dd'
+      this.applyFilters();
+    }
+  }
+  // onDepartmentFilter(departmentId: string): void {
+  //   this.filters.DepartmentId = departmentId;
+  //   this.applyFilters();
+  // }
+  // onFactionFilter(factionId: string): void {
+  //   this.filters.FactionId = factionId;
+  //   this.applyFilters();
+  // }
+  
 }

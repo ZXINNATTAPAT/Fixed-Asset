@@ -9,7 +9,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
   template: `
  <div class="table-responsive mb-4" [formGroup]="formGroup">
   <h3><span class="anuphan-700">ตารางแสดงค่าเสื่อม</span></h3>
-  <table class="table table-bordered table-striped shadow-sm">
+  <table class="table table-bordered table-striped ">
     <tbody>
       <tr>
         <th colspan="4">

@@ -1,27 +1,22 @@
-<div class="card shadow-sm" style="border: none;">
+<div class="card shadow-sm h-100" style="border: none;">
     <div class="card-body">
 
         <h3 class="">
-            <span 
-                class="anuphan-700" 
-                style="color: green;">
+            <span class="anuphan-700" style="color: green;">
                 ครุภัณฑ์ที่ซ่อมแซม
             </span>
         </h3>
 
-        <hr/>
+        <hr />
 
         <div style="display: block;">
-            <canvas baseChart
-                    [datasets]="barChartData"
-                    [labels]="barChartLabels"
-                    [options]="barChartOptions"
-                    [type]="'bar'">
+            <canvas baseChart [datasets]="barChartData" [labels]="barChartLabels" [options]="barChartOptions"
+                [type]="'bar'">
             </canvas>
         </div>
-         <br/>
+        <br />
 
-          <button class="btn btn-sm btn-outline-success w-100 anuphan-400" >ดูข้อมูลทั้งหมด</button>
-          
+        <button class="btn btn-sm btn-outline-success w-100 anuphan-400">ดูข้อมูลทั้งหมด</button>
+
     </div>
 </div>

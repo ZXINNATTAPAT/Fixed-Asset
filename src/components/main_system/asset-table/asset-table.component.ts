@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
-import { TextColorDirective ,FormDirective,FormLabelDirective,FormControlDirective,ButtonDirective} from '@coreui/angular';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, } from '@angular/core';
+import { TextColorDirective, FormDirective, FormLabelDirective, FormControlDirective, ButtonDirective } from '@coreui/angular';
 import { CommonModule, DatePipe, NgIf, NgStyle } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
 import { IconDirective } from '@coreui/icons-angular';
@@ -23,14 +23,15 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { DialogMessageComponent, TrashComponent, TrashDialogWrapper } from './Dialog/TrashComponent/TrashDialog';
 import { MatIconModule } from '@angular/material/icon';
 import jsPDF from 'jspdf';
+import { Router, ActivatedRoute } from '@angular/router';
 
 interface AssetDetails {
   AssetId: any;
   PurchaseDate: string;
   AssetCode: string;
   AssetName: string;
-  TypeId:number;
-  CategoryId:number;
+  TypeId: number;
+  CategoryId: number;
   PurchasePrice: number;
   PurchasedFrom: string;
   DocumentNumber: string;
@@ -62,7 +63,7 @@ interface AssetDetails {
     NgxMatSelectSearchModule,
     DialogMessageComponent,
     MatIconModule,
-    NgStyle,NgIf
+    NgStyle, NgIf
   ],
   templateUrl: './asset-table.component.html',
   styleUrl: './asset-table.component.scss',
@@ -75,11 +76,11 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   assets: AssetDetails[] = []; // แก้จาก any = {} เป็น array
-  
+
   qrCodeUrl: string = '';
 
   selectedAssetType: number = 0;
-  selectedCategoryId: number = 0 ;
+  selectedCategoryId: number = 0;
 
   displayedColumns: string[];  //Eng
   displayedColumns1: string[]; //ทั้งหมด
@@ -103,11 +104,8 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   dataSource: MatTableDataSource<AssetDetails> = new MatTableDataSource<AssetDetails>(this.assetDetails);
   private dataSubscription!: Subscription;
-  
-  constructor(
-    private apiService: ApiService ,
-    private dataService :DataService,
-    public dialog: MatDialog) {
+
+  constructor(private apiService: ApiService, private dataService: DataService, public dialog: MatDialog, private route: Router, private activatedRoute: ActivatedRoute) {
     this.myFunctionInstance = new myFunction();
     this.icons = this.myFunctionInstance.icons;
     this.displayedColumns3 = this.myFunctionInstance.displayedColumns3;
@@ -115,40 +113,61 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.displayedColumns1 = this.myFunctionInstance.displayedColumns1;
     this.displayedColumns = this.myFunctionInstance.displayedColumns;
   }
-  
-  ngAfterViewInit() {this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort;} 
 
-  onAssetTypeChange(): void {this.filterAssets();}// เรียกเมื่อประเภท Asset เปลี่ยน
+  ngAfterViewInit() { this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }
+
+  onAssetTypeChange(): void {
+    const selectedType = this.assetTypes.find(t => t.TypeId === this.selectedAssetType);
+    const code = selectedType ? selectedType.TypeCode : null;
+  
+    this.route.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { typecode: code },
+      queryParamsHandling: 'merge', // คงค่าพารามิเตอร์อื่น ๆ ไว้
+    });
+  
+    this.filterAssets();
+  }
+  // เรียกเมื่อประเภท Asset เปลี่ยน
 
   ngOnDestroy(): void {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
     this._onDestroy.next();     // ✅ แจ้งว่า component จะถูกทำลาย
     this._onDestroy.complete(); // ✅ ปิด stream เพื่อไม่ให้ memory leak
   }
-  
-  ngOnInit(): void {
+
+  async ngOnInit(): Promise<void> {
     this.initializeUserInfo();
-
-    this.loadAssetTypes();
-
-    // this.getAssetDetails();
-
-    this.loadAssetCategory(); 
-    
+    await this.loadAssetTypes(); // ✅ ตอนนี้มั่นใจว่า this.assetTypes โหลดเสร็จ
+  
+    this.activatedRoute.queryParams.subscribe(params => {
+      const typecodeFromUrl = params['typecode'];
+      const matchedType = this.assetTypes.find(t => t.TypeCode === typecodeFromUrl);
+  
+      if (matchedType) {
+        this.selectedAssetType = matchedType.TypeId;
+        this.filterAssets();
+      }
+    });
+  
+    this.loadAssetCategory();
+  
     this.categoryFilterCtrl.valueChanges
-    .pipe(takeUntil(this._onDestroy))
-    .subscribe(() => {
-      this.filterCategoryList();
-    });}
-    
-    // โหลดข้อมูล UserInfo
-    private async initializeUserInfo(): Promise<void> {
-      this.dataService.userInfo$.subscribe(userInfo => {
-        if (userInfo) {
-          this.userinfo = userInfo.claims;
-          this.getAssetDetails();// ✅ เมื่อโหลด UserInfo เสร็จแล้ว ค่อยโหลด Asset Details
-        }
-      });    
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterCategoryList();
+      });
+  }
+  
+
+  // โหลดข้อมูล UserInfo
+  private async initializeUserInfo(): Promise<void> {
+    this.dataService.userInfo$.subscribe(userInfo => {
+      if (userInfo) {
+        this.userinfo = userInfo.claims;
+        this.getAssetDetails();// ✅ เมื่อโหลด UserInfo เสร็จแล้ว ค่อยโหลด Asset Details
+      }
+    });
 
     this.apiService.authService.getUserRole().subscribe(res => {
       this.userRoles = res.roles;
@@ -159,7 +178,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   isGeneralStaffOnly(): boolean {
     return this.userRoles.includes('เจ้าหน้าที่ทั่วไป') && this.userRoles.length === 1;
   }
-  
+
   // โหลดข้อมูล Asset Details
   private getAssetDetails(): void {
     // this.apiService.assetService.fetchData(`AssetDetails/GetForTable?deptId=${this.userinfo.DeptId}`).subscribe({
@@ -170,12 +189,22 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // โหลดข้อมูล Asset Types
-  private loadAssetTypes(): void {
-    this.apiService.assetService.fetchData('Assettype').subscribe({
-      next: (data) => (this.assetTypes = data),
-      error: (err) => console.error('Error loading Asset Types:', err),
+  private loadAssetTypes(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.apiService.assetService.fetchData('Assettype').subscribe({
+        next: (data) => {
+          this.assetTypes = data;
+          resolve(); // ✅ รอโหลดข้อมูลเสร็จ
+        },
+        error: (err) => {
+          console.error('Error loading Asset Types:', err);
+          reject(err); // 💥 ส่ง error ออกไปกรณีโหลดไม่สำเร็จ
+        }
+      });
     });
   }
+  
+
 
   private loadAssetCategory(): void {
     this.apiService.assetService.fetchData('Assetcategories').subscribe({
@@ -186,13 +215,20 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       error: (err) => console.error('Error loading Asset Categories:', err),
     });
   }
-  
+
   // ฟิลเตอร์ Asset ตามประเภท
   filterAssets(): void {
-    this.dataSource.data = this.selectedAssetType
-      ? this.assetDetails.filter((asset) => asset.TypeId === this.selectedAssetType)
+    const selectedTypeId = +this.selectedAssetType; // เผื่อมันเป็น string
+  
+    if (!this.assetDetails || this.assetDetails.length === 0) return;
+  
+    this.dataSource.data = selectedTypeId
+      ? this.assetDetails.filter(asset => asset.TypeId === selectedTypeId)
       : this.assetDetails;
+  
+    console.log('✅ Filtered data:', this.dataSource.data);
   }
+  
 
   filterByCategory(): void {
     this.dataSource.data = this.selectedCategoryId
@@ -206,33 +242,33 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       cat.CategoryName.toLowerCase().includes(search)
     );
   }
-  
+
   // จัดการข้อมูล Asset Details
   private handleAssetDetails(data: any[]): void {
     this.assetDetails = data
       .filter((asset) => this.filterAssetByAffiliation(asset))
       .sort((a, b) => this.sortByPurchaseDate(a, b))
       .map((asset) => this.transformAsset(asset));
-  
+
     this.dataSource.data = this.assetDetails;
-    console.log('Processed Asset Details:', this.assetDetails);
+    // console.log('Processed Asset Details:', this.assetDetails);
   }
-  
+
   // ฟิลเตอร์ข้อมูล Asset ตาม Affiliation
   private filterAssetByAffiliation(asset: any): boolean {
     const assetCode = asset.AssetCode || '';
     const affiliation = this.userinfo?.Affiliation || '';
-  
+
     return affiliation === 'ส่วนกลาง'
       ? assetCode.startsWith('กกต') && !assetCode.startsWith('กกต.')
       : assetCode.startsWith('กกต');
   }
-  
+
   // จัดเรียงข้อมูล Asset ตามวันที่ซื้อ
   private sortByPurchaseDate(a: any, b: any): number {
     return new Date(b.PurchaseDate).getTime() - new Date(a.PurchaseDate).getTime();
   }
-  
+
   editDialog(assetId: number): void {
     const dialogRef = this.dialog.open(EditAssetDialog, {
       width: '1200px',
@@ -258,16 +294,16 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
-  
+
   // สลับคอลัมน์ที่แสดง
   toggleColumn(event: MatSelectChange): void {
     const selectedColumns = event.value;
     this.displayedColumns3 = selectedColumns.includes('เซตค่าคืนทั้งหมด')
       ? ['Aactions', ...this.displayedColumns2]
       : [
-          'Aactions',
-          ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด'),
-        ];
+        'Aactions',
+        ...selectedColumns.filter((column: string) => column !== 'เซตค่าคืนทั้งหมด'),
+      ];
   }
 
   setupFilter(column: string) {
@@ -285,7 +321,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
       }
     };
-    
+
   }
 
   applyFilter(event: Event) {
@@ -299,7 +335,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
   private transformAsset(asset: any): any {
     asset.PurchaseDate = this.myFunctionInstance?.convertDate(asset.PurchaseDate);
     asset = this.myFunctionInstance?.translateToThai(asset);
-  
+
     const path = `http://localhost:4200/system/infoasset/${asset.AssetId}`;
     QRCode.toDataURL(path, (err, url) => {
       if (err) {
@@ -308,7 +344,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
         asset.qrCodeUrl = url;
       }
     });
-  
+
     return asset;
   }
 
@@ -329,15 +365,14 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-
   generatePdfWithQrCodes(): void {
     const doc = new jsPDF();
-  
+
     // ตั้งค่าหัวเรื่อง
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.text('Asset Registry with QR Code', 105, 15, { align: 'center' });
-  
+
     // กำหนดค่าการจัดวางแบบ Grid
     const itemsPerRow = 3;      // จำนวนรายการต่อแถว
     const itemsPerPage = 9;     // จำนวนรายการต่อหน้า
@@ -346,7 +381,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
     const marginY = 10;
     const gapX = 70;            // ช่องว่างแนวนอนระหว่างแต่ละ QR
     const gapY = 80;            // ช่องว่างแนวตั้งระหว่างแต่ละแถว
-  
+
     // สร้างคำสั่ง generate QR Code ทีละรายการ (แบบ asynchronous)
     const qrCodePromises = this.assetDetails.map((asset, index) => {
       // ดึงค่าจาก asset ให้ยืดหยุ่น (ใช้ as any กับ key ภาษาไทย)
@@ -354,7 +389,7 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
       const assetCode = asset.AssetCode ?? (asset as any)['รหัสครุภัณฑ์'] ?? 'N/A';
       const assetName = asset.AssetName ?? (asset as any)['ชื่อครุภัณฑ์'] ?? 'N/A';
       const qrCodePath = `${this.apiService.apiUrl_link}system/infoasset/${assetId}`;
-  
+
       return new Promise<void>((resolve, reject) => {
         QRCode.toDataURL(qrCodePath, (err, url) => {
           if (err) {
@@ -362,17 +397,17 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
             reject(err);
             return;
           }
-  
+
           // คำนวณตำแหน่งบนหน้า PDF แบบ Grid
           const pageIndex = Math.floor(index / itemsPerPage);
           const itemIndex = index % itemsPerPage;
           const col = itemIndex % itemsPerRow;
           const row = Math.floor(itemIndex / itemsPerRow);
-  
+
           const x = marginX + col * gapX;
           // รวม marginY, gapY และ offset สำหรับหัวเรื่อง (เช่น +10)
           const y = marginY + row * gapY + 10;
-  
+
           // ถ้าเป็นรายการแรกของหน้าใหม่ ให้เพิ่มหน้าใหม่และ re-add header
           if (itemIndex === 0 && pageIndex > 0) {
             doc.addPage();
@@ -380,24 +415,24 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
             doc.setFontSize(16);
             doc.text('Asset Registry with QR Code', 105, 15, { align: 'center' });
           }
-  
+
           // ตั้งค่าฟอนต์สำหรับข้อความด้านล่าง QR Code
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(8);
-  
+
           // วางข้อความ ASCODE: ให้อยู่ตรงกลางใต้ QR Code
           doc.text(`${assetCode}`, x + qrSize / 2, y + qrSize + 5, { align: 'center' });
           // หากต้องการแสดง ASNAME ด้วย ให้เปิดบรรทัดด้านล่างนี้:
           // doc.text(`ASNAME: ${assetName}`, x + qrSize / 2, y + qrSize + 12, { align: 'center' });
-  
+
           // เพิ่ม QR Code image ลงในตำแหน่งที่คำนวณไว้
           doc.addImage(url, 'PNG', x, y, qrSize, qrSize);
-  
+
           resolve();
         });
       });
     });
-  
+
     // รอให้ทุก QR Code ถูก generate แล้วบันทึก PDF
     Promise.all(qrCodePromises)
       .then(() => {
@@ -407,140 +442,137 @@ export class AssetTableComponent implements OnInit, OnDestroy, AfterViewInit {
         console.error('Error generating QR codes for PDF:', error);
       });
   }
-  
+
   // ตัวอย่าง method export Excel ที่มีแค่ QR Code
-exportExcelWithQrCodes(): void {
-  // สร้าง workbook และ worksheet
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('QR Codes');
+  exportExcelWithQrCodes(): void {
+    // สร้าง workbook และ worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('QR Codes');
 
-  // กำหนด grid layout
-  const itemsPerRow = 3; // จำนวน QR Code ต่อแถว
-  const qrSize = 100;    // ความกว้าง/สูงของรูป QR (หน่วยเป็น pixel)
-  const colWidth = 15;   // กำหนดความกว้างคอลัมน์ (ปรับตามที่เหมาะ)
-  const rowHeight = 80;  // กำหนดความสูงแถว (ปรับตามที่เหมาะ)
+    // กำหนด grid layout
+    const itemsPerRow = 3; // จำนวน QR Code ต่อแถว
+    const qrSize = 100;    // ความกว้าง/สูงของรูป QR (หน่วยเป็น pixel)
+    const colWidth = 15;   // กำหนดความกว้างคอลัมน์ (ปรับตามที่เหมาะ)
+    const rowHeight = 80;  // กำหนดความสูงแถว (ปรับตามที่เหมาะ)
 
-  // ตั้งค่าความกว้างของคอลัมน์ใน worksheet
-  for (let i = 1; i <= itemsPerRow; i++) {
-    worksheet.getColumn(i).width = colWidth;
+    // ตั้งค่าความกว้างของคอลัมน์ใน worksheet
+    for (let i = 1; i <= itemsPerRow; i++) {
+      worksheet.getColumn(i).width = colWidth;
+    }
+
+    // สร้าง array ของ promises สำหรับ QR Code generation
+    const qrCodePromises = this.assetDetails.map((asset, index) => {
+      const assetId = asset.AssetId ?? asset.TypeId ?? 'unknown';
+      const qrCodePath = `${this.apiService.apiUrl_link}system/infoasset/${assetId}`;
+
+      return new Promise<{ index: number; base64: string }>((resolve, reject) => {
+        QRCode.toDataURL(qrCodePath, (err, url) => {
+          if (err) {
+            console.error('Error generating QR code:', err);
+            reject(err);
+          } else {
+            resolve({ index, base64: url });
+          }
+        });
+      });
+    });
+
+    // เมื่อ QR Code ทั้งหมด generate เสร็จแล้ว
+    Promise.all(qrCodePromises)
+      .then((results) => {
+        // วนลูปแต่ละรายการที่ generate แล้ว
+        results.forEach((result) => {
+          // เพิ่มรูปภาพลงใน workbook (ExcelJS ต้องการ base64 และ extension)
+          const imageId = workbook.addImage({
+            base64: result.base64,
+            extension: 'png',
+          });
+
+          // คำนวณตำแหน่ง grid ของ QR Code ใน Excel:
+          // เราจะใช้ row และ column แบบเลข 1-based
+          const rowNumber = Math.floor(result.index / itemsPerRow) + 1;
+          const colNumber = (result.index % itemsPerRow) + 1;
+
+          // เราสามารถกำหนดตำแหน่งรูปได้ด้วย option แบบ "tl" (top-left) และ "ext" (extension size)
+          // ค่าที่กำหนดไว้ใน "tl" จะเป็นตำแหน่งเริ่มต้น และ "ext" เป็นความกว้างและสูงของรูป
+          worksheet.addImage(imageId, {
+            tl: { col: colNumber - 1 + 0.2, row: rowNumber - 1 + 0.2 },
+            ext: { width: qrSize, height: qrSize },
+          });
+
+          // เพิ่มการปรับความสูงของแถวให้พอเหมาะ (ExcelJS ใช้ row.height เป็นค่าในหน่วย points)
+          const currentRow = worksheet.getRow(rowNumber);
+          currentRow.height = rowHeight; // กำหนดความสูงแถว
+        });
+
+        // เขียน workbook ลง buffer แล้วดาวน์โหลดเป็น Excel file
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          const blob = new Blob([buffer], {
+            type:
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Asset_QR_Codes.xlsx';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+      })
+      .catch((error) => {
+        console.error('Error generating QR codes for Excel:', error);
+      });
+  }
+  // Method สำหรับให้ผู้ใช้เลือกว่าจะ Export เป็น PDF หรือ Excel
+  exportQrCodes(): void {
+    Swal.fire({
+      title: 'เลือกฟอร์แมตการ Export',
+      text: 'คุณต้องการ Export เป็น PDF หรือ Excel?',
+      icon: 'question',
+      showDenyButton: true,
+      showCancelButton: false,
+      confirmButtonText: 'PDF',
+      denyButtonText: 'Excel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.generatePdfWithQrCodes();
+      } else if (result.isDenied) {
+        this.exportExcelWithQrCodes();
+      }
+    });
   }
 
-  // สร้าง array ของ promises สำหรับ QR Code generation
-  const qrCodePromises = this.assetDetails.map((asset, index) => {
-    const assetId = asset.AssetId ?? asset.TypeId ?? 'unknown';
-    const qrCodePath = `${this.apiService.apiUrl_link}system/infoasset/${assetId}`;
-
-    return new Promise<{ index: number; base64: string }>((resolve, reject) => {
-      QRCode.toDataURL(qrCodePath, (err, url) => {
-        if (err) {
-          console.error('Error generating QR code:', err);
-          reject(err);
-        } else {
-          resolve({ index, base64: url });
-        }
-      });
-    });
-  });
-
-  // เมื่อ QR Code ทั้งหมด generate เสร็จแล้ว
-  Promise.all(qrCodePromises)
-    .then((results) => {
-      // วนลูปแต่ละรายการที่ generate แล้ว
-      results.forEach((result) => {
-        // เพิ่มรูปภาพลงใน workbook (ExcelJS ต้องการ base64 และ extension)
-        const imageId = workbook.addImage({
-          base64: result.base64,
-          extension: 'png',
-        });
-
-        // คำนวณตำแหน่ง grid ของ QR Code ใน Excel:
-        // เราจะใช้ row และ column แบบเลข 1-based
-        const rowNumber = Math.floor(result.index / itemsPerRow) + 1;
-        const colNumber = (result.index % itemsPerRow) + 1;
-
-        // เราสามารถกำหนดตำแหน่งรูปได้ด้วย option แบบ "tl" (top-left) และ "ext" (extension size)
-        // ค่าที่กำหนดไว้ใน "tl" จะเป็นตำแหน่งเริ่มต้น และ "ext" เป็นความกว้างและสูงของรูป
-        worksheet.addImage(imageId, {
-          tl: { col: colNumber - 1 + 0.2, row: rowNumber - 1 + 0.2 },
-          ext: { width: qrSize, height: qrSize },
-        });
-
-        // เพิ่มการปรับความสูงของแถวให้พอเหมาะ (ExcelJS ใช้ row.height เป็นค่าในหน่วย points)
-        const currentRow = worksheet.getRow(rowNumber);
-        currentRow.height = rowHeight; // กำหนดความสูงแถว
-      });
-
-      // เขียน workbook ลง buffer แล้วดาวน์โหลดเป็น Excel file
-      workbook.xlsx.writeBuffer().then((buffer) => {
-        const blob = new Blob([buffer], {
-          type:
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Asset_QR_Codes.xlsx';
-        a.click();
-        window.URL.revokeObjectURL(url);
-      });
-    })
-    .catch((error) => {
-      console.error('Error generating QR codes for Excel:', error);
-    });
-}
-  // Method สำหรับให้ผู้ใช้เลือกว่าจะ Export เป็น PDF หรือ Excel
-exportQrCodes(): void {
-  Swal.fire({
-    title: 'เลือกฟอร์แมตการ Export',
-    text: 'คุณต้องการ Export เป็น PDF หรือ Excel?',
-    icon: 'question',
-    showDenyButton: true,
-    showCancelButton: false,
-    confirmButtonText: 'PDF',
-    denyButtonText: 'Excel',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.generatePdfWithQrCodes();
-    } else if (result.isDenied) {
-      this.exportExcelWithQrCodes();
-    }
-  });
-}
-
-  
-  
-  
-  
-  
-
   // ลบสินทรัพย์แบบ Soft Delete
-  // async deleteAsset(asset: any): Promise<void> {
-  //   const result = await Swal.fire({
-  //     title: 'คุณแน่ใจหรือไม่?',
-  //     text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
-  //     icon: 'warning',
-  //     showCancelButton: true,
-  //     confirmButtonText: 'ใช่',
-  //     cancelButtonText: 'ไม่',
-  //   });
+  async softdeleteAsset(asset: any): Promise<void> {
+    const result = await Swal.fire({
+      title: 'คุณแน่ใจหรือไม่?',
+      text: 'คุณต้องการลบสินทรัพย์นี้หรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่',
+      cancelButtonText: 'ไม่',
+    });
 
-  //   if (result.isConfirmed) {
-  //     try {
-  //       await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`); // soft delete endpoint
-  //       const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
-  //       if (index !== -1) {
-  //         this.assetDetails.splice(index, 1); // เอาออกจากหน้าแสดงผล (ไม่ลบจริง)
-  //         this.dataSource.data = this.assetDetails; // อัปเดตตาราง
-  //       }
-  //       Swal.fire('ลบแล้ว!', 'สินทรัพย์ถูกย้ายไปถังขยะแล้ว', 'success');
-  //     } catch (error) {
-  //       console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
-  //       Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถลบสินทรัพย์ได้', 'error');
-  //     }
-  //   } else if (result.dismiss === Swal.DismissReason.cancel) {
-  //     Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณยังคงอยู่', 'info');
-  //   }
-  // }
+    if (result.isConfirmed) {
+      try {
+        // เรียก API ไปยัง Softdelete แทนการลบจริง
+        await this.apiService.assetService.deleteData(`AssetDetails/Softdelete/${asset.AssetId}`);
+
+        const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
+        if (index !== -1) {
+          this.assetDetails.splice(index, 1); // เอาออกจากตารางชั่วคราว
+          this.dataSource.data = this.assetDetails; // รีเฟรชข้อมูลในตาราง
+        }
+
+        Swal.fire('ลบแล้ว!', 'สินทรัพย์ถูกย้ายไปถังขยะแล้ว', 'success');
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการลบสินทรัพย์:', error);
+        Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถลบสินทรัพย์ได้', 'error');
+      }
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      Swal.fire('ยกเลิกแล้ว', 'สินทรัพย์ของคุณยังคงอยู่', 'info');
+    }
+  }
 
   //ลบสินทรัพย์
   async deleteAsset(asset: any): Promise<void> {
@@ -552,22 +584,22 @@ exportQrCodes(): void {
       confirmButtonText: 'ดำเนินการ',
       cancelButtonText: 'ยกเลิก',
     });
-  
+
     if (result.isConfirmed) {
       try {
         await this.apiService.assetService.deleteData(`AssetDetails/${asset.AssetId}`);
-  
+
         // ลบออกจาก list ในตาราง
         const index = this.assetDetails.findIndex((a) => a.AssetId === asset.AssetId);
         if (index !== -1) {
           this.assetDetails.splice(index, 1);
           this.dataSource.data = [...this.assetDetails]; // trigger data update
         }
-  
+
         Swal.fire('ลบสำเร็จ!', 'สินทรัพย์ถูกลบออกเรียบร้อยแล้ว', 'success');
       } catch (error: any) {
         console.error('Error while deleting asset:', error);
-  
+
         if (error.code === 'ERR_NETWORK') {
           Swal.fire('🌐 ข้อผิดพลาดเครือข่าย', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
         } else {
@@ -578,16 +610,15 @@ exportQrCodes(): void {
       Swal.fire('ยกเลิกแล้ว', 'ยังไม่มีการลบสินทรัพย์ใด ๆ', 'info');
     }
   }
-  
 
   exportExcel(): void {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Assets');
-  
+
     const exportColumns = this.displayedColumns3.filter(column =>
       column !== 'Aactions' && column !== 'Qrcode' && column !== 'สถานะ'
     );
-  
+
     // Title row
     const title = 'ทะเบียนคุมครุภัณฑ์';
     const titleRow = worksheet.addRow([title]);
@@ -598,16 +629,16 @@ exportQrCodes(): void {
       bold: true,
       size: 14,
     };
-    
-  
+
+
     // Header row (row 2)
     worksheet.addRow(exportColumns);
-  
+
     // จัดกลุ่มตามปีงบประมาณ
     const groupedByYear = this.groupByFiscalYear(this.assetDetails);
-  
+
     let currentRow = 3;
-  
+
     for (const year in groupedByYear) {
       // แถวคั่นปีงบประมาณ (สีเทา)
       const yearRow = worksheet.insertRow(currentRow, [`ประจำปีงบประมาณ ${year}`]);
@@ -623,7 +654,7 @@ exportQrCodes(): void {
       };
       yearRow.getCell(1).alignment = { horizontal: 'center' };
       currentRow++;
-  
+
       // เพิ่มข้อมูลของปีนั้นๆ
       groupedByYear[year].forEach((asset: any) => {
         const row = exportColumns.map(column =>
@@ -638,9 +669,9 @@ exportQrCodes(): void {
           };
         });
         currentRow++;
-      });      
+      });
     }
-  
+
     // ดาวน์โหลดไฟล์
     workbook.xlsx.writeBuffer().then((data: any) => {
       const blob = new Blob([data], {
@@ -653,22 +684,22 @@ exportQrCodes(): void {
       a.click();
     });
   }
-  
+
   // 🧠 ฟังก์ชันแยกตามปีงบประมาณ (ตัวอย่าง logic นายอาจต้องปรับให้เข้ากับข้อมูลจริง)
   groupByFiscalYear(assets: any[]): { [year: string]: any[] } {
     const grouped: { [year: string]: any[] } = {};
-  
+
     assets.forEach(asset => {
       // ตัวอย่าง: ดึงปีจากรหัสครุภัณฑ์ (เช่น "0313-4-2541" => 2541)
       const match = asset['รหัสครุภัณฑ์']?.match(/(\d{4})$/);
       const year = match ? match[1] : 'ไม่ทราบปี';
-  
+
       if (!grouped[year]) {
         grouped[year] = [];
       }
       grouped[year].push(asset);
     });
-  
+
     return grouped;
   }
 
@@ -678,6 +709,6 @@ exportQrCodes(): void {
       height: '600px',
     });
   }
-  
+
 
 }

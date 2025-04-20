@@ -38,22 +38,16 @@ export class AuthGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     return this.authService.authService.getAuthStatus().pipe(
       map(response => {
-        // console.log("🔍 Auth Status:", response);
   
-        // ✅ ป้องกันกรณี `route.data.roles` เป็น undefined
+        // ป้องกันกรณี `route.data.roles` เป็น undefined
         const allowedRoles = (route.data?.['roles'] as string[]) || [];
-        // console.log("🔍 Allowed Roles:", allowedRoles);
   
-        if (allowedRoles.length === 0) {
-          // console.warn("⚠️ No roles defined for this route! Access granted by default.");
-          // window.location.href = '/login'
-          return true;
-        }
+        if (allowedRoles.length === 0) {return true;}
   
-        // ✅ แปลง Role เป็น lowercase เพื่อป้องกัน Case-Sensitive ปัญหา
+        // แปลง Role เป็น lowercase เพื่อป้องกัน Case-Sensitive ปัญหา
         const userRoles = (Array.isArray(response.roles) ? response.roles : [response.roles])
         .map((role: string) => role.toLowerCase());
-      const requiredRoles = allowedRoles.map(role => role.toLowerCase());
+        const requiredRoles = allowedRoles.map(role => role.toLowerCase());
   
         if (response.isAuthenticated && userRoles.some(role => requiredRoles.includes(role))) {
           console.log("✅ Access Granted!");

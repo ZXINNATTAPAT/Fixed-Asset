@@ -171,8 +171,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
     });
   }
 
-
-
   private getAvailableDevices(): void {
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => {
@@ -399,7 +397,6 @@ export class AssetcountComponent implements OnInit, OnDestroy {
       console.warn('⚠️ Invalid QR Code format');
     }
   }
-
 
   /** 🔍 ฟังก์ชันแยก ID จาก URL */
   extractAssetIdFromUrl(url: string): string | null {

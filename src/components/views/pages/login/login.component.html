@@ -1,4 +1,5 @@
-<div class="min-vh-100 d-flex flex-row align-items-center" style="background-color: #30916b;">
+<div class="d-flex flex-column min-vh-100">
+<div class="flex-grow-1 d-flex flex-row align-items-center" style="background-color: #30916b;">
   <c-container breakpoint="md">
     <c-row class="justify-content-center">
       <c-col lg="12" xl="8">
@@ -6,41 +7,33 @@
           <c-card class="p-4">
             <c-card-body>
 
-              <div  *ngIf="isLoading">
-                <img
-                  src="../../../../assets/mc.gif"
-                  alt="ss"
-                  width="100%"
-                  height="auto"
-                />
-              </div >
+              <div *ngIf="isLoading">
+                <img src="../../../../assets/mc.gif" alt="ss" width="100%" height="auto" />
+              </div>
 
               <form *ngIf="!isLoading" cForm (submit)="login($event,username.value, password.value)">
-                <h1>Login</h1>
-                <p class="text-body-secondary">Sign In to your account</p>
+                <h1><span class="anuphan-700">เข้าสู่ระบบ</span></h1>
+                <p class="text-body-secondary anuphan-700">กรุณาเข้าสู่บัญชีผู้ใช้งานของคุณ</p>
+
                 <c-input-group class="mb-3">
                   <span cInputGroupText>
                     <svg cIcon name="cilUser"></svg>
                   </span>
-                  <input autoComplete="username" cFormControl placeholder="Username" type="email" #username required/>
+                  <input class="anuphan-500" autoComplete="username" cFormControl placeholder="อีเมลของหน่วยงาน"
+                    type="email" #username required />
                 </c-input-group>
                 <c-input-group class="mb-4">
                   <span cInputGroupText>
                     <svg cIcon name="cilLockLocked"></svg>
                   </span>
-                  <input
-                    autoComplete="current-password"
-                    cFormControl
-                    placeholder="Password"
-                    type="password"
-                    required
-                    #password
-                  />
+                  <input autoComplete="current-password" class="anuphan-500" cFormControl placeholder="รหัสผ่าน"
+                    type="password" required #password />
                 </c-input-group>
                 <c-row>
                   <c-col xs="6">
-                    <button cButton type="submit" class="px-4" color="primary" style="background-color: #30916b;" >
-                      Login
+                    <button cButton type="submit" class="px-4 anuphan-700" color="primary"
+                      style="background-color: #30916b;">
+                      เข้าสู่ระบบ
                     </button>
                   </c-col>
                   <c-col class="text-right" xs="6">
@@ -55,8 +48,7 @@
           </c-card>
           <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white  py-5">
             <c-card-body class="text-center">
-              <img src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png" height="200" alt="ss"
-                 />
+              <img src="https://party.ect.go.th/themes/ect-pr/assets/images/logo_ect_big.png" height="200" alt="ss" />
               <br />
             </c-card-body>
           </c-card>
@@ -64,4 +56,10 @@
       </c-col>
     </c-row>
   </c-container>
+
+
+</div>
+  <footer class="text-center text-muted py-3 bg-white small anuphan-500">
+  © 2568 สำนักงานคณะกรรมการการเลือกตั้ง ระบบบริหารจัดการครุภัณฑ์ | อีเมล Support: <a href="mailto:support@example.com">nattapat.p.npt&#64;gmail.com</a>
+</footer>
 </div>

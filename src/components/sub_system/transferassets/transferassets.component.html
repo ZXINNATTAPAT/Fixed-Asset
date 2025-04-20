@@ -1,133 +1,208 @@
-<div class="card mb-4 shadow-sm" style="border: none">
-  <div class="card-body">
+<div class="container p-4 bg-white shadow rounded">
 
-    <h1>
-      <span class="anuphan-700">บันทึกรายการโอนย้ายภายในส่วนกลาง</span>
-    </h1>
 
-    <hr />
+  <h1><span class="anuphan-700">บันทึกรายการโอนย้ายภายในส่วนกลาง</span></h1>
+  <hr />
 
-    <div class="card" style="border: none">
+  <div class="card" style="border: none">
+    <div class="card-body">
 
-      <div class="card-body">
-
-        <!-- Row 2: โอนย้ายจาก และ โอนย้ายไปที่ -->
-        <form [formGroup]="assetTransferForm" (ngSubmit)="onUpdateDepartmentAndFaction()">
-          <!-- Row 1: รหัสครุภัณฑ์ และวันที่โอนย้าย -->
-          <div class="row mb-3">
-            <!-- รหัสครุภัณฑ์ -->
-            <div class="col-md-4">
-              <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
-              <div class="input-group">
-                <input type="text" id="assetCode" formControlName="AssetCode" class="form-control"
-                  placeholder="พิมพ์รหัสครุภัณฑ์" />
-                <button type="button" class="btn btn-success" style="color: white;" (click)="onSearch()">
-                  ค้นหา
-                </button>
-              </div>
+      <!-- Row 2: โอนย้ายจาก และ โอนย้ายไปที่ -->
+      <form [formGroup]="assetTransferForm" (ngSubmit)="onTransferAsset()">
+        <!-- Row 1: รหัสครุภัณฑ์ และวันที่โอนย้าย -->
+        <div class="row mb-3">
+          <!-- รหัสครุภัณฑ์ -->
+          <div class="col">
+            <label for="assetCode" class="form-label">รหัสครุภัณฑ์</label>
+            <div class="input-group">
+              <input type="text" id="assetCode" formControlName="AssetCode" class="form-control"
+                placeholder="พิมพ์รหัสครุภัณฑ์" />
+              <button type="button" class="btn btn-success" style="color: white;" (click)="onSearch()">
+                ค้นหา
+              </button>
             </div>
-
-            <!-- วันที่โอนย้าย -->
-            <!-- <div class="col-md-3">
-              <label for="Date" class="form-label">วันที่โอนย้าย</label>
-              <input type="date" id="Date" formControlName="Date" class="form-control" />
-            </div> -->
-
           </div>
+        </div>
 
-          <!-- Row 2: โอนย้ายจาก และโอนย้ายไปที่ -->
-          <div class="row mb-3">
+        <!-- Row 2: โอนย้ายจาก และโอนย้ายไปที่ -->
+        <div class="row mb-3">
 
-            <!-- โอนย้ายจาก -->
-            <div class="col-md-6">
-              <label for="TransferredFrom" class="form-label">โอนย้ายจาก</label>
+          <!-- โอนย้ายจาก -->
+          <div class="">
+            <label for="TransferredFrom" class="form-label">โอนย้ายจาก</label>
 
-              <div class="row">
-                <!-- เลือกแผนก -->
-                <div class="col-md-6">
+            <div class="row">
+              <!-- เลือกแผนก -->
+              <div class="col-md-6">
 
-                  <input type="text" id="TransferredFrom" formControlName="DepartmentFrom" class="form-control" placeholder=""
-                    readonly />
-                </div>
-
-                <div class="col-md-6">
-
-                  <input type="text" id="TransferredFrom" formControlName="FactionNameFrom" class="form-control" placeholder=""
-                    readonly />
-                </div>
+                <input type="text" id="TransferredFrom" formControlName="DepartmentFrom" class="form-control"
+                  placeholder="" readonly />
               </div>
-            </div>
 
-            <!-- โอนย้ายไปที่ -->
+              <div class="col-md-6">
 
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="TransferredToDept" class="form-label">โอนย้ายไปที่</label>
-              <div class="row">
-                <!-- เลือกแผนก -->
-                <div class="col-md-6">
-
-                  <div class="form-control"> 
-
-                    <mat-select  formControlName="DepartmentTf" placeholder="เลือกแผนก"
-                      (selectionChange)="onDepartmentChange($event)">
-                      <mat-option>
-                        <ngx-mat-select-search placeholderLabel="ค้นหาแผนก" noEntriesFoundLabel="ไม่พบข้อมูล"
-                          [formControl]="departmentFilterCtrl"></ngx-mat-select-search>
-                      </mat-option>
-                      <mat-option *ngFor="let department of (filteredDepartments | async)" [value]="department.DeptId">
-                        {{ department.Name }}
-                      </mat-option>
-                    </mat-select>
-
-                  </div>
-
-                </div>
-
-                <!-- เลือกฝ่าย -->
-                <div class="col-md-6">
-
-                  <div class="form-control"> 
-
-                    <mat-select formControlName="FactionNameTf" placeholder="เลือกฝ่าย">
-                      <mat-option>
-                        <ngx-mat-select-search placeholderLabel="ค้นหาฝ่าย" noEntriesFoundLabel="ไม่พบข้อมูล"
-                          [formControl]="factionFilterCtrl"></ngx-mat-select-search>
-                      </mat-option>
-                      <mat-option *ngFor="let faction of (filteredFactions | async)" [value]="faction.FactId">
-                        {{ faction.Name }}
-                      </mat-option>
-                    </mat-select>
-                
-                  </div>
-
-                </div>
+                <input type="text" id="TransferredFrom" formControlName="FactionNameFrom" class="form-control"
+                  placeholder="" readonly />
               </div>
             </div>
 
           </div>
 
-          <!-- Row 3: หมายเหตุ และปุ่ม Submit -->
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="Note" class="form-label">หมายเหตุ</label>
-              <input id="Note" formControlName="Note" class="form-control" rows="3"
-                placeholder="ระบุหมายเหตุเพิ่มเติม"/>
-            </div>
+          <!-- โอนย้ายไปที่ -->
 
+        </div>
 
-            <div class="col-md-4 d-flex align-items-end">
-              <button type="submit" class="btn btn-success">บันทึก</button>
+        <div class="row mb-3">
+          <div class="">
+            <label for="TransferredToDept" class="form-label">โอนย้ายไปที่</label>
+            <div class="row">
+              <!-- เลือกแผนก -->
+              <div class="col-md-6">
+
+                <div class="form-control">
+
+                  <mat-select formControlName="DepartmentTf" placeholder="เลือกแผนก"
+                    (selectionChange)="onDepartmentChange($event)">
+                    <mat-option>
+                      <ngx-mat-select-search placeholderLabel="ค้นหาแผนก" noEntriesFoundLabel="ไม่พบข้อมูล"
+                        [formControl]="departmentFilterCtrl"></ngx-mat-select-search>
+                    </mat-option>
+                    <mat-option *ngFor="let department of (filteredDepartments | async)" [value]="department.DeptId">
+                      {{ department.Name }}
+                    </mat-option>
+                  </mat-select>
+
+                </div>
+
+              </div>
+
+              <!-- เลือกฝ่าย -->
+              <div class="col-md-6">
+
+                <div class="form-control">
+
+                  <mat-select formControlName="FactionNameTf" placeholder="เลือกฝ่าย">
+                    <mat-option>
+                      <ngx-mat-select-search placeholderLabel="ค้นหาฝ่าย" noEntriesFoundLabel="ไม่พบข้อมูล"
+                        [formControl]="factionFilterCtrl"></ngx-mat-select-search>
+                    </mat-option>
+                    <mat-option *ngFor="let faction of (filteredFactions | async)" [value]="faction.FactId">
+                      {{ faction.Name }}
+                    </mat-option>
+                  </mat-select>
+
+                </div>
+
+              </div>
             </div>
           </div>
-        </form>
 
+        </div>
+
+        <!-- Row 3: หมายเหตุ และปุ่ม Submit -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="Note" class="form-label">หมายเหตุ</label>
+            <input id="Note" formControlName="Note" class="form-control" rows="3" placeholder="ระบุหมายเหตุเพิ่มเติม" />
+          </div>
+
+
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-success" style="color: white;">บันทึก</button>
+          </div>
+        </div>
+      </form>
+
+      <hr class="mt-5 mb-4" />
+
+      <h2 class=" mb-3"><span class="anuphan-700">ประวัติการโอนย้าย</span></h2>
+
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource" matSort
+          class="table table-striped table-hover text-center align-middle">
+
+          <!-- ✅ Actions Column -->
+          <ng-container matColumnDef="Aactions">
+            <th mat-header-cell *matHeaderCellDef class="border" style="width: 14%;color: black; font-weight: bold">
+              การกระทำ
+            </th>
+            <td mat-cell *matCellDef="let asset" class="border" style="width: 12%;">
+
+              <!-- 🔍 ปุ่มดู -->
+              <button class="btn btn-sm btn-primary m-1" (click)="viewTransfer(asset)">
+                <svg [cIcon]="this.icons.cilSearch" style="color: white; width: 16px; height: 16px;"></svg>
+              </button>
+
+              <!-- ✏️ ปุ่มแก้ไข -->
+              <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-warning m-1" (click)="editTransfer(asset)">
+                <svg [cIcon]="this.icons.cilPencil" style="color: white; width: 16px; height: 16px;"></svg>
+              </button>
+
+              <!-- 🗑️ ปุ่มลบ -->
+              <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-danger m-1" (click)="deleteTransfer(asset)">
+                <svg [cIcon]="this.icons.cilTrash" style="color: white; width: 16px; height: 16px;"></svg>
+              </button>
+
+            </td>
+          </ng-container>
+
+
+          <!-- ลำดับ -->
+          <!-- <ng-container matColumnDef="no">
+      <th mat-header-cell *matHeaderCellDef>#</th>
+      <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+    </ng-container> -->
+
+          <!-- AssetId -->
+          <ng-container matColumnDef="assetCode">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รหัสครุภัณฑ์</th>
+            <td mat-cell *matCellDef="let row" class="border">{{ row.AssetCode }}</td>
+          </ng-container>
+
+          <!-- AssetName -->
+          <ng-container matColumnDef="assetName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รายการ</th>
+            <td mat-cell *matCellDef="let row" class="border">{{ row.AssetName || '-' }}</td>
+          </ng-container>
+
+          <!-- From -->
+          <ng-container matColumnDef="transferredFrom">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">จากหน่วยงาน</th>
+            <td mat-cell *matCellDef="let row" class="border">{{ row.TransferredFromName || '-' }}</td>
+          </ng-container>
+
+          <!-- To -->
+          <ng-container matColumnDef="transferredTo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ไปยังหน่วยงาน</th>
+            <td mat-cell *matCellDef="let row" class="border">{{ row.TransferredToName || '-' }}</td>
+          </ng-container>
+
+          <!-- Date -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่</th>
+            <td mat-cell *matCellDef="let row" class="border">{{ row.Date | date:'shortDate' }}</td>
+          </ng-container>
+
+          <!-- Note -->
+          <ng-container matColumnDef="note">
+            <th mat-header-cell *matHeaderCellDef class="border">หมายเหตุ</th>
+            <td mat-cell *matCellDef="let row" class="border">{{ row.Note || '-' }}</td>
+          </ng-container>
+
+          <!-- Header and Row -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr *matNoDataRow>
+            <td colspan="7">ไม่มีประวัติการโอนย้าย</td>
+          </tr>
+        </table>
       </div>
+
+      <!-- ✅ Paginator -->
+      <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+
     </div>
-
-
-
   </div>
+
+
 </div>

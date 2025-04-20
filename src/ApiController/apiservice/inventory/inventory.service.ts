@@ -14,6 +14,7 @@ export interface AssetInventoryCycle {
 export interface AssetInventorySession {
   SessionId: number;
   Date: string;
+  DateDisplay?: string; 
   SessionName: string;
   DepartmentId: number;
   VerifierId: number;

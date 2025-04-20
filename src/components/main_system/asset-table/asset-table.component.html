@@ -42,7 +42,9 @@
               stroke-linejoin="miter" stroke-miterlimit="10" font-family="none" font-weight="none" font-size="none"
               text-anchor="none" style="mix-blend-mode: normal">
               <g transform="scale(5.12,5.12)">
-                <path d="M48,4h-8v-4h-32v4h-8c-2.209,0 -4,1.791 -4,4v48c0,2.209 1.791,4 4,4h48c2.209,0 4,-1.791 4,-4v-48c0,-2.209 -1.791,-4 -4,-4zM16,0h24v4h-24zM48,52h-48v-48h8v4h32v-4h8zM24,20h-8v-8h8zM40,20h-8v-8h8zM24,36h-8v-8h8zM40,36h-8v-8h8z"></path>
+                <path
+                  d="M48,4h-8v-4h-32v4h-8c-2.209,0 -4,1.791 -4,4v48c0,2.209 1.791,4 4,4h48c2.209,0 4,-1.791 4,-4v-48c0,-2.209 -1.791,-4 -4,-4zM16,0h24v4h-24zM48,52h-48v-48h8v4h32v-4h8zM24,20h-8v-8h8zM40,20h-8v-8h8zM24,36h-8v-8h8zM40,36h-8v-8h8z">
+                </path>
               </g>
             </g>
           </svg>
@@ -58,6 +60,7 @@
 
     </div>
 
+    <!-- ส่วนตัวกรองข้อมูล -->
     <div class="row mb-3">
 
       <div class="col-2">
@@ -65,6 +68,7 @@
         <mat-form-field appearance="fill" class="w-100">
           <mat-select id="assetTypeSelect" [(ngModel)]="selectedAssetType" (selectionChange)="onAssetTypeChange()"
             placeholder="เลือกประเภท">
+
             <mat-option value="">ทั้งหมด</mat-option>
             <mat-option *ngFor="let type of assetTypes" [value]="type.TypeId">
               {{ type.TypeName }}
@@ -104,6 +108,7 @@
       </div>
     </div>
 
+    <p>รายการครุภัณฑ์ดังกล่าวจะถูกเรียกดูได้เฉพาะในเขตความรับผิดชอบของสำนักนั้นเท่านั้น</p>
 
     <div class="table-responsive">
       <table class="table table-striped table-hover" style="font-size: 10.5px; width: fit-content" mat-table matSort
@@ -131,7 +136,12 @@
             </button>
 
             <!-- 🗑️ ปุ่มลบ (ซ่อนถ้าเป็นเจ้าหน้าที่ทั่วไปเท่านั้น) -->
-            <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
+            <!-- <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
+              <svg [cIcon]="this.myFunctionInstance?.icons?.cilTrash"
+                style="color: white; width: 16px; height: 16px;"></svg>
+            </button> -->
+
+            <button *ngIf="!isGeneralStaffOnly()" class="btn btn-sm btn-danger m-1" (click)="softdeleteAsset(asset)">
               <svg [cIcon]="this.myFunctionInstance?.icons?.cilTrash"
                 style="color: white; width: 16px; height: 16px;"></svg>
             </button>
@@ -193,8 +203,10 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr><!-- Header Row -->
 
         <tr mat-row *matRowDef="let row; columns: displayedColumns3"></tr> <!-- Data Rows -->
+
       </table>
 
     </div>
+
   </div>
 </div>

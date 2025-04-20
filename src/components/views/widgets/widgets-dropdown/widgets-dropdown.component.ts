@@ -187,8 +187,17 @@ linktranfer(): void {
 }
 
 linkassetcom(): void {
-  this.router.navigate(['/assettable']);
+  this.router.navigate(['/table/assettable'], { queryParams: { typecode: '004' } });
 }
+
+linkassetoffice(): void {
+  this.router.navigate(['/table/assettable'], { queryParams: { typecode: '003' } });
+}
+
+linkassetElec(): void {
+  this.router.navigate(['/table/assettable'], { queryParams: { typecode: '001' } });
+}
+
   data: any[] = [];
   
   options: any[] = [];

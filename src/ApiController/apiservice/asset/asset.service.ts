@@ -87,14 +87,14 @@ export class AssetService {
   }
 
   getDeletedAssets(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/AssetDetails/trash`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.baseUrl}AssetDetails/trash`, { withCredentials: true });
   }
   
   restoreAsset(id: number): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AssetDetails/restore/${id}`, {}, { withCredentials: true });
+    return this.http.post(`${this.baseUrl}AssetDetails/restore/${id}`, {}, { withCredentials: true });
   }
   
   deleteAssetPermanently(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/AssetDetails/permanent/${id}`, { withCredentials: true });
+    return this.http.delete(`${this.baseUrl}AssetDetails/permanent/${id}`, { withCredentials: true });
   }
 }

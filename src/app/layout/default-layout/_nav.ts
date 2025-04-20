@@ -38,11 +38,14 @@ export const navItems: ICustomNavData[] = [
     iconComponent: { name: 'cil-pencil' },
     roles: ['Admin', 'เจ้าหน้าที่ฝ่ายพัสดุ'],
     children: [
-      { name: 'เพิ่มรายการครุภัณฑ์', url: '/system/main/assetDetails', icon: 'nav-icon-bullet' },
-      { name: 'ตรวจนับครุภัณฑ์', url: '/system/sub/assetcount', icon: 'nav-icon-bullet' },
+      { name: 'เพิ่มครุภัณฑ์', url: '/system/main/assetDetails', icon: 'nav-icon-bullet' },
+      // { name: 'ตรวจนับครุภัณฑ์', url: '/system/sub/assetcount', icon: 'nav-icon-bullet' },
       { name: 'บันทึกซ่อมแซม', url: '/system/sub/repair', icon: 'nav-icon-bullet' },
       { name: 'โอนย้ายครุภัณฑ์', url: '/system/sub/transferassets', icon: 'nav-icon-bullet' },
-      { name: 'ตัดจำหน่ายครุภัณฑ์', url: '/system/sub/disassets', icon: 'nav-icon-bullet' }
+      // { name: 'ตัดจำหน่ายครุภัณฑ์', url: '/system/sub/disassets', icon: 'nav-icon-bullet' }
+      { name: 'ขาย/จำหน่ายครุภัณฑ์', url: '/system/sub/disassets/sale', icon: 'nav-icon-bullet' },
+      { name: 'บริจาคครุภัณฑ์', url: '/system/sub/disassets/donation', icon: 'nav-icon-bullet' },
+      { name: 'เลิกใช้ครุภัณฑ์', url: '/system/sub/disassets/decommission', icon: 'nav-icon-bullet' }
     ]
   },
   {
@@ -70,11 +73,11 @@ export const navItems: ICustomNavData[] = [
     iconComponent: { name: 'cil-pencil' },
     roles: ['Admin', 'เจ้าหน้าที่จัดการข้อมูล'],
     children: [
-      { name: 'รหัสประเภทสินทรัพย์', url: '/defaultdata/Assettypecode', icon: 'nav-icon-bullet' },
-      { name: 'หมวดสินทรัพย์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },
+      { name: 'รหัสประเภทครุภัณฑ์', url: '/defaultdata/Assettypecode', icon: 'nav-icon-bullet' },
+      { name: 'หมวดหมู่ครุภัณฑ์', url: '/defaultdata/asc', icon: 'nav-icon-bullet' },
       { name: 'รหัสสำนักงาน', url: '/defaultdata/sectiontype', icon: 'nav-icon-bullet' },
       { name: 'รหัสฝ่าย', url: '/defaultdata/faction', icon: 'nav-icon-bullet' },
-      // { name: 'หน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
+      { name: 'หน่วยนับ', url: '/defaultdata/coutingunit', icon: 'nav-icon-bullet' },
       { name: 'ผู้ขายทรัพย์สิน', url: '/defaultdata/ps', icon: 'nav-icon-bullet' }
     ]
   }

@@ -49,9 +49,33 @@ export const routes: Routes = [
       },
       {
         path: 'disassets',
-        loadComponent: () => import('./disassets/disassets.component')
-        .then(m => m.DisassetsComponent),
-        data: {title: 'AssetDetails'}
+        data: { title: 'Disposal Menu' },
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./disassets/disassets.component')
+              .then(m => m.DisassetsComponent),
+            data: { title: 'Disposal Menu' }
+          },
+          {
+            path: 'sale',
+            loadComponent: () => import('./disassets/Sale/disasset-sale.component')
+              .then(m => m.DisassetSaleComponent),
+            data: { title: 'ขายครุภัณฑ์' }
+          },
+          {
+            path: 'donation',
+            loadComponent: () => import('./disassets/donation/disasset-donation.component')
+              .then(m => m.DisassetDonationComponent),
+            data: { title: 'บริจาคครุภัณฑ์' }
+          },
+          {
+            path: 'decommission',
+            loadComponent: () => import('./disassets/decommission/disasset-decommission.component.')
+              .then(m => m.DisassetDecommissionComponent),
+            data: { title: 'เลิกใช้ครุภัณฑ์' }
+          }
+        ]
       },
       {
         path: 'transferassets',

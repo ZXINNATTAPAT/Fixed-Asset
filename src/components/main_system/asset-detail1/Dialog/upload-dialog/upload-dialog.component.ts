@@ -48,14 +48,9 @@ export class UploadDialogComponent {
    private depreciationScheduleService = inject(DepreciationScheduleService)
 
   ngOnInit() {
-
-    // ✅ ดึงค่าจาก data ที่ inject มา
-    this.assetCategory = this.data.assetCategory || [];
-
+    this.assetCategory = this.data.assetCategory || []; // ✅ ดึงค่าจาก data ที่ inject มา
     this.assetTypes = this.data.assetTypes || [];
-
     this.departments = this.data.departments || [];
-
     this.userId = this.data.userId || 0;
   }
 
