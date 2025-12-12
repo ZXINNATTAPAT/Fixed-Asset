@@ -24,6 +24,7 @@ import { SubAssetService } from './Service/sub-asset.service';
 import { DepreciationScheduleService } from './Service/depreciation-schedule.service';
 import { DepreciationPreviewComponent } from './components/depreciation-preview.component';
 import { SubAssetFormComponent } from './components/sub-asset-form.component';
+import { DepreciationService } from './Service/depreciation.service';
 
 const formFieldOptions: MatFormFieldDefaultOptions = {
   hideRequiredMarker: true,
@@ -104,6 +105,8 @@ export class SystemComponent implements OnInit, OnDestroy {
   @ViewChild('assetTypeselect') assetTypeSelect!: ElementRef;
 
   asset!: FormGroup;
+  protechdate: any = null;
+  protechdate2: any = null;
 
   userinfo: any = {};
 
@@ -142,6 +145,7 @@ export class SystemComponent implements OnInit, OnDestroy {
     private formService: FormService,
     private subAssetService: SubAssetService,
     private depreciationScheduleService: DepreciationScheduleService,
+    private DepreciationService : DepreciationService,
     private assetCodeService: AssetCodeService,
     private api: ApiService,
     private dataService: DataService,
@@ -213,64 +217,6 @@ export class SystemComponent implements OnInit, OnDestroy {
       },
     });
   }
-
-  private async generateMultipleAssetCodes(): Promise<void> {
-    const category = this.assetCategory.find(
-      (type) => type.CategoryId === this.asset.get('CategoryId')?.value
-    );
-    const purchaseDate = this.asset.get('PurchaseDate')?.value;
-    const receiptDate = this.asset.get('ReceiptDate')?.value;
-    const year = purchaseDate ? new Date(purchaseDate).getFullYear() + 543 : '';
-    const copies = this.asset.get('numberOfCopies')?.value || 1;
-  
-    if (!category || !year) return;
-  
-    const payload = {
-      Affiliation: 'กกต',
-      AssetCategory: category.CategoryCode,
-      Year: year.toString(),
-      Copies: copies
-    };
-  
-    // ✅ เรียก API เพื่อสร้างหลายรหัสก่อน
-    this.api.assetService.postData('AssetDetails/generate-multiple-codes', payload)
-      .then((res: any) => {
-        if (res?.assetCodes?.length) {
-          this.generatedCodes = res.assetCodes;
-          const firstCode = this.generatedCodes[0];
-          this.asset.patchValue({ AssetCode: firstCode });
-          this.validateAssetCode(firstCode);
-  
-          // ✅ คำนวณตารางค่าเสื่อมหลังจากได้รหัสแล้ว
-          const purchasePrice = this.asset.get('PurchasePrice')?.value;
-  
-          if (purchasePrice && receiptDate) {
-            this.api.assetService.fetchDataById('Depreciations/type', category.TypeId).subscribe(deps => {
-              const schedule = this.depreciationScheduleService.calculateSchedule(
-                purchasePrice,
-                deps[0].Rate_dep,
-                receiptDate
-              );
-              const summary = this.depreciationScheduleService.extractFirstYearSummary(schedule);
-  
-              this.asset.patchValue({
-                DepreciationRate: deps[0].Rate_dep,
-                AssetAge: deps[0].Servicelife,
-                DepreciationValue: summary.depreciation,
-                AccumulatedDepreciation: summary.accumulatedDepreciation,
-                BookValue: summary.bookValue
-              });
-  
-              this.depreciationSchedule = schedule;
-            });
-          }
-        }
-      })
-      .catch(() => {
-        this.showError('ไม่สามารถสร้างรหัสได้');
-      });
-  }
-  
   private handleGeneratedAssetCode(generatedCode: string, year: string): string {
     const base = generatedCode.split('-')[0];
     let suffix = 1;
@@ -287,6 +233,78 @@ export class SystemComponent implements OnInit, OnDestroy {
     return finalCode;
   }
 
+  private async generateMultipleAssetCodes(): Promise<void> {
+    const category = this.assetCategory.find((type) => type.CategoryId === this.asset.get('CategoryId')?.value);
+    const purchaseDate = this.asset.get('PurchaseDate')?.value;
+    const receiptDate = this.asset.get('ReceiptDate')?.value;
+    const year = purchaseDate ? new Date(purchaseDate).getFullYear() + 543 : '';
+    const copies = this.asset.get('numberOfCopies')?.value || 1;
+  
+    if (!category) {
+      this.showError('ไม่พบข้อมูลหมวดหมู่');
+      return;
+    }
+  
+    if (!year) {
+      this.showError('กรุณาระบุวันที่ได้มาให้ถูกต้อง');
+      return;
+    }
+  
+    if (copies <= 0) {
+      this.showError('จำนวนที่ต้องการสร้างต้องมากกว่า 0');
+      return;
+    }
+  
+    const payload = {
+      Affiliation: 'กกต',
+      AssetCategory: category.CategoryCode,
+      Year: year.toString(),
+      Copies: copies
+    };
+  
+    try {
+      const res: any = await this.api.assetService.postData('AssetDetails/generate-multiple-codes', payload);
+  
+      if (!res?.assetCodes?.length) throw new Error('ไม่สามารถสร้างรหัสได้');
+  
+      this.generatedCodes = res.assetCodes;
+      const firstCode = this.generatedCodes[0];
+      this.asset.patchValue({ AssetCode: firstCode });
+      this.validateAssetCode(firstCode);
+  
+      const purchasePrice = this.asset.get('PurchasePrice')?.value;
+      if (!purchasePrice || !receiptDate) throw new Error('ข้อมูลวันที่หรือราคาซื้อไม่ถูกต้อง');
+  
+      const depResponse = await this.api.assetService.fetchDataById('Depreciations/type', category.TypeId).toPromise();
+      const depreciationRate = Number(depResponse[0]?.Rate_dep);
+      const servicelife = Number(depResponse[0]?.Servicelife);
+  
+      if (isNaN(depreciationRate) || isNaN(servicelife)) throw new Error('ไม่พบข้อมูลอัตราหรืออายุการใช้งาน');
+  
+      const schedule = this.DepreciationService.calculateDepreciationWithPartialYear(
+        purchasePrice,
+        depreciationRate,
+        receiptDate,
+        servicelife
+      );
+  
+      const first = schedule[0];
+  
+      this.asset.patchValue({
+        DepreciationRate: depreciationRate,
+        AssetAge: servicelife,
+        DepreciationValue: first.depreciation,
+        AccumulatedDepreciation: first.accumulatedDepreciation,
+        BookValue: first.bookValue
+      });
+  
+      this.depreciationSchedule = schedule;
+  
+    } catch (error: any) {
+      this.showError(error.message || 'ไม่สามารถสร้างรหัสได้');
+    }
+  }
+  
   private validateAssetCode(code: string): void {
     const isDuplicate = this.assetDetails.some(asset => asset.AssetCode === code);
     Swal.fire({
@@ -301,7 +319,7 @@ export class SystemComponent implements OnInit, OnDestroy {
       timerProgressBar: true,
     });
   }
-
+  
   async onSubmit(event?: Event): Promise<void> {
     event?.preventDefault();
   
@@ -309,30 +327,23 @@ export class SystemComponent implements OnInit, OnDestroy {
       if (!this.userinfo?.userId) throw new Error('ไม่พบข้อมูลผู้ใช้งาน');
   
       const copies = this.asset.get("numberOfCopies")?.value || 1;
-
       if (copies <= 0) throw new Error('จำนวนที่ต้องการสร้างต้องมากกว่า 0');
   
-      const payload = { ...this.asset.value, CreatedBy: this.userinfo.userId };
-  
-      if (copies === 1 && this.generatedCodes.length < 1) {
-        throw new Error('ยังไม่ได้สร้างรหัส กรุณากดสร้างรหัสก่อนครับ');
-      }
-      
-
-      // ✅ ตรวจว่าค่าเสื่อมไม่ว่าง
       const depreciationValue = this.asset.get('DepreciationValue')?.value;
       const accumulatedDep = this.asset.get('AccumulatedDepreciation')?.value;
       const bookValue = this.asset.get('BookValue')?.value;
   
-      if (
-        depreciationValue == null ||
-        accumulatedDep == null ||
-        bookValue == null
-      ) {
+      if (depreciationValue == null || accumulatedDep == null || bookValue == null) {
         throw new Error('กรุณาคำนวณตารางค่าเสื่อมให้ครบก่อนบันทึก');
       }
   
+      if (this.generatedCodes.length < copies) {
+        throw new Error('ยังไม่ได้สร้างรหัสให้ครบ กรุณากดสร้างรหัส');
+      }
+  
+      const payload = { ...this.asset.value, CreatedBy: this.userinfo.userId };
       const dataToSend: any[] = [];
+  
       for (let i = 0; i < copies; i++) {
         dataToSend.push({
           ...payload,
@@ -340,9 +351,7 @@ export class SystemComponent implements OnInit, OnDestroy {
           uniqueKey: `${payload.AssetName}-${i + 1}`
         });
       }
-      
   
-      console.log('Data to send:', dataToSend);
       await this.api.assetService.postData('AssetDetails', dataToSend);
   
       Swal.fire({
@@ -363,7 +372,22 @@ export class SystemComponent implements OnInit, OnDestroy {
     }
   }
   
+  
+
+  checkdate(){
+    this.protechdate = this.asset.get('PurchaseDate')?.value;
+    this.protechdate2 = this.asset.get('ReceiptDate')?.value;
+    if(this.protechdate2 < this.protechdate){
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'วันที่รับมอบครุภัณฑ์ต้องมากกว่าวันที่ซื้อ',
+      });
+    }
+  }
+
   private setupFormListeners(): void {
+
     this.asset.get('PurchasePrice')?.valueChanges.subscribe(() => {
       this.formService.syncCalculatedPrice(this.asset);
     });
@@ -443,8 +467,18 @@ export class SystemComponent implements OnInit, OnDestroy {
         this.generateMultipleAssetCodes(); // หลายรหัส
       }
     });
+  }
 
+  onDateChange(event: any): void {
+    // this.checkdate();
+    this.displayDate = this.formService.onReceiptDateChange(event, this.asset);
+  }
 
+  onDateChange2(event: any): void {
+    // this.checkdate();
+    this.formService.onPurchaseDateChange(event, this.asset);
+    this.generateAssetCode();
+    // this.generateMultipleAssetCodes(); // ✅
   }
   
   private loadInitialData(): void {
@@ -508,14 +542,6 @@ export class SystemComponent implements OnInit, OnDestroy {
 
   autoInput(): void {this.formService.autoInputFields(this.asset, this.userinfo, this.assetTypes);}
 
-  onDateChange(event: any): void {this.displayDate = this.formService.onReceiptDateChange(event, this.asset);}
-
-  onDateChange2(event: any): void {
-    this.formService.onPurchaseDateChange(event, this.asset);
-    this.generateAssetCode();
-    // this.generateMultipleAssetCodes(); // ✅
-  }
-  
   showAlert(): void {Swal.fire({icon: 'info',title: 'กรุณาเลือกประเภทครุภัณฑ์ก่อน',toast: true,position: 'top-end',showConfirmButton: false,timer: 2500});}
 
   getSubAssetForm(index: number): FormGroup {return this.subAssets.at(index) as FormGroup;}

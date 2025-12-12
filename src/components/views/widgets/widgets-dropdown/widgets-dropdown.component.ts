@@ -103,7 +103,8 @@ loadAssetCounts(): void {
     return;
   }
 
-  const url = `Assettype/AssetCountsByTypeCode?deptId=${this.userinfo.DeptId}`;
+  // const url = `Assettype/AssetCountsByTypeCode?deptId=${this.userinfo.DeptId}`;
+  const url = `Assettype/AssetCountsByTypeCode`;
 
   this.apiService.assetService.fetchData(url)
     .pipe(

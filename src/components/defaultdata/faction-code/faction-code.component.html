@@ -1,99 +1,116 @@
 <!-- defaultdata.component.html -->
 <div class="container p-4 bg-white shadow rounded">
 
-    <h1><span class="anuphan-700">กำหนดรหัสฝ่าย</span></h1>
+  <h1><span class="anuphan-700">กำหนดรหัสฝ่าย</span></h1><hr />
 
-    <hr />
-      
-    <div *ngIf="isFormVisible">
-      <form cForm (submit)="onSubmit()">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 mb-3 m-1">
+  <div>
+    <form cForm (submit)="onSubmit()">
 
-          <div class="col">
-            <label cLabel for="factionCodeInput">รหัสฝ่าย</label>
-            <input cFormControl id="factionCodeInput" placeholder="ระบุรหัสฝ่าย" name="FactionCode"
-              [(ngModel)]="asset.FactionCode" class="form-control" type="text" />
-          </div>
-
-          <div class="col">
-            <label cLabel for="factionNameInput">ชื่อฝ่าย</label>
-            <input cFormControl id="factionNameInput" placeholder="ระบุชื่อฝ่าย" name="FactionName"
-              [(ngModel)]="asset.FactionName" class="form-control" type="text" />
-          </div>
-
-          <div class="col align-self-end">
-            <button type="submit" class="btn btn-primary">
-              เพิ่ม
-            </button>
-          </div>
-
+      <div class="row row-cols-1 row-cols-sm-2 g-3  mb-3">
+        
+        <!-- รหัสฝ่าย -->
+        <div class="col">
+          <label cLabel for="factionCodeInput">รหัสฝ่าย</label>
+          <input cFormControl id="factionCodeInput" name="Code" placeholder="ระบุรหัสฝ่าย"
+            [(ngModel)]="asset.Code" class="form-control" type="text" />
         </div>
-      </form><br />
-    </div>
-
     
-    <div class="d-flex justify-content-between align-items-center m-1 mb-3">
-      <!-- ปุ่มเพิ่มข้อมูล -->
-      <button class="btn btn-sm btn-outline-success anuphan-500" (click)="isFormVisible = !isFormVisible"
-        style="color: green">
-        + เพิ่มข้อมูล
-      </button>
-
-      <!-- Paginator -->
-      <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" [pageSize]="15" showFirstLastButtons>
-      </mat-paginator>
-    </div>
-
-    <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource" matSort class="table table-striped table-hover">
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-
-          <th mat-header-cell *matHeaderCellDef class="border" style="font-weight: bold">
-            #
-          </th>
-
-          <td mat-cell *matCellDef="let asset" class="border" style="width: 10%;">
-
-            <button class="btn btn-sm btn-warning m-1" (click)="editAsset(asset)">
-
-              <svg [cIcon]="icons.cilPencil" style="color: white; width: 16px; height: 16px;">
-              </svg>
-
-            </button>
-
-            <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(asset)">
-
-              <svg [cIcon]="icons.cilTrash" style="color: white; width: 16px; height: 16px;">
-              </svg>
-
-            </button>
-
-          </td>
-
-        </ng-container>
-
-        <!-- Dynamic Columns -->
-        <ng-container *ngFor="let column of displayedColumns2" [matColumnDef]="column">
-
-          <th mat-header-cell *matHeaderCellDef mat-sort-header class="border" style="font-weight: bold">
-            {{ column }}
-          </th>
-
-          <td mat-cell *matCellDef="let asset" class="border">
-            {{ asset[column] }}
-          </td>
-
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="['actions', 'รหัสฝ่าย', 'ชื่อฝ่าย', 'ชื่อสำนัก']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['actions', 'รหัสฝ่าย', 'ชื่อฝ่าย', 'ชื่อสำนัก']"></tr>
-
-      </table>
-
+        <!-- ชื่อฝ่าย -->
+        <div class="col">
+          <label cLabel for="factionNameInput">ชื่อฝ่าย</label>
+          <input cFormControl id="factionNameInput" name="Name" placeholder="ระบุชื่อฝ่าย"
+            [(ngModel)]="asset.Name" class="form-control" type="text" />
+        </div>
+    
+        <!-- ชื่อย่อ -->
+        <div class="col">
+          <label cLabel for="factionSeminInput">ชื่อย่อ</label>
+          <input cFormControl id="factionSeminInput" name="Semin" placeholder="ระบุชื่อย่อ"
+            [(ngModel)]="asset.Semin" class="form-control" type="text" />
+        </div>
+    
+        <!-- สำนัก -->
+        <div class="col">
+          <label cLabel for="deptSelect">สำนัก</label>
+          <mat-form-field appearance="fill" style="width: 100%;">
+            <mat-label>เลือกสำนัก (Department)</mat-label>
+            <mat-select id="deptSelect" name="DeptId" [(ngModel)]="asset.DeptId" required>
+              <mat-option *ngFor="let dept of departments" [value]="dept.DeptId">
+                {{ dept.Name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+    
+      </div>
+      <!-- ปุ่ม -->
+         <div class="text-end mb-3">
+          <button type="submit" class="btn btn-success px-4" style="color: white;">
+            เพิ่ม
+          </button>
+        </div>
       
-    </div>
+    </form>
+    
+    
+    <br />
+  </div>
+
 
   
+
+    <!-- Paginator -->
+    <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" [pageSize]="15" showFirstLastButtons>
+    </mat-paginator>
+
+
+  <div class="table-responsive">
+
+    <table mat-table [dataSource]="dataSource" matSort class="table table-striped">
+      
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="border">จัดการ</th>
+        <td mat-cell *matCellDef="let row" class="border">
+          <!-- ปุ่มแก้ไข ลบ ตามต้องการ -->
+          <button class="btn btn-sm btn-warning m-1" (click)="editAsset(row)"><svg [cIcon]="icons.cilPencil"
+              style="color: white; width: 16px; height: 16px;"></svg></button>
+          <button class="btn btn-sm btn-danger m-1" (click)="deleteAsset(row)"><svg [cIcon]="icons.cilTrash"
+              style="color: white; width: 16px; height: 16px;"></svg></button>
+        </td>
+      </ng-container>
+      <!-- Code Column -->
+      <ng-container matColumnDef="Code">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">รหัสฝ่าย</th>
+        <td mat-cell *matCellDef="let row" class="border">{{ row.Code }}</td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="Name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ชื่อฝ่าย</th>
+        <td mat-cell *matCellDef="let row" class="border">{{ row.Name }}</td>
+      </ng-container>
+
+      <!-- Semin Column -->
+      <ng-container matColumnDef="Semin">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ชื่อย่อ</th>
+        <td mat-cell *matCellDef="let row" class="border">{{ row.Semin }}</td>
+      </ng-container>
+
+      <!-- DeptName Column -->
+      <ng-container matColumnDef="DeptName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ชื่อสำนัก</th>
+        <td mat-cell *matCellDef="let row" class="border">{{ row.DeptName }}</td>
+      </ng-container>
+
+      
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+
   </div>
+
+
+</div>

@@ -22,7 +22,7 @@ export class ApiService {
   ) {}
 
   // public apiUrl_link = 'https://localhost:7204/api/'; // URL ของ API
-  public apiUrl_link = 'https://dotnetapi-fixasset.onrender.com/api/'; // URL ของ API
+  public apiUrl_link = 'http://localhost:5194/api/'; // URL ของ API
 
   
 }

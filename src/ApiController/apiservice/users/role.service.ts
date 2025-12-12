@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class RoleService {
 
-    private readonly baseUrl = 'https://dotnetapi-fixasset.onrender.com/api/';
+    private readonly baseUrl = 'http://localhost:5194/api/';
     private roleClassMap: Map<string, string> = new Map([
         ['Admin', 'btn-outline-danger'],
         ['เจ้าหน้าที่พัสดุ', 'btn-outline-primary'],

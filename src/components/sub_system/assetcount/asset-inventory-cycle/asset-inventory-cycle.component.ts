@@ -12,6 +12,7 @@ import { ApiService } from '../../../../ApiController/apiservice/api-service.ser
 import { AssetInventoryCycle } from '../../../../ApiController/apiservice/inventory/inventory.service';
 import { Router } from '@angular/router';
 import { cibAddthis, cilDataTransferDown, cilInfo, cilPencil, cilTrash,cilSearch } from '@coreui/icons';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -116,6 +117,21 @@ export class AssetInventoryCycleComponent implements OnInit {
   toInventorytable(cycleId: number) {
     this.router.navigate(['table/inventorysession'], { queryParams: { cycleId } });
   }
+  
+  minEndDate: string = ''; // วันที่สิ้นสุดอย่างน้อยต้องไม่ต่ำกว่านี้
+
+updateMinDate(): void {
+  if (this.newCycle.DateStart) {
+    this.minEndDate = this.newCycle.DateStart;
+    // ถ้า dateEnd ปัจจุบัน < dateStart ก็ล้างค่าเดิมทิ้ง
+    if (this.newCycle.DateEnd && this.newCycle.DateEnd < this.newCycle.DateStart) {
+      this.newCycle.DateEnd = '';
+    }
+  } else {
+    this.minEndDate = '';
+  }
+}
+
   
 
 }

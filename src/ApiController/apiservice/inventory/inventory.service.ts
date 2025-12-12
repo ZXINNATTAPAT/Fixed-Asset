@@ -31,7 +31,7 @@ export interface AssetInventorySession {
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
-  private readonly baseUrl = 'https://dotnetapi-fixasset.onrender.com/api/';
+  private readonly baseUrl = 'http://localhost:5194/api/';
 
   constructor(private http: HttpClient) {}
 

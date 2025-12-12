@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class DepreciationScheduleService {
+  
   calculateSchedule(purchasePrice: number, rate: number, receiptDate: string) {
     const schedule: { year: string; depreciation: number; accumulatedDepreciation: number; bookValue: number }[] = [];
     const rateDecimal = rate / 100;

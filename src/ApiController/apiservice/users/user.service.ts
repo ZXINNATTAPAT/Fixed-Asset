@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class UserService {
   // private readonly baseUrl = 'https://localhost:7204/api/';
-  private readonly baseUrl = 'https://dotnetapi-fixasset.onrender.com/api/';
+  private readonly baseUrl = 'http://localhost:5194/api/';
 
   constructor(private http: HttpClient) {}
 
@@ -37,7 +37,7 @@ export class UserService {
 
   logout(): Observable<any> {
     return this.http.post(
-      'https://localhost:7204/auth/logout',
+      'http://localhost:5194/auth/logout',
       {}, // <- body ว่าง
       { withCredentials: true } // <- ใส่ options ตรงนี้
     );

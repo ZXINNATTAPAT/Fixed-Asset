@@ -45,7 +45,7 @@ export class UploadDialogComponent {
 
   private ap = inject(ApiService);
 
-   private depreciationScheduleService = inject(DepreciationScheduleService)
+  private depreciationScheduleService = inject(DepreciationScheduleService)
 
   ngOnInit() {
     this.assetCategory = this.data.assetCategory || []; // ✅ ดึงค่าจาก data ที่ inject มา
@@ -61,7 +61,7 @@ export class UploadDialogComponent {
       ExcelPreviewHelper.parseExcel(file)
         .then(async (rows) => {
           const result = ExcelPreviewHelper.validateDataAgainstMaster(rows, this.departments, this.assetCategory, this.userId);
-          this.asset2 = result.data.map(row => ExcelPreviewHelper.translateToEnglish(row));
+          this.asset2 = result.data.map(row => this.normalizeAsset(ExcelPreviewHelper.translateToEnglish(row)));
           this.validationFlags = result.validationFlags;
   
           // 👉 วน loop แต่ละ row เพื่อคำนวณค่าเสื่อมแบบแยกประเภท
@@ -200,4 +200,51 @@ export class UploadDialogComponent {
   cancel(): void {
     this.dialogRef.close();
   }
+
+  private normalizeAsset(asset: any): any {
+    // 🔧 เติม 'กกต ' หากไม่มี
+    if (asset.AssetCode && !asset.AssetCode.startsWith('กกต')) {
+      asset.AssetCode = 'กกต ' + asset.AssetCode.trim();
+    }
+  
+    // 🔧 แปลงวันที่ให้เป็น Date ที่ใช้งานได้ (รองรับทั้งรูปแบบไทยและสากล)
+    // const parseDate = (value: any): string | null => {
+    //   if (!value) return null;
+    
+    //   if (typeof value === 'string') {
+    //     // 🔹 กรณี dd/MM/yyyy
+    //     if (value.includes('/')) {
+    //       const [day, month, year] = value.split('/');
+    //       let y = parseInt(year);
+    //       if (y > 2400) y -= 543;
+    //       const d = parseInt(day);
+    //       const m = parseInt(month) - 1;
+    //       return new Date(Date.UTC(y, m, d)).toISOString();
+    //     }
+    
+    //     // 🔹 กรณี 10 มี.ค. 2568
+    //     const thaiMonths: { [key: string]: number } = {
+    //       'ม.ค.': 0, 'ก.พ.': 1, 'มี.ค.': 2, 'เม.ย.': 3, 'พ.ค.': 4, 'มิ.ย.': 5,
+    //       'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11
+    //     };
+    //     const parts = value.trim().split(' ');
+    //     if (parts.length === 3) {
+    //       const day = parseInt(parts[0]);
+    //       const month = thaiMonths[parts[1]];
+    //       let year = parseInt(parts[2]);
+    //       if (year > 2400) year -= 543;
+    //       return new Date(Date.UTC(year, month, day)).toISOString();
+    //     }
+    //   }
+    
+    //   return null;
+    // };
+    
+  
+    // asset.PurchaseDate = parseDate(asset.PurchaseDate);
+    // asset.ReceiptDate = parseDate(asset.ReceiptDate);
+  
+    return asset;
+  }
+  
 }

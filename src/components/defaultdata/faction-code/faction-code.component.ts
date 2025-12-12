@@ -16,9 +16,23 @@ import { MatButtonModule } from '@angular/material/button';
 import Swal from 'sweetalert2';
 import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { MatDialog } from '@angular/material/dialog';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
 
 
+interface FactionType {
+  FactId: number;
+  Code: string;
+  Name: string;
+  Semin: string;
+  DeptId: number;
+  DeptName?: string;   // ชื่อสำนักที่แมปเข้ามา
+}
 
+interface Department {
+  DeptId: number;
+  Name: string;
+}
 
 interface AssetDetails {
   FactionCode: string;
@@ -49,62 +63,100 @@ interface AssetDetails {
     FormDirective,
     FormLabelDirective,
     FormControlDirective,
+    MatOptionModule,MatSelectModule,
   ],
   templateUrl: './faction-code.component.html',
   styleUrl: './faction-code.component.scss',
 })
 export class FactionCodeComponent implements OnInit {
-  icons = { cilPencil, cilTrash };
-  assetDetails: any[] = []; // Array to hold the faction details data
-  isFormVisible = false; // เริ่มต้นซ่อนฟอร์ม
 
-  dataSource: MatTableDataSource<any> = new MatTableDataSource<any>(this.assetDetails);
+  icons = { cilPencil, cilTrash };
+  // ตาราง
+  displayedColumns: string[] = ['actions','Code', 'Name', 'Semin', 'DeptName'];
+  dataSource = new MatTableDataSource<FactionType>([]);
+
+  // ข้อมูล
+  factions: FactionType[] = [];
+  departments: Department[] = [];
+
+  // ฟอร์ม
+  asset: Partial<FactionType> = {};
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private ap: ApiService, private dialog: MatDialog) {}
-
-  displayedColumns2 = ['รหัสฝ่าย', 'ชื่อฝ่าย', 'ชื่อสำนัก']; // <-- เพิ่มชื่อสำนัก
-  asset: any = {};
+  constructor(private ap: ApiService, private dialog:MatDialog) {}
 
   ngOnInit(): void {
-    this.getAssetType();
+    this.loadDepartments();
   }
 
-  getAssetType(): void {
-    this.ap.assetService.fetchData('Factiontypecodes').subscribe(
-      (data) => {
-        this.assetDetails = data.map((asset: any) => this.translateToThai(asset));
-        this.dataSource = new MatTableDataSource<any>(this.assetDetails);
+  // โหลดสำนักก่อน เพื่อจะได้แมปชื่อ
+  private loadDepartments(): void {
+    this.ap.assetService.fetchData('Departments').subscribe({
+      next: (depts: any[]) => {
+        this.departments = depts.map(d => ({
+          DeptId: d.DeptId,
+          Name: d.Name
+        }));
+        // พอโหลดสำนักเสร็จ ค่อยโหลดฝ่าย
+        this.loadFactions();
+      },
+      error: err => console.error('Error loading departments', err)
+    });
+  }
+
+  // โหลดรหัสฝ่าย และแมปชื่อสำนัก
+  private loadFactions(): void {
+    this.ap.assetService.fetchData('Factiontypecodes').subscribe({
+      next: (list: any[]) => {
+        this.factions = list.map(item => {
+          const f: FactionType = {
+            FactId: item.FactId,
+            Code: item.Code,
+            Name: item.Name,
+            Semin: item.Semin,
+            DeptId: item.DeptId,
+            DeptName: this.departments.find(d => d.DeptId === item.DeptId)?.Name || ''
+          };
+          return f;
+        });
+        this.dataSource.data = this.factions;
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+        
       },
-      (error) => {
-        console.error('Error fetching faction type codes:', error);
-      }
-    );
+      error: err => console.error('Error fetching faction codes', err)
+    });
   }
 
+  // บันทึกข้อมูลใหม่
   onSubmit(): void {
-    this.ap.assetService.postData('Factiontypecodes', this.asset).then(
-      (response) => {
-        const newAsset = this.translateToThai(response);
-        this.assetDetails.push(newAsset);
-        this.dataSource.data = this.assetDetails;
+    if (!this.asset.Code || !this.asset.Name || !this.asset.Semin || !this.asset.DeptId) {
+      Swal.fire('กรุณากรอกให้ครบทุกช่อง', '', 'warning');
+      return;
+    }
 
-        Swal.fire({
-          title: 'บันทึกเสร็จสิ้น',
-          icon: 'success',
-        });
-      }
-    ).catch(
-      (error) => {
-        console.error('Error saving faction type code:', error);
-        Swal.fire({
-          title: 'มีข้อมูลในระบบอยู่แล้ว',
-          icon: 'error',
-        });
+    this.ap.assetService.postData('Factiontypecodes', this.asset).then(
+      (resp: any) => {
+        // เพิ่มเข้า array พร้อมแมปชื่อสำนัก
+        const newFaction: FactionType = {
+          FactId: resp.FactId,
+          Code: resp.Code,
+          Name: resp.Name,
+          Semin: resp.Semin,
+          DeptId: resp.DeptId,
+          DeptName: this.departments.find(d => d.DeptId === resp.DeptId)?.Name || ''
+        };
+        this.factions.push(newFaction);
+        this.dataSource.data = this.factions;
+
+        Swal.fire('บันทึกเสร็จสิ้น', '', 'success');
+        this.asset = {};  // ล้างฟอร์ม
+      },
+      err => {
+        console.error('Error saving faction code', err);
+        Swal.fire('มีข้อมูลในระบบอยู่แล้ว', '', 'error');
       }
     );
   }
@@ -113,6 +165,7 @@ export class FactionCodeComponent implements OnInit {
     const translationMap: { [key: string]: string } = {
       Code: 'รหัสฝ่าย',
       Name: 'ชื่อฝ่าย',
+      Semin: 'ชื่อย่อ',
       DepartmentName: 'ชื่อสำนัก',
     };
 
@@ -122,12 +175,10 @@ export class FactionCodeComponent implements OnInit {
         translatedAsset[translationMap[key] || key] = asset[key];
       }
     }
-
-    console.log('Translated Asset:', translatedAsset); // Log translated object for debugging
     return translatedAsset;
   }
 
-  deleteAsset(asset: any): void {
+  deleteAsset(asset: FactionType): void {
     Swal.fire({
       title: 'คุณแน่ใจหรือไม่?',
       text: 'คุณต้องการลบข้อมูลฝ่ายนี้หรือไม่?',
@@ -137,51 +188,43 @@ export class FactionCodeComponent implements OnInit {
       cancelButtonText: 'ไม่',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.ap.assetService.deleteData(`Factiontypecodes/${asset.id}`).then(
-          () => {
-            const index = this.assetDetails.findIndex((a) => a.id === asset.id);
-            if (index !== -1) {
-              this.assetDetails.splice(index, 1);
-              this.dataSource.data = this.assetDetails;
-            }
-            Swal.fire('ลบแล้ว!', 'ข้อมูลฝ่ายของคุณถูกลบแล้ว', 'success');
-          }
-        ).catch(
-          (error) => {
-            console.error('Error deleting faction type code:', error);
-            Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบข้อมูลฝ่าย', 'error');
-          }
-        );
+        this.ap.assetService.deleteData(`Factiontypecodes/${asset.FactId}`).then(() => {
+          this.factions = this.factions.filter(a => a.FactId !== asset.FactId);
+          this.dataSource.data = this.factions;
+          Swal.fire('ลบแล้ว!', 'ข้อมูลฝ่ายของคุณถูกลบแล้ว', 'success');
+        }).catch((error) => {
+          console.error('Error deleting faction type code:', error);
+          Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดขณะทำการลบข้อมูลฝ่าย', 'error');
+        });
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         Swal.fire('ยกเลิกแล้ว', 'ข้อมูลฝ่ายของคุณปลอดภัย :)', 'info');
       }
     });
   }
-
-  editAsset(asset: any): void {
+  
+  editAsset(asset: FactionType): void {
     const dialogRef = this.dialog.open(EditFactionCodeDialogComponent, {
-      width: '400px',
+      width: '800px',
       data: { ...asset }
     });
-
+  
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Update the faction details
-        this.ap.assetService.updateData(`Factiontypecodes/${asset.id}`, result)
-          .then(() => {
-            const index = this.assetDetails.findIndex(a => a.id === asset.id);
-            if (index !== -1) {
-              this.assetDetails[index] = { ...asset, ...result };
-              this.dataSource.data = this.assetDetails;
-            }
-            Swal.fire('สำเร็จ', 'ข้อมูลฝ่ายถูกแก้ไขแล้ว', 'success');
-          })
-          .catch(error => {
-            console.error('Error updating faction type code:', error);
-            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถแก้ไขข้อมูลได้', 'error');
-          });
+        const index = this.factions.findIndex(a => a.FactId === asset.FactId);
+        if (index !== -1) {
+          // อัปเดต UI อย่างเดียว เพราะ backend ทำสำเร็จแล้วใน dialog
+          this.factions[index] = {
+            ...this.factions[index],
+            ...result,
+            DeptName: this.departments.find(d => d.DeptId === result.DeptId)?.Name || ''
+          };
+          this.dataSource.data = this.factions;
+        }
+        Swal.fire('สำเร็จ', 'ข้อมูลฝ่ายถูกแก้ไขแล้ว', 'success');
       }
     });
   }
+  
+  
 }
 

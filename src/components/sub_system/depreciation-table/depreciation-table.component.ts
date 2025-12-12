@@ -15,6 +15,7 @@ import { MatOption } from '@angular/material/core';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatFormField } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
+import { DepreciationService } from '../../main_system/asset-detail1/Service/depreciation.service';
 
 
 @Component({
@@ -39,45 +40,82 @@ export class DepreciationTableComponent implements OnInit {
   selectedAssetType: number | null = null;
   assetTypes: any[] = [];
 
-
-
   displayedColumns: string[] = ['actions',
     'code', 'name', 'price', 'qty', 'amount', 'rate',
     'openingValue', 'depreciation', 'accumulated',
     'netValue', 'received'
   ];
+
   instan = { icons: { cilPencil, cilTrash, cilInfo, cilSearch } };
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private ap: ApiService, public dialog: MatDialog) { }
+  constructor(private ap: ApiService, public dialog: MatDialog ,private depreciationService :DepreciationService) { }
 
   ngOnInit(): void {
     this.ap.assetService.fetchData('AssetDetails/Depreciations').subscribe(
-      data => {
-        this.originalData = data;
+  data => {
+    this.originalData = data.map((asset: Asset) => {
+      const {
+      DepreciationValue,
+      AccumulatedDepreciation,
+      BookValue,
+      PurchasePrice,
+      DepreciationRate,
+      ReceiptDate,
+      ServiceLife
+      } = asset;
 
-        this.dataSource.data = [...data].sort((a, b) => {
-          const matchA = a.AssetCode?.match(/(\d+)-(\d+)-(\d+)/);
-          const matchB = b.AssetCode?.match(/(\d+)-(\d+)-(\d+)/);
+      if (
+      DepreciationValue === 0 &&
+      AccumulatedDepreciation === 0 &&
+      BookValue === 0 &&
+      PurchasePrice &&
+      DepreciationRate &&
+      ReceiptDate &&
+      ServiceLife
+      ) {
+      const depreciationData: DepreciationData[] = this.depreciationService.calculateDepreciationWithPartialYear(
+        PurchasePrice,
+        DepreciationRate,
+        ReceiptDate,
+        ServiceLife
+      );
 
-          if (!matchA || !matchB) return 0; // ❌ ถ้าไม่ match ก็ไม่ต้องเปรียบเทียบ
+      const latest: DepreciationData | undefined = depreciationData.at(-1);
 
-          // เรียงจากปีใหม่ก่อน
-          const yearA = parseInt(matchA[3], 10);
-          const yearB = parseInt(matchB[3], 10);
-          if (yearA !== yearB) return yearB - yearA;
+      if (latest) {
+        asset.DepreciationValue = latest.depreciation;
+        asset.AccumulatedDepreciation = latest.accumulatedDepreciation;
+        asset.BookValue = latest.bookValue;
+      }
+      }
 
-          // จากนั้นเรียงตามตัวเลขรหัส
-          const numA = parseInt(matchA[1] + matchA[2], 10);
-          const numB = parseInt(matchB[1] + matchB[2], 10);
-          return numA - numB;
-  
-        });
-        this.dataSource.data = [...this.originalData];
-      },
-      err => console.error('API error', err)
-    );
+      return asset;
+    });
+
+  interface Asset {
+    DepreciationValue: number;
+    AccumulatedDepreciation: number;
+    BookValue: number;
+    PurchasePrice: number;
+    DepreciationRate: number;
+    ReceiptDate: string;
+    ServiceLife: number;
+    [key: string]: any; // To allow additional properties
+  }
+
+  interface DepreciationData {
+    depreciation: number;
+    accumulatedDepreciation: number;
+    bookValue: number;
+  }
+
+    this.dataSource.data = [...this.originalData]; // ให้แสดงผลลัพธ์
+  },
+  err => console.error('API error', err)
+);
+
     this.ap.assetService.fetchData('Assetcategories').subscribe(data => {
       this.categories = data;
       this.filteredCategoryList = data;

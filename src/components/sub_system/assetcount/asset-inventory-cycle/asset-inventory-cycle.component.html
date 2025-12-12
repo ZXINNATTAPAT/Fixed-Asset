@@ -1,126 +1,132 @@
 <!-- 🔹 แบบฟอร์มเพิ่มรอบ -->
 <div class="container p-4 bg-white shadow rounded">
-  
-    <h1><span class="anuphan-700">📋 สร้างรอบการตรวจนับครุภัณฑ์</span></h1>
-    <p>เป็นกำหนดระยะเวลาในการตรวจนับประจำปี </p>
-    <hr />
-    
-    <form (ngSubmit)="addCycle()" #cycleForm="ngForm">
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label for="cycleName" class="form-label">ชื่อรอบ</label>
-          <input type="text" id="cycleName" [(ngModel)]="newCycle.CycleName" name="CycleName" class="form-control"
-            required />
-        </div>
 
-        <div class="col-md-4">
-          <label for="dateStart" class="form-label">วันที่เริ่ม</label>
-          <input type="date" id="dateStart" [(ngModel)]="newCycle.DateStart" name="DateStart" class="form-control"
-            required />
-        </div>
+  <h1><span class="anuphan-700">📋 สร้างรอบการตรวจนับครุภัณฑ์</span></h1>
+  <p>เป็นกำหนดระยะเวลาในการตรวจนับประจำปี </p>
+  <hr />
 
-        <div class="col-md-4">
-          <label for="dateEnd" class="form-label">วันที่สิ้นสุด</label>
-          <input type="date" id="dateEnd" [(ngModel)]="newCycle.DateEnd" name="DateEnd" class="form-control" required />
-        </div>
-
-        <div class="col-12">
-          <label for="note" class="form-label">หมายเหตุ</label>
-          <textarea id="note" [(ngModel)]="newCycle.Note" name="Note" rows="2" class="form-control"
-            placeholder="ใส่หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
-        </div>
-
-        <div class="col-12 text-end">
-          <button type="submit" class="btn btn-primary" [disabled]="cycleForm.invalid">
-            ➕ เพิ่มรอบ
-          </button>
-        </div>
+  <form (ngSubmit)="addCycle()" #cycleForm="ngForm">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label for="cycleName" class="form-label">ชื่อรอบ</label>
+        <input type="text" id="cycleName" [(ngModel)]="newCycle.CycleName" name="CycleName" class="form-control"
+          required />
       </div>
-    </form>
-    <!-- 🔸 ตารางแสดงรอบ -->
 
-  
-    <h1><span class="anuphan-700">ตารางแสดงรอบการตรวจนับ</span></h1>
-    <p>ตารางแสดงรอบการตรวจนับรายปี </p>
-    <hr />
-   
-    <div class="row mb-3">
 
-      <div class="col-2">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>กรองตามปี</mat-label>
-          <mat-select [(ngModel)]="selectedYear" (selectionChange)="applyYearFilter()" name="yearFilter">
-            <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
-            <mat-option [value]="''">ทั้งหมด</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <!-- วันที่เริ่ม -->
+      <div class="col-md-4">
+        <label for="dateStart" class="form-label">วันที่เริ่ม</label>
+        <input type="date" id="dateStart" name="DateStart" class="form-control" [(ngModel)]="newCycle.DateStart"
+          (ngModelChange)="updateMinDate()" required />
       </div>
-      <div class="col">
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator><!-- Paginator -->
+
+      <!-- วันที่สิ้นสุด -->
+      <div class="col-md-4">
+        <label for="dateEnd" class="form-label">วันที่สิ้นสุด</label>
+        <input type="date" id="dateEnd" name="DateEnd" class="form-control" [(ngModel)]="newCycle.DateEnd"
+          [min]="minEndDate" required />
       </div>
-    </div> 
-    
 
-    <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource" matSort class="table table table-hover">
-        <!-- จัดการ Column -->
-        <ng-container matColumnDef="add">
-          <th mat-header-cell *matHeaderCellDef class="text-center border" style="width: 5%;">#</th>
-          <td mat-cell *matCellDef="let cycle" class="border">
-            
-            <button class="btn btn-sm btn-success m-1" (click)="toInventoryCount(cycle.CycleId)">
-              <svg [cIcon]="this.icons.cibAddthis" style="color: white; width: 16px; height: 16px;"></svg>
-            </button>
+      <!-- หมายเหตุ -->
+      <div class="col-md-12">
+        <label for="cycleNote" class="form-label">หมายเหตุ</label>
+        <textarea id="cycleNote" name="Note" class="form-control" [(ngModel)]="newCycle.Note" rows="2"
+          placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+      </div>
 
-          </td>
-        </ng-container>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="text-center border">จัดการ</th>
-          <td mat-cell *matCellDef="let cycle" class="border">
-            
-            <button class="btn btn-sm btn-primary m-1" (click)="toInventorytable(cycle.CycleId)">
-              <svg [cIcon]="this.icons.cilSearch" style="color: white; width: 16px; height: 16px;"></svg>
-            </button>
 
-            <button class="btn btn-sm btn-danger m-1" (click)="deleteCycle(cycle.CycleId!)">
-              <svg [cIcon]="this.icons.cilTrash" style="color: white; width: 16px; height: 16px;"></svg>
-            </button>
-          </td>
-        </ng-container>
-
-        <!-- ชื่อรอบ Column -->
-        <ng-container matColumnDef="CycleName">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ชื่อรอบ</th>
-          <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.CycleName }}</td>
-        </ng-container>
-
-        <!-- วันที่เริ่ม Column -->
-        <ng-container matColumnDef="DateStart">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่เริ่ม</th>
-          <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.DateStart | date: 'yyyy-MM-dd' }}</td>
-        </ng-container>
-
-        <!-- วันที่สิ้นสุด Column -->
-        <ng-container matColumnDef="DateEnd">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่สิ้นสุด</th>
-          <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.DateEnd | date: 'yyyy-MM-dd' }}</td>
-        </ng-container>
-
-        <!-- หมายเหตุ Column -->
-        <ng-container matColumnDef="Note">
-          <th mat-header-cell *matHeaderCellDef class="border">หมายเหตุ</th>
-          <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.Note || '-' }}</td>
-        </ng-container>
-
-        <!-- Header Row -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <!-- Data Row -->
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary" [disabled]="cycleForm.invalid">
+          ➕ เพิ่มรอบ
+        </button>
+      </div>
     </div>
-  
+  </form>
+  <!-- 🔸 ตารางแสดงรอบ -->
 
-  
+
+  <h1><span class="anuphan-700">ตารางแสดงรอบการตรวจนับ</span></h1>
+  <p>ตารางแสดงรอบการตรวจนับรายปี </p>
+  <hr />
+
+  <div class="row mb-3">
+
+    <div class="col-2">
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>กรองตามปี</mat-label>
+        <mat-select [(ngModel)]="selectedYear" (selectionChange)="applyYearFilter()" name="yearFilter">
+          <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+          <mat-option [value]="''">ทั้งหมด</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator><!-- Paginator -->
+    </div>
+  </div>
+
+
+  <div class="table-responsive">
+    <table mat-table [dataSource]="dataSource" matSort class="table table table-hover">
+      <!-- จัดการ Column -->
+      <ng-container matColumnDef="add">
+        <th mat-header-cell *matHeaderCellDef class="text-center border" style="width: 5%;">#</th>
+        <td mat-cell *matCellDef="let cycle" class="border">
+
+          <button class="btn btn-sm btn-success m-1" (click)="toInventoryCount(cycle.CycleId)">
+            <svg [cIcon]="this.icons.cibAddthis" style="color: white; width: 16px; height: 16px;"></svg>
+          </button>
+
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="text-center border">จัดการ</th>
+        <td mat-cell *matCellDef="let cycle" class="border">
+
+          <button class="btn btn-sm btn-primary m-1" (click)="toInventorytable(cycle.CycleId)">
+            <svg [cIcon]="this.icons.cilSearch" style="color: white; width: 16px; height: 16px;"></svg>
+          </button>
+
+          <button class="btn btn-sm btn-danger m-1" (click)="deleteCycle(cycle.CycleId!)">
+            <svg [cIcon]="this.icons.cilTrash" style="color: white; width: 16px; height: 16px;"></svg>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- ชื่อรอบ Column -->
+      <ng-container matColumnDef="CycleName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">ชื่อรอบ</th>
+        <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.CycleName }}</td>
+      </ng-container>
+
+      <!-- วันที่เริ่ม Column -->
+      <ng-container matColumnDef="DateStart">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่เริ่ม</th>
+        <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.DateStart | date: 'yyyy-MM-dd' }}</td>
+      </ng-container>
+
+      <!-- วันที่สิ้นสุด Column -->
+      <ng-container matColumnDef="DateEnd">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="border">วันที่สิ้นสุด</th>
+        <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.DateEnd | date: 'yyyy-MM-dd' }}</td>
+      </ng-container>
+
+      <!-- หมายเหตุ Column -->
+      <ng-container matColumnDef="Note">
+        <th mat-header-cell *matHeaderCellDef class="border">หมายเหตุ</th>
+        <td mat-cell *matCellDef="let cycle" class="border">{{ cycle.Note || '-' }}</td>
+      </ng-container>
+
+      <!-- Header Row -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <!-- Data Row -->
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+
+
 </div>
-

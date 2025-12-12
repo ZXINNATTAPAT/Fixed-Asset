@@ -8,6 +8,7 @@ import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule } from '@angular/mat
 import { ApiService } from '../../../ApiController/apiservice/api-service.service';
 import { SubAssetDialogComponent } from './Subasset/subasset/subasset.component';
 import { RepairAssetComponent } from './repair-history/repair-history/repair-history.component';
+import { DepreciationService } from '../asset-detail1/Service/depreciation.service';
 
 interface AssetDetails {
   assetId: any;
@@ -63,9 +64,10 @@ export class InfoassetComponent {
   assetImages: any[] = [];
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public datadialog: any, // อนุญาตให้รับค่าได้ทั้ง object หรือ undefined
+    @Inject(MAT_DIALOG_DATA) public datadialog: any,
     private ap: ApiService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private depreciationService: DepreciationService
   ) { }
 
   ngOnInit() {
@@ -190,39 +192,31 @@ uploadImage() {
 
   //ปิดการใช้งานไว้ก่อน
   calculateDepreciation(): number {
-    const purchasePrice = this.assets.PurchasePrice;
-    const purchaseDate = new Date(this.assets.PurchaseDate);
-
-    const purchaseDay = purchaseDate.getDate();
-    const purchaseMonth = purchaseDate.getMonth();
-    let purchaseYear = purchaseDate.getFullYear();
-
-    // ตรวจสอบว่าวันที่เป็นวันที่ 1-15 ของเดือนหรือไม่
-    const isFullMonth = purchaseDay <= 15;
-
-    // กำหนดเดือนเริ่มต้นการคำนวณ
-    const startMonth = isFullMonth ? purchaseMonth : purchaseMonth + 1;
-    let adjustedStartMonth = startMonth;
-    if (startMonth > 11) {
-      adjustedStartMonth = 0; // Reset to January of the next year
-      purchaseYear += 1;
-    }
-    const startYear = isFullMonth ? purchaseYear : adjustedStartMonth;
-
-    // คำนวณจำนวนเดือนที่ใช้งานจนถึงปัจจุบัน
-    const currentDate = new Date();
-    let monthsUsed = (currentDate.getFullYear() - startYear) * 12 + (currentDate.getMonth() - startMonth + 1);
-
-    if (monthsUsed < 0) {
-      monthsUsed = 0;
-    }
-
-    // คำนวณค่าเสื่อมราคาสะสม
-    const monthlyDepreciationRate = this.annualDepreciationRate / 12;
-    const depreciation = monthlyDepreciationRate * monthsUsed * purchasePrice;
-
-    return Math.round(depreciation * 100) / 100; // ปัดเศษทศนิยมสองตำแหน่ง
+    const asset = this.assets;
+    const purchasePrice = asset.PurchasePrice;
+    const depreciationRate = parseFloat(asset.Rate_dep); // อัตราร้อยละ เช่น 25
+    const receiptDate = asset.ReceiptDate;
+    const serviceLife = parseInt(asset.Servicelife); // อายุการใช้งาน เช่น 4 ปี
+  
+    if (!purchasePrice || !depreciationRate || !receiptDate || !serviceLife) return 0;
+  
+    // 🔁 เรียกใช้ฟังก์ชันที่คุณเขียนไว้
+    const depreciationData = this.depreciationService.calculateDepreciationWithPartialYear(
+      purchasePrice,
+      depreciationRate,
+      receiptDate,
+      serviceLife
+    );
+  
+    // ✅ รวมค่าเสื่อมราคาสะสมจนถึงปัจจุบัน
+    const accumulatedDepreciation = depreciationData.reduce((sum, year) => sum + year.depreciation, 0);
+    // console.log('depreciationData:', depreciationData);
+    // const accumulatedDepreciation = depreciationData.accumulatedDepreciation;
+  
+    return Math.round(accumulatedDepreciation * 100) / 100;
   }
+  
+  
 
 
 }

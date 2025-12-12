@@ -17,7 +17,7 @@ export interface AssetInventoryDetails {
 @Injectable({ providedIn: 'root' })
 export class AssetService {
   // private readonly baseUrl = 'https://localhost:7204/api/';
-  private readonly baseUrl = 'https://dotnetapi-fixasset.onrender.com/api/';
+  private readonly baseUrl = 'http://localhost:5194/api/';
 
   constructor(private http: HttpClient) {}
 
